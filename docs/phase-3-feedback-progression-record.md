@@ -113,3 +113,6 @@ Deferred:
 - Round 6 added overlay improvement feedback with `NEW BEST`, `MATCHED BEST`, or the current `BEST` line.
 - Round 6 intentionally deferred combo/streak mechanics because the requested retry signal is covered without adding a balance system.
 - Round 6 fake-DOM/storage smoke confirmed a new best at L6 writes `thatbutton.bestRun.v1`, updates the strip to `L6 / 0 / NEW BEST`, and leaves matched/below comparison logic intact.
+- Round 7 extended `scripts/validate-structure.mjs` with Phase 3 markers for best-record storage, best UI, recap UI, recap debug helpers, and `NEW BEST`.
+- Round 7 structure validation now checks empty, corrupt, saved, loaded, new/matched/below best-record states and wrong-click/timeout recap facts with fake `localStorage`.
+- Round 7 validation: `npm run validate` and `npm run build` passed after adding the Phase 3 guard.

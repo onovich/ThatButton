@@ -745,7 +745,8 @@
             currentRuleText: "",
             bestRecord: loadedBestRecord.record,
             bestRecordStatus: loadedBestRecord.status,
-            lastRunComparison: null
+            lastRunComparison: null,
+            lastFailureRecap: null
         };
 
         // DOM Elements
@@ -983,6 +984,50 @@
             };
         }
 
+        function getButtonRecap(button) {
+            if (!button) return null;
+            return {
+                id: button.id,
+                color: button.color.name,
+                colorId: button.color.id,
+                shape: button.shape.name,
+                shapeId: button.shape.id,
+                number: button.number,
+                label: `${button.color.name} ${button.shape.name} ${String(button.number).padStart(2, '0')}`
+            };
+        }
+
+        function getForbiddenButtonRecaps() {
+            return gameState.forbiddenIds
+                .map((id) => gameState.buttons.find((button) => button.id === id))
+                .filter(Boolean)
+                .map(getButtonRecap);
+        }
+
+        function buildFailureRecap(failureReason, pressedButton = null) {
+            const forbiddenButtons = getForbiddenButtonRecaps();
+            const safeTotal = Math.max(0, gameState.currentDifficulty.buttonCount - forbiddenButtons.length);
+            const safeRemaining = Math.max(0, gameState.safeKeysRemaining);
+            const safeCleared = Math.max(0, safeTotal - safeRemaining);
+            const comparison = compareRunToBest(gameState.level, gameState.score, gameState.bestRecord);
+            return {
+                failureReason,
+                level: gameState.level,
+                score: gameState.score,
+                difficultyId: gameState.currentDifficulty.id,
+                gridSize: gameState.currentDifficulty.gridSize,
+                ruleText: gameState.currentRuleText,
+                fatalCount: forbiddenButtons.length,
+                forbiddenButtons,
+                pressedButton: getButtonRecap(pressedButton),
+                safeTotal,
+                safeCleared,
+                safeRemaining,
+                bestBefore: cloneBestRecord(gameState.bestRecord),
+                bestComparison: comparison
+            };
+        }
+
         function getRoundSnapshot() {
             return {
                 level: gameState.level,
@@ -1091,9 +1136,56 @@
             return preview;
         }
 
+        function previewFailureRecap(seed, level = 1, failureReason = 'wrong_click') {
+            const targetLevel = Math.max(1, Math.floor(Number(level) || 1));
+            const normalizedReason = failureReason === 'timeout' ? 'timeout' : 'wrong_click';
+            const snapshot = {
+                seed: gameState.seed,
+                rng: gameState.rng,
+                level: gameState.level,
+                buttons: gameState.buttons,
+                forbiddenIds: gameState.forbiddenIds,
+                safeKeysRemaining: gameState.safeKeysRemaining,
+                currentDifficulty: gameState.currentDifficulty,
+                currentRuleTier: gameState.currentRuleTier,
+                currentRuleId: gameState.currentRuleId,
+                timeLimit: gameState.timeLimit,
+                timeLeft: gameState.timeLeft,
+                currentRuleText: gameState.currentRuleText,
+                score: gameState.score,
+                lastFailureRecap: gameState.lastFailureRecap
+            };
+
+            gameState.seed = seed;
+            gameState.rng = createSeededRng(seed);
+
+            for (let currentLevel = 1; currentLevel <= targetLevel; currentLevel++) {
+                gameState.level = currentLevel;
+                const difficulty = getDifficultyForLevel(currentLevel);
+                gameState.currentDifficulty = difficulty;
+                gameState.timeLimit = difficulty.timeLimitMs;
+                gameState.timeLeft = difficulty.timeLimitMs;
+                generateLevelData(difficulty);
+            }
+
+            const pressedButton = normalizedReason === 'wrong_click'
+                ? gameState.buttons.find((button) => button.id === gameState.forbiddenIds[0])
+                : null;
+            const recap = buildFailureRecap(normalizedReason, pressedButton);
+
+            Object.assign(gameState, snapshot);
+            return recap;
+        }
+
         window.__THAT_BUTTON_DEBUG__ = {
             previewSeededLevel,
+            previewFailureRecap,
             getDifficultyForLevel,
+            getLastFailureRecap: () => gameState.lastFailureRecap ? {
+                ...gameState.lastFailureRecap,
+                forbiddenButtons: [...gameState.lastFailureRecap.forbiddenButtons],
+                bestBefore: cloneBestRecord(gameState.lastFailureRecap.bestBefore)
+            } : null,
             getBestRecord: () => ({
                 record: cloneBestRecord(gameState.bestRecord),
                 status: gameState.bestRecordStatus,
@@ -1245,10 +1337,14 @@
             playExplosion();
             const isTimeout = id === 'timeout';
             const failedButton = gameState.buttons.find((button) => button.id === id);
+            const failureReason = isTimeout ? 'timeout' : 'wrong_click';
+            const failureRecap = buildFailureRecap(failureReason, failedButton);
+            gameState.lastFailureRecap = failureRecap;
             recordDebugEvent('failure', {
-                failureReason: isTimeout ? 'timeout' : 'wrong_click',
+                failureReason,
                 pressedButtonId: isTimeout ? null : id,
-                pressedButton: getButtonSummary(failedButton)
+                pressedButton: getButtonSummary(failedButton),
+                failureRecap
             });
             
             // Visual feedback
@@ -1327,6 +1423,7 @@
             gameState.currentDifficulty = getDifficultyForLevel(1);
             gameState.timeLimit = gameState.currentDifficulty.timeLimitMs;
             gameState.timeLeft = gameState.currentDifficulty.timeLimitMs;
+            gameState.lastFailureRecap = null;
             warningText.classList.add('hidden');
             
             startRound();

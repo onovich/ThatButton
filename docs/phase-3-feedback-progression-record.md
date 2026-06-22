@@ -101,3 +101,7 @@ Deferred:
 - Round 3 added a compact `BEST: -- / 0` status strip under the existing top status row, with short storage notes for corrupt/unavailable states.
 - Round 3 reloads best-record state on start/reset and refreshes the strip from debug save/reset helpers.
 - Round 3 fake-DOM smoke confirmed the strip renders default `-- / 0`, debug-saved `L7 / 210 SAVED`, and reset default values.
+- Round 4 added a recap data model built from `currentRuleText`, `forbiddenIds`, button facts, `safeKeysRemaining`, score, level, difficulty band, and the best record.
+- Round 4 stores `lastFailureRecap` and includes `failureRecap` in failure debug events for both wrong-click and timeout paths.
+- Round 4 added `previewFailureRecap(seed, level, reason)` and `getLastFailureRecap()` debug helpers.
+- Round 4 VM smoke with seed `phase3-recap`, level 8: wrong-click recap included pressed forbidden button `紫色 三角形 03`; timeout recap had `pressedButton: null`; both listed the same fatal condition, forbidden button, safe remaining count, and best comparison.

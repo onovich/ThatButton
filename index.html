@@ -287,6 +287,14 @@
             margin-bottom: 0.35rem;
         }
 
+        .failure-result {
+            color: var(--crt-green);
+            border-bottom: 1px solid rgba(74, 246, 38, 0.25);
+            padding-bottom: 0.35rem;
+            margin-bottom: 0.35rem;
+            font-weight: 700;
+        }
+
         .failure-recap-row {
             margin-top: 0.25rem;
         }
@@ -764,6 +772,12 @@
             return '';
         }
 
+        function getRunComparisonNote(comparison) {
+            if (comparison === 'new_best') return 'NEW BEST';
+            if (comparison === 'matched_best') return 'MATCHED BEST';
+            return '';
+        }
+
         // Game State Variables
         const loadedBestRecord = loadBestRecord();
         let gameState = {
@@ -1067,8 +1081,36 @@
                 safeCleared,
                 safeRemaining,
                 bestBefore: cloneBestRecord(gameState.bestRecord),
-                bestComparison: comparison
+                bestAfter: cloneBestRecord(gameState.bestRecord),
+                bestComparison: comparison,
+                bestSaveStatus: 'not_saved'
             };
+        }
+
+        function finalizeBestRecordForRun(recap) {
+            const comparison = recap.bestComparison;
+            let saveResult = {
+                record: cloneBestRecord(gameState.bestRecord),
+                status: 'not_saved'
+            };
+            if (comparison === 'new_best') {
+                saveResult = saveBestRecord(buildBestRecordFromRun(recap.level, recap.score));
+                gameState.bestRecord = saveResult.record;
+                gameState.bestRecordStatus = saveResult.status;
+            }
+            gameState.lastRunComparison = comparison;
+            recap.bestAfter = cloneBestRecord(gameState.bestRecord);
+            recap.bestSaveStatus = saveResult.status;
+            updateBestRecordUi(getRunComparisonNote(comparison));
+            return recap;
+        }
+
+        function previewBestRecordForRun(recap) {
+            if (recap.bestComparison === 'new_best') {
+                recap.bestAfter = buildBestRecordFromRun(recap.level, recap.score, 'preview');
+                recap.bestSaveStatus = 'preview';
+            }
+            return recap;
         }
 
         function escapeHtml(value) {
@@ -1078,6 +1120,16 @@
                 .replaceAll('>', '&gt;')
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#39;');
+        }
+
+        function getFailureResultText(recap) {
+            if (recap.bestComparison === 'new_best') {
+                return `NEW BEST：L${recap.bestAfter.bestLevel} / ${recap.bestAfter.bestScore} 分`;
+            }
+            if (recap.bestComparison === 'matched_best') {
+                return `MATCHED BEST：L${recap.bestBefore.bestLevel} / ${recap.bestBefore.bestScore} 分`;
+            }
+            return `BEST：L${recap.bestBefore.bestLevel} / ${recap.bestBefore.bestScore} 分`;
         }
 
         function renderFailureRecap(recap) {
@@ -1096,6 +1148,7 @@
                 : '<div class="failure-recap-row">失败原因：倒计时归零</div>';
 
             failureRecapEl.innerHTML = `
+                <div class="failure-result">${escapeHtml(getFailureResultText(recap))}</div>
                 <div class="failure-recap-title">致命条件回放</div>
                 <div class="failure-recap-row">${escapeHtml(recap.ruleText)}</div>
                 ${pressedLine}
@@ -1249,7 +1302,7 @@
             const pressedButton = normalizedReason === 'wrong_click'
                 ? gameState.buttons.find((button) => button.id === gameState.forbiddenIds[0])
                 : null;
-            const recap = buildFailureRecap(normalizedReason, pressedButton);
+            const recap = previewBestRecordForRun(buildFailureRecap(normalizedReason, pressedButton));
 
             Object.assign(gameState, snapshot);
             return recap;
@@ -1262,7 +1315,8 @@
             getLastFailureRecap: () => gameState.lastFailureRecap ? {
                 ...gameState.lastFailureRecap,
                 forbiddenButtons: [...gameState.lastFailureRecap.forbiddenButtons],
-                bestBefore: cloneBestRecord(gameState.lastFailureRecap.bestBefore)
+                bestBefore: cloneBestRecord(gameState.lastFailureRecap.bestBefore),
+                bestAfter: cloneBestRecord(gameState.lastFailureRecap.bestAfter)
             } : null,
             getBestRecord: () => ({
                 record: cloneBestRecord(gameState.bestRecord),
@@ -1416,7 +1470,7 @@
             const isTimeout = id === 'timeout';
             const failedButton = gameState.buttons.find((button) => button.id === id);
             const failureReason = isTimeout ? 'timeout' : 'wrong_click';
-            const failureRecap = buildFailureRecap(failureReason, failedButton);
+            const failureRecap = finalizeBestRecordForRun(buildFailureRecap(failureReason, failedButton));
             gameState.lastFailureRecap = failureRecap;
             recordDebugEvent('failure', {
                 failureReason,
@@ -1504,6 +1558,7 @@
             gameState.timeLimit = gameState.currentDifficulty.timeLimitMs;
             gameState.timeLeft = gameState.currentDifficulty.timeLimitMs;
             gameState.lastFailureRecap = null;
+            gameState.lastRunComparison = null;
             warningText.classList.add('hidden');
             
             startRound();

@@ -109,3 +109,7 @@ Deferred:
 - Round 5 simplified wrong-click death copy so the full rule is not duplicated outside the recap.
 - Round 5 added mobile-safe recap sizing with scroll inside the recap block on short screens.
 - Round 5 fake-DOM render smoke confirmed wrong-click recap includes `错按` and a forbidden-button label, while timeout recap includes `失败原因：倒计时归零` and `安全键进度`.
+- Round 6 added failure-time best-record finalization: `new_best` writes storage and updates the best strip, `matched_best` and `below_best` remain read-only.
+- Round 6 added overlay improvement feedback with `NEW BEST`, `MATCHED BEST`, or the current `BEST` line.
+- Round 6 intentionally deferred combo/streak mechanics because the requested retry signal is covered without adding a balance system.
+- Round 6 fake-DOM/storage smoke confirmed a new best at L6 writes `thatbutton.bestRun.v1`, updates the strip to `L6 / 0 / NEW BEST`, and leaves matched/below comparison logic intact.

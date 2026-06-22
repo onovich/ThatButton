@@ -38,12 +38,24 @@ Status: Accepted by CheckAndGoal; see [docs/phase-2-final-report.md](docs/phase-
 
 Estimated conversation rounds: 1-3
 Goal guide: [docs/phase-3-feedback-progression-goal-guide.md](docs/phase-3-feedback-progression-goal-guide.md)
-Status: Implemented by executor; ready for CheckAndGoal acceptance. See [docs/phase-3-final-report.md](docs/phase-3-final-report.md) and [docs/phase-3-feedback-progression-record.md](docs/phase-3-feedback-progression-record.md).
+Status: Accepted by CheckAndGoal; see [docs/phase-3-final-report.md](docs/phase-3-final-report.md) and [docs/phase-3-feedback-progression-record.md](docs/phase-3-feedback-progression-record.md).
 
 - Add a lightweight high-score record with `localStorage`, including best level and best score. Implemented as a small versioned local best-run record.
 - Add a post-death recap that lists the actual fatal button attributes for learning without making the next run too easy. Implemented with current fatal condition, actual forbidden buttons, safe-key progress, and failure reason.
 - Tune early-level timing after mobile testing; touch input is slower than mouse, so the timer curve may need a mobile buffer. Deferred pending real iOS/Android evidence; no Phase 1 timing values changed.
 - Consider combo or streak rewards to make correct rapid decisions feel more expressive than simple survival. Deferred; Phase 3 uses best-run and improvement feedback without adding a balance system.
+
+## Phase 3A - Architecture Regularization And Guardrails
+
+Estimated conversation rounds: 3-5
+Goal guide: [docs/phase-3a-architecture-regularization-goal-guide.md](docs/phase-3a-architecture-regularization-goal-guide.md)
+Status: Inserted after Phase 3 PASS; dispatched before Phase 4 gameplay expansion.
+
+- Split the current single-file prototype into strict zero-dependency ES modules before adding broader gameplay systems.
+- Enforce code standards and architecture boundaries: core logic must not touch DOM/window/localStorage, UI must not duplicate rule semantics, and `main.js` must stay orchestration-only.
+- Make architecture self-checks part of every execution round, with explicit answers before validation, commit, and push.
+- Preserve Phase 1 difficulty, Phase 2 copy semantics, Phase 3 best-run/recap behavior, seed/debug APIs, and GitHub Pages behavior.
+- Update validation so architecture boundaries and fixed-seed behavior equivalence are protected by repeatable checks.
 
 ## Phase 4 - Gameplay Expansion Prototypes
 
@@ -83,4 +95,4 @@ Estimated conversation rounds: 2-5
 
 ## Current Recommendation
 
-Build phases in this order: Phase 0, Phase 1, Phase 2, Phase 3, then choose between Phase 4 and Phase 6 depending on whether the next milestone is a better web prototype or engine migration prep.
+Build phases in this order: Phase 0, Phase 1, Phase 2, Phase 3, Phase 3A, then choose between Phase 4 and Phase 6 depending on whether the next milestone is a better web prototype or engine migration prep.

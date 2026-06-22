@@ -96,7 +96,24 @@ window.__THAT_BUTTON_DEBUG__.getLog()
 
 | Date | Surface | Result | Evidence |
 | --- | --- | --- | --- |
-| 2026-06-23 | Repository baseline | Pending | Phase 0 record created before implementation and command validation. |
+| 2026-06-23 | Repository baseline | Pass | Phase 0 record created with first 10-level criteria, required session fields, and round record fields. |
+| 2026-06-23 | Static validation | Pass | `npm run validate` passed after seed and debug logging changes. |
+| 2026-06-23 | Static build | Pass | `npm run build` generated `dist/index.html` and `.nojekyll`; `dist/` remains ignored. |
+| 2026-06-23 | Local launcher dry-run | Pass | `StartLocalTest.ps1 -DryRun` selected a local Node server command and URL. |
+| 2026-06-23 | Local HTTP smoke | Pass | `http://127.0.0.1:5175/?seed=phase0-smoke&debug=1` returned HTTP 200 with game and debug API markers. |
+| 2026-06-23 | GitHub Pages launcher dry-run | Pass | `OpenOnlineTest.ps1 -DryRun` printed `https://onovich.github.io/ThatButton/`. |
+| 2026-06-23 | GitHub Pages workflow file | Pass | `.github/workflows/deploy.yml` exists and runs validate/build before Pages deploy. |
+| 2026-06-23 | Desktop browser click smoke | Pending human/browser automation | Playwright is not installed in this workspace, so no automated browser click result is recorded. |
+| 2026-06-23 | iOS Safari real device | Pending real device | Requires physical iOS Safari test for audio unlock, safe area, touch accuracy, and restart. |
+| 2026-06-23 | Android Chrome real device | Pending real device | Requires physical Android Chrome test for audio unlock, layout fit, touch latency, and restart. |
+
+## Phase 1 Input Notes From Current Evidence
+
+- Current baseline grid size is `3x3`; Phase 1 should decide whether early levels need a smaller grid only after human playtest evidence.
+- Current generated fatal count is bounded by rule generation: early levels target 1-3 fatal buttons, later levels may allow up to 4.
+- Current timer starts at 15000 ms for level 1, then tightens by level progression; Phase 1 should compare first-failure levels against this timer pressure.
+- Current failure evidence can distinguish `wrong_click` from `timeout` through the debug log, but human quit reasons still require manual session records.
+- Current copy ambiguity evidence is not yet collected from real players; Phase 2 should wait for recorded `ambiguity_note` entries.
 
 ## Data For Later Phases
 

@@ -28,6 +28,10 @@ Phase 0 test criteria and evidence live in [`docs/phase-0-playtest-record.md`](d
 
 Phase 1 replaces the fixed 3x3 opening with data-driven level bands: early levels start at 2x2, then move to 2x3, then return to 3x3 with rule complexity, fatal count, timer, reward, readability, and feedback intensity as separate tuning axes. The debug preview API reports the active band and parameters for each seeded level.<br/>**Phase 1 已把固定 3x3 开局改为数据驱动关卡段：早期从 2x2 开始，随后进入 2x3，再回到 3x3，并把规则复杂度、致命键数量、计时、奖励、可读性和反馈强度拆成独立调参轴。调试预览 API 会输出每个固定种子关卡的当前关卡段和参数。**
 
+## Copywriting Pass
+
+Phase 2 standardizes visible instructions around fatal conditions, forbidden buttons, safe buttons, and clearing the panel. Generated rules now use one shared sentence so matching buttons are always presented as forbidden, while the player action remains pressing the other safe buttons.<br/>**Phase 2 已统一所有玩家可见说明：围绕致命条件、禁止按键、安全键和清空面板展开。生成规则现在使用同一句式，明确“符合条件的是禁止按键”，玩家要按的是其他安全键。**
+
 ## Deployment
 
 GitHub Pages deployment is configured with `.github/workflows/deploy.yml` and publishes the generated `dist/` folder from the `main` branch.<br/>**项目已通过 `.github/workflows/deploy.yml` 配置 GitHub Pages 部署，从 `main` 分支生成并发布 `dist/` 目录。**

@@ -7,3 +7,5 @@
 - [Phase 1 Difficulty Curve Record](phase-1-difficulty-curve-record.md) - implemented difficulty bands, evidence, and remaining playtest questions for Phase 1.
 - [Phase 1 Final Report](phase-1-final-report.md) - completed Phase 1 curve summary, validation evidence, remaining risks, and commits.
 - [Phase 2 Copywriting And Tone Pass Goal Guide](phase-2-copywriting-tone-goal-guide.md) - goal-mode execution guide for unifying player-facing copy, removing accidental ambiguity, and preserving intended rule difficulty.
+- [Phase 2 Copywriting And Tone Record](phase-2-copywriting-tone-record.md) - visible-copy inventory, terminology guide, generated-rule wording evidence, and Phase 2 round notes.
+- [Phase 2 Final Report](phase-2-final-report.md) - completed Phase 2 summary, validation evidence, remaining risks, and readiness for CheckAndGoal acceptance.

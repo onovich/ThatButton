@@ -27,12 +27,12 @@ Status: Accepted by CheckAndGoal; see [docs/phase-1-final-report.md](docs/phase-
 
 Estimated conversation rounds: 1-2
 Goal guide: [docs/phase-2-copywriting-tone-goal-guide.md](docs/phase-2-copywriting-tone-goal-guide.md)
-Status: Planned after Phase 1 PASS; dispatched as the next executor goal.
+Status: Implemented by executor; ready for CheckAndGoal acceptance. See [docs/phase-2-final-report.md](docs/phase-2-final-report.md) and [docs/phase-2-copywriting-tone-record.md](docs/phase-2-copywriting-tone-record.md).
 
-- Rewrite all visible copy into one consistent voice: urgent terminal instructions, clear failure feedback, and concise rule language.
-- Remove awkward phrasing, grammatical issues, redundant warnings, and overly tangled clue sentences.
-- Preserve intended challenge from logic rules, not from accidental ambiguity or uneven wording.
-- Playtest the updated first 10 levels and revise any clue that still reads like "press this" instead of "avoid this condition".
+- Rewrite all visible copy into one consistent voice: urgent terminal instructions, clear failure feedback, and concise rule language. Done.
+- Remove awkward phrasing, grammatical issues, redundant warnings, and overly tangled clue sentences. Done.
+- Preserve intended challenge from logic rules, not from accidental ambiguity or uneven wording. Done; no Phase 1 difficulty parameters changed.
+- Playtest the updated first 10 levels and revise any clue that still reads like "press this" instead of "avoid this condition". Pending real-player follow-up after acceptance.
 
 ## Phase 3 - Feedback, Progression, And Retention
 

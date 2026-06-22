@@ -38,7 +38,7 @@ Status: Accepted by CheckAndGoal; see [docs/phase-2-final-report.md](docs/phase-
 
 Estimated conversation rounds: 1-3
 Goal guide: [docs/phase-3-feedback-progression-goal-guide.md](docs/phase-3-feedback-progression-goal-guide.md)
-Status: Implementation in progress by executor; see [docs/phase-3-feedback-progression-record.md](docs/phase-3-feedback-progression-record.md).
+Status: Implemented by executor; ready for CheckAndGoal acceptance. See [docs/phase-3-final-report.md](docs/phase-3-final-report.md) and [docs/phase-3-feedback-progression-record.md](docs/phase-3-feedback-progression-record.md).
 
 - Add a lightweight high-score record with `localStorage`, including best level and best score. Implemented as a small versioned local best-run record.
 - Add a post-death recap that lists the actual fatal button attributes for learning without making the next run too easy. Implemented with current fatal condition, actual forbidden buttons, safe-key progress, and failure reason.

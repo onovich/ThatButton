@@ -11,3 +11,4 @@
 - [Phase 2 Final Report](phase-2-final-report.md) - completed Phase 2 summary, validation evidence, remaining risks, and readiness for CheckAndGoal acceptance.
 - [Phase 3 Feedback, Progression, And Retention Goal Guide](phase-3-feedback-progression-goal-guide.md) - goal-mode execution guide for best-run persistence, post-death recap, and lightweight retry feedback.
 - [Phase 3 Feedback, Progression, And Retention Record](phase-3-feedback-progression-record.md) - storage model, recap model, implementation evidence, validation smokes, and pending real-device/human-playtest questions.
+- [Phase 3 Final Report](phase-3-final-report.md) - completed Phase 3 summary, storage and recap models, validation evidence, remaining risks, and readiness for CheckAndGoal acceptance.

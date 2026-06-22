@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const indexPath = resolve(root, 'index.html');
+const mainModulePath = resolve(root, 'src/main.js');
 const failures = [];
 
 if (!existsSync(indexPath)) {
@@ -27,11 +28,16 @@ if (!existsSync(indexPath)) {
     failures.push('index.html contains replacement characters, which usually means a broken text encoding.');
   }
 
-  const inlineScripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
-  if (inlineScripts.length === 0) {
-    failures.push('No inline game script found in index.html.');
+  const moduleEntry = '<script type="module" src="./src/main.js"></script>';
+  if (!html.includes(moduleEntry)) {
+    failures.push(`index.html is missing module entry: ${moduleEntry}`);
   }
 
+  if (!existsSync(mainModulePath)) {
+    failures.push('Missing src/main.js module entry.');
+  }
+
+  const inlineScripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
   inlineScripts.forEach((match, index) => {
     try {
       new Function(match[1]);

@@ -116,3 +116,5 @@ Deferred:
 - Round 7 extended `scripts/validate-structure.mjs` with Phase 3 markers for best-record storage, best UI, recap UI, recap debug helpers, and `NEW BEST`.
 - Round 7 structure validation now checks empty, corrupt, saved, loaded, new/matched/below best-record states and wrong-click/timeout recap facts with fake `localStorage`.
 - Round 7 validation: `npm run validate` and `npm run build` passed after adding the Phase 3 guard.
+- Round 8 local HTTP smoke: `http://127.0.0.1:5175/?seed=phase3-http&debug=1` returned HTTP 200 and included `best-status`, `failure-recap`, `thatbutton.bestRun.v1`, `previewFailureRecap`, and `NEW BEST` markers.
+- Round 8 launcher dry-runs passed: `StartLocalTest.ps1 -DryRun` selected a fallback port while the smoke server was active, and `OpenOnlineTest.ps1 -DryRun` reported the Pages URL.

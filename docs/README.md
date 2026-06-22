@@ -13,3 +13,5 @@
 - [Phase 3 Feedback, Progression, And Retention Record](phase-3-feedback-progression-record.md) - storage model, recap model, implementation evidence, validation smokes, and pending real-device/human-playtest questions.
 - [Phase 3 Final Report](phase-3-final-report.md) - completed Phase 3 summary, storage and recap models, validation evidence, remaining risks, and readiness for CheckAndGoal acceptance.
 - [Phase 3A Architecture Regularization And Guardrails Goal Guide](phase-3a-architecture-regularization-goal-guide.md) - goal-mode execution guide for modularizing the prototype, enforcing strict code boundaries, and making architecture self-checks part of every round.
+- [Phase 3A Architecture Regularization Record](phase-3a-architecture-regularization-record.md) - baseline fixtures, module boundary map, fixed-seed equivalence data, and Phase 3A self-check evidence.
+- [Phase 3A Final Report](phase-3a-final-report.md) - completed Phase 3A summary, architecture guardrails, validation matrix, commits, and readiness for CheckAndGoal acceptance.

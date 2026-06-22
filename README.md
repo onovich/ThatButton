@@ -2,7 +2,7 @@
 
 Core Meltdown: THAT Button is a single-screen HTML5 puzzle arcade game about identifying the fatal button and pressing every other safe button under pressure.<br/>**《核心熔毁：那个键》是一款单屏 HTML5 逻辑反应小游戏：玩家需要根据终端线索避开致命键，并在倒计时内按下所有安全键。**
 
-The current implementation is intentionally lightweight: one playable `index.html`, vanilla JavaScript, CSS effects, and generated Web Audio feedback.<br/>**当前实现保持轻量：一个可玩的 `index.html`、原生 JavaScript、CSS 特效，以及 Web Audio 合成反馈。**
+The current implementation is intentionally lightweight: one playable `index.html`, zero-dependency ES modules in `src/`, CSS effects, and generated Web Audio feedback.<br/>**当前实现保持轻量：一个可玩的 `index.html`、`src/` 中的零依赖 ES 模块、CSS 特效，以及 Web Audio 合成反馈。**
 
 ## Play Locally
 
@@ -18,7 +18,7 @@ npm run build
 npm run dev
 ```
 
-`npm run validate` checks the static entry and inline script syntax; `npm run build` copies the deployable site into `dist/`; `npm run dev` serves the root folder with the local Node server.<br/>**`npm run validate` 会检查静态入口和内联脚本语法；`npm run build` 会把可部署站点复制到 `dist/`；`npm run dev` 会用本地 Node 服务器托管根目录。**
+`npm run validate` checks the static entry, module graph, architecture boundaries, fixed-seed behavior fixtures, failure recaps, and best-record helpers; `npm run build` copies the deployable site into `dist/`; `npm run dev` serves the root folder with the local Node server.<br/>**`npm run validate` 会检查静态入口、模块图、架构边界、固定种子行为样本、失败回顾和最佳记录辅助函数；`npm run build` 会把可部署站点复制到 `dist/`；`npm run dev` 会用本地 Node 服务器托管根目录。**
 
 ## Playtest Baseline
 
@@ -36,6 +36,10 @@ Phase 2 standardizes visible instructions around fatal conditions, forbidden but
 
 Phase 3 adds a local best-run record and a compact failure recap. The recap shows the fatal condition, actual forbidden button attributes, safe-key progress, and whether the run set or matched the local best, while leaving the Phase 1 difficulty curve unchanged.<br/>**Phase 3 增加了本地最佳记录和紧凑的失败回顾。回顾会显示致命条件、实际禁止按键属性、安全键进度，以及本轮是否刷新或追平本地最佳，同时不改变 Phase 1 难度曲线。**
 
+## Architecture Guardrails
+
+Phase 3A moves runtime logic into strict ES modules. `src/config/` owns difficulty data, `src/core/` owns deterministic rules, level generation, recap, storage, and debug helpers, `src/ui/` owns DOM/audio presentation, and `src/main.js` coordinates browser adapters and the game loop.<br/>**Phase 3A 已将运行时逻辑拆入严格 ES 模块：`src/config/` 负责难度数据，`src/core/` 负责确定性规则、关卡生成、回顾、存档和调试辅助，`src/ui/` 负责 DOM/音频表现，`src/main.js` 只协调浏览器适配和游戏循环。**
+
 ## Deployment
 
 GitHub Pages deployment is configured with `.github/workflows/deploy.yml` and publishes the generated `dist/` folder from the `main` branch.<br/>**项目已通过 `.github/workflows/deploy.yml` 配置 GitHub Pages 部署，从 `main` 分支生成并发布 `dist/` 目录。**
@@ -47,6 +51,7 @@ If the first deployment does not appear, set the repository Pages source to GitH
 ## Project Structure
 
 - `index.html` - playable game entry.<br/>**`index.html` - 可直接运行的游戏入口。**
+- `src/` - zero-dependency ES modules for config, core gameplay logic, UI rendering/audio, and orchestration.<br/>**`src/` - 配置、核心玩法逻辑、UI 渲染/音频和编排入口的零依赖 ES 模块。**
 - `origin/` - original prototype and handoff/design notes.<br/>**`origin/` - 原始原型、交接和设计文档。**
 - `scripts/` - zero-dependency local build, validation, and static-server helpers.<br/>**`scripts/` - 无第三方依赖的本地构建、校验和静态服务器脚本。**
 - `StartLocalTest.cmd` / `OpenOnlineTest.cmd` - Windows launchers for local and online manual testing.<br/>**`StartLocalTest.cmd` / `OpenOnlineTest.cmd` - 用于本地和在线手动测试的 Windows 启动器。**

@@ -50,12 +50,13 @@ Status: Accepted by CheckAndGoal; see [docs/phase-3-final-report.md](docs/phase-
 Estimated conversation rounds: 3-5
 Goal guide: [docs/phase-3a-architecture-regularization-goal-guide.md](docs/phase-3a-architecture-regularization-goal-guide.md)
 Status: Inserted after Phase 3 PASS; dispatched before Phase 4 gameplay expansion.
+Completion: Implemented in Phase 3A; see [docs/phase-3a-final-report.md](docs/phase-3a-final-report.md) and [docs/phase-3a-architecture-regularization-record.md](docs/phase-3a-architecture-regularization-record.md).
 
-- Split the current single-file prototype into strict zero-dependency ES modules before adding broader gameplay systems.
-- Enforce code standards and architecture boundaries: core logic must not touch DOM/window/localStorage, UI must not duplicate rule semantics, and `main.js` must stay orchestration-only.
-- Make architecture self-checks part of every execution round, with explicit answers before validation, commit, and push.
-- Preserve Phase 1 difficulty, Phase 2 copy semantics, Phase 3 best-run/recap behavior, seed/debug APIs, and GitHub Pages behavior.
-- Update validation so architecture boundaries and fixed-seed behavior equivalence are protected by repeatable checks.
+- Split the current single-file prototype into strict zero-dependency ES modules before adding broader gameplay systems. Done.
+- Enforce code standards and architecture boundaries: core logic must not touch DOM/window/localStorage, UI must not duplicate rule semantics, and `main.js` must stay orchestration-only. Done through module boundaries and `npm run validate` guardrails.
+- Make architecture self-checks part of every execution round, with explicit answers before validation, commit, and push. Done for Phase 3A execution.
+- Preserve Phase 1 difficulty, Phase 2 copy semantics, Phase 3 best-run/recap behavior, seed/debug APIs, and GitHub Pages behavior. Done; fixed-seed and helper smokes cover the preserved behavior.
+- Update validation so architecture boundaries and fixed-seed behavior equivalence are protected by repeatable checks. Done in `scripts/validate-structure.mjs`.
 
 ## Phase 4 - Gameplay Expansion Prototypes
 

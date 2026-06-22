@@ -196,3 +196,13 @@ Best-record smoke baseline:
 - Baseline fixtures were captured from the existing inline debug API before extraction.
 - Planned module boundaries keep browser APIs outside core modules.
 - Planned validation update will compare imported modules against the fixed seed and recap/storage fixtures above.
+
+## Implementation Rounds Architecture Self-Check
+
+- `index.html` now keeps markup/CSS and loads `src/main.js` with a module script.
+- `src/config/difficulty.js` owns the Phase 1 color/shape vocabulary and difficulty bands.
+- `src/core/rng.js`, `src/core/rules.js`, `src/core/level.js`, `src/core/storage.js`, `src/core/recap.js`, and `src/core/debug.js` have no DOM, `window`, `document`, `localStorage`, `AudioContext`, URL query, CSS class, or global `gameState` access.
+- `src/ui/render.js` and `src/ui/audio.js` own presentation and feedback only; they consume already-generated facts instead of duplicating difficulty or rule semantics.
+- `src/main.js` owns browser adapters, state orchestration, event binding, and the game loop while delegating rule, level, storage, recap, debug preview, DOM rendering, and audio details.
+- `scripts/validate-structure.mjs` now imports modules directly, checks architecture boundaries, checks `main.js` for business-logic markers, and protects fixed-seed previews for levels `1`, `4`, `8`, `12`, and `18`.
+- `scripts/build-static-site.mjs` now copies `src/` into `dist/` so GitHub Pages receives the module graph.

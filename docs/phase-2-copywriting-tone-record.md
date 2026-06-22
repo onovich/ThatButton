@@ -63,3 +63,7 @@ This keeps the predicate and the player action in a stable order. The predicate 
 
 - Round 1 inventory completed against `index.html` static UI, generated rule templates, fallback rule, and failure copy.
 - No Phase 1 difficulty or level-structure changes made in this round.
+- Round 2 static UI copy updated to define `致命条件`, `禁止按键`, `安全键`, and `清空面板` before play starts.
+- Round 2 generated rule templates now share `致命条件：...。匹配者是禁止按键；按其他安全键。`
+- Round 2 failure copy now reports timeout as uncleared-panel failure and wrong click as `禁止按键`.
+- New generated clue samples stayed within existing `maxClueChars`; no difficulty band, timer, button-count, or rule unlock changes were required.

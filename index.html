@@ -107,12 +107,12 @@
             border-radius: 4px;
             padding: 1rem;
             margin-bottom: 1rem;
-            min-height: 100px;
+            min-height: 112px;
             position: relative;
         }
 
         #clue-text {
-            min-height: 3rem;
+            min-height: 3.5rem;
         }
 
         .terminal-hint {
@@ -288,13 +288,13 @@
             }
 
             .terminal-box {
-                min-height: 86px;
+                min-height: 104px;
                 margin-bottom: 0.75rem;
                 padding: 0.75rem;
             }
 
             #clue-text {
-                min-height: 2.75rem;
+                min-height: 3.25rem;
                 font-size: 1rem;
                 line-height: 1.45;
             }
@@ -376,13 +376,13 @@
             }
 
             .terminal-box {
-                min-height: 76px;
+                min-height: 94px;
                 padding-top: 0.65rem;
                 padding-bottom: 0.65rem;
             }
 
             #clue-text {
-                min-height: 2.4rem;
+                min-height: 3rem;
             }
 
             .start-rules {
@@ -409,11 +409,11 @@
 
         <!-- Terminal Clue Display -->
         <div class="terminal-box">
-            <div class="text-xs mb-1 opacity-70 crt-font border-b border-green-800 pb-1">>> DIRECTIVE_RECV // ID: 89X_A</div>
+            <div class="text-xs mb-1 opacity-70 crt-font border-b border-green-800 pb-1">>> FATAL_CONDITION // READ FIRST</div>
             <div id="clue-text" class="text-lg font-bold tracking-wider leading-relaxed mt-2">
                 <!-- Typewriter text goes here -->
             </div>
-            <div class="terminal-hint text-xs mt-2 text-yellow-400 crt-font">** 目标：只按安全键，清空面板 **</div>
+            <div class="terminal-hint text-xs mt-2 text-yellow-400 crt-font">** 避开禁止按键，清空所有安全键 **</div>
         </div>
 
         <!-- Button Grid -->
@@ -426,14 +426,14 @@
             <h1 class="start-title text-5xl font-black mb-2 tracking-widest crt-font text-center" style="text-shadow: 0 0 20px var(--crt-green);">别按那个键</h1>
             <p class="start-subtitle text-xl mb-8 opacity-80 font-bold tracking-widest">CORE MELTDOWN</p>
             <div class="start-rules text-left max-w-sm text-sm leading-relaxed mb-8 opacity-90 p-4 border border-green-800 rounded bg-black bg-opacity-50">
-                <p class="text-yellow-400 mb-2 font-bold">> 规则覆写协议：</p>
-                <p class="mb-1">1. 核心即将熔毁，你必须按下按钮释放压力。</p>
-                <p class="mb-1">2. 终端会提示<span class="text-red-500 font-bold">【致命键】</span>的特征。</p>
-                <p class="mb-1">3. 符合提示特征的都是<span class="text-red-500 font-bold">禁止按键</span>，可能不止一个。</p>
-                <p class="mb-1 text-green-400">4. 你的目标是快速按下<span class="font-bold underline">所有其他安全键</span>过关。</p>
-                <p class="mt-2 text-xs opacity-70 text-center">系统难度将随时间递增，祝你好运，操作员。</p>
+                <p class="text-yellow-400 mb-2 font-bold">> 操作员指令：</p>
+                <p class="mb-1">1. 每轮终端都会发布<span class="text-red-500 font-bold">【致命条件】</span>。</p>
+                <p class="mb-1">2. 符合条件的按钮都是<span class="text-red-500 font-bold">禁止按键</span>，可能不止一个。</p>
+                <p class="mb-1">3. 不符合条件的按钮才是<span class="text-green-400 font-bold">安全键</span>。</p>
+                <p class="mb-1 text-green-400">4. 按下全部安全键，清空面板。</p>
+                <p class="mt-2 text-xs opacity-70 text-center">读规则，避开致命键。系统会逐级加压。</p>
             </div>
-            <button class="btn-ui" onclick="startGame()">启动稳定程序</button>
+            <button class="btn-ui" onclick="startGame()">开始清空面板</button>
         </div>
 
         <!-- Game Over Screen Overlay -->
@@ -442,9 +442,9 @@
             <p class="text-2xl mb-2 text-white">核心已熔毁</p>
             <p class="text-lg mb-8 text-yellow-400">最终存活轮数: <span id="final-level" class="font-bold text-2xl">0</span></p>
             <p id="death-reason" class="text-sm opacity-80 mb-8 max-w-xs text-center leading-relaxed">
-                你按下了致命键！
+                已触发禁止按键。
             </p>
-            <button class="btn-ui btn-ui-red" onclick="resetGame()">重新启动反应堆</button>
+            <button class="btn-ui btn-ui-red" onclick="resetGame()">重新进入面板</button>
         </div>
     </div>
 
@@ -683,6 +683,8 @@
         const randomValue = () => gameState.rng();
         const randomInt = (min, max) => Math.floor(randomValue() * (max - min + 1)) + min;
         const randomItem = (arr) => arr[Math.floor(randomValue() * arr.length)];
+        const SAFE_ACTION_TEXT = '匹配者是禁止按键；按其他安全键。';
+        const formatFatalRule = (conditionText) => `致命条件：${conditionText}。${SAFE_ACTION_TEXT}`;
 
         function shuffledNumbers(count) {
             const pool = Array.from({ length: 9 }, (_, index) => index + 1);
@@ -708,16 +710,16 @@
             const templates = [
                 { id: 'color', tier: 'singleVisual', fn: () => {
                     const c = randomItem(COLORS);
-                    return { txt: `致命条件：颜色为【${c.name}】。目标：按下其它安全键。`, check: (b) => b.color.id === c.id };
+                    return { txt: formatFatalRule(`颜色为【${c.name}】`), check: (b) => b.color.id === c.id };
                 }},
                 { id: 'shape', tier: 'singleVisual', fn: () => {
                     const s = randomItem(SHAPES);
-                    return { txt: `致命条件：形状为【${s.name}】。目标：按下其它安全键。`, check: (b) => b.shape.id === s.id };
+                    return { txt: formatFatalRule(`形状为【${s.name}】`), check: (b) => b.shape.id === s.id };
                 }},
                 { id: 'number-parity', tier: 'singleNumber', fn: () => {
                     const isEven = randomValue() > 0.5;
                     return { 
-                        txt: `致命条件：数字为【${isEven ? '偶数' : '奇数'}】。目标：按下其它安全键。`,
+                        txt: formatFatalRule(`数字为【${isEven ? '偶数' : '奇数'}】`),
                         check: (b) => isEven ? (b.number % 2 === 0) : (b.number % 2 !== 0) 
                     };
                 }},
@@ -726,14 +728,14 @@
                     const c = randomItem(COLORS);
                     const s = randomItem(SHAPES);
                     return { 
-                        txt: `致命条件：颜色为【${c.name}】，且形状为【${s.name}】。`,
+                        txt: formatFatalRule(`颜色为【${c.name}】且形状为【${s.name}】`),
                         check: (b) => b.color.id === c.id && b.shape.id === s.id 
                     };
                 }},
                 { id: 'color-number-exact', tier: 'compoundExact', fn: () => {
                     const sample = randomItem(buttons);
                     return { 
-                        txt: `致命条件：数字为【${sample.number}】，且颜色为【${sample.color.name}】。`,
+                        txt: formatFatalRule(`数字为【${sample.number}】且颜色为【${sample.color.name}】`),
                         check: (b) => b.color.id === sample.color.id && b.number === sample.number
                     };
                 }},
@@ -742,7 +744,7 @@
                     const c = randomItem(COLORS);
                     const s = randomItem(SHAPES);
                     return { 
-                        txt: `致命条件：颜色不是【${c.name}】，且形状为【${s.name}】。`,
+                        txt: formatFatalRule(`颜色不是【${c.name}】且形状为【${s.name}】`),
                         check: (b) => b.color.id !== c.id && b.shape.id === s.id 
                     };
                 }},
@@ -751,7 +753,7 @@
                     let c2 = randomItem(COLORS);
                     while(c2.id === c1.id) c2 = randomItem(COLORS);
                     return { 
-                        txt: `致命条件：颜色为【${c1.name}】或【${c2.name}】。`,
+                        txt: formatFatalRule(`颜色为【${c1.name}】或【${c2.name}】`),
                         check: (b) => b.color.id === c1.id || b.color.id === c2.id 
                     };
                 }},
@@ -759,7 +761,7 @@
                     const isEven = randomValue() > 0.5;
                     const c = randomItem(COLORS);
                     return { 
-                        txt: `致命条件：颜色为【${c.name}】，或数字为【${isEven ? '偶数' : '奇数'}】。`,
+                        txt: formatFatalRule(`颜色为【${c.name}】或数字为【${isEven ? '偶数' : '奇数'}】`),
                         check: (b) => b.color.id === c.id || (isEven ? (b.number % 2 === 0) : (b.number % 2 !== 0))
                     };
                 }}
@@ -797,7 +799,7 @@
                 b.number === fallbackTarget.number
             );
             return {
-                text: `备用判定：颜色为【${fallbackTarget.color.name}】，形状为【${fallbackTarget.shape.name}】，且数字为【${fallbackTarget.number}】。`,
+                text: formatFatalRule(`颜色为【${fallbackTarget.color.name}】且形状为【${fallbackTarget.shape.name}】且数字为【${fallbackTarget.number}】`),
                 targetIds: fallbackTargets.map(t => t.id),
                 ruleTier: 'fallback',
                 ruleId: 'exact-button'
@@ -1064,9 +1066,9 @@
                 
                 const reasonEl = document.getElementById('death-reason');
                 if (isTimeout) {
-                    reasonEl.innerHTML = "未能及时释放压力！<br>反应堆已超过临界点！";
+                    reasonEl.innerHTML = "倒计时归零。<br>面板未清空，反应堆越过临界线。";
                 } else {
-                    reasonEl.innerHTML = `你按下了那个致命键！<br><span class="text-xs text-green-400 mt-2 block">系统提示回顾: ${gameState.currentRuleText}</span>`;
+                    reasonEl.innerHTML = `你按下了禁止按键。<br><span class="text-xs text-green-400 mt-2 block">致命条件回放: ${gameState.currentRuleText}</span>`;
                 }
 
                 document.getElementById('game-over-screen').classList.remove('hidden');

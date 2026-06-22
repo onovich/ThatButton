@@ -39,6 +39,11 @@ This record documents the implemented curve and evidence for Phase 1. It is not 
 | 2026-06-23 | Phase 1 audit | Pass | Current code is fixed 3x3/9 buttons with timer-dominant progression; `scripts/validate-structure.mjs` is missing and should be added. |
 | 2026-06-23 | Data-driven difficulty implementation | Pass | Implemented `DIFFICULTY_BANDS` in `index.html` with 2x2, 2x3, and 3x3 bands plus fatal range, rule tiers, clue readability, timers, rewards, carryover, and feedback intensity. |
 | 2026-06-23 | Seeded curve stress | Pass | Six seeds across levels 1-20 stayed within configured button counts, fatal ranges, clue length limits, and expected band transitions: training 2x2, orientation 2x3, baseline/pressure/extended 3x3. |
+| 2026-06-23 | Structure validation | Pass | Added `scripts/validate-structure.mjs`; `npm run validate` now runs static validation plus Phase 1 structure/debug preview checks. |
+| 2026-06-23 | Local HTTP smoke | Pass | `http://127.0.0.1:5175/?seed=phase1-http&debug=1` returned HTTP 200 with difficulty, grid, and debug API markers. |
+| 2026-06-23 | Mobile layout shape smoke | Pass | Runtime preview confirmed the introduced board-size sequence `2x2 -> 2x3 -> 3x3`; CSS markers for dynamic grid width and small-screen media queries are present. |
+| 2026-06-23 | iOS Safari real device | Pending real device | Physical iOS touch/audio/safe-area verification is still required. |
+| 2026-06-23 | Android Chrome real device | Pending real device | Physical Android touch/audio/layout verification is still required. |
 
 ## Implemented Band Evidence
 

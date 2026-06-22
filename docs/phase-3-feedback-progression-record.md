@@ -118,3 +118,6 @@ Deferred:
 - Round 7 validation: `npm run validate` and `npm run build` passed after adding the Phase 3 guard.
 - Round 8 local HTTP smoke: `http://127.0.0.1:5175/?seed=phase3-http&debug=1` returned HTTP 200 and included `best-status`, `failure-recap`, `thatbutton.bestRun.v1`, `previewFailureRecap`, and `NEW BEST` markers.
 - Round 8 launcher dry-runs passed: `StartLocalTest.ps1 -DryRun` selected a fallback port while the smoke server was active, and `OpenOnlineTest.ps1 -DryRun` reported the Pages URL.
+- Round 10 runtime smoke in a VM called real `startGame()`, triggered a seeded wrong-click failure, confirmed recap HTML and `lastFailureRecap`, called `resetGame()` and confirmed recap was cleared, saved a best record, reloaded with the same fake storage, and confirmed the best strip restored `L9 / 240`.
+- Round 10 timeout smoke confirmed timeout recap uses `failureReason: timeout`, no pressed button, and at least one forbidden-button fact.
+- Round 10 browser automation note: Playwright is unavailable in this workspace, and no in-app browser control tool was exposed in this session; real browser click smoke remains pending human/browser-tool follow-up.

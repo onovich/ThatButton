@@ -724,6 +724,7 @@
         }
 
         function previewSeededLevel(seed, level = 1) {
+            const targetLevel = Math.max(1, Math.floor(Number(level) || 1));
             const snapshot = {
                 seed: gameState.seed,
                 rng: gameState.rng,
@@ -736,22 +737,25 @@
 
             gameState.seed = seed;
             gameState.rng = createSeededRng(seed);
-            gameState.level = level;
-            generateLevelData();
+            let preview = null;
 
-            const preview = {
-                level,
-                seed,
-                gridSize: '3x3',
-                fatalCount: gameState.forbiddenIds.length,
-                ruleText: gameState.currentRuleText,
-                forbiddenIds: [...gameState.forbiddenIds],
-                buttons: gameState.buttons.map((button) => ({
-                    color: button.color.id,
-                    shape: button.shape.id,
-                    number: button.number
-                }))
-            };
+            for (let currentLevel = 1; currentLevel <= targetLevel; currentLevel++) {
+                gameState.level = currentLevel;
+                generateLevelData();
+                preview = {
+                    level: currentLevel,
+                    seed,
+                    gridSize: '3x3',
+                    fatalCount: gameState.forbiddenIds.length,
+                    ruleText: gameState.currentRuleText,
+                    forbiddenIds: [...gameState.forbiddenIds],
+                    buttons: gameState.buttons.map((button) => ({
+                        color: button.color.id,
+                        shape: button.shape.id,
+                        number: button.number
+                    }))
+                };
+            }
 
             Object.assign(gameState, snapshot);
             return preview;

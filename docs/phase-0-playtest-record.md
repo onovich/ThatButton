@@ -69,7 +69,7 @@ Add `?seed=<label>` to the local or Pages URL before starting a run. Example:
 http://127.0.0.1:5173/?seed=phase0-level1
 ```
 
-When `seed` is absent, the game keeps using normal browser randomness. When `seed` is present, the same seed and level can reproduce the same generated button grid, fatal count, and rule text for design review.
+When `seed` is absent, the game keeps using normal browser randomness. When `seed` is present, the same seed can replay the same generation sequence. The debug preview helper simulates that sequence up to the requested level, then returns the generated button grid, fatal count, and rule text for design review.
 
 For automated checks or console inspection, use:
 

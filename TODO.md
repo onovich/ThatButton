@@ -15,7 +15,7 @@ Status: Baseline implementation completed on 2026-06-23; see [docs/phase-0-final
 
 Estimated conversation rounds: 2-4
 Goal guide: [docs/phase-1-difficulty-curve-goal-guide.md](docs/phase-1-difficulty-curve-goal-guide.md)
-Status: Ready for CheckAndGoal review; see [docs/phase-1-final-report.md](docs/phase-1-final-report.md) and [docs/phase-1-difficulty-curve-record.md](docs/phase-1-difficulty-curve-record.md).
+Status: Accepted by CheckAndGoal; see [docs/phase-1-final-report.md](docs/phase-1-final-report.md) and [docs/phase-1-difficulty-curve-record.md](docs/phase-1-difficulty-curve-record.md).
 
 - Rework the difficulty curve so the game does not become punishing too quickly or make players abandon early.
 - Increase playable level count by pacing difficulty across a longer sequence instead of mostly compressing the timer.
@@ -26,6 +26,8 @@ Status: Ready for CheckAndGoal review; see [docs/phase-1-final-report.md](docs/p
 ## Phase 2 - Copywriting And Tone Pass
 
 Estimated conversation rounds: 1-2
+Goal guide: [docs/phase-2-copywriting-tone-goal-guide.md](docs/phase-2-copywriting-tone-goal-guide.md)
+Status: Planned after Phase 1 PASS; dispatched as the next executor goal.
 
 - Rewrite all visible copy into one consistent voice: urgent terminal instructions, clear failure feedback, and concise rule language.
 - Remove awkward phrasing, grammatical issues, redundant warnings, and overly tangled clue sentences.

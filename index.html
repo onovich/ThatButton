@@ -15,13 +15,23 @@
             --panel-bg: #1a1a1a;
         }
         
+        html {
+            min-height: 100%;
+            background-color: var(--bg-color);
+        }
+
         body {
             background-color: var(--bg-color);
             color: var(--crt-green);
             font-family: 'Noto Sans SC', sans-serif;
             overflow: hidden;
+            min-height: 100vh;
+            min-height: 100dvh;
+            margin: 0;
+            overscroll-behavior: none;
             touch-action: manipulation;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .crt-font { font-family: 'Share Tech Mono', monospace; }
@@ -67,13 +77,27 @@
         #game-container {
             max-width: 500px;
             margin: 0 auto;
+            width: 100%;
             height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 1rem;
+            box-sizing: border-box;
+            padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
             position: relative;
             z-index: 10;
+        }
+
+        .top-status {
+            gap: 0.5rem;
+            min-height: 32px;
+        }
+
+        .status-value {
+            display: inline-block;
+            min-width: 2ch;
+            text-align: right;
         }
 
         .terminal-box {
@@ -87,12 +111,21 @@
             position: relative;
         }
 
+        #clue-text {
+            min-height: 3rem;
+        }
+
+        .terminal-hint {
+            letter-spacing: 0;
+        }
+
         /* Buttons Styling */
         .btn-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             perspective: 1000px;
+            contain: layout;
         }
 
         .game-btn {
@@ -111,6 +144,25 @@
             border: 2px solid rgba(0,0,0,0.5);
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
             transform-style: preserve-3d;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            outline-offset: 4px;
+        }
+
+        .game-btn:focus-visible {
+            outline: 2px solid #fff;
+        }
+
+        .btn-number {
+            font-size: 0.875rem;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+            opacity: 0.8;
+        }
+
+        .btn-shape {
+            font-size: 2.5rem;
+            line-height: 1;
         }
 
         .game-btn:active, .game-btn.pressed {
@@ -163,6 +215,8 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 100; text-align: center; padding: 2rem;
             backdrop-filter: blur(4px);
+            box-sizing: border-box;
+            overflow-y: auto;
         }
         .hidden { display: none !important; }
 
@@ -178,6 +232,9 @@
             text-transform: uppercase;
             box-shadow: 0 0 10px rgba(74, 246, 38, 0.2);
             transition: all 0.2s;
+            min-height: 44px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         .btn-ui:hover {
             background: var(--crt-green);
@@ -200,6 +257,135 @@
         
         .blink { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
+
+        @media (max-width: 520px) {
+            #game-container {
+                max-width: none;
+                justify-content: flex-start;
+                padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+            }
+
+            .top-status {
+                align-items: center;
+                margin-bottom: 0.4rem;
+                font-size: 0.95rem;
+            }
+
+            .status-value {
+                font-size: 1.1rem;
+            }
+
+            #warning-text {
+                font-size: 0.75rem;
+            }
+
+            .timer-container {
+                height: 10px;
+                margin-bottom: 0.65rem;
+            }
+
+            .terminal-box {
+                min-height: 86px;
+                margin-bottom: 0.75rem;
+                padding: 0.75rem;
+            }
+
+            #clue-text {
+                min-height: 2.75rem;
+                font-size: 1rem;
+                line-height: 1.45;
+            }
+
+            .btn-grid {
+                gap: 9px;
+            }
+
+            .game-btn {
+                border-radius: 7px;
+                box-shadow: 0 6px 0 rgba(0,0,0,0.8), 0 10px 16px rgba(0,0,0,0.45), inset 0 2px 2px rgba(255,255,255,0.4);
+            }
+
+            .game-btn:active,
+            .game-btn.pressed,
+            .game-btn.disabled {
+                transform: translateY(6px);
+            }
+
+            .game-btn.explode {
+                transform: scale(1.08) translateY(0);
+            }
+
+            .btn-shape {
+                font-size: 2.25rem;
+            }
+
+            .overlay {
+                align-items: stretch;
+                padding: max(1.25rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1.25rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+            }
+
+            .start-title {
+                font-size: 2.25rem;
+                line-height: 1.1;
+            }
+
+            .start-subtitle {
+                margin-bottom: 1rem;
+            }
+
+            .start-rules {
+                max-height: 46dvh;
+                overflow-y: auto;
+                margin-bottom: 0.75rem;
+            }
+
+            .btn-ui {
+                width: 100%;
+                margin-top: 0.75rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .top-status {
+                font-size: 0.8rem;
+            }
+
+            .status-value {
+                font-size: 1rem;
+            }
+
+            #clue-text {
+                font-size: 0.95rem;
+            }
+
+            .btn-number {
+                font-size: 0.75rem;
+            }
+
+            .btn-shape {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-height: 700px) {
+            #game-container {
+                justify-content: flex-start;
+            }
+
+            .terminal-box {
+                min-height: 76px;
+                padding-top: 0.65rem;
+                padding-bottom: 0.65rem;
+            }
+
+            #clue-text {
+                min-height: 2.4rem;
+            }
+
+            .start-rules {
+                max-height: 40dvh;
+            }
+        }
     </style>
 </head>
 <body>
@@ -208,10 +394,10 @@
     <div id="game-container">
         
         <!-- Header -->
-        <div class="flex justify-between items-end mb-2 crt-font">
-            <div class="text-xl">SYS.LEVEL: <span id="level-display" class="text-2xl font-bold">1</span></div>
+        <div class="top-status flex justify-between items-end mb-2 crt-font">
+            <div class="text-xl">SYS.LEVEL: <span id="level-display" class="status-value text-2xl font-bold">1</span></div>
             <div class="text-sm blink text-red-500 hidden" id="warning-text">CRITICAL OVR</div>
-            <div class="text-xl">SCORE: <span id="score-display">0</span></div>
+            <div class="text-xl">SCORE: <span id="score-display" class="status-value">0</span></div>
         </div>
 
         <div class="timer-container">
@@ -221,10 +407,10 @@
         <!-- Terminal Clue Display -->
         <div class="terminal-box">
             <div class="text-xs mb-1 opacity-70 crt-font border-b border-green-800 pb-1">>> DIRECTIVE_RECV // ID: 89X_A</div>
-            <div id="clue-text" class="text-lg font-bold tracking-wider leading-relaxed mt-2" style="min-height: 3rem;">
+            <div id="clue-text" class="text-lg font-bold tracking-wider leading-relaxed mt-2">
                 <!-- Typewriter text goes here -->
             </div>
-            <div class="text-xs mt-2 text-yellow-400 crt-font">** 按下所有安全键以解除危险 **</div>
+            <div class="terminal-hint text-xs mt-2 text-yellow-400 crt-font">** 目标：只按安全键，清空面板 **</div>
         </div>
 
         <!-- Button Grid -->
@@ -234,14 +420,14 @@
 
         <!-- Start Screen Overlay -->
         <div id="start-screen" class="overlay">
-            <h1 class="text-5xl font-black mb-2 tracking-widest crt-font text-center" style="text-shadow: 0 0 20px var(--crt-green);">别按那个键</h1>
-            <p class="text-xl mb-8 opacity-80 font-bold tracking-widest">CORE MELTDOWN</p>
-            <div class="text-left max-w-sm text-sm leading-relaxed mb-8 opacity-90 p-4 border border-green-800 rounded bg-black bg-opacity-50">
+            <h1 class="start-title text-5xl font-black mb-2 tracking-widest crt-font text-center" style="text-shadow: 0 0 20px var(--crt-green);">别按那个键</h1>
+            <p class="start-subtitle text-xl mb-8 opacity-80 font-bold tracking-widest">CORE MELTDOWN</p>
+            <div class="start-rules text-left max-w-sm text-sm leading-relaxed mb-8 opacity-90 p-4 border border-green-800 rounded bg-black bg-opacity-50">
                 <p class="text-yellow-400 mb-2 font-bold">> 规则覆写协议：</p>
                 <p class="mb-1">1. 核心即将熔毁，你必须按下按钮释放压力。</p>
                 <p class="mb-1">2. 终端会提示<span class="text-red-500 font-bold">【致命键】</span>的特征。</p>
-                <p class="mb-1">3. 推理出致命键（可能不止一个），<span class="text-red-500 font-bold">绝对不要按它</span>。</p>
-                <p class="mb-1 text-green-400">4. 快速按下<span class="font-bold underline">所有其他安全的按键</span>过关。</p>
+                <p class="mb-1">3. 符合提示特征的都是<span class="text-red-500 font-bold">禁止按键</span>，可能不止一个。</p>
+                <p class="mb-1 text-green-400">4. 你的目标是快速按下<span class="font-bold underline">所有其他安全键</span>过关。</p>
                 <p class="mt-2 text-xs opacity-70 text-center">系统难度将随时间递增，祝你好运，操作员。</p>
             </div>
             <button class="btn-ui" onclick="startGame()">启动稳定程序</button>
@@ -340,16 +526,16 @@
                 // Level 1-2: Single attribute (Color or Shape or Odd/Even)
                 { maxLvl: 3, fn: () => {
                     const c = randomItem(COLORS);
-                    return { txt: `绝对不要按【${c.name}】的键！`, check: (b) => b.color.id === c.id };
+                    return { txt: `致命条件：颜色为【${c.name}】。目标：按下其它安全键。`, check: (b) => b.color.id === c.id };
                 }},
                 { maxLvl: 3, fn: () => {
                     const s = randomItem(SHAPES);
-                    return { txt: `警告：含有【${s.name}】的键会引发爆炸！`, check: (b) => b.shape.id === s.id };
+                    return { txt: `致命条件：形状为【${s.name}】。目标：按下其它安全键。`, check: (b) => b.shape.id === s.id };
                 }},
                 { maxLvl: 4, fn: () => {
                     const isEven = Math.random() > 0.5;
                     return { 
-                        txt: `注意：所有带【${isEven ? '偶数' : '奇数'}】的键都是致命的！`, 
+                        txt: `致命条件：数字为【${isEven ? '偶数' : '奇数'}】。目标：按下其它安全键。`,
                         check: (b) => isEven ? (b.number % 2 === 0) : (b.number % 2 !== 0) 
                     };
                 }},
@@ -359,7 +545,7 @@
                     const c = randomItem(COLORS);
                     const s = randomItem(SHAPES);
                     return { 
-                        txt: `系统检测到：【${c.name}】的【${s.name}】键被污染，别碰它！`, 
+                        txt: `致命条件：颜色为【${c.name}】，且形状为【${s.name}】。`,
                         check: (b) => b.color.id === c.id && b.shape.id === s.id 
                     };
                 }},
@@ -367,7 +553,7 @@
                     const c = randomItem(COLORS);
                     const num = randomInt(1, 9);
                     return { 
-                        txt: `唯一带有数字【${num}】且是【${c.name}】的键，按了就会死。`, 
+                        txt: `致命条件：数字为【${num}】，且颜色为【${c.name}】。`,
                         check: (b) => b.color.id === c.id && b.number === num 
                     };
                 }},
@@ -377,7 +563,7 @@
                     const c = randomItem(COLORS);
                     const s = randomItem(SHAPES);
                     return { 
-                        txt: `它【不是${c.name}】，并且带有一个【${s.name}】...千万别按错！`, 
+                        txt: `致命条件：颜色不是【${c.name}】，且形状为【${s.name}】。`,
                         check: (b) => b.color.id !== c.id && b.shape.id === s.id 
                     };
                 }},
@@ -386,7 +572,7 @@
                     let c2 = randomItem(COLORS);
                     while(c2.id === c1.id) c2 = randomItem(COLORS);
                     return { 
-                        txt: `如果键是【${c1.name}】或者【${c2.name}】，那就是致命键。`, 
+                        txt: `致命条件：颜色为【${c1.name}】或【${c2.name}】。`,
                         check: (b) => b.color.id === c1.id || b.color.id === c2.id 
                     };
                 }},
@@ -394,7 +580,7 @@
                     const isEven = Math.random() > 0.5;
                     const c = randomItem(COLORS);
                     return { 
-                        txt: `致命键具备特征：是【${c.name}】，或者是个【${isEven ? '偶数' : '奇数'}】。`, 
+                        txt: `致命条件：颜色为【${c.name}】，或数字为【${isEven ? '偶数' : '奇数'}】。`,
                         check: (b) => b.color.id === c.id || (isEven ? (b.number % 2 === 0) : (b.number % 2 !== 0))
                     };
                 }}
@@ -424,9 +610,14 @@
             
             // Fallback if loop fails (rare)
             const fallbackTarget = buttons[0];
+            const fallbackTargets = buttons.filter(b =>
+                b.color.id === fallbackTarget.color.id &&
+                b.shape.id === fallbackTarget.shape.id &&
+                b.number === fallbackTarget.number
+            );
             return {
-                text: `系统错误。唯一致命键含有数字【${fallbackTarget.number}】。`,
-                targetIds: [fallbackTarget.id]
+                text: `备用判定：颜色为【${fallbackTarget.color.name}】，形状为【${fallbackTarget.shape.name}】，且数字为【${fallbackTarget.number}】。`,
+                targetIds: fallbackTargets.map(t => t.id)
             };
         }
 
@@ -465,11 +656,14 @@
                 const btnEl = document.createElement('div');
                 btnEl.id = btn.id;
                 btnEl.className = `game-btn ${btn.color.css}`;
+                btnEl.setAttribute('role', 'button');
+                btnEl.setAttribute('tabindex', '0');
+                btnEl.setAttribute('aria-label', `${btn.color.name}${btn.shape.name}，数字 ${btn.number}`);
                 
                 // Content: Number + Shape
                 btnEl.innerHTML = `
-                    <span class="text-sm opacity-80 mb-1 leading-none crt-font">0${btn.number}</span>
-                    <span class="leading-none text-4xl">${btn.shape.char}</span>
+                    <span class="btn-number crt-font">0${btn.number}</span>
+                    <span class="btn-shape">${btn.shape.char}</span>
                 `;
                 
                 // Staggered entrance animation
@@ -482,7 +676,12 @@
                 }, index * 40);
 
                 // Add click listener
-                btnEl.addEventListener('pointerdown', (e) => handleBtnClick(btn.id, btnEl, e));
+                btnEl.addEventListener('pointerdown', (e) => handleBtnClick(btn.id, btnEl, e), { passive: false });
+                btnEl.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        handleBtnClick(btn.id, btnEl, e);
+                    }
+                });
                 
                 gridEl.appendChild(btnEl);
             });
@@ -511,6 +710,10 @@
 
 
         function handleBtnClick(id, element, event) {
+            if (event) {
+                if (event.pointerType && event.isPrimary === false) return;
+                event.preventDefault();
+            }
             if (!gameState.isPlaying) return;
             if (element.classList.contains('disabled') || element.classList.contains('pressed')) return;
 

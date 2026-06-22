@@ -37,3 +37,17 @@ This record documents the implemented curve and evidence for Phase 1. It is not 
 | Date | Surface | Result | Evidence |
 | --- | --- | --- | --- |
 | 2026-06-23 | Phase 1 audit | Pass | Current code is fixed 3x3/9 buttons with timer-dominant progression; `scripts/validate-structure.mjs` is missing and should be added. |
+| 2026-06-23 | Data-driven difficulty implementation | Pass | Implemented `DIFFICULTY_BANDS` in `index.html` with 2x2, 2x3, and 3x3 bands plus fatal range, rule tiers, clue readability, timers, rewards, carryover, and feedback intensity. |
+| 2026-06-23 | Seeded curve stress | Pass | Six seeds across levels 1-20 stayed within configured button counts, fatal ranges, clue length limits, and expected band transitions: training 2x2, orientation 2x3, baseline/pressure/extended 3x3. |
+
+## Implemented Band Evidence
+
+Representative `phase1-smoke` preview results:
+
+| Level | Band | Grid | Buttons | Fatal Count | Rule Tier | Time Limit |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | training | 2x2 | 4 | 1 | singleVisual | 18000 ms |
+| 4 | orientation | 2x3 | 6 | 1 | singleVisual | 16500 ms |
+| 8 | baseline | 3x3 | 9 | 2 | compoundAnd | 14700 ms |
+| 12 | pressure | 3x3 | 9 | 3 | orColor | 13100 ms |
+| 18 | extended | 3x3 | 9 | 4 | orMixed | 11500 ms |

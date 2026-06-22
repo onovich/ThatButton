@@ -32,6 +32,10 @@ Phase 1 replaces the fixed 3x3 opening with data-driven level bands: early level
 
 Phase 2 standardizes visible instructions around fatal conditions, forbidden buttons, safe buttons, and clearing the panel. Generated rules now use one shared sentence so matching buttons are always presented as forbidden, while the player action remains pressing the other safe buttons.<br/>**Phase 2 已统一所有玩家可见说明：围绕致命条件、禁止按键、安全键和清空面板展开。生成规则现在使用同一句式，明确“符合条件的是禁止按键”，玩家要按的是其他安全键。**
 
+## Feedback And Retention
+
+Phase 3 adds a local best-run record and a compact failure recap. The recap shows the fatal condition, actual forbidden button attributes, safe-key progress, and whether the run set or matched the local best, while leaving the Phase 1 difficulty curve unchanged.<br/>**Phase 3 增加了本地最佳记录和紧凑的失败回顾。回顾会显示致命条件、实际禁止按键属性、安全键进度，以及本轮是否刷新或追平本地最佳，同时不改变 Phase 1 难度曲线。**
+
 ## Deployment
 
 GitHub Pages deployment is configured with `.github/workflows/deploy.yml` and publishes the generated `dist/` folder from the `main` branch.<br/>**项目已通过 `.github/workflows/deploy.yml` 配置 GitHub Pages 部署，从 `main` 分支生成并发布 `dist/` 目录。**

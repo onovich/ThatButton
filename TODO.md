@@ -38,12 +38,12 @@ Status: Accepted by CheckAndGoal; see [docs/phase-2-final-report.md](docs/phase-
 
 Estimated conversation rounds: 1-3
 Goal guide: [docs/phase-3-feedback-progression-goal-guide.md](docs/phase-3-feedback-progression-goal-guide.md)
-Status: Planned after Phase 2 PASS; dispatched as the next executor goal.
+Status: Implementation in progress by executor; see [docs/phase-3-feedback-progression-record.md](docs/phase-3-feedback-progression-record.md).
 
-- Add a lightweight high-score record with `localStorage`, including best level and best score.
-- Add a post-death recap that lists the actual fatal button attributes for learning without making the next run too easy.
-- Tune early-level timing after mobile testing; touch input is slower than mouse, so the timer curve may need a mobile buffer.
-- Consider combo or streak rewards to make correct rapid decisions feel more expressive than simple survival.
+- Add a lightweight high-score record with `localStorage`, including best level and best score. Implemented as a small versioned local best-run record.
+- Add a post-death recap that lists the actual fatal button attributes for learning without making the next run too easy. Implemented with current fatal condition, actual forbidden buttons, safe-key progress, and failure reason.
+- Tune early-level timing after mobile testing; touch input is slower than mouse, so the timer curve may need a mobile buffer. Deferred pending real iOS/Android evidence; no Phase 1 timing values changed.
+- Consider combo or streak rewards to make correct rapid decisions feel more expressive than simple survival. Deferred; Phase 3 uses best-run and improvement feedback without adding a balance system.
 
 ## Phase 4 - Gameplay Expansion Prototypes
 

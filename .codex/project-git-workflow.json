@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "initializedMarker": "codex-project-git-workflow: initialized",
+  "initializedAt": "2026-06-22 22:45:00 +08:00",
+  "projectName": "ThatButton",
+  "repoRoot": "D:\\WebProjects\\ThatButton",
+  "safeDirectory": "D:/WebProjects/ThatButton",
+  "statusCommand": "git -c safe.directory=D:/WebProjects/ThatButton status --short --branch",
+  "validationCommands": [
+    "npm run validate",
+    "npm run build",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File .\\StartLocalTest.ps1 -DryRun",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File .\\OpenOnlineTest.ps1 -DryRun"
+  ],
+  "stagingPolicy": "ask each time",
+  "commitCommand": "",
+  "pushCommand": "git -c safe.directory=D:/WebProjects/ThatButton push -u origin HEAD",
+  "docsRequirement": "Keep README commands truthful when launch, build, or deploy workflow changes.",
+  "forbiddenCommands": "Never force-push. Do not overwrite an existing remote without explicit user confirmation."
+}

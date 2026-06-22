@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>核心熔毁：那个键 | 2026 GameJam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --crt-green: #4af626;
+            --crt-red: #ff2a2a;
+            --crt-yellow: #ffcc00;
+            --panel-bg: #1a1a1a;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--crt-green);
+            font-family: 'Noto Sans SC', sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .crt-font { font-family: 'Share Tech Mono', monospace; }
+
+        /* CRT Scanline Effect */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.6;
+        }
+
+        /* Screen Glitch & Shake */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        
+        @keyframes micro-shake {
+            0% { transform: translate(0px, 0px); }
+            25% { transform: translate(-1px, 1px); }
+            50% { transform: translate(1px, -1px); }
+            75% { transform: translate(1px, 1px); }
+            100% { transform: translate(0px, 0px); }
+        }
+
+        .shake-intense { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; color: var(--crt-red) !important; }
+        .shake-light { animation: micro-shake 0.1s both; }
+
+        /* Game UI Components */
+        #game-container {
+            max-width: 500px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .terminal-box {
+            background-color: rgba(0, 20, 0, 0.8);
+            border: 2px solid var(--crt-green);
+            box-shadow: 0 0 10px rgba(74, 246, 38, 0.3), inset 0 0 15px rgba(74, 246, 38, 0.2);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            min-height: 100px;
+            position: relative;
+        }
+
+        /* Buttons Styling */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            perspective: 1000px;
+        }
+
+        .game-btn {
+            aspect-ratio: 1 / 1;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.8), 0 15px 20px rgba(0,0,0,0.5), inset 0 2px 2px rgba(255,255,255,0.4);
+            transition: all 0.1s ease;
+            position: relative;
+            border: 2px solid rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            transform-style: preserve-3d;
+        }
+
+        .game-btn:active, .game-btn.pressed {
+            transform: translateY(8px);
+            box-shadow: 0 0px 0 rgba(0,0,0,0.8), 0 2px 5px rgba(0,0,0,0.5), inset 0 4px 6px rgba(0,0,0,0.6);
+        }
+
+        .game-btn.disabled {
+            opacity: 0.3;
+            pointer-events: none;
+            filter: grayscale(0.8);
+            transform: translateY(8px);
+            box-shadow: 0 0px 0 rgba(0,0,0,0.8);
+        }
+        
+        .game-btn.explode {
+            background-color: var(--crt-red) !important;
+            box-shadow: 0 0 30px var(--crt-red) !important;
+            border-color: #fff;
+            transform: scale(1.1) translateY(0);
+            z-index: 20;
+        }
+
+        /* Timer Bar */
+        .timer-container {
+            width: 100%;
+            height: 12px;
+            background-color: #111;
+            border: 1px solid var(--crt-green);
+            margin-bottom: 1rem;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        #timer-bar {
+            height: 100%;
+            width: 100%;
+            background-color: var(--crt-green);
+            box-shadow: 0 0 10px var(--crt-green);
+            transform-origin: left;
+            transition: background-color 0.3s;
+        }
+        
+        .timer-danger { background-color: var(--crt-red) !important; box-shadow: 0 0 10px var(--crt-red) !important; }
+
+        /* Overlays */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; text-align: center; padding: 2rem;
+            backdrop-filter: blur(4px);
+        }
+        .hidden { display: none !important; }
+
+        .btn-ui {
+            background: transparent;
+            color: var(--crt-green);
+            border: 2px solid var(--crt-green);
+            padding: 10px 30px;
+            font-size: 1.2rem;
+            font-family: 'Share Tech Mono', monospace;
+            cursor: pointer;
+            margin-top: 20px;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(74, 246, 38, 0.2);
+            transition: all 0.2s;
+        }
+        .btn-ui:hover {
+            background: var(--crt-green);
+            color: #000;
+            box-shadow: 0 0 20px rgba(74, 246, 38, 0.6);
+        }
+        
+        .btn-ui-red {
+            color: var(--crt-red); border-color: var(--crt-red); box-shadow: 0 0 10px rgba(255, 42, 42, 0.2);
+        }
+        .btn-ui-red:hover {
+            background: var(--crt-red); color: #fff; box-shadow: 0 0 20px rgba(255, 42, 42, 0.6);
+        }
+
+        /* Utility Color Classes for Buttons */
+        .color-red { background: linear-gradient(145deg, #ff4d4d, #cc0000); color: #fff; }
+        .color-blue { background: linear-gradient(145deg, #4da6ff, #0066cc); color: #fff; }
+        .color-yellow { background: linear-gradient(145deg, #ffd633, #cca300); color: #000; }
+        .color-purple { background: linear-gradient(145deg, #b366ff, #7300e6); color: #fff; }
+        
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+
+    <div id="game-container">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-end mb-2 crt-font">
+            <div class="text-xl">SYS.LEVEL: <span id="level-display" class="text-2xl font-bold">1</span></div>
+            <div class="text-sm blink text-red-500 hidden" id="warning-text">CRITICAL OVR</div>
+            <div class="text-xl">SCORE: <span id="score-display">0</span></div>
+        </div>
+
+        <div class="timer-container">
+            <div id="timer-bar"></div>
+        </div>
+
+        <!-- Terminal Clue Display -->
+        <div class="terminal-box">
+            <div class="text-xs mb-1 opacity-70 crt-font border-b border-green-800 pb-1">>> DIRECTIVE_RECV // ID: 89X_A</div>
+            <div id="clue-text" class="text-lg font-bold tracking-wider leading-relaxed mt-2" style="min-height: 3rem;">
+                <!-- Typewriter text goes here -->
+            </div>
+            <div class="text-xs mt-2 text-yellow-400 crt-font">** 按下所有安全键以解除危险 **</div>
+        </div>
+
+        <!-- Button Grid -->
+        <div id="btn-grid" class="btn-grid">
+            <!-- Buttons generated by JS -->
+        </div>
+
+        <!-- Start Screen Overlay -->
+        <div id="start-screen" class="overlay">
+            <h1 class="text-5xl font-black mb-2 tracking-widest crt-font text-center" style="text-shadow: 0 0 20px var(--crt-green);">别按那个键</h1>
+            <p class="text-xl mb-8 opacity-80 font-bold tracking-widest">CORE MELTDOWN</p>
+            <div class="text-left max-w-sm text-sm leading-relaxed mb-8 opacity-90 p-4 border border-green-800 rounded bg-black bg-opacity-50">
+                <p class="text-yellow-400 mb-2 font-bold">> 规则覆写协议：</p>
+                <p class="mb-1">1. 核心即将熔毁，你必须按下按钮释放压力。</p>
+                <p class="mb-1">2. 终端会提示<span class="text-red-500 font-bold">【致命键】</span>的特征。</p>
+                <p class="mb-1">3. 推理出致命键（可能不止一个），<span class="text-red-500 font-bold">绝对不要按它</span>。</p>
+                <p class="mb-1 text-green-400">4. 快速按下<span class="font-bold underline">所有其他安全的按键</span>过关。</p>
+                <p class="mt-2 text-xs opacity-70 text-center">系统难度将随时间递增，祝你好运，操作员。</p>
+            </div>
+            <button class="btn-ui" onclick="startGame()">启动稳定程序</button>
+        </div>
+
+        <!-- Game Over Screen Overlay -->
+        <div id="game-over-screen" class="overlay hidden">
+            <h1 class="text-6xl font-black mb-4 text-red-500 crt-font blink">SYSTEM FAILURE</h1>
+            <p class="text-2xl mb-2 text-white">核心已熔毁</p>
+            <p class="text-lg mb-8 text-yellow-400">最终存活轮数: <span id="final-level" class="font-bold text-2xl">0</span></p>
+            <p id="death-reason" class="text-sm opacity-80 mb-8 max-w-xs text-center leading-relaxed">
+                你按下了致命键！
+            </p>
+            <button class="btn-ui btn-ui-red" onclick="resetGame()">重新启动反应堆</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Configurations & Data Vocabs
+        const COLORS = [
+            { id: 'red', css: 'color-red', name: '红色' },
+            { id: 'blue', css: 'color-blue', name: '蓝色' },
+            { id: 'yellow', css: 'color-yellow', name: '黄色' },
+            { id: 'purple', css: 'color-purple', name: '紫色' }
+        ];
+        const SHAPES = [
+            { id: 'triangle', char: '▲', name: '三角形' },
+            { id: 'circle', char: '●', name: '圆形' },
+            { id: 'square', char: '■', name: '正方形' },
+            { id: 'star', char: '★', name: '五角星' }
+        ];
+
+        // Game State Variables
+        let gameState = {
+            level: 1,
+            score: 0,
+            isPlaying: false,
+            buttons: [],       // Current 9 buttons data
+            forbiddenIds: [],  // IDs of buttons that cause game over
+            safeKeysRemaining: 0,
+            timeLimit: 12000,  // ms
+            timeLeft: 12000,
+            lastTime: 0,
+            animationFrame: null,
+            currentRuleText: ""
+        };
+
+        // DOM Elements
+        const gridEl = document.getElementById('btn-grid');
+        const clueEl = document.getElementById('clue-text');
+        const timerBarEl = document.getElementById('timer-bar');
+        const levelDisplay = document.getElementById('level-display');
+        const scoreDisplay = document.getElementById('score-display');
+        const warningText = document.getElementById('warning-text');
+        
+        // Audio Synthesizer (No external assets)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBeep(freq, type, duration) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playSafeClick() { playBeep(600, 'sine', 0.1); }
+        function playExplosion() {
+            playBeep(100, 'sawtooth', 0.5);
+            setTimeout(() => playBeep(50, 'square', 0.8), 100);
+        }
+        function playLevelUp() {
+            playBeep(400, 'square', 0.1);
+            setTimeout(() => playBeep(600, 'square', 0.15), 100);
+            setTimeout(() => playBeep(800, 'square', 0.2), 250);
+        }
+
+        
+        // Random utility
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+        // Generate a valid rule based on difficulty level
+        function generateRule(buttons, level) {
+            let ruleText = "";
+            let targets = [];
+            let attempts = 0;
+            const maxAttempts = 100;
+
+            // Define rule templates
+            const templates = [
+                // Level 1-2: Single attribute (Color or Shape or Odd/Even)
+                { maxLvl: 3, fn: () => {
+                    const c = randomItem(COLORS);
+                    return { txt: `绝对不要按【${c.name}】的键！`, check: (b) => b.color.id === c.id };
+                }},
+                { maxLvl: 3, fn: () => {
+                    const s = randomItem(SHAPES);
+                    return { txt: `警告：含有【${s.name}】的键会引发爆炸！`, check: (b) => b.shape.id === s.id };
+                }},
+                { maxLvl: 4, fn: () => {
+                    const isEven = Math.random() > 0.5;
+                    return { 
+                        txt: `注意：所有带【${isEven ? '偶数' : '奇数'}】的键都是致命的！`, 
+                        check: (b) => isEven ? (b.number % 2 === 0) : (b.number % 2 !== 0) 
+                    };
+                }},
+                
+                // Level 3-6: AND combinations
+                { minLvl: 3, maxLvl: 7, fn: () => {
+                    const c = randomItem(COLORS);
+                    const s = randomItem(SHAPES);
+                    return { 
+                        txt: `系统检测到：【${c.name}】的【${s.name}】键被污染，别碰它！`, 
+                        check: (b) => b.color.id === c.id && b.shape.id === s.id 
+                    };
+                }},
+                { minLvl: 4, maxLvl: 8, fn: () => {
+                    const c = randomItem(COLORS);
+                    const num = randomInt(1, 9);
+                    return { 
+                        txt: `唯一带有数字【${num}】且是【${c.name}】的键，按了就会死。`, 
+                        check: (b) => b.color.id === c.id && b.number === num 
+                    };
+                }},
+
+                // Level 6+: NOT relations and complex logic
+                { minLvl: 6, fn: () => {
+                    const c = randomItem(COLORS);
+                    const s = randomItem(SHAPES);
+                    return { 
+                        txt: `它【不是${c.name}】，并且带有一个【${s.name}】...千万别按错！`, 
+                        check: (b) => b.color.id !== c.id && b.shape.id === s.id 
+                    };
+                }},
+                { minLvl: 8, fn: () => {
+                    const c1 = randomItem(COLORS);
+                    let c2 = randomItem(COLORS);
+                    while(c2.id === c1.id) c2 = randomItem(COLORS);
+                    return { 
+                        txt: `如果键是【${c1.name}】或者【${c2.name}】，那就是致命键。`, 
+                        check: (b) => b.color.id === c1.id || b.color.id === c2.id 
+                    };
+                }},
+                { minLvl: 10, fn: () => {
+                    const isEven = Math.random() > 0.5;
+                    const c = randomItem(COLORS);
+                    return { 
+                        txt: `致命键具备特征：是【${c.name}】，或者是个【${isEven ? '偶数' : '奇数'}】。`, 
+                        check: (b) => b.color.id === c.id || (isEven ? (b.number % 2 === 0) : (b.number % 2 !== 0))
+                    };
+                }}
+            ];
+
+            // Filter available templates for current level
+            const availableTemplates = templates.filter(t => 
+                (t.minLvl === undefined || level >= t.minLvl) && 
+                (t.maxLvl === undefined || level <= t.maxLvl)
+            );
+
+            // Loop until we find a rule that targets exactly 1 to 3 buttons
+            while (attempts < maxAttempts) {
+                const tmpl = randomItem(availableTemplates);
+                const rule = tmpl.fn();
+                targets = buttons.filter(b => rule.check(b));
+
+                // We want 1 to 4 forbidden buttons. Too many makes it impossible to click safes in time.
+                // At higher levels, allow up to 4 targets (5 safes to click).
+                let maxTargets = level > 5 ? 4 : 3;
+
+                if (targets.length >= 1 && targets.length <= maxTargets) {
+                    return { text: rule.txt, targetIds: targets.map(t => t.id) };
+                }
+                attempts++;
+            }
+            
+            // Fallback if loop fails (rare)
+            const fallbackTarget = buttons[0];
+            return {
+                text: `系统错误。唯一致命键含有数字【${fallbackTarget.number}】。`,
+                targetIds: [fallbackTarget.id]
+            };
+        }
+
+        function generateLevelData() {
+            // Generate 9 random buttons
+            gameState.buttons = [];
+            // Ensure some variance
+            let usedNumbers = new Set();
+            for (let i = 0; i < 9; i++) {
+                let num = randomInt(1, 9);
+                if(usedNumbers.has(num) && Math.random() > 0.5) { num = randomInt(1, 9); } // slight bias to unique
+                usedNumbers.add(num);
+
+                gameState.buttons.push({
+                    id: `btn-${i}`,
+                    color: randomItem(COLORS),
+                    shape: randomItem(SHAPES),
+                    number: num,
+                    isClicked: false
+                });
+            }
+
+            // Generate Rule based on the board
+            const ruleObj = generateRule(gameState.buttons, gameState.level);
+            gameState.currentRuleText = ruleObj.text;
+            gameState.forbiddenIds = ruleObj.targetIds;
+            gameState.safeKeysRemaining = 9 - gameState.forbiddenIds.length;
+        }
+
+
+        let typewriterTimeout;
+        function renderBoard() {
+            gridEl.innerHTML = '';
+            
+            gameState.buttons.forEach((btn, index) => {
+                const btnEl = document.createElement('div');
+                btnEl.id = btn.id;
+                btnEl.className = `game-btn ${btn.color.css}`;
+                
+                // Content: Number + Shape
+                btnEl.innerHTML = `
+                    <span class="text-sm opacity-80 mb-1 leading-none crt-font">0${btn.number}</span>
+                    <span class="leading-none text-4xl">${btn.shape.char}</span>
+                `;
+                
+                // Staggered entrance animation
+                btnEl.style.opacity = '0';
+                btnEl.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    btnEl.style.transition = 'all 0.2s cubic-bezier(.36,.07,.19,.97)';
+                    btnEl.style.opacity = '1';
+                    btnEl.style.transform = 'scale(1)';
+                }, index * 40);
+
+                // Add click listener
+                btnEl.addEventListener('pointerdown', (e) => handleBtnClick(btn.id, btnEl, e));
+                
+                gridEl.appendChild(btnEl);
+            });
+
+            // Typewriter effect for clue
+            clueEl.innerHTML = '';
+            clearTimeout(typewriterTimeout);
+            let charIndex = 0;
+            const text = gameState.currentRuleText;
+            
+            function typeChar() {
+                if (charIndex < text.length) {
+                    clueEl.innerHTML += text.charAt(charIndex);
+                    charIndex++;
+                    // Play tiny click sound for typewriter visually
+                    if(charIndex % 3 === 0) playBeep(800 + Math.random()*200, 'square', 0.02);
+                    typewriterTimeout = setTimeout(typeChar, 30);
+                }
+            }
+            typeChar();
+
+            // Update Header
+            levelDisplay.innerText = gameState.level;
+            scoreDisplay.innerText = gameState.score;
+        }
+
+
+        function handleBtnClick(id, element, event) {
+            if (!gameState.isPlaying) return;
+            if (element.classList.contains('disabled') || element.classList.contains('pressed')) return;
+
+            // Micro shake on every interaction
+            document.body.classList.remove('shake-light');
+            void document.body.offsetWidth; // trigger reflow
+            document.body.classList.add('shake-light');
+
+            element.classList.add('pressed');
+            element.classList.add('disabled'); // Disable it
+
+            if (gameState.forbiddenIds.includes(id)) {
+                // Pressed the WRONG button!
+                triggerGameOver(id, element);
+            } else {
+                // Pressed a SAFE button
+                playSafeClick();
+                gameState.safeKeysRemaining--;
+                gameState.score += 10;
+                
+                // Reward time per safe click (diminishing at higher levels)
+                let timeReward = Math.max(500, 1500 - (gameState.level * 100));
+                gameState.timeLeft = Math.min(gameState.timeLimit, gameState.timeLeft + timeReward);
+
+                if (gameState.safeKeysRemaining <= 0) {
+                    levelComplete();
+                }
+            }
+        }
+
+        function triggerGameOver(id, element) {
+            gameState.isPlaying = false;
+            playExplosion();
+            
+            // Visual feedback
+            if (element) {
+                element.classList.add('explode');
+            }
+            document.body.classList.add('shake-intense');
+            
+            // Highlight what was actually deadly
+            setTimeout(() => {
+                document.getElementById('final-level').innerText = gameState.level;
+                
+                const isTimeout = id === 'timeout';
+                const reasonEl = document.getElementById('death-reason');
+                if (isTimeout) {
+                    reasonEl.innerHTML = "未能及时释放压力！<br>反应堆已超过临界点！";
+                } else {
+                    reasonEl.innerHTML = `你按下了那个致命键！<br><span class="text-xs text-green-400 mt-2 block">系统提示回顾: ${gameState.currentRuleText}</span>`;
+                }
+
+                document.getElementById('game-over-screen').classList.remove('hidden');
+            }, 800);
+        }
+
+        function levelComplete() {
+            gameState.isPlaying = false;
+            playLevelUp();
+            gameState.level++;
+            
+            // Adjust Difficulty
+            // Base time starts at 12s, decreases to a minimum of 4s
+            gameState.timeLimit = Math.max(4000, 12000 - (gameState.level * 600));
+            // Carry over a portion of remaining time
+            gameState.timeLeft = Math.min(gameState.timeLimit, gameState.timeLeft + (gameState.timeLimit * 0.5));
+
+            if(gameState.timeLimit < 6000) { warningText.classList.remove('hidden'); }
+
+            setTimeout(() => {
+                startRound();
+            }, 600); // brief pause before next grid
+        }
+
+        function startRound() {
+            generateLevelData();
+            renderBoard();
+            gameState.lastTime = performance.now();
+            gameState.isPlaying = true;
+        }
+
+        function startGame() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.body.classList.remove('shake-intense');
+            
+            // Reset Stats
+            gameState.level = 1;
+            gameState.score = 0;
+            gameState.timeLimit = 15000; // Genereous start time
+            gameState.timeLeft = 15000;
+            warningText.classList.add('hidden');
+            
+            startRound();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resetGame() {
+            startGame();
+        }
+
+
+        function gameLoop(timestamp) {
+            if (!gameState.isPlaying) {
+                gameState.lastTime = timestamp;
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+
+            const deltaTime = timestamp - gameState.lastTime;
+            gameState.lastTime = timestamp;
+            
+            gameState.timeLeft -= deltaTime;
+
+            // Update Timer UI
+            const timePercent = Math.max(0, (gameState.timeLeft / gameState.timeLimit) * 100);
+            timerBarEl.style.width = `${timePercent}%`;
+
+            if (timePercent < 30) {
+                timerBarEl.classList.add('timer-danger');
+                if(Math.floor(gameState.timeLeft / 200) % 2 === 0) {
+                     timerBarEl.style.opacity = '0.5';
+                } else {
+                     timerBarEl.style.opacity = '1';
+                }
+            } else {
+                timerBarEl.classList.remove('timer-danger');
+                timerBarEl.style.opacity = '1';
+            }
+
+            // Check Time Out
+            if (gameState.timeLeft <= 0) {
+                triggerGameOver('timeout', null);
+            }
+
+            scoreDisplay.innerText = gameState.score;
+
+            requestAnimationFrame(gameLoop);
+        }
+
+    </script>
+</body>
+</html>

@@ -15,7 +15,7 @@ Status: Baseline implementation completed on 2026-06-23; see [docs/phase-0-final
 
 Estimated conversation rounds: 2-4
 Goal guide: [docs/phase-1-difficulty-curve-goal-guide.md](docs/phase-1-difficulty-curve-goal-guide.md)
-Status: Planned after Phase 0 PASS; dispatched as the next executor goal.
+Status: Implementation in progress; data-driven bands, variable board sizes, structure validation, and smoke evidence are recorded in [docs/phase-1-difficulty-curve-record.md](docs/phase-1-difficulty-curve-record.md).
 
 - Rework the difficulty curve so the game does not become punishing too quickly or make players abandon early.
 - Increase playable level count by pacing difficulty across a longer sequence instead of mostly compressing the timer.

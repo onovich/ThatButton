@@ -24,6 +24,10 @@ npm run dev
 
 Phase 0 test criteria and evidence live in [`docs/phase-0-playtest-record.md`](docs/phase-0-playtest-record.md). Add `?seed=<label>` to a local or Pages URL to reproduce a generated run sequence; add `?debug=1` to log structured round and failure events for design review.<br/>**Phase 0 的测试标准与证据记录位于 [`docs/phase-0-playtest-record.md`](docs/phase-0-playtest-record.md)。在本地或 Pages 地址后添加 `?seed=<label>` 可以复现生成序列；添加 `?debug=1` 可为设计复盘输出结构化轮次和失败事件。**
 
+## Difficulty Curve
+
+Phase 1 replaces the fixed 3x3 opening with data-driven level bands: early levels start at 2x2, then move to 2x3, then return to 3x3 with rule complexity, fatal count, timer, reward, readability, and feedback intensity as separate tuning axes. The debug preview API reports the active band and parameters for each seeded level.<br/>**Phase 1 已把固定 3x3 开局改为数据驱动关卡段：早期从 2x2 开始，随后进入 2x3，再回到 3x3，并把规则复杂度、致命键数量、计时、奖励、可读性和反馈强度拆成独立调参轴。调试预览 API 会输出每个固定种子关卡的当前关卡段和参数。**
+
 ## Deployment
 
 GitHub Pages deployment is configured with `.github/workflows/deploy.yml` and publishes the generated `dist/` folder from the `main` branch.<br/>**项目已通过 `.github/workflows/deploy.yml` 配置 GitHub Pages 部署，从 `main` 分支生成并发布 `dist/` 目录。**

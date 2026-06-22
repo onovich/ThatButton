@@ -98,3 +98,6 @@ Deferred:
 - Round 2 exposed best-record debug helpers for load, save, reset, inspect, and comparison validation.
 - Round 2 did not render UI or update records on failure yet; those are intentionally left for later rounds.
 - Round 2 storage smoke in a VM with fake `localStorage`: empty -> `empty`, malformed JSON -> `corrupt`, saved L5/120 -> reload `loaded`, comparisons returned `new_best`, `matched_best`, and `below_best`.
+- Round 3 added a compact `BEST: -- / 0` status strip under the existing top status row, with short storage notes for corrupt/unavailable states.
+- Round 3 reloads best-record state on start/reset and refreshes the strip from debug save/reset helpers.
+- Round 3 fake-DOM smoke confirmed the strip renders default `-- / 0`, debug-saved `L7 / 210 SAVED`, and reset default values.

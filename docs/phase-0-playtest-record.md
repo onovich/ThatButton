@@ -61,6 +61,22 @@ Record one row for each notable level, failure, ambiguity, or replay-worthy roun
 | phase_1_signal | Optional | Difficulty curve clue, such as too many safe clicks or timer too short. |
 | phase_2_signal | Optional | Copywriting clue, such as a rule that reads backwards. |
 
+## Debug Seed Entry
+
+Add `?seed=<label>` to the local or Pages URL before starting a run. Example:
+
+```text
+http://127.0.0.1:5173/?seed=phase0-level1
+```
+
+When `seed` is absent, the game keeps using normal browser randomness. When `seed` is present, the same seed and level can reproduce the same generated button grid, fatal count, and rule text for design review.
+
+For automated checks or console inspection, use:
+
+```js
+window.__THAT_BUTTON_DEBUG__.previewSeededLevel('phase0-level1', 1)
+```
+
 ## First 10-Level Review Checklist
 
 - Levels 1-5: player identifies that the clue describes fatal buttons, not safe buttons.

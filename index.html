@@ -465,6 +465,8 @@
             level: 1,
             score: 0,
             isPlaying: false,
+            seed: null,
+            rng: Math.random,
             buttons: [],       // Current 9 buttons data
             forbiddenIds: [],  // IDs of buttons that cause game over
             safeKeysRemaining: 0,
@@ -511,8 +513,39 @@
 
         
         // Random utility
-        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-        const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        function hashSeed(seedText) {
+            let hash = 2166136261;
+            for (let i = 0; i < seedText.length; i++) {
+                hash ^= seedText.charCodeAt(i);
+                hash = Math.imul(hash, 16777619);
+            }
+            return hash >>> 0;
+        }
+
+        function createSeededRng(seedText) {
+            let state = hashSeed(seedText);
+            return function seededRandom() {
+                state += 0x6D2B79F5;
+                let t = state;
+                t = Math.imul(t ^ (t >>> 15), t | 1);
+                t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            };
+        }
+
+        function getSeedFromUrl() {
+            const seed = new URLSearchParams(window.location.search).get('seed');
+            return seed && seed.trim() ? seed.trim() : null;
+        }
+
+        function resetRandomSource() {
+            gameState.seed = getSeedFromUrl();
+            gameState.rng = gameState.seed ? createSeededRng(gameState.seed) : Math.random;
+        }
+
+        const randomValue = () => gameState.rng();
+        const randomInt = (min, max) => Math.floor(randomValue() * (max - min + 1)) + min;
+        const randomItem = (arr) => arr[Math.floor(randomValue() * arr.length)];
 
         // Generate a valid rule based on difficulty level
         function generateRule(buttons, level) {
@@ -533,7 +566,7 @@
                     return { txt: `致命条件：形状为【${s.name}】。目标：按下其它安全键。`, check: (b) => b.shape.id === s.id };
                 }},
                 { maxLvl: 4, fn: () => {
-                    const isEven = Math.random() > 0.5;
+                    const isEven = randomValue() > 0.5;
                     return { 
                         txt: `致命条件：数字为【${isEven ? '偶数' : '奇数'}】。目标：按下其它安全键。`,
                         check: (b) => isEven ? (b.number % 2 === 0) : (b.number % 2 !== 0) 
@@ -577,7 +610,7 @@
                     };
                 }},
                 { minLvl: 10, fn: () => {
-                    const isEven = Math.random() > 0.5;
+                    const isEven = randomValue() > 0.5;
                     const c = randomItem(COLORS);
                     return { 
                         txt: `致命条件：颜色为【${c.name}】，或数字为【${isEven ? '偶数' : '奇数'}】。`,
@@ -628,7 +661,7 @@
             let usedNumbers = new Set();
             for (let i = 0; i < 9; i++) {
                 let num = randomInt(1, 9);
-                if(usedNumbers.has(num) && Math.random() > 0.5) { num = randomInt(1, 9); } // slight bias to unique
+                if(usedNumbers.has(num) && randomValue() > 0.5) { num = randomInt(1, 9); } // slight bias to unique
                 usedNumbers.add(num);
 
                 gameState.buttons.push({
@@ -646,6 +679,44 @@
             gameState.forbiddenIds = ruleObj.targetIds;
             gameState.safeKeysRemaining = 9 - gameState.forbiddenIds.length;
         }
+
+        function previewSeededLevel(seed, level = 1) {
+            const snapshot = {
+                seed: gameState.seed,
+                rng: gameState.rng,
+                level: gameState.level,
+                buttons: gameState.buttons,
+                forbiddenIds: gameState.forbiddenIds,
+                safeKeysRemaining: gameState.safeKeysRemaining,
+                currentRuleText: gameState.currentRuleText
+            };
+
+            gameState.seed = seed;
+            gameState.rng = createSeededRng(seed);
+            gameState.level = level;
+            generateLevelData();
+
+            const preview = {
+                level,
+                seed,
+                gridSize: '3x3',
+                fatalCount: gameState.forbiddenIds.length,
+                ruleText: gameState.currentRuleText,
+                forbiddenIds: [...gameState.forbiddenIds],
+                buttons: gameState.buttons.map((button) => ({
+                    color: button.color.id,
+                    shape: button.shape.id,
+                    number: button.number
+                }))
+            };
+
+            Object.assign(gameState, snapshot);
+            return preview;
+        }
+
+        window.__THAT_BUTTON_DEBUG__ = {
+            previewSeededLevel
+        };
 
 
         let typewriterTimeout;
@@ -800,6 +871,7 @@
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-over-screen').classList.add('hidden');
             document.body.classList.remove('shake-intense');
+            resetRandomSource();
             
             // Reset Stats
             gameState.level = 1;

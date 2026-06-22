@@ -467,6 +467,8 @@
             isPlaying: false,
             seed: null,
             rng: Math.random,
+            debug: false,
+            debugLog: [],
             buttons: [],       // Current 9 buttons data
             forbiddenIds: [],  // IDs of buttons that cause game over
             safeKeysRemaining: 0,
@@ -536,6 +538,11 @@
         function getSeedFromUrl() {
             const seed = new URLSearchParams(window.location.search).get('seed');
             return seed && seed.trim() ? seed.trim() : null;
+        }
+
+        function getDebugFromUrl() {
+            const value = new URLSearchParams(window.location.search).get('debug');
+            return value === '1' || value === 'true';
         }
 
         function resetRandomSource() {
@@ -680,6 +687,42 @@
             gameState.safeKeysRemaining = 9 - gameState.forbiddenIds.length;
         }
 
+        function getButtonSummary(button) {
+            if (!button) return null;
+            return {
+                id: button.id,
+                color: button.color.id,
+                shape: button.shape.id,
+                number: button.number
+            };
+        }
+
+        function getRoundSnapshot() {
+            return {
+                level: gameState.level,
+                seed: gameState.seed,
+                gridSize: '3x3',
+                fatalCount: gameState.forbiddenIds.length,
+                ruleText: gameState.currentRuleText,
+                timeLimitMs: gameState.timeLimit,
+                safeKeysRemaining: gameState.safeKeysRemaining
+            };
+        }
+
+        function recordDebugEvent(type, details = {}) {
+            const entry = {
+                type,
+                atMs: Math.round(performance.now()),
+                ...getRoundSnapshot(),
+                ...details
+            };
+            gameState.debugLog.push(entry);
+            if (gameState.debug) {
+                console.info('[ThatButton debug]', entry);
+            }
+            return entry;
+        }
+
         function previewSeededLevel(seed, level = 1) {
             const snapshot = {
                 seed: gameState.seed,
@@ -715,7 +758,11 @@
         }
 
         window.__THAT_BUTTON_DEBUG__ = {
-            previewSeededLevel
+            previewSeededLevel,
+            getLog: () => [...gameState.debugLog],
+            clearLog: () => {
+                gameState.debugLog = [];
+            }
         };
 
 
@@ -818,6 +865,13 @@
         function triggerGameOver(id, element) {
             gameState.isPlaying = false;
             playExplosion();
+            const isTimeout = id === 'timeout';
+            const failedButton = gameState.buttons.find((button) => button.id === id);
+            recordDebugEvent('failure', {
+                failureReason: isTimeout ? 'timeout' : 'wrong_click',
+                pressedButtonId: isTimeout ? null : id,
+                pressedButton: getButtonSummary(failedButton)
+            });
             
             // Visual feedback
             if (element) {
@@ -829,7 +883,6 @@
             setTimeout(() => {
                 document.getElementById('final-level').innerText = gameState.level;
                 
-                const isTimeout = id === 'timeout';
                 const reasonEl = document.getElementById('death-reason');
                 if (isTimeout) {
                     reasonEl.innerHTML = "未能及时释放压力！<br>反应堆已超过临界点！";
@@ -843,6 +896,7 @@
 
         function levelComplete() {
             gameState.isPlaying = false;
+            recordDebugEvent('level_complete');
             playLevelUp();
             gameState.level++;
             
@@ -861,6 +915,7 @@
 
         function startRound() {
             generateLevelData();
+            recordDebugEvent('round_start');
             renderBoard();
             gameState.lastTime = performance.now();
             gameState.isPlaying = true;
@@ -872,6 +927,8 @@
             document.getElementById('game-over-screen').classList.add('hidden');
             document.body.classList.remove('shake-intense');
             resetRandomSource();
+            gameState.debug = getDebugFromUrl();
+            gameState.debugLog = [];
             
             // Reset Stats
             gameState.level = 1;

@@ -77,6 +77,12 @@ For automated checks or console inspection, use:
 window.__THAT_BUTTON_DEBUG__.previewSeededLevel('phase0-level1', 1)
 ```
 
+For design/debug sessions, add `&debug=1` after the seed or `?debug=1` without a seed. Debug mode keeps ordinary UI unchanged and writes structured round/failure events to the browser console. The same events can be inspected with:
+
+```js
+window.__THAT_BUTTON_DEBUG__.getLog()
+```
+
 ## First 10-Level Review Checklist
 
 - Levels 1-5: player identifies that the clue describes fatal buttons, not safe buttons.

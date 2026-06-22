@@ -2,7 +2,7 @@
 
 workspace: D:\WebProjects\ThatButton
 created_at: 2026-06-23T01:45:53.5461407+08:00
-updated_at: 2026-06-23T01:47:53.0922766+08:00
+updated_at: 2026-06-23T01:51:33.3692717+08:00
 
 planner:
   role: architect
@@ -25,7 +25,7 @@ executor:
 idempotency:
   active_goal_guide: docs/phase-0-baseline-playtest-goal-guide.md
   active_goal_phase: Phase 0 - Baseline And Playtest Criteria
-  last_planner_dispatch: 2026-06-23T01:47:53.0922766+08:00
-  last_planner_dispatch_status: pending
+  last_planner_dispatch: 2026-06-23T01:51:33.3692717+08:00
+  last_planner_dispatch_status: sent
   last_planner_dispatch_guide: docs/phase-0-baseline-playtest-goal-guide.md
-  last_planner_dispatch_commit: pending
+  last_planner_dispatch_commit: 0ab72d57248483d5a84d712696f3211b230dc6cf

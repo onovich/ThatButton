@@ -122,10 +122,13 @@
         /* Buttons Styling */
         .btn-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 12px;
             perspective: 1000px;
             contain: layout;
+            width: 100%;
+            max-width: var(--board-max-width, 500px);
+            margin: 0 auto;
         }
 
         .game-btn {
@@ -460,6 +463,130 @@
             { id: 'star', char: '★', name: '五角星' }
         ];
 
+        const DIFFICULTY_BANDS = [
+            {
+                id: 'training',
+                label: 'TRAINING',
+                minLevel: 1,
+                maxLevel: 2,
+                rows: 2,
+                cols: 2,
+                buttonCount: 4,
+                fatalMin: 1,
+                fatalMax: 1,
+                ruleTiers: ['singleVisual'],
+                readability: 'short visual clue',
+                maxClueChars: 34,
+                baseTimeLimitMs: 18000,
+                minTimeLimitMs: 17000,
+                timeDropPerLevelMs: 500,
+                timeRewardMs: 2200,
+                carryoverRatio: 0.45,
+                feedbackIntensity: 'calm'
+            },
+            {
+                id: 'orientation',
+                label: 'ORIENTATION',
+                minLevel: 3,
+                maxLevel: 5,
+                rows: 2,
+                cols: 3,
+                buttonCount: 6,
+                fatalMin: 1,
+                fatalMax: 1,
+                ruleTiers: ['singleVisual', 'singleNumber'],
+                readability: 'single-axis clue',
+                maxClueChars: 38,
+                baseTimeLimitMs: 17000,
+                minTimeLimitMs: 15500,
+                timeDropPerLevelMs: 500,
+                timeRewardMs: 1800,
+                carryoverRatio: 0.4,
+                feedbackIntensity: 'low'
+            },
+            {
+                id: 'baseline',
+                label: 'BASELINE',
+                minLevel: 6,
+                maxLevel: 10,
+                rows: 3,
+                cols: 3,
+                buttonCount: 9,
+                fatalMin: 1,
+                fatalMax: 2,
+                ruleTiers: ['singleVisual', 'singleNumber', 'compoundAnd'],
+                readability: 'simple mixed clue',
+                maxClueChars: 44,
+                baseTimeLimitMs: 15500,
+                minTimeLimitMs: 13500,
+                timeDropPerLevelMs: 400,
+                timeRewardMs: 1300,
+                carryoverRatio: 0.34,
+                feedbackIntensity: 'medium'
+            },
+            {
+                id: 'pressure',
+                label: 'PRESSURE',
+                minLevel: 11,
+                maxLevel: 15,
+                rows: 3,
+                cols: 3,
+                buttonCount: 9,
+                fatalMin: 2,
+                fatalMax: 3,
+                ruleTiers: ['compoundAnd', 'compoundExact', 'not', 'orColor'],
+                readability: 'compound clue',
+                maxClueChars: 50,
+                baseTimeLimitMs: 13500,
+                minTimeLimitMs: 11500,
+                timeDropPerLevelMs: 400,
+                timeRewardMs: 900,
+                carryoverRatio: 0.28,
+                feedbackIntensity: 'high'
+            },
+            {
+                id: 'extended',
+                label: 'EXTENDED',
+                minLevel: 16,
+                rows: 3,
+                cols: 3,
+                buttonCount: 9,
+                fatalMin: 2,
+                fatalMax: 4,
+                ruleTiers: ['compoundAnd', 'compoundExact', 'not', 'orColor', 'orMixed'],
+                readability: 'full rule set',
+                maxClueChars: 56,
+                baseTimeLimitMs: 12000,
+                minTimeLimitMs: 9500,
+                timeDropPerLevelMs: 250,
+                timeRewardMs: 700,
+                carryoverRatio: 0.22,
+                feedbackIntensity: 'critical'
+            }
+        ];
+
+        function getDifficultyBand(level) {
+            return DIFFICULTY_BANDS.find((band) =>
+                level >= band.minLevel && (band.maxLevel === undefined || level <= band.maxLevel)
+            ) || DIFFICULTY_BANDS[DIFFICULTY_BANDS.length - 1];
+        }
+
+        function getDifficultyForLevel(level) {
+            const normalizedLevel = Math.max(1, Math.floor(Number(level) || 1));
+            const band = getDifficultyBand(normalizedLevel);
+            const levelOffset = normalizedLevel - band.minLevel;
+            const timeLimitMs = Math.max(
+                band.minTimeLimitMs,
+                band.baseTimeLimitMs - (levelOffset * band.timeDropPerLevelMs)
+            );
+            return {
+                ...band,
+                level: normalizedLevel,
+                timeLimitMs,
+                gridSize: `${band.rows}x${band.cols}`
+            };
+        }
+
         // Game State Variables
         let gameState = {
             level: 1,
@@ -469,7 +596,10 @@
             rng: Math.random,
             debug: false,
             debugLog: [],
-            buttons: [],       // Current 9 buttons data
+            currentDifficulty: getDifficultyForLevel(1),
+            currentRuleTier: "",
+            currentRuleId: "",
+            buttons: [],       // Current board button data
             forbiddenIds: [],  // IDs of buttons that cause game over
             safeKeysRemaining: 0,
             timeLimit: 12000,  // ms
@@ -554,8 +684,21 @@
         const randomInt = (min, max) => Math.floor(randomValue() * (max - min + 1)) + min;
         const randomItem = (arr) => arr[Math.floor(randomValue() * arr.length)];
 
+        function shuffledNumbers(count) {
+            const pool = Array.from({ length: 9 }, (_, index) => index + 1);
+            const numbers = [];
+            while (numbers.length < count && pool.length > 0) {
+                const index = randomInt(0, pool.length - 1);
+                numbers.push(pool.splice(index, 1)[0]);
+            }
+            while (numbers.length < count) {
+                numbers.push(randomInt(1, 9));
+            }
+            return numbers;
+        }
+
         // Generate a valid rule based on difficulty level
-        function generateRule(buttons, level) {
+        function generateRule(buttons, level, difficulty = getDifficultyForLevel(level)) {
             let ruleText = "";
             let targets = [];
             let attempts = 0;
@@ -563,16 +706,15 @@
 
             // Define rule templates
             const templates = [
-                // Level 1-2: Single attribute (Color or Shape or Odd/Even)
-                { maxLvl: 3, fn: () => {
+                { id: 'color', tier: 'singleVisual', fn: () => {
                     const c = randomItem(COLORS);
                     return { txt: `致命条件：颜色为【${c.name}】。目标：按下其它安全键。`, check: (b) => b.color.id === c.id };
                 }},
-                { maxLvl: 3, fn: () => {
+                { id: 'shape', tier: 'singleVisual', fn: () => {
                     const s = randomItem(SHAPES);
                     return { txt: `致命条件：形状为【${s.name}】。目标：按下其它安全键。`, check: (b) => b.shape.id === s.id };
                 }},
-                { maxLvl: 4, fn: () => {
+                { id: 'number-parity', tier: 'singleNumber', fn: () => {
                     const isEven = randomValue() > 0.5;
                     return { 
                         txt: `致命条件：数字为【${isEven ? '偶数' : '奇数'}】。目标：按下其它安全键。`,
@@ -580,8 +722,7 @@
                     };
                 }},
                 
-                // Level 3-6: AND combinations
-                { minLvl: 3, maxLvl: 7, fn: () => {
+                { id: 'color-shape-and', tier: 'compoundAnd', fn: () => {
                     const c = randomItem(COLORS);
                     const s = randomItem(SHAPES);
                     return { 
@@ -589,17 +730,15 @@
                         check: (b) => b.color.id === c.id && b.shape.id === s.id 
                     };
                 }},
-                { minLvl: 4, maxLvl: 8, fn: () => {
-                    const c = randomItem(COLORS);
-                    const num = randomInt(1, 9);
+                { id: 'color-number-exact', tier: 'compoundExact', fn: () => {
+                    const sample = randomItem(buttons);
                     return { 
-                        txt: `致命条件：数字为【${num}】，且颜色为【${c.name}】。`,
-                        check: (b) => b.color.id === c.id && b.number === num 
+                        txt: `致命条件：数字为【${sample.number}】，且颜色为【${sample.color.name}】。`,
+                        check: (b) => b.color.id === sample.color.id && b.number === sample.number
                     };
                 }},
 
-                // Level 6+: NOT relations and complex logic
-                { minLvl: 6, fn: () => {
+                { id: 'not-color-shape', tier: 'not', fn: () => {
                     const c = randomItem(COLORS);
                     const s = randomItem(SHAPES);
                     return { 
@@ -607,7 +746,7 @@
                         check: (b) => b.color.id !== c.id && b.shape.id === s.id 
                     };
                 }},
-                { minLvl: 8, fn: () => {
+                { id: 'two-colors-or', tier: 'orColor', fn: () => {
                     const c1 = randomItem(COLORS);
                     let c2 = randomItem(COLORS);
                     while(c2.id === c1.id) c2 = randomItem(COLORS);
@@ -616,7 +755,7 @@
                         check: (b) => b.color.id === c1.id || b.color.id === c2.id 
                     };
                 }},
-                { minLvl: 10, fn: () => {
+                { id: 'color-or-parity', tier: 'orMixed', fn: () => {
                     const isEven = randomValue() > 0.5;
                     const c = randomItem(COLORS);
                     return { 
@@ -627,23 +766,25 @@
             ];
 
             // Filter available templates for current level
-            const availableTemplates = templates.filter(t => 
-                (t.minLvl === undefined || level >= t.minLvl) && 
-                (t.maxLvl === undefined || level <= t.maxLvl)
-            );
+            const availableTemplates = templates.filter(t => difficulty.ruleTiers.includes(t.tier));
 
-            // Loop until we find a rule that targets exactly 1 to 3 buttons
+            // Loop until we find a rule that fits the current difficulty band.
             while (attempts < maxAttempts) {
                 const tmpl = randomItem(availableTemplates);
                 const rule = tmpl.fn();
                 targets = buttons.filter(b => rule.check(b));
 
-                // We want 1 to 4 forbidden buttons. Too many makes it impossible to click safes in time.
-                // At higher levels, allow up to 4 targets (5 safes to click).
-                let maxTargets = level > 5 ? 4 : 3;
-
-                if (targets.length >= 1 && targets.length <= maxTargets) {
-                    return { text: rule.txt, targetIds: targets.map(t => t.id) };
+                if (
+                    targets.length >= difficulty.fatalMin &&
+                    targets.length <= difficulty.fatalMax &&
+                    rule.txt.length <= difficulty.maxClueChars
+                ) {
+                    return {
+                        text: rule.txt,
+                        targetIds: targets.map(t => t.id),
+                        ruleTier: tmpl.tier,
+                        ruleId: tmpl.id
+                    };
                 }
                 attempts++;
             }
@@ -657,19 +798,18 @@
             );
             return {
                 text: `备用判定：颜色为【${fallbackTarget.color.name}】，形状为【${fallbackTarget.shape.name}】，且数字为【${fallbackTarget.number}】。`,
-                targetIds: fallbackTargets.map(t => t.id)
+                targetIds: fallbackTargets.map(t => t.id),
+                ruleTier: 'fallback',
+                ruleId: 'exact-button'
             };
         }
 
-        function generateLevelData() {
-            // Generate 9 random buttons
+        function generateLevelData(difficulty = getDifficultyForLevel(gameState.level)) {
+            gameState.currentDifficulty = difficulty;
             gameState.buttons = [];
-            // Ensure some variance
-            let usedNumbers = new Set();
-            for (let i = 0; i < 9; i++) {
-                let num = randomInt(1, 9);
-                if(usedNumbers.has(num) && randomValue() > 0.5) { num = randomInt(1, 9); } // slight bias to unique
-                usedNumbers.add(num);
+            const numbers = shuffledNumbers(difficulty.buttonCount);
+            for (let i = 0; i < difficulty.buttonCount; i++) {
+                const num = numbers[i];
 
                 gameState.buttons.push({
                     id: `btn-${i}`,
@@ -681,10 +821,12 @@
             }
 
             // Generate Rule based on the board
-            const ruleObj = generateRule(gameState.buttons, gameState.level);
+            const ruleObj = generateRule(gameState.buttons, gameState.level, difficulty);
             gameState.currentRuleText = ruleObj.text;
             gameState.forbiddenIds = ruleObj.targetIds;
-            gameState.safeKeysRemaining = 9 - gameState.forbiddenIds.length;
+            gameState.currentRuleTier = ruleObj.ruleTier;
+            gameState.currentRuleId = ruleObj.ruleId;
+            gameState.safeKeysRemaining = difficulty.buttonCount - gameState.forbiddenIds.length;
         }
 
         function getButtonSummary(button) {
@@ -701,10 +843,20 @@
             return {
                 level: gameState.level,
                 seed: gameState.seed,
-                gridSize: '3x3',
+                difficultyId: gameState.currentDifficulty.id,
+                gridSize: gameState.currentDifficulty.gridSize,
+                rows: gameState.currentDifficulty.rows,
+                cols: gameState.currentDifficulty.cols,
+                buttonCount: gameState.currentDifficulty.buttonCount,
                 fatalCount: gameState.forbiddenIds.length,
+                fatalRange: `${gameState.currentDifficulty.fatalMin}-${gameState.currentDifficulty.fatalMax}`,
                 ruleText: gameState.currentRuleText,
+                ruleTier: gameState.currentRuleTier,
+                ruleId: gameState.currentRuleId,
                 timeLimitMs: gameState.timeLimit,
+                timeRewardMs: gameState.currentDifficulty.timeRewardMs,
+                readability: gameState.currentDifficulty.readability,
+                feedbackIntensity: gameState.currentDifficulty.feedbackIntensity,
                 safeKeysRemaining: gameState.safeKeysRemaining
             };
         }
@@ -732,6 +884,11 @@
                 buttons: gameState.buttons,
                 forbiddenIds: gameState.forbiddenIds,
                 safeKeysRemaining: gameState.safeKeysRemaining,
+                currentDifficulty: gameState.currentDifficulty,
+                currentRuleTier: gameState.currentRuleTier,
+                currentRuleId: gameState.currentRuleId,
+                timeLimit: gameState.timeLimit,
+                timeLeft: gameState.timeLeft,
                 currentRuleText: gameState.currentRuleText
             };
 
@@ -741,13 +898,27 @@
 
             for (let currentLevel = 1; currentLevel <= targetLevel; currentLevel++) {
                 gameState.level = currentLevel;
-                generateLevelData();
+                const difficulty = getDifficultyForLevel(currentLevel);
+                gameState.timeLimit = difficulty.timeLimitMs;
+                gameState.timeLeft = difficulty.timeLimitMs;
+                generateLevelData(difficulty);
                 preview = {
                     level: currentLevel,
                     seed,
-                    gridSize: '3x3',
+                    difficultyId: difficulty.id,
+                    gridSize: difficulty.gridSize,
+                    rows: difficulty.rows,
+                    cols: difficulty.cols,
+                    buttonCount: difficulty.buttonCount,
                     fatalCount: gameState.forbiddenIds.length,
+                    fatalRange: `${difficulty.fatalMin}-${difficulty.fatalMax}`,
                     ruleText: gameState.currentRuleText,
+                    ruleTier: gameState.currentRuleTier,
+                    ruleId: gameState.currentRuleId,
+                    timeLimitMs: difficulty.timeLimitMs,
+                    timeRewardMs: difficulty.timeRewardMs,
+                    readability: difficulty.readability,
+                    feedbackIntensity: difficulty.feedbackIntensity,
                     forbiddenIds: [...gameState.forbiddenIds],
                     buttons: gameState.buttons.map((button) => ({
                         color: button.color.id,
@@ -763,6 +934,7 @@
 
         window.__THAT_BUTTON_DEBUG__ = {
             previewSeededLevel,
+            getDifficultyForLevel,
             getLog: () => [...gameState.debugLog],
             clearLog: () => {
                 gameState.debugLog = [];
@@ -773,6 +945,10 @@
         let typewriterTimeout;
         function renderBoard() {
             gridEl.innerHTML = '';
+            const difficulty = gameState.currentDifficulty;
+            gridEl.style.gridTemplateColumns = `repeat(${difficulty.cols}, minmax(0, 1fr))`;
+            gridEl.style.setProperty('--board-max-width', difficulty.cols <= 2 ? '340px' : '500px');
+            gridEl.dataset.gridSize = difficulty.gridSize;
             
             gameState.buttons.forEach((btn, index) => {
                 const btnEl = document.createElement('div');
@@ -784,7 +960,7 @@
                 
                 // Content: Number + Shape
                 btnEl.innerHTML = `
-                    <span class="btn-number crt-font">0${btn.number}</span>
+                    <span class="btn-number crt-font">${String(btn.number).padStart(2, '0')}</span>
                     <span class="btn-shape">${btn.shape.char}</span>
                 `;
                 
@@ -856,8 +1032,7 @@
                 gameState.safeKeysRemaining--;
                 gameState.score += 10;
                 
-                // Reward time per safe click (diminishing at higher levels)
-                let timeReward = Math.max(500, 1500 - (gameState.level * 100));
+                const timeReward = gameState.currentDifficulty.timeRewardMs;
                 gameState.timeLeft = Math.min(gameState.timeLimit, gameState.timeLeft + timeReward);
 
                 if (gameState.safeKeysRemaining <= 0) {
@@ -904,13 +1079,19 @@
             playLevelUp();
             gameState.level++;
             
-            // Adjust Difficulty
-            // Base time starts at 12s, decreases to a minimum of 4s
-            gameState.timeLimit = Math.max(4000, 12000 - (gameState.level * 600));
-            // Carry over a portion of remaining time
-            gameState.timeLeft = Math.min(gameState.timeLimit, gameState.timeLeft + (gameState.timeLimit * 0.5));
+            const nextDifficulty = getDifficultyForLevel(gameState.level);
+            gameState.currentDifficulty = nextDifficulty;
+            gameState.timeLimit = nextDifficulty.timeLimitMs;
+            gameState.timeLeft = Math.min(
+                gameState.timeLimit,
+                gameState.timeLeft + (gameState.timeLimit * nextDifficulty.carryoverRatio)
+            );
 
-            if(gameState.timeLimit < 6000) { warningText.classList.remove('hidden'); }
+            if(nextDifficulty.feedbackIntensity === 'critical') {
+                warningText.classList.remove('hidden');
+            } else {
+                warningText.classList.add('hidden');
+            }
 
             setTimeout(() => {
                 startRound();
@@ -918,7 +1099,13 @@
         }
 
         function startRound() {
-            generateLevelData();
+            const difficulty = getDifficultyForLevel(gameState.level);
+            gameState.currentDifficulty = difficulty;
+            if (!gameState.timeLimit) {
+                gameState.timeLimit = difficulty.timeLimitMs;
+                gameState.timeLeft = difficulty.timeLimitMs;
+            }
+            generateLevelData(difficulty);
             recordDebugEvent('round_start');
             renderBoard();
             gameState.lastTime = performance.now();
@@ -937,8 +1124,9 @@
             // Reset Stats
             gameState.level = 1;
             gameState.score = 0;
-            gameState.timeLimit = 15000; // Genereous start time
-            gameState.timeLeft = 15000;
+            gameState.currentDifficulty = getDifficultyForLevel(1);
+            gameState.timeLimit = gameState.currentDifficulty.timeLimitMs;
+            gameState.timeLeft = gameState.currentDifficulty.timeLimitMs;
             warningText.classList.add('hidden');
             
             startRound();

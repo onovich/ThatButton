@@ -27,7 +27,7 @@ Status: Accepted by CheckAndGoal; see [docs/phase-1-final-report.md](docs/phase-
 
 Estimated conversation rounds: 1-2
 Goal guide: [docs/phase-2-copywriting-tone-goal-guide.md](docs/phase-2-copywriting-tone-goal-guide.md)
-Status: Implemented by executor; ready for CheckAndGoal acceptance. See [docs/phase-2-final-report.md](docs/phase-2-final-report.md) and [docs/phase-2-copywriting-tone-record.md](docs/phase-2-copywriting-tone-record.md).
+Status: Accepted by CheckAndGoal; see [docs/phase-2-final-report.md](docs/phase-2-final-report.md) and [docs/phase-2-copywriting-tone-record.md](docs/phase-2-copywriting-tone-record.md).
 
 - Rewrite all visible copy into one consistent voice: urgent terminal instructions, clear failure feedback, and concise rule language. Done.
 - Remove awkward phrasing, grammatical issues, redundant warnings, and overly tangled clue sentences. Done.
@@ -37,6 +37,8 @@ Status: Implemented by executor; ready for CheckAndGoal acceptance. See [docs/ph
 ## Phase 3 - Feedback, Progression, And Retention
 
 Estimated conversation rounds: 1-3
+Goal guide: [docs/phase-3-feedback-progression-goal-guide.md](docs/phase-3-feedback-progression-goal-guide.md)
+Status: Planned after Phase 2 PASS; dispatched as the next executor goal.
 
 - Add a lightweight high-score record with `localStorage`, including best level and best score.
 - Add a post-death recap that lists the actual fatal button attributes for learning without making the next run too easy.

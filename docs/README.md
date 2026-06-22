@@ -9,3 +9,4 @@
 - [Phase 2 Copywriting And Tone Pass Goal Guide](phase-2-copywriting-tone-goal-guide.md) - goal-mode execution guide for unifying player-facing copy, removing accidental ambiguity, and preserving intended rule difficulty.
 - [Phase 2 Copywriting And Tone Record](phase-2-copywriting-tone-record.md) - visible-copy inventory, terminology guide, generated-rule wording evidence, and Phase 2 round notes.
 - [Phase 2 Final Report](phase-2-final-report.md) - completed Phase 2 summary, validation evidence, remaining risks, and readiness for CheckAndGoal acceptance.
+- [Phase 3 Feedback, Progression, And Retention Goal Guide](phase-3-feedback-progression-goal-guide.md) - goal-mode execution guide for best-run persistence, post-death recap, and lightweight retry feedback.

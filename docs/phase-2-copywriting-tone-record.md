@@ -67,3 +67,6 @@ This keeps the predicate and the player action in a stable order. The predicate 
 - Round 2 generated rule templates now share `致命条件：...。匹配者是禁止按键；按其他安全键。`
 - Round 2 failure copy now reports timeout as uncleared-panel failure and wrong click as `禁止按键`.
 - New generated clue samples stayed within existing `maxClueChars`; no difficulty band, timer, button-count, or rule unlock changes were required.
+- Round 3 structure validation now fails if generated seeded previews omit `致命条件`, `禁止按键`, or `安全键`, or if stale Phase 1/early Phase 2 copy returns to `index.html`.
+- Round 3 seeded preview evidence with seed `phase2-copy`: L1 shape, L4 fallback exact-button, L8 compound AND, L12 OR color, and L18 OR color all use the shared fatal-condition/action sentence.
+- Round 3 validation: `npm run validate` passed after adding the copy guard.

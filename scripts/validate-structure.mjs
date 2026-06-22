@@ -21,10 +21,26 @@ for (const marker of [
   'carryoverRatio',
   'window.__THAT_BUTTON_DEBUG__',
   'previewSeededLevel',
-  'getDifficultyForLevel'
+  'getDifficultyForLevel',
+  'const SAFE_ACTION_TEXT',
+  'formatFatalRule',
+  '匹配者是禁止按键；按其他安全键。',
+  '** 避开禁止按键，清空所有安全键 **',
+  '致命条件回放'
 ]) {
   if (!html.includes(marker)) {
-    failures.push(`Missing Phase 1 structure marker: ${marker}`);
+    failures.push(`Missing required structure/copy marker: ${marker}`);
+  }
+}
+
+for (const staleCopy of [
+  '目标：按下其它安全键',
+  '备用判定',
+  '你按下了那个致命键',
+  '未能及时释放压力'
+]) {
+  if (html.includes(staleCopy)) {
+    failures.push(`Stale Phase 2 copy remains: ${staleCopy}`);
   }
 }
 
@@ -124,6 +140,12 @@ if (inlineScript) {
         const [minFatal, maxFatal] = preview.fatalRange.split('-').map(Number);
         if (preview.fatalCount < minFatal || preview.fatalCount > maxFatal) {
           failures.push(`Fatal count out of range for level ${preview.level}: ${preview.fatalCount} not in ${preview.fatalRange}`);
+        }
+
+        for (const requiredCopy of ['致命条件', '禁止按键', '安全键']) {
+          if (!preview.ruleText.includes(requiredCopy)) {
+            failures.push(`Rule copy for level ${preview.level} is missing ${requiredCopy}: ${preview.ruleText}`);
+          }
         }
       });
 

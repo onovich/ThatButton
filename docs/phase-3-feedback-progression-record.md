@@ -94,3 +94,7 @@ Deferred:
 - Round 1 audited score, level-complete, failure, reset, overlay, seed/debug preview, and debug logging flows in `index.html`.
 - Round 1 confirmed `generateRule` remains the source of rule semantics and recap will consume `currentRuleText`, `forbiddenIds`, and button facts.
 - Round 1 made no runtime, difficulty, timer, reward, board-size, rule-tier, or copy-semantics changes.
+- Round 2 added `BEST_RECORD_KEY`, schema versioning, default clone/normalization, guarded `localStorage` access, JSON corruption fallback, save helpers, and run-vs-best comparison helpers.
+- Round 2 exposed best-record debug helpers for load, save, reset, inspect, and comparison validation.
+- Round 2 did not render UI or update records on failure yet; those are intentionally left for later rounds.
+- Round 2 storage smoke in a VM with fake `localStorage`: empty -> `empty`, malformed JSON -> `corrupt`, saved L5/120 -> reload `loaded`, comparisons returned `new_best`, `matched_best`, and `below_best`.

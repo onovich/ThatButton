@@ -587,7 +587,106 @@
             };
         }
 
+        const BEST_RECORD_KEY = 'thatbutton.bestRun.v1';
+        const BEST_RECORD_VERSION = 1;
+        const DEFAULT_BEST_RECORD = Object.freeze({
+            version: BEST_RECORD_VERSION,
+            bestLevel: 1,
+            bestScore: 0,
+            updatedAt: null
+        });
+
+        function cloneBestRecord(record = DEFAULT_BEST_RECORD) {
+            return {
+                version: BEST_RECORD_VERSION,
+                bestLevel: Math.max(1, Math.floor(Number(record.bestLevel) || 1)),
+                bestScore: Math.max(0, Math.floor(Number(record.bestScore) || 0)),
+                updatedAt: typeof record.updatedAt === 'string' ? record.updatedAt : null
+            };
+        }
+
+        function getBestRecordStorage() {
+            try {
+                return window.localStorage || null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function normalizeBestRecord(value) {
+            if (!value || value.version !== BEST_RECORD_VERSION) {
+                return null;
+            }
+            const bestLevel = Number(value.bestLevel);
+            const bestScore = Number(value.bestScore);
+            if (!Number.isFinite(bestLevel) || !Number.isFinite(bestScore)) {
+                return null;
+            }
+            return cloneBestRecord({
+                bestLevel,
+                bestScore,
+                updatedAt: value.updatedAt
+            });
+        }
+
+        function loadBestRecord() {
+            const storage = getBestRecordStorage();
+            if (!storage) {
+                return { record: cloneBestRecord(), status: 'unavailable' };
+            }
+            try {
+                const raw = storage.getItem(BEST_RECORD_KEY);
+                if (!raw) {
+                    return { record: cloneBestRecord(), status: 'empty' };
+                }
+                const parsed = JSON.parse(raw);
+                const normalized = normalizeBestRecord(parsed);
+                if (!normalized) {
+                    return { record: cloneBestRecord(), status: 'corrupt' };
+                }
+                return { record: normalized, status: 'loaded' };
+            } catch (error) {
+                return { record: cloneBestRecord(), status: 'corrupt' };
+            }
+        }
+
+        function saveBestRecord(record) {
+            const storage = getBestRecordStorage();
+            const normalized = cloneBestRecord(record);
+            if (!storage) {
+                return { record: normalized, status: 'unavailable' };
+            }
+            try {
+                storage.setItem(BEST_RECORD_KEY, JSON.stringify(normalized));
+                return { record: normalized, status: 'saved' };
+            } catch (error) {
+                return { record: normalized, status: 'unavailable' };
+            }
+        }
+
+        function compareRunToBest(runLevel, runScore, bestRecord) {
+            const level = Math.max(1, Math.floor(Number(runLevel) || 1));
+            const score = Math.max(0, Math.floor(Number(runScore) || 0));
+            const best = cloneBestRecord(bestRecord);
+            if (level > best.bestLevel || (level === best.bestLevel && score > best.bestScore)) {
+                return 'new_best';
+            }
+            if (level === best.bestLevel && score === best.bestScore) {
+                return 'matched_best';
+            }
+            return 'below_best';
+        }
+
+        function buildBestRecordFromRun(runLevel, runScore, timestamp = new Date().toISOString()) {
+            return cloneBestRecord({
+                bestLevel: runLevel,
+                bestScore: runScore,
+                updatedAt: timestamp
+            });
+        }
+
         // Game State Variables
+        const loadedBestRecord = loadBestRecord();
         let gameState = {
             level: 1,
             score: 0,
@@ -606,7 +705,10 @@
             timeLeft: 12000,
             lastTime: 0,
             animationFrame: null,
-            currentRuleText: ""
+            currentRuleText: "",
+            bestRecord: loadedBestRecord.record,
+            bestRecordStatus: loadedBestRecord.status,
+            lastRunComparison: null
         };
 
         // DOM Elements
@@ -937,6 +1039,43 @@
         window.__THAT_BUTTON_DEBUG__ = {
             previewSeededLevel,
             getDifficultyForLevel,
+            getBestRecord: () => ({
+                record: cloneBestRecord(gameState.bestRecord),
+                status: gameState.bestRecordStatus,
+                key: BEST_RECORD_KEY,
+                version: BEST_RECORD_VERSION
+            }),
+            loadBestRecord: () => {
+                const loaded = loadBestRecord();
+                gameState.bestRecord = loaded.record;
+                gameState.bestRecordStatus = loaded.status;
+                return {
+                    record: cloneBestRecord(gameState.bestRecord),
+                    status: gameState.bestRecordStatus
+                };
+            },
+            saveBestRecord: (level, score) => {
+                const saved = saveBestRecord(buildBestRecordFromRun(level, score));
+                gameState.bestRecord = saved.record;
+                gameState.bestRecordStatus = saved.status;
+                return {
+                    record: cloneBestRecord(gameState.bestRecord),
+                    status: gameState.bestRecordStatus
+                };
+            },
+            resetBestRecord: () => {
+                const storage = getBestRecordStorage();
+                if (storage) {
+                    storage.removeItem(BEST_RECORD_KEY);
+                }
+                gameState.bestRecord = cloneBestRecord();
+                gameState.bestRecordStatus = storage ? 'empty' : 'unavailable';
+                return {
+                    record: cloneBestRecord(gameState.bestRecord),
+                    status: gameState.bestRecordStatus
+                };
+            },
+            compareRunToBest,
             getLog: () => [...gameState.debugLog],
             clearLog: () => {
                 gameState.debugLog = [];

@@ -20,6 +20,10 @@ npm run dev
 
 `npm run validate` checks the static entry and inline script syntax; `npm run build` copies the deployable site into `dist/`; `npm run dev` serves the root folder with the local Node server.<br/>**`npm run validate` 会检查静态入口和内联脚本语法；`npm run build` 会把可部署站点复制到 `dist/`；`npm run dev` 会用本地 Node 服务器托管根目录。**
 
+## Playtest Baseline
+
+Phase 0 test criteria and evidence live in [`docs/phase-0-playtest-record.md`](docs/phase-0-playtest-record.md). Add `?seed=<label>` to a local or Pages URL to reproduce a generated run sequence; add `?debug=1` to log structured round and failure events for design review.<br/>**Phase 0 的测试标准与证据记录位于 [`docs/phase-0-playtest-record.md`](docs/phase-0-playtest-record.md)。在本地或 Pages 地址后添加 `?seed=<label>` 可以复现生成序列；添加 `?debug=1` 可为设计复盘输出结构化轮次和失败事件。**
+
 ## Deployment
 
 GitHub Pages deployment is configured with `.github/workflows/deploy.yml` and publishes the generated `dist/` folder from the `main` branch.<br/>**项目已通过 `.github/workflows/deploy.yml` 配置 GitHub Pages 部署，从 `main` 分支生成并发布 `dist/` 目录。**

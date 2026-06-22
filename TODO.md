@@ -4,6 +4,7 @@
 
 Estimated conversation rounds: 1-2
 Goal guide: [docs/phase-0-baseline-playtest-goal-guide.md](docs/phase-0-baseline-playtest-goal-guide.md)
+Status: Baseline implementation completed on 2026-06-23; see [docs/phase-0-final-report.md](docs/phase-0-final-report.md) and [docs/phase-0-playtest-record.md](docs/phase-0-playtest-record.md).
 
 - Run a real-device pass on iOS Safari and Android Chrome, focusing on first tap audio unlock, button hit accuracy, safe-area spacing, and whether the no-scroll game layout still fits short screens.
 - Record where players usually fail, how many levels they willingly retry, and which clues make them ask whether they should press or avoid the described buttons.

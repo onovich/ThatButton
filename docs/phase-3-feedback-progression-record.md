@@ -105,3 +105,7 @@ Deferred:
 - Round 4 stores `lastFailureRecap` and includes `failureRecap` in failure debug events for both wrong-click and timeout paths.
 - Round 4 added `previewFailureRecap(seed, level, reason)` and `getLastFailureRecap()` debug helpers.
 - Round 4 VM smoke with seed `phase3-recap`, level 8: wrong-click recap included pressed forbidden button `紫色 三角形 03`; timeout recap had `pressedButton: null`; both listed the same fatal condition, forbidden button, safe remaining count, and best comparison.
+- Round 5 rendered a compact failure-overlay recap with `致命条件回放`, actual `禁止按键`, wrong-click/timeout reason, safe-key progress, level, score, and difficulty band.
+- Round 5 simplified wrong-click death copy so the full rule is not duplicated outside the recap.
+- Round 5 added mobile-safe recap sizing with scroll inside the recap block on short screens.
+- Round 5 fake-DOM render smoke confirmed wrong-click recap includes `错按` and a forbidden-button label, while timeout recap includes `失败原因：倒计时归零` and `安全键进度`.

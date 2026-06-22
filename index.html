@@ -268,6 +268,34 @@
             background: var(--crt-red); color: #fff; box-shadow: 0 0 20px rgba(255, 42, 42, 0.6);
         }
 
+        .failure-recap {
+            width: 100%;
+            max-width: 360px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(74, 246, 38, 0.35);
+            border-radius: 4px;
+            background: rgba(0, 20, 0, 0.55);
+            padding: 0.75rem;
+            text-align: left;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+        }
+
+        .failure-recap-title {
+            color: var(--crt-yellow);
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+        }
+
+        .failure-recap-row {
+            margin-top: 0.25rem;
+        }
+
+        .failure-recap-list {
+            margin: 0.25rem 0 0;
+            padding-left: 1rem;
+        }
+
         /* Utility Color Classes for Buttons */
         .color-red { background: linear-gradient(145deg, #ff4d4d, #cc0000); color: #fff; }
         .color-blue { background: linear-gradient(145deg, #4da6ff, #0066cc); color: #fff; }
@@ -366,6 +394,19 @@
             .btn-ui {
                 width: 100%;
                 margin-top: 0.75rem;
+            }
+
+            .failure-title {
+                font-size: 2.75rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .failure-recap {
+                max-height: 42dvh;
+                overflow-y: auto;
+                font-size: 0.78rem;
+                padding: 0.65rem;
+                margin-bottom: 0.65rem;
             }
         }
 
@@ -469,12 +510,13 @@
 
         <!-- Game Over Screen Overlay -->
         <div id="game-over-screen" class="overlay hidden">
-            <h1 class="text-6xl font-black mb-4 text-red-500 crt-font blink">SYSTEM FAILURE</h1>
+            <h1 class="failure-title text-6xl font-black mb-4 text-red-500 crt-font blink">SYSTEM FAILURE</h1>
             <p class="text-2xl mb-2 text-white">核心已熔毁</p>
             <p class="text-lg mb-8 text-yellow-400">最终存活轮数: <span id="final-level" class="font-bold text-2xl">0</span></p>
-            <p id="death-reason" class="text-sm opacity-80 mb-8 max-w-xs text-center leading-relaxed">
+            <p id="death-reason" class="text-sm opacity-80 mb-4 max-w-xs text-center leading-relaxed">
                 已触发禁止按键。
             </p>
+            <div id="failure-recap" class="failure-recap text-xs crt-font"></div>
             <button class="btn-ui btn-ui-red" onclick="resetGame()">重新进入面板</button>
         </div>
     </div>
@@ -759,6 +801,7 @@
         const bestLevelDisplay = document.getElementById('best-level-display');
         const bestScoreDisplay = document.getElementById('best-score-display');
         const bestStatusNote = document.getElementById('best-status-note');
+        const failureRecapEl = document.getElementById('failure-recap');
         
         // Audio Synthesizer (No external assets)
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1026,6 +1069,41 @@
                 bestBefore: cloneBestRecord(gameState.bestRecord),
                 bestComparison: comparison
             };
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function renderFailureRecap(recap) {
+            if (!recap) {
+                failureRecapEl.innerHTML = '';
+                return;
+            }
+            const forbiddenItems = recap.forbiddenButtons
+                .slice(0, 4)
+                .map((button) => `<li>${escapeHtml(button.label)}</li>`)
+                .join('');
+            const hiddenCount = Math.max(0, recap.forbiddenButtons.length - 4);
+            const extraLine = hiddenCount > 0 ? `<li>另有 ${hiddenCount} 个禁止按键</li>` : '';
+            const pressedLine = recap.failureReason === 'wrong_click' && recap.pressedButton
+                ? `<div class="failure-recap-row">错按：${escapeHtml(recap.pressedButton.label)}</div>`
+                : '<div class="failure-recap-row">失败原因：倒计时归零</div>';
+
+            failureRecapEl.innerHTML = `
+                <div class="failure-recap-title">致命条件回放</div>
+                <div class="failure-recap-row">${escapeHtml(recap.ruleText)}</div>
+                ${pressedLine}
+                <div class="failure-recap-row">禁止按键：</div>
+                <ul class="failure-recap-list">${forbiddenItems}${extraLine}</ul>
+                <div class="failure-recap-row">安全键进度：已清 ${recap.safeCleared}/${recap.safeTotal}，剩余 ${recap.safeRemaining}</div>
+                <div class="failure-recap-row">本轮：L${recap.level} / ${recap.score} 分 / ${escapeHtml(recap.difficultyId)}</div>
+            `;
         }
 
         function getRoundSnapshot() {
@@ -1361,9 +1439,10 @@
                 if (isTimeout) {
                     reasonEl.innerHTML = "倒计时归零。<br>面板未清空，反应堆越过临界线。";
                 } else {
-                    reasonEl.innerHTML = `你按下了禁止按键。<br><span class="text-xs text-green-400 mt-2 block">致命条件回放: ${gameState.currentRuleText}</span>`;
+                    reasonEl.innerHTML = "你按下了禁止按键。";
                 }
 
+                renderFailureRecap(failureRecap);
                 document.getElementById('game-over-screen').classList.remove('hidden');
             }, 800);
         }
@@ -1412,6 +1491,7 @@
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-over-screen').classList.add('hidden');
             document.body.classList.remove('shake-intense');
+            renderFailureRecap(null);
             syncBestRecordFromStorage();
             resetRandomSource();
             gameState.debug = getDebugFromUrl();

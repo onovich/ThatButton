@@ -1,4 +1,6 @@
 import { getDifficultyForLevel } from '../config/difficulty.js';
+import { createCombatState } from './combat.js';
+import { createComboState } from './combo.js';
 
 export function createInitialState({ bestRecord, bestRecordStatus, rng }) {
   return {
@@ -23,6 +25,11 @@ export function createInitialState({ bestRecord, bestRecordStatus, rng }) {
     bestRecord,
     bestRecordStatus,
     lastRunComparison: null,
-    lastFailureRecap: null
+    combat: createCombatState(),
+    combo: createComboState(),
+    lastCombatResult: null,
+    lastFailureRecap: null,
+    lastVictoryRecap: null,
+    lastRunResultRecap: null
   };
 }

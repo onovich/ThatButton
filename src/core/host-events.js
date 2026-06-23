@@ -9,6 +9,10 @@ export const HOST_EVENT_TYPES = Object.freeze({
   SAFE_BUTTON_CLEARED: 'safe_button_cleared',
   SCORE_CHANGED: 'score_changed',
   ROUND_CLEARED: 'round_cleared',
+  COMBAT_STARTED: 'combat_started',
+  COMBO_CHANGED: 'combo_changed',
+  BOSS_DAMAGED: 'boss_damaged',
+  BOSS_DEFEATED: 'boss_defeated',
   RUN_FINISHED: 'run_finished',
   BEST_RECORD_CHANGED: 'best_record_changed'
 });
@@ -121,7 +125,9 @@ export function createRoundPayload({
   forbiddenIds,
   safeKeysRemaining,
   timeLimit,
-  timeLeft
+  timeLeft,
+  combat = null,
+  combo = null
 }) {
   return cloneJsonSafeValue({
     level,
@@ -142,6 +148,8 @@ export function createRoundPayload({
     timeLeftMs: Math.max(0, Math.round(Number(timeLeft) || 0)),
     timeRewardMs: difficulty.timeRewardMs,
     safeKeysRemaining,
+    combat,
+    combo,
     buttons: buttons.map(createButtonPayload)
   }, 'round payload');
 }
@@ -165,9 +173,45 @@ export function createButtonPressPayload({ buttonId, result, button = null, roun
 }
 
 export function createFailurePayload({ failureReason, recap, round = null }) {
-  return cloneJsonSafeValue({
-    failureReason,
+  return createRunResultPayload({
+    result: 'failure',
+    reason: failureReason,
     recap,
     round
-  }, 'failure payload');
+  });
+}
+
+export function createCombatPayload(combat = null) {
+  return cloneJsonSafeValue(combat, 'combat payload');
+}
+
+export function createComboPayload(combo = null) {
+  return cloneJsonSafeValue(combo, 'combo payload');
+}
+
+export function createBossDamagePayload({ damage, combat, combo, round = null }) {
+  return cloneJsonSafeValue({
+    damage,
+    combat,
+    combo,
+    round
+  }, 'boss damage payload');
+}
+
+export function createRunResultPayload({
+  result,
+  reason = null,
+  recap,
+  round = null,
+  combat = null,
+  combo = null
+}) {
+  return cloneJsonSafeValue({
+    result,
+    reason,
+    recap,
+    round,
+    combat,
+    combo
+  }, 'run result payload');
 }

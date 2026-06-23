@@ -23,16 +23,19 @@ const moduleFiles = [
   'src/core/app-state.js',
   'src/core/combat.js',
   'src/core/combo.js',
+  'src/core/encounter.js',
   'src/core/rng.js',
   'src/core/rules.js',
   'src/core/level.js',
   'src/core/storage.js',
   'src/core/recap.js',
+  'src/core/run-recaps.js',
   'src/core/debug.js',
   'src/core/host-events.js',
   'src/host/app-host-api.js',
   'src/host/browser-host-bridge.js',
   'src/host/browser-storage.js',
+  'src/app/create-app.js',
   'src/ui/audio.js',
   'src/ui/render.js',
   'src/main.js'
@@ -83,11 +86,13 @@ const coreBoundaryFiles = [
   'src/core/app-state.js',
   'src/core/combat.js',
   'src/core/combo.js',
+  'src/core/encounter.js',
   'src/core/rng.js',
   'src/core/rules.js',
   'src/core/level.js',
   'src/core/storage.js',
   'src/core/recap.js',
+  'src/core/run-recaps.js',
   'src/core/debug.js',
   'src/core/host-events.js'
 ];
@@ -230,8 +235,12 @@ const {
   HOST_EVENT_TYPES,
   createHostEvent,
   cloneHostEvent,
+  createBossDamagePayload,
   createButtonPayload,
+  createCombatPayload,
+  createComboPayload,
   createRoundPayload,
+  createRunResultPayload,
   isJsonSafeValue
 } = hostEventsModule;
 const {
@@ -558,6 +567,27 @@ const hostButtonPayload = createButtonPayload({
 if (hostButtonPayload.label !== '黄色 正方形 01' || 'css' in hostButtonPayload.color) {
   failures.push(`Host button payload leaked presentation fields or lost its label: ${JSON.stringify(hostButtonPayload)}`);
 }
+const combatPayload = createCombatPayload(getCombatSummary(firstCombatHit.combat));
+const comboPayload = createComboPayload(createComboState({ streak: 3 }));
+const bossDamagePayload = createBossDamagePayload({
+  damage: firstCombatHit.damage,
+  combat: combatPayload,
+  combo: comboPayload,
+  round: hostRoundPayload
+});
+if (!isJsonSafeValue(bossDamagePayload) || bossDamagePayload.damage.appliedDamage !== 24 || bossDamagePayload.combo.multiplierLabel !== 'x1.1') {
+  failures.push(`Boss damage payload smoke failed: ${JSON.stringify(bossDamagePayload)}`);
+}
+const victoryPayload = createRunResultPayload({
+  result: 'victory',
+  reason: 'boss_defeated',
+  recap: { result: 'victory', ok: true },
+  combat: combatPayload,
+  combo: comboPayload
+});
+if (!isJsonSafeValue(victoryPayload) || victoryPayload.result !== 'victory' || victoryPayload.reason !== 'boss_defeated') {
+  failures.push(`Run victory payload smoke failed: ${JSON.stringify(victoryPayload)}`);
+}
 
 const noopBridge = createNoopHostBridge();
 const noopResult = noopBridge.emit(hostEvent);
@@ -730,6 +760,11 @@ const requiredDebugHelpers = [
   'previewFailureRecap',
   'getDifficultyForLevel',
   'getLastFailureRecap',
+  'getLastVictoryRecap',
+  'getLastRunResultRecap',
+  'previewCombatRoundClear',
+  'getCombatState',
+  'getComboState',
   'getBestRecord',
   'loadBestRecord',
   'saveBestRecord',
@@ -772,6 +807,9 @@ const safePress = hostSmokeApp.press('btn-0');
 if (!safePress.accepted || safePress.result !== 'safe' || hostSmokeApp.getSnapshot().run.score !== 10) {
   failures.push(`Host safe press did not reuse gameplay scoring: ${JSON.stringify(safePress)}`);
 }
+if (hostSmokeApp.getSnapshot().combo.streak !== 1) {
+  failures.push(`Host safe press did not update combo state: ${JSON.stringify(hostSmokeApp.getSnapshot().combo)}`);
+}
 const repeatPress = hostSmokeApp.press('btn-0');
 if (repeatPress.accepted || repeatPress.reason !== 'already_pressed') {
   failures.push(`Host repeat press should be rejected by shared input state: ${JSON.stringify(repeatPress)}`);
@@ -784,10 +822,12 @@ const hostEventTypes = hostSmokeBridge.getEvents().map((event) => event.type);
 for (const requiredType of [
   HOST_EVENT_TYPES.HOST_BRIDGE_READY,
   HOST_EVENT_TYPES.RUN_STARTED,
+  HOST_EVENT_TYPES.COMBAT_STARTED,
   HOST_EVENT_TYPES.ROUND_STARTED,
   HOST_EVENT_TYPES.BUTTON_PRESSED,
   HOST_EVENT_TYPES.SAFE_BUTTON_CLEARED,
   HOST_EVENT_TYPES.SCORE_CHANGED,
+  HOST_EVENT_TYPES.COMBO_CHANGED,
   HOST_EVENT_TYPES.RUN_FINISHED,
   HOST_EVENT_TYPES.BEST_RECORD_CHANGED
 ]) {
@@ -803,6 +843,56 @@ if (!isJsonSafeValue(hostSmokeBridge.getEvents())) {
   failures.push('Captured host event sequence is not JSON-safe.');
 }
 
+const victoryBridge = createCaptureHostBridge();
+const victoryWindow = {
+  location: { search: '?seed=phase3a-baseline' },
+  AudioContext: FakeAudioContext,
+  webkitAudioContext: FakeAudioContext,
+  localStorage: fakeStorage()
+};
+const victoryApp = mainModule.createApp({
+  window: victoryWindow,
+  document: fakeDocument,
+  performance: { now: () => 3000 },
+  requestAnimationFrame: () => 0,
+  setTimeout: (callback) => {
+    if (typeof callback === 'function') callback();
+    return 0;
+  },
+  clearTimeout: () => {},
+  random: () => 0.5,
+  hostBridge: victoryBridge
+});
+victoryApp.init();
+victoryApp.start();
+for (let guard = 0; guard < 12 && victoryApp.getSnapshot().status === 'playing'; guard++) {
+  const state = victoryApp.getState();
+  const safeIds = state.buttons
+    .filter((button) => !state.forbiddenIds.includes(button.id) && !button.isClicked)
+    .map((button) => button.id);
+  safeIds.forEach((buttonId) => victoryApp.press(buttonId));
+}
+const victorySnapshot = victoryApp.getSnapshot();
+if (victorySnapshot.status !== 'finished' || victorySnapshot.lastVictoryRecap?.result !== 'victory' || victorySnapshot.combat.status !== 'defeated') {
+  failures.push(`Fixed-seed boss defeat path failed: ${JSON.stringify(victorySnapshot)}`);
+}
+const victoryEventTypes = victoryBridge.getEvents().map((event) => event.type);
+for (const requiredType of [
+  HOST_EVENT_TYPES.BOSS_DAMAGED,
+  HOST_EVENT_TYPES.BOSS_DEFEATED,
+  HOST_EVENT_TYPES.RUN_FINISHED
+]) {
+  if (!victoryEventTypes.includes(requiredType)) {
+    failures.push(`Victory host event smoke missed ${requiredType}: ${JSON.stringify(victoryEventTypes)}`);
+  }
+}
+const victoryFinishedEvent = victoryBridge.getEvents().find((event) =>
+  event.type === HOST_EVENT_TYPES.RUN_FINISHED && event.payload.result === 'victory'
+);
+if (victoryFinishedEvent?.payload?.reason !== 'boss_defeated') {
+  failures.push(`Victory run_finished event lost result facts: ${JSON.stringify(victoryFinishedEvent)}`);
+}
+
 if (debugApi) {
   assertEqual(
     'Debug API level 18 preview',
@@ -812,6 +902,10 @@ if (debugApi) {
   const debugWrongRecap = debugApi.previewFailureRecap(baselineSeed, 8, 'wrong_click');
   if (debugWrongRecap.pressedButton?.label !== '蓝色 三角形 06') {
     failures.push(`Debug API wrong-click recap changed: ${JSON.stringify(debugWrongRecap)}`);
+  }
+  const debugCombatPreview = debugApi.previewCombatRoundClear({ timeLeftMs: 18000, streak: 3 });
+  if (debugCombatPreview.damage.appliedDamage !== 24 || debugCombatPreview.combo.multiplierLabel !== 'x1.1') {
+    failures.push(`Debug API combat preview changed: ${JSON.stringify(debugCombatPreview)}`);
   }
 
   const debugInitial = debugApi.getBestRecord();

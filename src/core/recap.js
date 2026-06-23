@@ -34,7 +34,10 @@ export function buildFailureRecap({
   forbiddenIds,
   buttons,
   safeKeysRemaining,
-  bestRecord
+  bestRecord,
+  combat = null,
+  combo = null,
+  lastDamage = null
 }) {
   const forbiddenButtons = getForbiddenButtonRecaps(buttons, forbiddenIds);
   const safeTotal = Math.max(0, difficulty.buttonCount - forbiddenButtons.length);
@@ -42,6 +45,7 @@ export function buildFailureRecap({
   const safeCleared = Math.max(0, safeTotal - safeRemaining);
   const comparison = compareRunToBest(level, score, bestRecord);
   return {
+    result: 'failure',
     failureReason,
     level,
     score,
@@ -57,7 +61,37 @@ export function buildFailureRecap({
     bestBefore: cloneBestRecord(bestRecord),
     bestAfter: cloneBestRecord(bestRecord),
     bestComparison: comparison,
-    bestSaveStatus: 'not_saved'
+    bestSaveStatus: 'not_saved',
+    combat,
+    combo,
+    lastDamage
+  };
+}
+
+export function buildVictoryRecap({
+  level,
+  score,
+  difficulty,
+  bestRecord,
+  combat,
+  combo,
+  lastDamage
+}) {
+  const comparison = compareRunToBest(level, score, bestRecord);
+  return {
+    result: 'victory',
+    failureReason: null,
+    level,
+    score,
+    difficultyId: difficulty.id,
+    gridSize: difficulty.gridSize,
+    bestBefore: cloneBestRecord(bestRecord),
+    bestAfter: cloneBestRecord(bestRecord),
+    bestComparison: comparison,
+    bestSaveStatus: 'not_saved',
+    combat,
+    combo,
+    lastDamage
   };
 }
 

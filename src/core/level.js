@@ -49,7 +49,9 @@ export function getRoundSnapshot({
   ruleTier,
   ruleId,
   timeLimit,
-  safeKeysRemaining
+  safeKeysRemaining,
+  combat = null,
+  combo = null
 }) {
   return {
     level,
@@ -68,6 +70,8 @@ export function getRoundSnapshot({
     timeRewardMs: difficulty.timeRewardMs,
     readability: difficulty.readability,
     feedbackIntensity: difficulty.feedbackIntensity,
-    safeKeysRemaining
+    safeKeysRemaining,
+    combat,
+    combo
   };
 }

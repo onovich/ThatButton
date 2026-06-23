@@ -1,4 +1,6 @@
 import { getDifficultyForLevel } from '../config/difficulty.js';
+import { applyRoundClearDamage, createCombatState, getCombatSummary } from './combat.js';
+import { createComboState, getComboSummary } from './combo.js';
 import { generateLevelData } from './level.js';
 import { createSeededRng } from './rng.js';
 import {
@@ -80,10 +82,25 @@ export function previewFailureRecap(seed, level = 1, failureReason = 'wrong_clic
 export function cloneFailureRecap(recap) {
   return recap ? {
     ...recap,
-    forbiddenButtons: [...recap.forbiddenButtons],
+    forbiddenButtons: recap.forbiddenButtons ? [...recap.forbiddenButtons] : [],
     bestBefore: cloneBestRecord(recap.bestBefore),
     bestAfter: cloneBestRecord(recap.bestAfter)
   } : null;
+}
+
+export function previewCombatRoundClear({ level = 1, timeLeftMs = 18000, streak = 3 } = {}) {
+  const combo = createComboState({ streak });
+  const combatResult = applyRoundClearDamage(createCombatState(), {
+    level,
+    timeLeftMs,
+    comboState: combo
+  });
+  return {
+    combat: getCombatSummary(combatResult.combat),
+    combo: getComboSummary(combo),
+    damage: combatResult.damage,
+    defeated: combatResult.defeated
+  };
 }
 
 export function createDebugApi({
@@ -105,8 +122,13 @@ export function createDebugApi({
         bestRecord: state.bestRecord
       });
     },
+    previewCombatRoundClear,
     getDifficultyForLevel,
     getLastFailureRecap: () => cloneFailureRecap(getState().lastFailureRecap),
+    getLastVictoryRecap: () => cloneFailureRecap(getState().lastVictoryRecap),
+    getLastRunResultRecap: () => cloneFailureRecap(getState().lastRunResultRecap),
+    getCombatState: () => getCombatSummary(getState().combat),
+    getComboState: () => getComboSummary(getState().combo),
     getBestRecord: () => {
       const state = getState();
       return {

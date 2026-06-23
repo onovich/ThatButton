@@ -8,6 +8,9 @@ function escapeHtml(value) {
 }
 
 function getFailureResultText(recap) {
+  if (recap.result === 'victory') {
+    return `VICTORY: L${recap.level} / ${recap.score} pts`;
+  }
   if (recap.bestComparison === 'new_best') {
     return `NEW BEST：L${recap.bestAfter.bestLevel} / ${recap.bestAfter.bestScore} 分`;
   }
@@ -15,6 +18,22 @@ function getFailureResultText(recap) {
     return `MATCHED BEST：L${recap.bestBefore.bestLevel} / ${recap.bestBefore.bestScore} 分`;
   }
   return `BEST：L${recap.bestBefore.bestLevel} / ${recap.bestBefore.bestScore} 分`;
+}
+
+function getCombatRecapRows(recap) {
+  if (!recap.combat && !recap.combo && !recap.lastDamage) {
+    return '';
+  }
+  const combatLine = recap.combat
+    ? `<div class="failure-recap-row">BOSS: ${escapeHtml(recap.combat.bossName)} ${recap.combat.hp}/${recap.combat.maxHp}</div>`
+    : '';
+  const damageLine = recap.lastDamage
+    ? `<div class="failure-recap-row">DAMAGE: ${recap.lastDamage.appliedDamage} (${recap.lastDamage.baseDamage}+${recap.lastDamage.timeBonus}+${recap.lastDamage.comboBonus})</div>`
+    : '';
+  const comboLine = recap.combo
+    ? `<div class="failure-recap-row">COMBO: ${recap.combo.streak} ${escapeHtml(recap.combo.multiplierLabel)} / +${recap.combo.damageBonus}</div>`
+    : '';
+  return `${combatLine}${damageLine}${comboLine}`;
 }
 
 export function createRenderer({ document, timers = {}, random = Math.random, audio }) {
@@ -34,7 +53,9 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     startScreen: document.getElementById('start-screen'),
     gameOverScreen: document.getElementById('game-over-screen'),
     finalLevel: document.getElementById('final-level'),
-    deathReason: document.getElementById('death-reason')
+    deathReason: document.getElementById('death-reason'),
+    resultTitle: document.getElementById('result-title'),
+    resultSubtitle: document.getElementById('result-subtitle')
   };
   let typewriterTimeout = null;
 
@@ -43,7 +64,17 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       refs.failureRecapEl.innerHTML = '';
       return;
     }
-    const forbiddenItems = recap.forbiddenButtons
+    if (recap.result === 'victory') {
+      refs.failureRecapEl.innerHTML = `
+                <div class="failure-result">${escapeHtml(getFailureResultText(recap))}</div>
+                <div class="failure-recap-title">Encounter result</div>
+                ${getCombatRecapRows(recap)}
+                <div class="failure-recap-row">Best status: ${escapeHtml(recap.bestComparison)}</div>
+            `;
+      return;
+    }
+
+    const forbiddenItems = (recap.forbiddenButtons || [])
       .slice(0, 4)
       .map((button) => `<li>${escapeHtml(button.label)}</li>`)
       .join('');
@@ -62,6 +93,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
                 <ul class="failure-recap-list">${forbiddenItems}${extraLine}</ul>
                 <div class="failure-recap-row">安全键进度：已清 ${recap.safeCleared}/${recap.safeTotal}，剩余 ${recap.safeRemaining}</div>
                 <div class="failure-recap-row">本轮：L${recap.level} / ${recap.score} 分 / ${escapeHtml(recap.difficultyId)}</div>
+                ${getCombatRecapRows(recap)}
             `;
   }
 
@@ -147,11 +179,18 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     refs.gameOverScreen.classList.add('hidden');
   }
 
-  function showGameOverScreen({ level, isTimeout, recap }) {
+  function showGameOverScreen({ level, isTimeout, recap, isVictory = false }) {
     refs.finalLevel.innerText = level;
-    refs.deathReason.innerHTML = isTimeout
-      ? '倒计时归零。<br>面板未清空，反应堆越过临界线。'
-      : '你按下了禁止按键。';
+    refs.resultTitle.innerText = isVictory ? 'ENCOUNTER CLEAR' : 'SYSTEM FAILURE';
+    refs.resultTitle.className = isVictory
+      ? 'failure-title text-5xl font-black mb-4 text-green-400 crt-font'
+      : 'failure-title text-6xl font-black mb-4 text-red-500 crt-font blink';
+    refs.resultSubtitle.innerText = isVictory ? 'Boss core collapsed' : '核心已熔毁';
+    refs.deathReason.innerHTML = isVictory
+      ? 'REACTOR WARDEN offline.<br>安全键链路保持完整。'
+      : (isTimeout
+        ? '倒计时归零。<br>面板未清空，反应堆越过临界线。'
+        : '你按下了禁止按键。');
     renderFailureRecap(recap);
     refs.gameOverScreen.classList.remove('hidden');
   }

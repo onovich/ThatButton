@@ -167,3 +167,46 @@ Round 2 architecture self-check:
 - UI and host adapters are unchanged and still do not own formula decisions.
 - `main.js` is unchanged in this round.
 - No deferred boss roster, roguelite, moving-button, Unity, WebView, 3D, dependency, or Phase 1 retuning scope was added.
+
+## Round 3 Runtime And Host Evidence
+
+Runtime integration:
+
+- `createInitialState()` now owns fresh combat/combo state.
+- `startGame()` resets the encounter, emits `run_started`, then emits `combat_started`.
+- Safe presses increment combo after the existing safe-button/score path accepts the input.
+- Repeated presses are rejected before combo changes.
+- Round clear applies pure combat damage, emits `round_cleared` and `boss_damaged`, then either advances to the next round or ends the run when the boss is defeated.
+- Boss defeat creates a victory recap, updates best-run comparison through the existing storage helper path, emits `boss_defeated`, and emits existing `run_finished` with `result: victory`.
+- Fatal click and timeout still end the run through the existing failure path and include combat/combo facts in the recap.
+
+Host/debug additions:
+
+- New host event types: `combat_started`, `combo_changed`, `boss_damaged`, and `boss_defeated`.
+- `run_finished` remains the final result event and can now carry `result: failure` or `result: victory`.
+- Host snapshots include `combat`, `combo`, `lastVictoryRecap`, and `lastRunResultRecap` while preserving `lastFailureRecap`.
+- Debug API adds `previewCombatRoundClear`, `getCombatState`, `getComboState`, `getLastVictoryRecap`, and `getLastRunResultRecap` without removing earlier helper names.
+- `src/main.js` is now a small browser entry point that re-exports `createApp`; app orchestration lives in `src/app/create-app.js` so the entry file remains under the Phase 3A line-count guard.
+
+Validation fixtures added:
+
+- host payload smokes for combat, combo, boss damage, and victory result payloads;
+- host safe press updates combo through the shared `press(buttonId)` path;
+- fixed-seed boss defeat path clears generated safe buttons until victory;
+- host event capture includes `boss_damaged`, `boss_defeated`, and `run_finished` with `reason: boss_defeated`;
+- debug combat preview confirms `18 + 4 + 2 = 24` damage for streak `3`.
+
+Round 3 debug self-check:
+
+- The runtime path can be reproduced with `phase3a-baseline` and the fixed-seed victory smoke.
+- Failures localize to combat model, combo model, host event contract, app orchestration, or result rendering.
+- Safe press, repeated press, round clear, boss damage, boss defeat, fatal click, timeout, and host result payloads are now covered by validation or preserved existing smokes.
+
+Round 3 architecture self-check:
+
+- Combat/combo formulas stayed in pure modules.
+- Host event vocabulary and payload builders stayed centralized in `src/core/host-events.js`.
+- UI still only renders recap/result facts; it does not decide damage, combo, victory, score, fatality, or round completion.
+- App orchestration is named explicitly under `src/app/create-app.js` instead of being hidden in a vague helper file.
+- DOM and host input still converge through `pressButton(...)`.
+- No Phase 1 difficulty values or Phase 2 rule semantics were changed.

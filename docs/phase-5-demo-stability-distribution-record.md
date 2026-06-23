@@ -64,3 +64,29 @@ Phase 5 validation must cover:
 - No UI rendering semantics changed.
 - No host bridge contract changed.
 - No external dependency, PWA, service worker, or framework work introduced.
+
+## Round 2 Implementation Evidence
+
+- Removed runtime references to Tailwind CDN and Google Fonts from `index.html`.
+- Replaced Google-hosted fonts with system UI and monospace stacks.
+- Added a project-owned local utility CSS subset for the classes used by the existing page and result renderer.
+- Added static validation markers for the local distribution CSS/font decisions.
+- Added runtime external URL validation for source runtime files.
+- Added optional `--include-dist` validation for generated `dist/` runtime files after build.
+
+Validation run:
+
+- `npm run build`: PASS
+- `npm run validate`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `OpenOnlineTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+- `rg "https?://|cdn\.tailwindcss|fonts\.googleapis|fonts\.gstatic" -n index.html src dist`: PASS, no matches
+
+Round 2 self-check:
+
+- Phase 4 boss/combo modules were not edited.
+- Phase 1 difficulty and Phase 2 copy semantics were not changed.
+- Phase 3B Host Bridge modules were not edited.
+- No PWA manifest, service worker, framework migration, dependency, or gameplay feature was added.

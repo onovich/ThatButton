@@ -72,6 +72,26 @@ for (const marker of ['.combat-status', 'grid-template-columns: auto minmax(80px
   }
 }
 
+for (const localDistributionMarker of [
+  'Local utility subset replacing previous Tailwind CDN usage.',
+  'font-family: system-ui',
+  'font-family: ui-monospace'
+]) {
+  if (!html.includes(localDistributionMarker)) {
+    failures.push(`Missing local distribution marker in index.html: ${localDistributionMarker}`);
+  }
+}
+
+for (const forbiddenRuntimeResource of [
+  'cdn.tailwindcss.com',
+  'fonts.googleapis.com',
+  'fonts.gstatic.com'
+]) {
+  if (html.includes(forbiddenRuntimeResource)) {
+    failures.push(`Runtime external resource marker remains in index.html: ${forbiddenRuntimeResource}`);
+  }
+}
+
 for (const staleCopy of [
   '目标：按下其它安全键',
   '备用判定',

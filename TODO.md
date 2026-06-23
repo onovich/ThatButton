@@ -64,6 +64,7 @@ Estimated conversation rounds: 2-3
 Goal guide: [docs/phase-3b-host-bridge-preparation-goal-guide.md](docs/phase-3b-host-bridge-preparation-goal-guide.md)
 Status: Planned after Phase 3A PASS; prepares future Unity/WebView embedding without integrating any engine or WebView plugin yet.
 Implementation record: [docs/phase-3b-host-bridge-preparation-record.md](docs/phase-3b-host-bridge-preparation-record.md).
+Completion: Implemented in Phase 3B; see [docs/phase-3b-final-report.md](docs/phase-3b-final-report.md).
 
 - Keep ThatButton independently playable as an HTML game while preparing a stable host-facing boundary. Implemented; normal browser play remains the default path.
 - Define plugin-neutral input and output contracts: `start`, `reset`, `press(buttonId)`, `getSnapshot()`, and versioned JSON events for run/round/button/result states. Implemented with pure host event builders and app boundary APIs.

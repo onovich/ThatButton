@@ -75,13 +75,16 @@ Completion: Implemented in Phase 3B; see [docs/phase-3b-final-report.md](docs/ph
 
 ## Phase 4 - Gameplay Expansion Prototypes
 
-Estimated conversation rounds: 3-6
+Estimated conversation rounds: 6-10
+Goal guide: [docs/phase-4-boss-combo-prototype-goal-guide.md](docs/phase-4-boss-combo-prototype-goal-guide.md)
+Status: Planned after Phase 3B PASS as a focused boss/combo prototype, not a broad gameplay grab bag.
 
-- Explore whether the core "avoid fatal conditions, press safe targets" loop can power enemy or boss encounters.
+- Explore whether the core "avoid fatal conditions, press safe targets" loop can power enemy or boss encounters. Planned as one boss-style prototype.
 - Prototype a boss-health version where solving rounds damages an enemy, replacing or supplementing the plain countdown presentation.
-- Test combo systems, special rounds, and pressure spikes carefully so they deepen the loop without making the rules noisy.
-- Consider roguelite elements only after the base loop, difficulty curve, and readability are stable; candidate elements include run modifiers, temporary perks, escalating hazards, or selectable risk-reward rules.
-- Decide whether these expansions belong in the HTML prototype, a separate branch, or a later engine version.
+- Add a conservative combo/streak layer that rewards clean comprehension and round clears without encouraging blind tapping.
+- Emit combat/combo result events through the Phase 3B Host Bridge so future embedding can observe the prototype.
+- Defer roguelite elements until the boss/combo loop proves useful; do not add perks, shops, loadouts, or meta-progression in this phase.
+- Keep Unity, WebView plugin, native bridge, 3D, moving-button, and spatial interaction work deferred.
 
 ## Phase 5 - Demo Stability And Distribution
 

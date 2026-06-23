@@ -18,3 +18,4 @@
 - [Phase 3B Host Bridge Preparation Goal Guide](phase-3b-host-bridge-preparation-goal-guide.md) - goal-mode execution guide for preparing plugin-neutral host input and result-output contracts before any Unity/WebView integration.
 - [Phase 3B Host Bridge Preparation Record](phase-3b-host-bridge-preparation-record.md) - host input API, output event vocabulary, JSON-safe payload rules, adapter architecture, and validation smoke plan.
 - [Phase 3B Final Report](phase-3b-final-report.md) - completed Phase 3B summary, host bridge architecture, validation guardrails, non-scope, and readiness for CheckAndGoal acceptance.
+- [Phase 4 Boss And Combo Gameplay Prototype Goal Guide](phase-4-boss-combo-prototype-goal-guide.md) - goal-mode execution guide for adding a focused boss objective, conservative combo/streak feedback, and host events without pulling in roguelite or engine scope.

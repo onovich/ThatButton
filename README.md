@@ -44,6 +44,10 @@ Phase 3A moves runtime logic into strict ES modules. `src/config/` owns difficul
 
 Phase 3B adds a plugin-neutral host boundary without integrating any engine or WebView SDK. The app exposes `start`, `reset`, `press(buttonId)`, `getSnapshot()`, and `getDebugApi()` from the app boundary and `window.__THAT_BUTTON_HOST__`; DOM clicks and host-driven presses reuse one gameplay decision path, and host events are versioned JSON-safe payloads.<br/>**Phase 3B 增加了插件中立的 Host 边界，但不集成任何引擎或 WebView SDK。应用会在 app 边界和 `window.__THAT_BUTTON_HOST__` 暴露 `start`、`reset`、`press(buttonId)`、`getSnapshot()` 和 `getDebugApi()`；DOM 点击和 Host 驱动点击复用同一条玩法判定路径，Host 事件是带版本的 JSON-safe payload。**
 
+## Boss And Combo Prototype
+
+Phase 4 adds one focused `REACTOR WARDEN` boss objective and a capped combo/streak layer. Safe presses build combo, round clears damage the boss, and defeating the boss ends the run with a victory recap. Combat/combo facts are exposed through the Phase 3B Host Bridge as JSON-safe events without changing the Phase 1 difficulty curve or Phase 2 rule semantics.
+
 ## Deployment
 
 GitHub Pages deployment is configured with `.github/workflows/deploy.yml` and publishes the generated `dist/` folder from the `main` branch.<br/>**项目已通过 `.github/workflows/deploy.yml` 配置 GitHub Pages 部署，从 `main` 分支生成并发布 `dist/` 目录。**

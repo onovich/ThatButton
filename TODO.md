@@ -77,12 +77,12 @@ Completion: Implemented in Phase 3B; see [docs/phase-3b-final-report.md](docs/ph
 
 Estimated conversation rounds: 6-10
 Goal guide: [docs/phase-4-boss-combo-prototype-goal-guide.md](docs/phase-4-boss-combo-prototype-goal-guide.md)
-Status: Planned after Phase 3B PASS as a focused boss/combo prototype, not a broad gameplay grab bag.
+Status: Implemented in Phase 4 as a focused boss/combo prototype; see [docs/phase-4-boss-combo-prototype-record.md](docs/phase-4-boss-combo-prototype-record.md) and [docs/phase-4-final-report.md](docs/phase-4-final-report.md).
 
-- Explore whether the core "avoid fatal conditions, press safe targets" loop can power enemy or boss encounters. Planned as one boss-style prototype.
-- Prototype a boss-health version where solving rounds damages an enemy, replacing or supplementing the plain countdown presentation.
-- Add a conservative combo/streak layer that rewards clean comprehension and round clears without encouraging blind tapping.
-- Emit combat/combo result events through the Phase 3B Host Bridge so future embedding can observe the prototype.
+- Explore whether the core "avoid fatal conditions, press safe targets" loop can power enemy or boss encounters. Implemented as one `REACTOR WARDEN` encounter.
+- Prototype a boss-health version where solving rounds damages an enemy, replacing or supplementing the plain countdown presentation. Implemented with visible HP and victory recap.
+- Add a conservative combo/streak layer that rewards clean comprehension and round clears without encouraging blind tapping. Implemented as capped combo damage bonus only.
+- Emit combat/combo result events through the Phase 3B Host Bridge so future embedding can observe the prototype. Implemented with JSON-safe combat/combo events.
 - Defer roguelite elements until the boss/combo loop proves useful; do not add perks, shops, loadouts, or meta-progression in this phase.
 - Keep Unity, WebView plugin, native bridge, 3D, moving-button, and spatial interaction work deferred.
 

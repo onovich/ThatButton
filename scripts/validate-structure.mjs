@@ -25,6 +25,7 @@ const moduleFiles = [
   'src/core/storage.js',
   'src/core/recap.js',
   'src/core/debug.js',
+  'src/core/host-events.js',
   'src/ui/audio.js',
   'src/ui/render.js',
   'src/main.js'
@@ -76,7 +77,8 @@ const coreBoundaryFiles = [
   'src/core/level.js',
   'src/core/storage.js',
   'src/core/recap.js',
-  'src/core/debug.js'
+  'src/core/debug.js',
+  'src/core/host-events.js'
 ];
 const forbiddenCorePatterns = [
   /\bwindow\b/,
@@ -147,12 +149,14 @@ const [
   debugModule,
   storageModule,
   recapModule,
+  hostEventsModule,
   mainModule
 ] = await Promise.all([
   import(moduleUrl('src/config/difficulty.js')),
   import(moduleUrl('src/core/debug.js')),
   import(moduleUrl('src/core/storage.js')),
   import(moduleUrl('src/core/recap.js')),
+  import(moduleUrl('src/core/host-events.js')),
   import(moduleUrl('src/main.js'))
 ]);
 
@@ -171,6 +175,14 @@ const {
   resetBestRecord,
   saveBestRecord
 } = storageModule;
+const {
+  HOST_EVENT_VERSION,
+  HOST_EVENT_TYPES,
+  createHostEvent,
+  createButtonPayload,
+  createRoundPayload,
+  isJsonSafeValue
+} = hostEventsModule;
 
 function assertEqual(label, actual, expected) {
   const actualText = JSON.stringify(actual);
@@ -376,6 +388,59 @@ for (const recap of [wrongRecap, timeoutRecap]) {
 
 if (typeof recapModule.getButtonRecap !== 'function' || typeof recapModule.buildFailureRecap !== 'function') {
   failures.push('Recap module import smoke failed.');
+}
+
+const hostEvent = createHostEvent(HOST_EVENT_TYPES.ROUND_STARTED, { ok: true }, { atMs: 12.4 });
+if (hostEvent.version !== HOST_EVENT_VERSION || hostEvent.type !== 'round_started' || hostEvent.atMs !== 12 || hostEvent.payload.ok !== true) {
+  failures.push(`Host event builder produced an unexpected event: ${JSON.stringify(hostEvent)}`);
+}
+if (JSON.stringify(hostEvent) !== JSON.stringify(JSON.parse(JSON.stringify(hostEvent)))) {
+  failures.push('Host event builder did not produce a JSON-stable payload.');
+}
+if (isJsonSafeValue({ fn() {} }) || isJsonSafeValue({ missing: undefined }) || isJsonSafeValue(new Date())) {
+  failures.push('Host event JSON-safety guard accepted unsupported values.');
+}
+try {
+  createHostEvent('plugin_specific_event', {});
+  failures.push('Host event builder accepted an unknown event type.');
+} catch (error) {
+  if (!(error instanceof TypeError)) {
+    failures.push(`Host event builder threw the wrong error for unknown type: ${error.message}`);
+  }
+}
+
+const hostRoundPreview = previewSeededLevel(baselineSeed, 1);
+const hostRoundPayload = createRoundPayload({
+  level: hostRoundPreview.level,
+  score: 0,
+  isPlaying: true,
+  seed: baselineSeed,
+  difficulty: getDifficultyForLevel(hostRoundPreview.level),
+  ruleText: hostRoundPreview.ruleText,
+  ruleTier: hostRoundPreview.ruleTier,
+  ruleId: hostRoundPreview.ruleId,
+  buttons: hostRoundPreview.buttons.map((button, index) => ({
+    id: `btn-${index}`,
+    color: difficultyModule.COLORS.find((color) => color.id === button.color),
+    shape: difficultyModule.SHAPES.find((shape) => shape.id === button.shape),
+    number: button.number
+  })),
+  forbiddenIds: hostRoundPreview.forbiddenIds,
+  safeKeysRemaining: hostRoundPreview.buttonCount - hostRoundPreview.fatalCount,
+  timeLimit: hostRoundPreview.timeLimitMs,
+  timeLeft: hostRoundPreview.timeLimitMs
+});
+if (!isJsonSafeValue(hostRoundPayload) || hostRoundPayload.buttons[1].label !== '黄色 正方形 01') {
+  failures.push(`Host round payload smoke failed: ${JSON.stringify(hostRoundPayload)}`);
+}
+const hostButtonPayload = createButtonPayload({
+  id: 'btn-1',
+  color: difficultyModule.COLORS[2],
+  shape: difficultyModule.SHAPES[2],
+  number: 1
+});
+if (hostButtonPayload.label !== '黄色 正方形 01' || 'css' in hostButtonPayload.color) {
+  failures.push(`Host button payload leaked presentation fields or lost its label: ${JSON.stringify(hostButtonPayload)}`);
 }
 
 function fakeStorage(seed = {}) {

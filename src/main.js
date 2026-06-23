@@ -1,10 +1,6 @@
 import { getDifficultyForLevel } from './config/difficulty.js';
+import { createInitialState } from './core/app-state.js';
 import { createDebugApi } from './core/debug.js';
-import {
-  HOST_EVENT_TYPES,
-  HOST_EVENT_VERSION,
-  createHostEvent
-} from './core/host-events.js';
 import { generateLevelData, getButtonSummary, getRoundSnapshot } from './core/level.js';
 import { createSeededRng } from './core/rng.js';
 import {
@@ -17,17 +13,11 @@ import {
   resetBestRecord as resetBestRecordInStorage
 } from './core/storage.js';
 import { buildFailureRecap } from './core/recap.js';
+import { createAppHostApi } from './host/app-host-api.js';
 import { createBrowserHostBridge } from './host/browser-host-bridge.js';
+import { getStorageAdapter } from './host/browser-storage.js';
 import { createAudioFeedback } from './ui/audio.js';
 import { createRenderer } from './ui/render.js';
-
-function getStorageAdapter(browserWindow) {
-  try {
-    return browserWindow.localStorage || null;
-  } catch (error) {
-    return null;
-  }
-}
 
 export function createApp({
   window: browserWindow,
@@ -49,30 +39,16 @@ export function createApp({
     random,
     audio
   });
-  const gameState = {
-    level: 1,
-    score: 0,
-    isPlaying: false,
-    seed: null,
-    rng: random,
-    debug: false,
-    debugLog: [],
-    currentDifficulty: getDifficultyForLevel(1),
-    currentRuleTier: '',
-    currentRuleId: '',
-    buttons: [],
-    forbiddenIds: [],
-    safeKeysRemaining: 0,
-    timeLimit: 12000,
-    timeLeft: 12000,
-    lastTime: 0,
-    animationFrame: null,
-    currentRuleText: '',
+  const gameState = createInitialState({
     bestRecord: loadedBestRecord.record,
     bestRecordStatus: loadedBestRecord.status,
-    lastRunComparison: null,
-    lastFailureRecap: null
-  };
+    rng: random
+  });
+  const hostController = createAppHostApi({
+    hostBridge: resolvedHostBridge,
+    getState: () => gameState,
+    performance
+  });
 
   function getSeedFromUrl() {
     const seed = new URLSearchParams(browserWindow.location.search).get('seed');
@@ -133,12 +109,6 @@ export function createApp({
     return entry;
   }
 
-  function emitHostEvent(type, payload = {}) {
-    return resolvedHostBridge.emit(createHostEvent(type, payload, {
-      atMs: performance.now()
-    }));
-  }
-
   function applyLevelData(levelData) {
     gameState.currentDifficulty = levelData.difficulty;
     gameState.buttons = levelData.buttons;
@@ -187,6 +157,12 @@ export function createApp({
     recap.bestAfter = cloneBestRecord(gameState.bestRecord);
     recap.bestSaveStatus = saveResult.status;
     updateBestRecordUi(getRunComparisonNote(comparison));
+    if (comparison === 'new_best') {
+      hostController.emitBestRecordChanged({
+        comparison,
+        status: saveResult.status
+      });
+    }
     return recap;
   }
 
@@ -203,6 +179,10 @@ export function createApp({
       pressedButtonId: isTimeout ? null : id,
       pressedButton: getButtonSummary(failedButton),
       failureRecap
+    });
+    hostController.emitRunFinished({
+      failureReason,
+      recap: failureRecap
     });
 
     if (element) {
@@ -222,6 +202,7 @@ export function createApp({
   function levelComplete() {
     gameState.isPlaying = false;
     recordDebugEvent('level_complete');
+    hostController.emitRoundCleared();
     audio.playLevelUp();
     gameState.level++;
 
@@ -239,20 +220,42 @@ export function createApp({
     }, 600);
   }
 
-  function handleButtonInput(id, element, event) {
+  function pressButton(id, { element = renderer.getButtonElement(id), event = null, source = 'host' } = {}) {
     if (event) {
-      if (event.pointerType && event.isPrimary === false) return;
+      if (event.pointerType && event.isPrimary === false) {
+        return { accepted: false, reason: 'non_primary_pointer', buttonId: id, source };
+      }
       event.preventDefault();
     }
-    if (!gameState.isPlaying) return;
-    if (element.classList.contains('disabled') || element.classList.contains('pressed')) return;
+    if (!gameState.isPlaying) {
+      return { accepted: false, reason: 'not_playing', buttonId: id, source };
+    }
+
+    const button = gameState.buttons.find((entry) => entry.id === id);
+    if (!button) {
+      return { accepted: false, reason: 'unknown_button', buttonId: id, source };
+    }
+    if (button.isClicked) {
+      return { accepted: false, reason: 'already_pressed', buttonId: id, source };
+    }
 
     renderer.playInteractionShake();
-    renderer.markButtonPressed(element);
+    if (element) {
+      renderer.markButtonPressed(element);
+    }
+    button.isClicked = true;
 
     if (gameState.forbiddenIds.includes(id)) {
+      const result = { accepted: true, result: 'fatal', buttonId: id, source };
+      hostController.emitButtonPressed({
+        buttonId: id,
+        result: result.result,
+        button
+      });
       triggerGameOver(id, element);
+      return result;
     } else {
+      const previousScore = gameState.score;
       audio.playSafeClick();
       gameState.safeKeysRemaining--;
       gameState.score += 10;
@@ -260,11 +263,34 @@ export function createApp({
         gameState.timeLimit,
         gameState.timeLeft + gameState.currentDifficulty.timeRewardMs
       );
+      const result = {
+        accepted: true,
+        result: 'safe',
+        buttonId: id,
+        source,
+        score: gameState.score,
+        safeKeysRemaining: gameState.safeKeysRemaining
+      };
+      hostController.emitButtonPressed({
+        buttonId: id,
+        result: result.result,
+        button
+      });
+      hostController.emitSafeButtonCleared({
+        buttonId: id,
+        button
+      });
+      hostController.emitScoreChanged({ previousScore });
 
       if (gameState.safeKeysRemaining <= 0) {
         levelComplete();
       }
+      return result;
     }
+  }
+
+  function handleButtonInput(id, element, event) {
+    return pressButton(id, { element, event, source: 'dom' });
   }
 
   function startRound() {
@@ -286,6 +312,7 @@ export function createApp({
     });
     gameState.lastTime = performance.now();
     gameState.isPlaying = true;
+    hostController.emitRoundStarted();
   }
 
   function startGame() {
@@ -306,12 +333,14 @@ export function createApp({
     gameState.lastFailureRecap = null;
     gameState.lastRunComparison = null;
     renderer.setWarningVisible(false);
+    hostController.emitRunStarted();
 
     startRound();
     requestAnimationFrame(gameLoop);
   }
 
   function resetGame() {
+    hostController.emitRunReset();
     startGame();
   }
 
@@ -350,17 +379,27 @@ export function createApp({
 
   function init() {
     updateBestRecordUi();
+    const hostInputApi = {
+      start: startGame,
+      reset: resetGame,
+      press: (buttonId) => pressButton(buttonId, { source: 'host' }),
+      getSnapshot: () => hostController.getSnapshot(),
+      getDebugApi: () => debugApi
+    };
     browserWindow.__THAT_BUTTON_DEBUG__ = debugApi;
+    browserWindow.__THAT_BUTTON_HOST__ = hostInputApi;
     browserWindow.startGame = startGame;
     browserWindow.resetGame = resetGame;
-    emitHostEvent(HOST_EVENT_TYPES.HOST_BRIDGE_READY, {
-      eventVersion: HOST_EVENT_VERSION,
-      inputApi: ['start', 'reset', 'press', 'getSnapshot', 'getDebugApi']
-    });
+    hostController.emitBridgeReady();
   }
 
   return {
     init,
+    start: startGame,
+    reset: resetGame,
+    press: (buttonId) => pressButton(buttonId, { source: 'host' }),
+    getSnapshot: () => hostController.getSnapshot(),
+    getDebugApi: () => debugApi,
     startGame,
     resetGame,
     gameLoop,
@@ -371,12 +410,5 @@ export function createApp({
 }
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-  createApp({
-    window,
-    document,
-    performance,
-    requestAnimationFrame,
-    setTimeout,
-    clearTimeout
-  }).init();
+  createApp({ window, document, performance, requestAnimationFrame, setTimeout, clearTimeout }).init();
 }

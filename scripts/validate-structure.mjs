@@ -19,6 +19,7 @@ function readProjectFile(relativePath) {
 const html = readProjectFile('index.html');
 const moduleFiles = [
   'src/config/difficulty.js',
+  'src/core/app-state.js',
   'src/core/rng.js',
   'src/core/rules.js',
   'src/core/level.js',
@@ -26,7 +27,9 @@ const moduleFiles = [
   'src/core/recap.js',
   'src/core/debug.js',
   'src/core/host-events.js',
+  'src/host/app-host-api.js',
   'src/host/browser-host-bridge.js',
+  'src/host/browser-storage.js',
   'src/ui/audio.js',
   'src/ui/render.js',
   'src/main.js'
@@ -73,6 +76,7 @@ for (const [relativePath, source] of [['index.html', html], ...sources]) {
 
 const coreBoundaryFiles = [
   'src/config/difficulty.js',
+  'src/core/app-state.js',
   'src/core/rng.js',
   'src/core/rules.js',
   'src/core/level.js',
@@ -632,6 +636,9 @@ app.init();
 if (app.hostBridge.getEvents()[0]?.type !== HOST_EVENT_TYPES.HOST_BRIDGE_READY) {
   failures.push(`App did not emit host bridge ready during init: ${JSON.stringify(app.hostBridge.getEvents())}`);
 }
+if (typeof app.press !== 'function' || typeof app.getSnapshot !== 'function' || typeof fakeWindow.__THAT_BUTTON_HOST__?.press !== 'function') {
+  failures.push('Host-facing input API is missing from app boundary or browser window.');
+}
 
 const debugApi = fakeWindow.__THAT_BUTTON_DEBUG__;
 const requiredDebugHelpers = [
@@ -651,6 +658,65 @@ for (const helper of requiredDebugHelpers) {
   if (typeof debugApi?.[helper] !== 'function') {
     failures.push(`Debug API is missing helper: ${helper}`);
   }
+}
+
+const hostSmokeStorage = fakeStorage();
+const hostSmokeBridge = createCaptureHostBridge();
+const hostSmokeWindow = {
+  location: { search: '?seed=phase3a-baseline' },
+  AudioContext: FakeAudioContext,
+  webkitAudioContext: FakeAudioContext,
+  localStorage: hostSmokeStorage
+};
+const hostSmokeApp = mainModule.createApp({
+  window: hostSmokeWindow,
+  document: fakeDocument,
+  performance: { now: () => 2000 },
+  requestAnimationFrame: () => 0,
+  setTimeout: () => 0,
+  clearTimeout: () => {},
+  random: () => 0.5,
+  hostBridge: hostSmokeBridge
+});
+hostSmokeApp.init();
+hostSmokeApp.start();
+const firstSnapshot = hostSmokeApp.getSnapshot();
+if (firstSnapshot.status !== 'playing' || firstSnapshot.round.forbiddenIds || firstSnapshot.round.buttons.length !== 4) {
+  failures.push(`Host snapshot shape changed: ${JSON.stringify(firstSnapshot)}`);
+}
+const safePress = hostSmokeApp.press('btn-0');
+if (!safePress.accepted || safePress.result !== 'safe' || hostSmokeApp.getSnapshot().run.score !== 10) {
+  failures.push(`Host safe press did not reuse gameplay scoring: ${JSON.stringify(safePress)}`);
+}
+const repeatPress = hostSmokeApp.press('btn-0');
+if (repeatPress.accepted || repeatPress.reason !== 'already_pressed') {
+  failures.push(`Host repeat press should be rejected by shared input state: ${JSON.stringify(repeatPress)}`);
+}
+const fatalPress = hostSmokeApp.press('btn-1');
+if (!fatalPress.accepted || fatalPress.result !== 'fatal' || hostSmokeApp.getSnapshot().status !== 'finished') {
+  failures.push(`Host fatal press did not finish the run: ${JSON.stringify(fatalPress)}`);
+}
+const hostEventTypes = hostSmokeBridge.getEvents().map((event) => event.type);
+for (const requiredType of [
+  HOST_EVENT_TYPES.HOST_BRIDGE_READY,
+  HOST_EVENT_TYPES.RUN_STARTED,
+  HOST_EVENT_TYPES.ROUND_STARTED,
+  HOST_EVENT_TYPES.BUTTON_PRESSED,
+  HOST_EVENT_TYPES.SAFE_BUTTON_CLEARED,
+  HOST_EVENT_TYPES.SCORE_CHANGED,
+  HOST_EVENT_TYPES.RUN_FINISHED,
+  HOST_EVENT_TYPES.BEST_RECORD_CHANGED
+]) {
+  if (!hostEventTypes.includes(requiredType)) {
+    failures.push(`Host event capture smoke missed ${requiredType}: ${JSON.stringify(hostEventTypes)}`);
+  }
+}
+const runFinishedEvent = hostSmokeBridge.getEvents().find((event) => event.type === HOST_EVENT_TYPES.RUN_FINISHED);
+if (runFinishedEvent?.payload?.recap?.pressedButton?.id !== 'btn-1') {
+  failures.push(`Host run_finished event lost fatal recap facts: ${JSON.stringify(runFinishedEvent)}`);
+}
+if (!isJsonSafeValue(hostSmokeBridge.getEvents())) {
+  failures.push('Captured host event sequence is not JSON-safe.');
 }
 
 if (debugApi) {

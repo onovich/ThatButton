@@ -187,6 +187,10 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     element.classList.add('explode');
   }
 
+  function getButtonElement(buttonId) {
+    return document.getElementById(buttonId);
+  }
+
   return {
     renderBoard,
     renderFailureRecap,
@@ -201,6 +205,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     setFailureShake,
     playInteractionShake,
     markButtonPressed,
-    markButtonExploded
+    markButtonExploded,
+    getButtonElement
   };
 }

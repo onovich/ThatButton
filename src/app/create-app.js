@@ -165,6 +165,7 @@ export function createApp({
 
   function applyComboChange(comboChange) {
     gameState.combo = comboChange.combo;
+    renderer.updateCombatStatus(getEncounterFacts(gameState));
     if (comboChange.changed) {
       hostController.emitComboChanged({
         previous: comboChange.previous,
@@ -224,6 +225,7 @@ export function createApp({
     gameState.combat = combatResult.combat;
     gameState.lastCombatResult = combatResult;
     const encounterFacts = getEncounterFacts(gameState);
+    renderer.updateCombatStatus(encounterFacts);
     recordDebugEvent('level_complete', {
       combatDamage: combatResult.damage,
       combat: encounterFacts.combat,
@@ -395,6 +397,7 @@ export function createApp({
     gameState.lastFailureRecap = null;
     gameState.lastRunComparison = null;
     resetEncounterState();
+    renderer.updateCombatStatus(getEncounterFacts(gameState));
     renderer.setWarningVisible(false);
     hostController.emitRunStarted();
     hostController.emitCombatStarted();
@@ -443,6 +446,7 @@ export function createApp({
 
   function init() {
     updateBestRecordUi();
+    renderer.updateCombatStatus(getEncounterFacts(gameState));
     const hostInputApi = {
       start: startGame,
       reset: resetGame,

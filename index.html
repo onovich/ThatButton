@@ -116,6 +116,51 @@
             color: var(--crt-yellow);
         }
 
+        .combat-status {
+            min-height: 34px;
+            border: 1px solid rgba(255, 204, 0, 0.45);
+            background: rgba(26, 12, 0, 0.5);
+            border-radius: 3px;
+            padding: 0.3rem 0.5rem;
+            margin-bottom: 0.5rem;
+            display: grid;
+            grid-template-columns: auto minmax(80px, 1fr) auto;
+            gap: 0.5rem;
+            align-items: center;
+            color: var(--crt-yellow);
+            letter-spacing: 0;
+        }
+
+        .combat-label {
+            min-width: 10ch;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .combat-hp-track {
+            height: 8px;
+            border: 1px solid rgba(255, 204, 0, 0.55);
+            background: rgba(0, 0, 0, 0.65);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .combat-hp-bar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--crt-red), var(--crt-yellow));
+            box-shadow: 0 0 8px rgba(255, 204, 0, 0.45);
+            transition: width 0.2s ease;
+        }
+
+        .combo-status-text {
+            min-width: 8ch;
+            color: var(--crt-green);
+            text-align: right;
+            white-space: nowrap;
+        }
+
         .terminal-box {
             background-color: rgba(0, 20, 0, 0.8);
             border: 2px solid var(--crt-green);
@@ -335,6 +380,19 @@
                 margin-bottom: 0.4rem;
             }
 
+            .combat-status {
+                min-height: 30px;
+                grid-template-columns: minmax(0, 1fr) minmax(70px, 1fr) auto;
+                gap: 0.4rem;
+                font-size: 0.72rem;
+                padding: 0.25rem 0.45rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .combat-label {
+                min-width: 0;
+            }
+
             #warning-text {
                 font-size: 0.75rem;
             }
@@ -432,6 +490,11 @@
                 padding: 0.2rem 0.4rem;
             }
 
+            .combat-status {
+                font-size: 0.66rem;
+                padding: 0.2rem 0.35rem;
+            }
+
             #clue-text {
                 font-size: 0.95rem;
             }
@@ -481,6 +544,12 @@
         <div id="best-status" class="best-status crt-font text-xs flex justify-between items-center" aria-live="polite">
             <span>BEST: <span id="best-level-display">--</span> / <span id="best-score-display">0</span></span>
             <span id="best-status-note" class="best-status-note"></span>
+        </div>
+
+        <div id="combat-status" class="combat-status crt-font text-xs" aria-live="polite">
+            <span id="boss-hp-text" class="combat-label">BOSS: --</span>
+            <span class="combat-hp-track"><span id="boss-hp-bar" class="combat-hp-bar"></span></span>
+            <span id="combo-status-text" class="combo-status-text">COMBO x1.0</span>
         </div>
 
         <div class="timer-container">

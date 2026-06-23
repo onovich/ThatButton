@@ -49,6 +49,9 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     bestLevelDisplay: document.getElementById('best-level-display'),
     bestScoreDisplay: document.getElementById('best-score-display'),
     bestStatusNote: document.getElementById('best-status-note'),
+    bossHpText: document.getElementById('boss-hp-text'),
+    bossHpBar: document.getElementById('boss-hp-bar'),
+    comboStatusText: document.getElementById('combo-status-text'),
     failureRecapEl: document.getElementById('failure-recap'),
     startScreen: document.getElementById('start-screen'),
     gameOverScreen: document.getElementById('game-over-screen'),
@@ -154,6 +157,14 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     refs.bestStatusNote.innerText = note;
   }
 
+  function updateCombatStatus({ combat, combo }) {
+    if (!combat || !combo) return;
+    const hpPercent = Math.max(0, Math.min(100, Math.round((combat.hp / combat.maxHp) * 100)));
+    refs.bossHpText.innerText = `${combat.bossName}: ${combat.hp}/${combat.maxHp}`;
+    refs.bossHpBar.style.width = `${hpPercent}%`;
+    refs.comboStatusText.innerText = `COMBO ${combo.multiplierLabel} / ${combo.streak}`;
+  }
+
   function updateTimer(timeLeft, timeLimit) {
     const timePercent = Math.max(0, (timeLeft / timeLimit) * 100);
     refs.timerBarEl.style.width = `${timePercent}%`;
@@ -234,6 +245,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     renderBoard,
     renderFailureRecap,
     updateBestRecordUi,
+    updateCombatStatus,
     updateTimer,
     updateScore,
     hideStartScreen,

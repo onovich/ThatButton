@@ -210,3 +210,32 @@ Round 3 architecture self-check:
 - App orchestration is named explicitly under `src/app/create-app.js` instead of being hidden in a vague helper file.
 - DOM and host input still converge through `pressButton(...)`.
 - No Phase 1 difficulty values or Phase 2 rule semantics were changed.
+
+## Round 4 Visible Status Evidence
+
+UI implementation:
+
+- Added one compact `#combat-status` strip below the best-run strip and above the timer.
+- The strip renders boss name/HP, a fixed-height HP bar, and combo multiplier/streak.
+- `src/ui/render.js` exposes `updateCombatStatus({ combat, combo })`; it does not calculate damage, combo tiers, victory, score, fatality, or round completion.
+- `src/app/create-app.js` calls `updateCombatStatus` after init, run start, safe-press combo changes, and round-clear boss damage.
+
+Mobile/static layout guard:
+
+- The status strip uses a fixed grid with `auto minmax(80px, 1fr) auto`.
+- The mobile media query keeps the strip compact with smaller type, tighter padding, and `minmax(0, 1fr)` for the boss label.
+- `scripts/validate-structure.mjs` checks the required DOM markers, runtime render marker, and mobile CSS markers.
+
+Round 4 debug self-check:
+
+- The visible boss/combo UI can be reproduced through existing fixed-seed app smokes because it renders from state facts after `start()` and `press(buttonId)`.
+- Failure localization remains split between UI marker/rendering, app orchestration, and pure combat/combo state.
+- UI changed, and a repeatable static marker smoke now guards the boss/combo strip and mobile layout constraints.
+
+Round 4 architecture self-check:
+
+- UI renders combat/combo facts only.
+- No UI module imports combat config or formula modules.
+- Host payloads remain centralized and JSON-safe.
+- DOM clicks and host input still share `pressButton(...)`.
+- Deferred roguelite, multi-boss, moving-button, Unity, WebView, 3D, dependency, and difficulty-retuning scope remains out.

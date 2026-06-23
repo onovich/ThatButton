@@ -46,6 +46,9 @@ const sources = new Map(moduleFiles.map((relativePath) => [relativePath, readPro
 for (const marker of [
   '<script type="module" src="./src/main.js"></script>',
   'id="best-status"',
+  'id="combat-status"',
+  'id="boss-hp-bar"',
+  'id="combo-status-text"',
   'id="failure-recap"',
   '致命条件',
   '禁止按键',
@@ -57,9 +60,15 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'updateCombatStatus']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
+  }
+}
+
+for (const marker of ['.combat-status', 'grid-template-columns: auto minmax(80px, 1fr) auto', '@media (max-width: 520px)']) {
+  if (!html.includes(marker)) {
+    failures.push(`Missing combat mobile layout marker in index.html: ${marker}`);
   }
 }
 

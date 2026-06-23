@@ -58,6 +58,19 @@ Completion: Implemented in Phase 3A; see [docs/phase-3a-final-report.md](docs/ph
 - Preserve Phase 1 difficulty, Phase 2 copy semantics, Phase 3 best-run/recap behavior, seed/debug APIs, and GitHub Pages behavior. Done; fixed-seed and helper smokes cover the preserved behavior.
 - Update validation so architecture boundaries and fixed-seed behavior equivalence are protected by repeatable checks. Done in `scripts/validate-structure.mjs`.
 
+## Phase 3B - Host Bridge Preparation
+
+Estimated conversation rounds: 2-3
+Goal guide: [docs/phase-3b-host-bridge-preparation-goal-guide.md](docs/phase-3b-host-bridge-preparation-goal-guide.md)
+Status: Planned after Phase 3A PASS; prepares future Unity/WebView embedding without integrating any engine or WebView plugin yet.
+
+- Keep ThatButton independently playable as an HTML game while preparing a stable host-facing boundary.
+- Define plugin-neutral input and output contracts: `start`, `reset`, `press(buttonId)`, `getSnapshot()`, and versioned JSON events for run/round/button/result states.
+- Add a no-op/browser-safe Host Bridge so normal browser and GitHub Pages play continue unchanged.
+- Ensure DOM clicks and future host-driven input reuse one gameplay decision path.
+- Add validation that protects JSON-safe payloads, host bridge boundaries, and Phase 3A architecture constraints.
+- Defer actual Unity, WebView plugin selection, native bridge code, 3D rendering, and gameplay expansion.
+
 ## Phase 4 - Gameplay Expansion Prototypes
 
 Estimated conversation rounds: 3-6
@@ -96,4 +109,4 @@ Estimated conversation rounds: 2-5
 
 ## Current Recommendation
 
-Build phases in this order: Phase 0, Phase 1, Phase 2, Phase 3, Phase 3A, then choose between Phase 4 and Phase 6 depending on whether the next milestone is a better web prototype or engine migration prep.
+Build phases in this order: Phase 0, Phase 1, Phase 2, Phase 3, Phase 3A, Phase 3B, then Phase 4 for gameplay expansion. Phase 6 can stay narrower later: consume the Phase 3B host bridge and only add real Unity/WebView integration when there is an engine milestone.

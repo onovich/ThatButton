@@ -88,11 +88,13 @@ Status: Implemented in Phase 4 as a focused boss/combo prototype; see [docs/phas
 
 ## Phase 5 - Demo Stability And Distribution
 
-Estimated conversation rounds: 1-2
+Estimated conversation rounds: 4-6
+Goal guide: [docs/phase-5-demo-stability-distribution-goal-guide.md](docs/phase-5-demo-stability-distribution-goal-guide.md)
+Status: Planned after Phase 4 PASS as a distribution hardening phase, not a gameplay phase.
 
-- Replace CDN-loaded Tailwind and Google Fonts with local CSS or system-font fallbacks if offline GameJam/demo use matters.
+- Replace CDN-loaded Tailwind and Google Fonts with local CSS or system-font fallbacks so local demos and GitHub Pages do not rely on runtime third-party resources.
 - Keep GitHub Pages validation healthy after asset changes.
-- Consider a PWA manifest and install icon once the gameplay loop is stable.
+- Make an explicit PWA/manifest decision. Do not add service-worker cache complexity unless a later milestone asks for it.
 
 ## Phase 6 - Engine Embedding Preparation
 
@@ -114,4 +116,4 @@ Estimated conversation rounds: 2-5
 
 ## Current Recommendation
 
-Build phases in this order: Phase 0, Phase 1, Phase 2, Phase 3, Phase 3A, Phase 3B, then Phase 4 for gameplay expansion. Phase 6 can stay narrower later: consume the Phase 3B host bridge and only add real Unity/WebView integration when there is an engine milestone.
+Build phases in this order: Phase 0, Phase 1, Phase 2, Phase 3, Phase 3A, Phase 3B, Phase 4, then Phase 5 for demo/distribution hardening. Phase 6 can stay narrower later: consume the Phase 3B host bridge and only add real Unity/WebView integration when there is an engine milestone.

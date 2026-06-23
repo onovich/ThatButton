@@ -71,6 +71,25 @@ export function createHostEvent(type, payload = {}, { atMs = 0 } = {}) {
   return normalizedEvent;
 }
 
+export function assertHostEvent(event) {
+  if (!event || typeof event !== 'object') {
+    throw new TypeError('Host event must be an object.');
+  }
+  if (event.version !== HOST_EVENT_VERSION) {
+    throw new TypeError(`Unsupported host event version: ${event.version}`);
+  }
+  assertKnownHostEventType(event.type);
+  if (!Number.isFinite(event.atMs) || event.atMs < 0) {
+    throw new TypeError('Host event atMs must be a non-negative finite number.');
+  }
+  assertJsonSafeValue(event.payload);
+}
+
+export function cloneHostEvent(event) {
+  assertHostEvent(event);
+  return cloneJsonSafeValue(event, 'host event');
+}
+
 export function createButtonPayload(button) {
   if (!button) return null;
   return {

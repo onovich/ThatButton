@@ -26,6 +26,7 @@ const moduleFiles = [
   'src/core/recap.js',
   'src/core/debug.js',
   'src/core/host-events.js',
+  'src/host/browser-host-bridge.js',
   'src/ui/audio.js',
   'src/ui/render.js',
   'src/main.js'
@@ -121,6 +122,21 @@ for (const relativePath of uiBoundaryFiles) {
   }
 }
 
+const pluginSpecificMarkers = [
+  /\bUnity\b/,
+  /\buniwebview\b/i,
+  /\bvuplex\b/i,
+  /\bpostMessageToNative\b/i,
+  /\bcustom URL scheme\b/i
+];
+for (const [relativePath, source] of sources) {
+  for (const pattern of pluginSpecificMarkers) {
+    if (pattern.test(source)) {
+      failures.push(`Plugin-specific host bridge marker found in ${relativePath}: ${pattern}`);
+    }
+  }
+}
+
 const mainSource = sources.get('src/main.js') || '';
 for (const marker of [
   'const COLORS',
@@ -150,6 +166,7 @@ const [
   storageModule,
   recapModule,
   hostEventsModule,
+  hostBridgeModule,
   mainModule
 ] = await Promise.all([
   import(moduleUrl('src/config/difficulty.js')),
@@ -157,6 +174,7 @@ const [
   import(moduleUrl('src/core/storage.js')),
   import(moduleUrl('src/core/recap.js')),
   import(moduleUrl('src/core/host-events.js')),
+  import(moduleUrl('src/host/browser-host-bridge.js')),
   import(moduleUrl('src/main.js'))
 ]);
 
@@ -179,10 +197,16 @@ const {
   HOST_EVENT_VERSION,
   HOST_EVENT_TYPES,
   createHostEvent,
+  cloneHostEvent,
   createButtonPayload,
   createRoundPayload,
   isJsonSafeValue
 } = hostEventsModule;
+const {
+  createBrowserHostBridge,
+  createCaptureHostBridge,
+  createNoopHostBridge
+} = hostBridgeModule;
 
 function assertEqual(label, actual, expected) {
   const actualText = JSON.stringify(actual);
@@ -408,6 +432,10 @@ try {
     failures.push(`Host event builder threw the wrong error for unknown type: ${error.message}`);
   }
 }
+const clonedHostEvent = cloneHostEvent(hostEvent);
+if (clonedHostEvent === hostEvent || clonedHostEvent.payload === hostEvent.payload) {
+  failures.push('Host event clone should return detached event and payload objects.');
+}
 
 const hostRoundPreview = previewSeededLevel(baselineSeed, 1);
 const hostRoundPayload = createRoundPayload({
@@ -441,6 +469,47 @@ const hostButtonPayload = createButtonPayload({
 });
 if (hostButtonPayload.label !== '黄色 正方形 01' || 'css' in hostButtonPayload.color) {
   failures.push(`Host button payload leaked presentation fields or lost its label: ${JSON.stringify(hostButtonPayload)}`);
+}
+
+const noopBridge = createNoopHostBridge();
+const noopResult = noopBridge.emit(hostEvent);
+if (!noopResult.accepted || noopBridge.getEvents().length !== 0) {
+  failures.push(`No-op host bridge did not accept without capture: ${JSON.stringify(noopResult)}`);
+}
+const captureBridge = createCaptureHostBridge();
+captureBridge.emit(hostEvent);
+if (captureBridge.getEvents().length !== 1 || captureBridge.getEvents()[0].type !== HOST_EVENT_TYPES.ROUND_STARTED) {
+  failures.push(`Capture host bridge did not retain a cloned event: ${JSON.stringify(captureBridge.getEvents())}`);
+}
+captureBridge.clearEvents();
+if (captureBridge.getEvents().length !== 0) {
+  failures.push('Capture host bridge clearEvents failed.');
+}
+const invalidSinkBridge = createBrowserHostBridge({ sink: { nope: true } });
+const invalidSinkResult = invalidSinkBridge.emit(hostEvent);
+if (invalidSinkResult.accepted || invalidSinkResult.reason !== 'invalid_sink') {
+  failures.push(`Browser host bridge did not isolate incompatible sink state: ${JSON.stringify(invalidSinkResult)}`);
+}
+const browserDispatches = [];
+const eventWindow = {
+  CustomEvent: class CustomEvent {
+    constructor(name, init) {
+      this.name = name;
+      this.detail = init.detail;
+    }
+  },
+  dispatchEvent(event) {
+    browserDispatches.push(event);
+  }
+};
+const dispatchBridge = createBrowserHostBridge({
+  window: eventWindow,
+  dispatchBrowserEvent: true,
+  eventName: 'thatbutton:test'
+});
+dispatchBridge.emit(hostEvent);
+if (browserDispatches.length !== 1 || browserDispatches[0].name !== 'thatbutton:test' || browserDispatches[0].detail.type !== HOST_EVENT_TYPES.ROUND_STARTED) {
+  failures.push(`Browser host bridge dispatch smoke failed: ${JSON.stringify(browserDispatches)}`);
 }
 
 function fakeStorage(seed = {}) {
@@ -556,9 +625,13 @@ const app = mainModule.createApp({
   requestAnimationFrame: () => 0,
   setTimeout: () => 0,
   clearTimeout: () => {},
-  random: () => 0.5
+  random: () => 0.5,
+  hostBridge: createCaptureHostBridge()
 });
 app.init();
+if (app.hostBridge.getEvents()[0]?.type !== HOST_EVENT_TYPES.HOST_BRIDGE_READY) {
+  failures.push(`App did not emit host bridge ready during init: ${JSON.stringify(app.hostBridge.getEvents())}`);
+}
 
 const debugApi = fakeWindow.__THAT_BUTTON_DEBUG__;
 const requiredDebugHelpers = [

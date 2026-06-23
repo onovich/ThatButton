@@ -1,5 +1,10 @@
 import { getDifficultyForLevel } from './config/difficulty.js';
 import { createDebugApi } from './core/debug.js';
+import {
+  HOST_EVENT_TYPES,
+  HOST_EVENT_VERSION,
+  createHostEvent
+} from './core/host-events.js';
 import { generateLevelData, getButtonSummary, getRoundSnapshot } from './core/level.js';
 import { createSeededRng } from './core/rng.js';
 import {
@@ -12,6 +17,7 @@ import {
   resetBestRecord as resetBestRecordInStorage
 } from './core/storage.js';
 import { buildFailureRecap } from './core/recap.js';
+import { createBrowserHostBridge } from './host/browser-host-bridge.js';
 import { createAudioFeedback } from './ui/audio.js';
 import { createRenderer } from './ui/render.js';
 
@@ -30,9 +36,11 @@ export function createApp({
   requestAnimationFrame,
   setTimeout,
   clearTimeout,
-  random = Math.random
+  random = Math.random,
+  hostBridge = null
 }) {
   const storage = getStorageAdapter(browserWindow);
+  const resolvedHostBridge = hostBridge || createBrowserHostBridge();
   const loadedBestRecord = loadBestRecordFromStorage(storage);
   const audio = createAudioFeedback(browserWindow.AudioContext || browserWindow.webkitAudioContext, { setTimeout });
   const renderer = createRenderer({
@@ -123,6 +131,12 @@ export function createApp({
       console.info('[ThatButton debug]', entry);
     }
     return entry;
+  }
+
+  function emitHostEvent(type, payload = {}) {
+    return resolvedHostBridge.emit(createHostEvent(type, payload, {
+      atMs: performance.now()
+    }));
   }
 
   function applyLevelData(levelData) {
@@ -339,6 +353,10 @@ export function createApp({
     browserWindow.__THAT_BUTTON_DEBUG__ = debugApi;
     browserWindow.startGame = startGame;
     browserWindow.resetGame = resetGame;
+    emitHostEvent(HOST_EVENT_TYPES.HOST_BRIDGE_READY, {
+      eventVersion: HOST_EVENT_VERSION,
+      inputApi: ['start', 'reset', 'press', 'getSnapshot', 'getDebugApi']
+    });
   }
 
   return {
@@ -347,6 +365,7 @@ export function createApp({
     resetGame,
     gameLoop,
     debugApi,
+    hostBridge: resolvedHostBridge,
     getState: () => gameState
   };
 }

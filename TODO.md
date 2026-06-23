@@ -63,13 +63,14 @@ Completion: Implemented in Phase 3A; see [docs/phase-3a-final-report.md](docs/ph
 Estimated conversation rounds: 2-3
 Goal guide: [docs/phase-3b-host-bridge-preparation-goal-guide.md](docs/phase-3b-host-bridge-preparation-goal-guide.md)
 Status: Planned after Phase 3A PASS; prepares future Unity/WebView embedding without integrating any engine or WebView plugin yet.
+Implementation record: [docs/phase-3b-host-bridge-preparation-record.md](docs/phase-3b-host-bridge-preparation-record.md).
 
-- Keep ThatButton independently playable as an HTML game while preparing a stable host-facing boundary.
-- Define plugin-neutral input and output contracts: `start`, `reset`, `press(buttonId)`, `getSnapshot()`, and versioned JSON events for run/round/button/result states.
-- Add a no-op/browser-safe Host Bridge so normal browser and GitHub Pages play continue unchanged.
-- Ensure DOM clicks and future host-driven input reuse one gameplay decision path.
-- Add validation that protects JSON-safe payloads, host bridge boundaries, and Phase 3A architecture constraints.
-- Defer actual Unity, WebView plugin selection, native bridge code, 3D rendering, and gameplay expansion.
+- Keep ThatButton independently playable as an HTML game while preparing a stable host-facing boundary. Implemented; normal browser play remains the default path.
+- Define plugin-neutral input and output contracts: `start`, `reset`, `press(buttonId)`, `getSnapshot()`, and versioned JSON events for run/round/button/result states. Implemented with pure host event builders and app boundary APIs.
+- Add a no-op/browser-safe Host Bridge so normal browser and GitHub Pages play continue unchanged. Implemented with no-op, capture, and optional browser `CustomEvent` adapter modes.
+- Ensure DOM clicks and future host-driven input reuse one gameplay decision path. Implemented through shared `pressButton(...)` orchestration.
+- Add validation that protects JSON-safe payloads, host bridge boundaries, and Phase 3A architecture constraints. Implemented in `scripts/validate-structure.mjs`.
+- Defer actual Unity, WebView plugin selection, native bridge code, 3D rendering, and gameplay expansion. Preserved.
 
 ## Phase 4 - Gameplay Expansion Prototypes
 

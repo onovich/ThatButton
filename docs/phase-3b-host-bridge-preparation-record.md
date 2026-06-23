@@ -123,3 +123,13 @@ Required smokes:
 - DOM clicks and future host input are required to converge in `src/main.js`.
 - Event vocabulary and payload shape are centralized in this record before code implementation.
 - No plugin-specific SDK, engine assumption, Phase 4/6 gameplay scope, generated output, or unrelated file was touched.
+
+## Implementation Rounds Self-Check
+
+- `src/core/host-events.js` centralizes the versioned event vocabulary, event builders, JSON-safety guards, and host payload helpers.
+- `src/host/browser-host-bridge.js` provides no-op, capture, optional browser `CustomEvent`, invalid-event, invalid-sink, and sink-failure behavior without plugin-specific APIs.
+- `src/host/app-host-api.js` owns app snapshot and host event emission helpers so `src/main.js` stays orchestration-focused.
+- `src/core/app-state.js` owns initial runtime state construction; `src/host/browser-storage.js` owns the browser storage adapter.
+- `src/main.js` exposes `start`, `reset`, `press(buttonId)`, `getSnapshot()`, and `getDebugApi()` and assigns the same surface to `window.__THAT_BUTTON_HOST__`.
+- DOM pointer/keyboard input and host `press(buttonId)` both route through `pressButton(...)` before any safe/fatal/score/run-finish decision.
+- `scripts/validate-structure.mjs` covers host event contract import, JSON-safety rejection, no-op/capture/browser bridge behavior, incompatible sink isolation, app init ready event, safe host press, repeat host press, fatal host press, run-finished recap facts, and captured event JSON safety.

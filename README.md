@@ -18,7 +18,7 @@ npm run build
 npm run dev
 ```
 
-`npm run validate` checks the static entry, module graph, architecture boundaries, fixed-seed behavior fixtures, failure recaps, and best-record helpers; `npm run build` copies the deployable site into `dist/`; `npm run dev` serves the root folder with the local Node server.<br/>**`npm run validate` 会检查静态入口、模块图、架构边界、固定种子行为样本、失败回顾和最佳记录辅助函数；`npm run build` 会把可部署站点复制到 `dist/`；`npm run dev` 会用本地 Node 服务器托管根目录。**
+`npm run validate` checks the static entry, module graph, architecture boundaries, fixed-seed behavior fixtures, failure recaps, best-record helpers, and host bridge contract smokes; `npm run build` copies the deployable site into `dist/`; `npm run dev` serves the root folder with the local Node server.<br/>**`npm run validate` 会检查静态入口、模块图、架构边界、固定种子行为样本、失败回顾、最佳记录辅助函数和 Host Bridge 合同 smoke；`npm run build` 会把可部署站点复制到 `dist/`；`npm run dev` 会用本地 Node 服务器托管根目录。**
 
 ## Playtest Baseline
 
@@ -40,6 +40,10 @@ Phase 3 adds a local best-run record and a compact failure recap. The recap show
 
 Phase 3A moves runtime logic into strict ES modules. `src/config/` owns difficulty data, `src/core/` owns deterministic rules, level generation, recap, storage, and debug helpers, `src/ui/` owns DOM/audio presentation, and `src/main.js` coordinates browser adapters and the game loop.<br/>**Phase 3A 已将运行时逻辑拆入严格 ES 模块：`src/config/` 负责难度数据，`src/core/` 负责确定性规则、关卡生成、回顾、存档和调试辅助，`src/ui/` 负责 DOM/音频表现，`src/main.js` 只协调浏览器适配和游戏循环。**
 
+## Host Bridge Preparation
+
+Phase 3B adds a plugin-neutral host boundary without integrating any engine or WebView SDK. The app exposes `start`, `reset`, `press(buttonId)`, `getSnapshot()`, and `getDebugApi()` from the app boundary and `window.__THAT_BUTTON_HOST__`; DOM clicks and host-driven presses reuse one gameplay decision path, and host events are versioned JSON-safe payloads.<br/>**Phase 3B 增加了插件中立的 Host 边界，但不集成任何引擎或 WebView SDK。应用会在 app 边界和 `window.__THAT_BUTTON_HOST__` 暴露 `start`、`reset`、`press(buttonId)`、`getSnapshot()` 和 `getDebugApi()`；DOM 点击和 Host 驱动点击复用同一条玩法判定路径，Host 事件是带版本的 JSON-safe payload。**
+
 ## Deployment
 
 GitHub Pages deployment is configured with `.github/workflows/deploy.yml` and publishes the generated `dist/` folder from the `main` branch.<br/>**项目已通过 `.github/workflows/deploy.yml` 配置 GitHub Pages 部署，从 `main` 分支生成并发布 `dist/` 目录。**
@@ -51,7 +55,7 @@ If the first deployment does not appear, set the repository Pages source to GitH
 ## Project Structure
 
 - `index.html` - playable game entry.<br/>**`index.html` - 可直接运行的游戏入口。**
-- `src/` - zero-dependency ES modules for config, core gameplay logic, UI rendering/audio, and orchestration.<br/>**`src/` - 配置、核心玩法逻辑、UI 渲染/音频和编排入口的零依赖 ES 模块。**
+- `src/` - zero-dependency ES modules for config, core gameplay logic, host bridge contracts/adapters, UI rendering/audio, and orchestration.<br/>**`src/` - 配置、核心玩法逻辑、Host Bridge 合同/适配器、UI 渲染/音频和编排入口的零依赖 ES 模块。**
 - `origin/` - original prototype and handoff/design notes.<br/>**`origin/` - 原始原型、交接和设计文档。**
 - `scripts/` - zero-dependency local build, validation, and static-server helpers.<br/>**`scripts/` - 无第三方依赖的本地构建、校验和静态服务器脚本。**
 - `StartLocalTest.cmd` / `OpenOnlineTest.cmd` - Windows launchers for local and online manual testing.<br/>**`StartLocalTest.cmd` / `OpenOnlineTest.cmd` - 用于本地和在线手动测试的 Windows 启动器。**

@@ -137,3 +137,33 @@ Architecture self-check:
 - Host payload vocabulary will stay centralized.
 - `main.js` will orchestrate state transitions but will not own formulas or payload schemas.
 - Deferred roguelite, multi-boss, moving-button, Unity, WebView, 3D, dependency, and difficulty-retuning scope remains out of phase.
+
+## Round 2 Pure-Module Evidence
+
+Implemented pure ownership:
+
+- `src/config/combat.js` owns boss and combo constants.
+- `src/core/combo.js` owns combo creation, increment, reset, tier, cap, and summary logic.
+- `src/core/combat.js` owns combat state, damage calculation, boss HP mutation, defeat transition, and summary logic.
+
+Validation fixtures added to `scripts/validate-structure.mjs`:
+
+- initial combo state is `0 / x1.0 / +0`;
+- 13 safe-press increments cap at streak `12`, tier `3`, `x1.3`, `+6`;
+- fatal reset returns combo to zero and records `fatal_press`;
+- initial boss state is `reactor-warden`, `160 / 160`, `active`;
+- `18000 ms` remaining with streak `3` deals `18 + 4 + 2 = 24`;
+- six max-bonus round clears defeat the boss at level `6`.
+
+Round 2 debug self-check:
+
+- Current combat/combo changes are reproduced by direct pure-module fixtures.
+- Failures can be localized to `src/config/combat.js`, `src/core/combo.js`, `src/core/combat.js`, or the validator import surface.
+- Success, safe-press combo, reset, round damage, and boss defeat are covered here; runtime fatal, timeout, host events, and UI are deferred to later rounds.
+
+Round 2 architecture self-check:
+
+- New combat/combo modules do not access DOM, browser globals, storage, audio, CSS classes, URL query, or `gameState`.
+- UI and host adapters are unchanged and still do not own formula decisions.
+- `main.js` is unchanged in this round.
+- No deferred boss roster, roguelite, moving-button, Unity, WebView, 3D, dependency, or Phase 1 retuning scope was added.

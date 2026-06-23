@@ -19,7 +19,10 @@ function readProjectFile(relativePath) {
 const html = readProjectFile('index.html');
 const moduleFiles = [
   'src/config/difficulty.js',
+  'src/config/combat.js',
   'src/core/app-state.js',
+  'src/core/combat.js',
+  'src/core/combo.js',
   'src/core/rng.js',
   'src/core/rules.js',
   'src/core/level.js',
@@ -76,7 +79,10 @@ for (const [relativePath, source] of [['index.html', html], ...sources]) {
 
 const coreBoundaryFiles = [
   'src/config/difficulty.js',
+  'src/config/combat.js',
   'src/core/app-state.js',
+  'src/core/combat.js',
+  'src/core/combo.js',
   'src/core/rng.js',
   'src/core/rules.js',
   'src/core/level.js',
@@ -166,6 +172,9 @@ if (mainLineCount > 420) {
 
 const [
   difficultyModule,
+  combatConfigModule,
+  combatModule,
+  comboModule,
   debugModule,
   storageModule,
   recapModule,
@@ -174,6 +183,9 @@ const [
   mainModule
 ] = await Promise.all([
   import(moduleUrl('src/config/difficulty.js')),
+  import(moduleUrl('src/config/combat.js')),
+  import(moduleUrl('src/core/combat.js')),
+  import(moduleUrl('src/core/combo.js')),
   import(moduleUrl('src/core/debug.js')),
   import(moduleUrl('src/core/storage.js')),
   import(moduleUrl('src/core/recap.js')),
@@ -185,6 +197,22 @@ const [
 const {
   getDifficultyForLevel
 } = difficultyModule;
+const {
+  PROTOTYPE_BOSS_CONFIG,
+  COMBO_MAX_STREAK
+} = combatConfigModule;
+const {
+  applyRoundClearDamage,
+  calculateRoundDamage,
+  createCombatState,
+  getCombatSummary
+} = combatModule;
+const {
+  createComboState,
+  getComboSummary,
+  incrementCombo,
+  resetCombo
+} = comboModule;
 const {
   previewSeededLevel,
   previewFailureRecap
@@ -386,6 +414,62 @@ if (level1.buttonCount >= 9) {
 }
 if (level10.timeLimitMs < 13000) {
   failures.push('Level 10 should remain readable instead of relying on a harsh timer.');
+}
+
+const initialCombo = createComboState();
+if (COMBO_MAX_STREAK !== 12 || initialCombo.streak !== 0 || initialCombo.multiplierLabel !== 'x1.0' || initialCombo.damageBonus !== 0) {
+  failures.push(`Initial combo state changed: ${JSON.stringify(initialCombo)}`);
+}
+let comboState = initialCombo;
+for (let pressIndex = 0; pressIndex < 13; pressIndex++) {
+  comboState = incrementCombo(comboState, 'safe_press').combo;
+}
+if (comboState.streak !== 12 || !comboState.isCapped || comboState.tier !== 3 || comboState.multiplierLabel !== 'x1.3' || comboState.damageBonus !== 6) {
+  failures.push(`Combo cap/tier smoke failed: ${JSON.stringify(comboState)}`);
+}
+const comboReset = resetCombo(comboState, 'fatal_press').combo;
+if (comboReset.streak !== 0 || comboReset.lastChangeReason !== 'fatal_press' || comboReset.damageBonus !== 0) {
+  failures.push(`Combo reset smoke failed: ${JSON.stringify(comboReset)}`);
+}
+if (JSON.stringify(getComboSummary(comboState)) !== JSON.stringify(comboState)) {
+  failures.push('Combo summary should be a stable plain-data clone.');
+}
+
+const initialCombat = createCombatState();
+if (
+  PROTOTYPE_BOSS_CONFIG.maxHp !== 160 ||
+  initialCombat.bossId !== 'reactor-warden' ||
+  initialCombat.hp !== 160 ||
+  initialCombat.status !== 'active'
+) {
+  failures.push(`Initial combat state changed: ${JSON.stringify(initialCombat)}`);
+}
+const roundDamage = calculateRoundDamage({
+  timeLeftMs: 18000,
+  comboState: createComboState({ streak: 3 })
+});
+if (roundDamage.baseDamage !== 18 || roundDamage.timeBonus !== 4 || roundDamage.comboBonus !== 2 || roundDamage.totalDamage !== 24) {
+  failures.push(`Round damage formula changed: ${JSON.stringify(roundDamage)}`);
+}
+const firstCombatHit = applyRoundClearDamage(initialCombat, {
+  level: 1,
+  timeLeftMs: 18000,
+  comboState: createComboState({ streak: 3 })
+});
+if (firstCombatHit.damage.appliedDamage !== 24 || firstCombatHit.combat.hp !== 136 || firstCombatHit.defeated) {
+  failures.push(`Combat damage application smoke failed: ${JSON.stringify(firstCombatHit)}`);
+}
+let defeatCombat = createCombatState();
+for (let level = 1; level <= 6; level++) {
+  defeatCombat = applyRoundClearDamage(defeatCombat, {
+    level,
+    timeLeftMs: 18000,
+    comboState: createComboState({ streak: 12 })
+  }).combat;
+}
+const defeatSummary = getCombatSummary(defeatCombat);
+if (defeatSummary.status !== 'defeated' || defeatSummary.hp !== 0 || defeatSummary.defeatedAtLevel !== 6 || defeatSummary.roundsCleared !== 6) {
+  failures.push(`Boss defeat smoke failed: ${JSON.stringify(defeatSummary)}`);
 }
 
 const wrongRecap = previewFailureRecap(baselineSeed, 8, 'wrong_click');

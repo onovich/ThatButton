@@ -2,7 +2,7 @@
 
 workspace: D:\WebProjects\ThatButton
 created_at: 2026-06-23T01:45:53.5461407+08:00
-updated_at: 2026-06-23T04:01:36.6199261+08:00
+updated_at: 2026-06-23T11:01:39.6925532+08:00
 
 planner:
   role: architect
@@ -23,12 +23,12 @@ executor:
   evidence: same-workspace programmer thread owns implementation work for this project.
 
 idempotency:
-  active_goal_guide: docs/phase-3a-architecture-regularization-goal-guide.md
-  active_goal_phase: Phase 3A - Architecture Regularization And Guardrails
-  last_planner_dispatch: 2026-06-23T03:41:22.2857337+08:00
+  active_goal_guide: docs/phase-3b-host-bridge-preparation-goal-guide.md
+  active_goal_phase: Phase 3B - Host Bridge Preparation
+  last_planner_dispatch: 2026-06-23T11:01:39.6925532+08:00
   last_planner_dispatch_status: sent
-  last_planner_dispatch_guide: docs/phase-3a-architecture-regularization-goal-guide.md
-  last_planner_dispatch_commit: 1202b0138fd6b1c9911a635d9f96a6cc14c28bb0
+  last_planner_dispatch_guide: docs/phase-3b-host-bridge-preparation-goal-guide.md
+  last_planner_dispatch_commit: f16de760881f17117ed847c9d3ac0977158af756
   last_executor_report_commit: a0b2f4177b361261e2cd4a79603ed4e5d698362c
   last_executor_report_status: ready_for_check
   last_executor_report_at: 2026-06-23T04:01:36.6199261+08:00

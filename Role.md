@@ -33,4 +33,4 @@ idempotency:
   last_executor_report_status: ready_for_check
   last_executor_report_at: 2026-06-23T17:03:25.0872228+08:00
   last_executor_report_guide: docs/phase-5-demo-stability-distribution-goal-guide.md
-  last_check_status: pending
+  last_check_status: pass

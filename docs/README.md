@@ -22,3 +22,5 @@
 - [Phase 4 Boss And Combo Gameplay Prototype Record](phase-4-boss-combo-prototype-record.md) - boss HP, damage formula, combo tiers, runtime/host/UI evidence, and validation fixtures for Phase 4.
 - [Phase 4 Final Report](phase-4-final-report.md) - completed Phase 4 summary, architecture map, validation results, non-scope, and pending evidence.
 - [Phase 5 Demo Stability And Distribution Goal Guide](phase-5-demo-stability-distribution-goal-guide.md) - goal-mode execution guide for removing runtime external resources, preserving the demo layout, and hardening local/GitHub Pages distribution.
+- [Phase 5 Demo Stability And Distribution Record](phase-5-demo-stability-distribution-record.md) - runtime resource inventory, local CSS decision, PWA/manifest decision, and implementation evidence.
+- [Phase 5 Final Report](phase-5-final-report.md) - completed Phase 5 summary, validation evidence, non-scope, and remaining risks.

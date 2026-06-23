@@ -90,11 +90,11 @@ Status: Implemented in Phase 4 as a focused boss/combo prototype; see [docs/phas
 
 Estimated conversation rounds: 4-6
 Goal guide: [docs/phase-5-demo-stability-distribution-goal-guide.md](docs/phase-5-demo-stability-distribution-goal-guide.md)
-Status: Planned after Phase 4 PASS as a distribution hardening phase, not a gameplay phase.
+Status: Implemented in Phase 5 as distribution hardening; see [docs/phase-5-demo-stability-distribution-record.md](docs/phase-5-demo-stability-distribution-record.md) and [docs/phase-5-final-report.md](docs/phase-5-final-report.md).
 
-- Replace CDN-loaded Tailwind and Google Fonts with local CSS or system-font fallbacks so local demos and GitHub Pages do not rely on runtime third-party resources.
-- Keep GitHub Pages validation healthy after asset changes.
-- Make an explicit PWA/manifest decision. Do not add service-worker cache complexity unless a later milestone asks for it.
+- Replace CDN-loaded Tailwind and Google Fonts with local CSS or system-font fallbacks so local demos and GitHub Pages do not rely on runtime third-party resources. Done.
+- Keep GitHub Pages validation healthy after asset changes. Done; source and `dist/` runtime files now have external URL guardrails.
+- Make an explicit PWA/manifest decision. Done; manifest/PWA work is deferred and no service worker was added.
 
 ## Phase 6 - Engine Embedding Preparation
 
@@ -116,4 +116,4 @@ Estimated conversation rounds: 2-5
 
 ## Current Recommendation
 
-Build phases in this order: Phase 0, Phase 1, Phase 2, Phase 3, Phase 3A, Phase 3B, Phase 4, then Phase 5 for demo/distribution hardening. Phase 6 can stay narrower later: consume the Phase 3B host bridge and only add real Unity/WebView integration when there is an engine milestone.
+Build phases in this order: Phase 0, Phase 1, Phase 2, Phase 3, Phase 3A, Phase 3B, Phase 4, Phase 5, then Phase 6 for engine embedding preparation. Phase 6 can stay narrower later: consume the Phase 3B host bridge and only add real Unity/WebView integration when there is an engine milestone.

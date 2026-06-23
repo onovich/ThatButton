@@ -48,6 +48,10 @@ Phase 3B adds a plugin-neutral host boundary without integrating any engine or W
 
 Phase 4 adds one focused `REACTOR WARDEN` boss objective and a capped combo/streak layer. Safe presses build combo, round clears damage the boss, and defeating the boss ends the run with a victory recap. Combat/combo facts are exposed through the Phase 3B Host Bridge as JSON-safe events without changing the Phase 1 difficulty curve or Phase 2 rule semantics.
 
+## Demo Distribution
+
+Phase 5 removes runtime third-party resources from the playable demo. The page now uses project-owned CSS utilities and system font stacks instead of Tailwind CDN or Google Fonts, and validation scans both source runtime files and built `dist/` output for external runtime URL regressions.
+
 ## Deployment
 
 GitHub Pages deployment is configured with `.github/workflows/deploy.yml` and publishes the generated `dist/` folder from the `main` branch.<br/>**项目已通过 `.github/workflows/deploy.yml` 配置 GitHub Pages 部署，从 `main` 分支生成并发布 `dist/` 目录。**

@@ -31,7 +31,7 @@ function getCombatRecapRows(recap) {
     ? `<div class="failure-recap-row">DAMAGE: ${recap.lastDamage.appliedDamage} (${recap.lastDamage.baseDamage}+${recap.lastDamage.timeBonus}+${recap.lastDamage.comboBonus})</div>`
     : '';
   const comboLine = recap.combo
-    ? `<div class="failure-recap-row">COMBO: ${recap.combo.streak} ${escapeHtml(recap.combo.multiplierLabel)} / +${recap.combo.damageBonus}</div>`
+    ? `<div class="failure-recap-row">COMBO: ${escapeHtml(recap.combo.comboText || recap.combo.statusText || 'CHAIN --')} / +${recap.combo.damageBonus}</div>`
     : '';
   return `${combatLine}${damageLine}${comboLine}`;
 }
@@ -87,16 +87,16 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
         strong: true
       };
     }
-    if (combo.damageBonus > previous.damageBonus) {
+    if (combo.rewardText && combo.damageBonus > previous.damageBonus) {
       return {
-        label: `DMG +${combo.damageBonus}`,
+        label: combo.rewardText,
         className: 'damage-bonus',
         color: 'var(--crt-yellow)',
         strong: true
       };
     }
     return {
-      label: 'COMBO +1',
+      label: combo.comboText || 'CHAIN BONUS',
       className: '',
       color: 'var(--crt-green)',
       strong: false
@@ -336,7 +336,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     const hpPercent = Math.max(0, Math.min(100, Math.round((combat.hp / combat.maxHp) * 100)));
     refs.bossHpText.innerText = `${combat.bossName}: ${combat.hp}/${combat.maxHp}`;
     refs.bossHpBar.style.width = `${hpPercent}%`;
-    refs.comboStatusText.innerText = `COMBO ${combo.multiplierLabel} / ${combo.streak}`;
+    refs.comboStatusText.innerText = combo.statusText || 'CHAIN --';
     if (combat.status === 'defeated') {
       refs.bossAvatarShell.classList.add('boss-defeated');
     } else {

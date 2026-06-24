@@ -8,6 +8,8 @@ export const PROTOTYPE_BOSS_CONFIG = Object.freeze({
 });
 
 export const COMBO_MAX_STREAK = 12;
+export const COMBO_DAMAGE_PER_CHAIN = 1;
+export const COMBO_MAX_DAMAGE_BONUS = 8;
 
 export const COMBO_TIERS = Object.freeze([
   Object.freeze({

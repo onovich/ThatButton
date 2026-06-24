@@ -154,3 +154,46 @@ Architecture self-check:
 - Proposed Phase 6 boundaries keep config/core as the source of truth.
 - UI and host remain planned consumers of facts only.
 - Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.
+
+## Rounds 2-3 Combo Semantics And Feedback Evidence
+
+Rounds 2 and 3 were combined because combo core facts and visible status text need to change together.
+
+Implemented:
+
+- `src/core/combo.js` now treats `streak`/`chainCount` as the visible combo chain count.
+- Initial combo state reports `CHAIN --`, no `comboText`, no reward text, and zero damage bonus.
+- First safe press reports `CHAIN READY`, no `comboText`, no visible reward text, and zero damage bonus.
+- Second chained safe press reports `COMBO x2` plus a separate `DMG +1` reward fact.
+- Later chained safe presses increment visible chain count by one and increase the separate damage reward up to the configured cap.
+- `src/app/create-app.js` suppresses combo reward effects until `combo.hasVisibleCombo` is true.
+- `src/ui/render.js` renders `combo.statusText` as the primary combat strip text and uses `combo.rewardText` for floating damage feedback.
+- `index.html` starts from `CHAIN --` instead of `COMBO x1.0`.
+- `scripts/validate-structure.mjs` now protects initial, first-safe, second-safe, later-chain, cap, reset, host-driven press, and debug preview combo semantics.
+
+Validation run:
+
+- `node --check src\core\combo.js`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `OpenOnlineTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- Local HTTP smoke on `http://127.0.0.1:5181/`: PASS; `CHAIN --`, `CHAIN BONUS`, battle-stage, and combo module markers served; old `COMBO x1.0` marker absent
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Debug self-check:
+
+- Minimal fixture explains the change: initial -> first safe -> second safe -> third safe -> cap -> reset.
+- Host-driven input smoke covers first safe as silent and second safe as `COMBO x2`.
+- Failures localize to combo config, combo core, app reward gating, render text, host payload, or validation.
+- No combo-window expiry, player HP, enemy scaling, or upgrade state was introduced yet.
+
+Architecture self-check:
+
+- Combo calculations remain in config/core modules.
+- UI renders combo facts and does not calculate chain count or damage bonus.
+- Host snapshots/events receive JSON-safe combo facts from the app/core path.
+- DOM clicks and host presses still share `pressButton(...)`.
+- Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.

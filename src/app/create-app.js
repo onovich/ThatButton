@@ -167,8 +167,8 @@ export function createApp({
     gameState.combo = comboChange.combo;
     renderer.updateCombatStatus(getEncounterFacts(gameState));
     const comboIncreased = comboChange.combo.streak > comboChange.previous.streak;
-    const cappedReward = showReward && !comboIncreased && comboChange.combo.isCapped;
-    if (showReward && (comboIncreased || cappedReward)) {
+    const cappedReward = showReward && !comboIncreased && comboChange.combo.isCapped && comboChange.combo.hasVisibleCombo;
+    if (showReward && comboChange.combo.hasVisibleCombo && (comboIncreased || cappedReward)) {
       renderer.showComboReward({
         previous: comboChange.previous,
         combo: comboChange.combo,

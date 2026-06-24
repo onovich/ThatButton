@@ -244,6 +244,8 @@ const {
   getDifficultyForLevel
 } = difficultyModule;
 const {
+  COMBO_DAMAGE_PER_CHAIN,
+  COMBO_MAX_DAMAGE_BONUS,
   PROTOTYPE_BOSS_CONFIG,
   COMBO_MAX_STREAK
 } = combatConfigModule;
@@ -467,18 +469,76 @@ if (level10.timeLimitMs < 13000) {
 }
 
 const initialCombo = createComboState();
-if (COMBO_MAX_STREAK !== 12 || initialCombo.streak !== 0 || initialCombo.multiplierLabel !== 'x1.0' || initialCombo.damageBonus !== 0) {
+if (
+  COMBO_MAX_STREAK !== 12 ||
+  COMBO_DAMAGE_PER_CHAIN !== 1 ||
+  COMBO_MAX_DAMAGE_BONUS !== 8 ||
+  initialCombo.streak !== 0 ||
+  initialCombo.chainCount !== 0 ||
+  initialCombo.comboText !== '' ||
+  initialCombo.statusText !== 'CHAIN --' ||
+  initialCombo.hasVisibleCombo ||
+  initialCombo.rewardText !== '' ||
+  initialCombo.damageBonus !== 0
+) {
   failures.push(`Initial combo state changed: ${JSON.stringify(initialCombo)}`);
+}
+const firstComboPress = incrementCombo(initialCombo, 'safe_press').combo;
+if (
+  firstComboPress.streak !== 1 ||
+  firstComboPress.chainCount !== 1 ||
+  firstComboPress.comboText !== '' ||
+  firstComboPress.statusText !== 'CHAIN READY' ||
+  firstComboPress.hasVisibleCombo ||
+  firstComboPress.rewardText !== '' ||
+  firstComboPress.damageBonus !== 0
+) {
+  failures.push(`First safe press should start a silent chain: ${JSON.stringify(firstComboPress)}`);
+}
+const secondComboPress = incrementCombo(firstComboPress, 'safe_press').combo;
+if (
+  secondComboPress.streak !== 2 ||
+  secondComboPress.chainCount !== 2 ||
+  secondComboPress.comboText !== 'COMBO x2' ||
+  secondComboPress.statusText !== 'COMBO x2' ||
+  !secondComboPress.hasVisibleCombo ||
+  secondComboPress.rewardText !== 'DMG +1' ||
+  secondComboPress.damageBonus !== 1
+) {
+  failures.push(`Second safe press should show COMBO x2 with separate damage reward: ${JSON.stringify(secondComboPress)}`);
+}
+const thirdComboPress = incrementCombo(secondComboPress, 'safe_press').combo;
+if (
+  thirdComboPress.streak !== 3 ||
+  thirdComboPress.comboText !== 'COMBO x3' ||
+  thirdComboPress.rewardText !== 'DMG +2' ||
+  thirdComboPress.damageBonus !== 2
+) {
+  failures.push(`Later chained safe presses should increment visible chain count by one: ${JSON.stringify(thirdComboPress)}`);
 }
 let comboState = initialCombo;
 for (let pressIndex = 0; pressIndex < 13; pressIndex++) {
   comboState = incrementCombo(comboState, 'safe_press').combo;
 }
-if (comboState.streak !== 12 || !comboState.isCapped || comboState.tier !== 3 || comboState.multiplierLabel !== 'x1.3' || comboState.damageBonus !== 6) {
+if (
+  comboState.streak !== 12 ||
+  comboState.chainCount !== 12 ||
+  !comboState.isCapped ||
+  comboState.comboText !== 'COMBO x12' ||
+  comboState.rewardText !== 'DMG +8' ||
+  comboState.damageBonus !== 8
+) {
   failures.push(`Combo cap/tier smoke failed: ${JSON.stringify(comboState)}`);
 }
 const comboReset = resetCombo(comboState, 'fatal_press').combo;
-if (comboReset.streak !== 0 || comboReset.lastChangeReason !== 'fatal_press' || comboReset.damageBonus !== 0) {
+if (
+  comboReset.streak !== 0 ||
+  comboReset.chainCount !== 0 ||
+  comboReset.comboText !== '' ||
+  comboReset.statusText !== 'CHAIN --' ||
+  comboReset.lastChangeReason !== 'fatal_press' ||
+  comboReset.damageBonus !== 0
+) {
   failures.push(`Combo reset smoke failed: ${JSON.stringify(comboReset)}`);
 }
 if (JSON.stringify(getComboSummary(comboState)) !== JSON.stringify(comboState)) {
@@ -510,7 +570,7 @@ if (firstCombatHit.damage.appliedDamage !== 24 || firstCombatHit.combat.hp !== 5
   failures.push(`Combat damage application smoke failed: ${JSON.stringify(firstCombatHit)}`);
 }
 let defeatCombat = createCombatState();
-for (let level = 1; level <= 20; level++) {
+for (let level = 1; level <= 18; level++) {
   defeatCombat = applyRoundClearDamage(defeatCombat, {
     level,
     timeLeftMs: 18000,
@@ -518,7 +578,7 @@ for (let level = 1; level <= 20; level++) {
   }).combat;
 }
 const defeatSummary = getCombatSummary(defeatCombat);
-if (defeatSummary.status !== 'defeated' || defeatSummary.hp !== 0 || defeatSummary.defeatedAtLevel !== 20 || defeatSummary.roundsCleared !== 20) {
+if (defeatSummary.status !== 'defeated' || defeatSummary.hp !== 0 || defeatSummary.defeatedAtLevel !== 18 || defeatSummary.roundsCleared !== 18) {
   failures.push(`Boss defeat smoke failed: ${JSON.stringify(defeatSummary)}`);
 }
 
@@ -618,7 +678,12 @@ const bossDamagePayload = createBossDamagePayload({
   combo: comboPayload,
   round: hostRoundPayload
 });
-if (!isJsonSafeValue(bossDamagePayload) || bossDamagePayload.damage.appliedDamage !== 24 || bossDamagePayload.combo.multiplierLabel !== 'x1.1') {
+if (
+  !isJsonSafeValue(bossDamagePayload) ||
+  bossDamagePayload.damage.appliedDamage !== 24 ||
+  bossDamagePayload.combo.comboText !== 'COMBO x3' ||
+  bossDamagePayload.combo.rewardText !== 'DMG +2'
+) {
   failures.push(`Boss damage payload smoke failed: ${JSON.stringify(bossDamagePayload)}`);
 }
 const victoryPayload = createRunResultPayload({
@@ -850,12 +915,27 @@ const safePress = hostSmokeApp.press('btn-0');
 if (!safePress.accepted || safePress.result !== 'safe' || hostSmokeApp.getSnapshot().run.score !== 10) {
   failures.push(`Host safe press did not reuse gameplay scoring: ${JSON.stringify(safePress)}`);
 }
-if (hostSmokeApp.getSnapshot().combo.streak !== 1) {
-  failures.push(`Host safe press did not update combo state: ${JSON.stringify(hostSmokeApp.getSnapshot().combo)}`);
+if (
+  hostSmokeApp.getSnapshot().combo.streak !== 1 ||
+  hostSmokeApp.getSnapshot().combo.comboText !== '' ||
+  hostSmokeApp.getSnapshot().combo.statusText !== 'CHAIN READY' ||
+  hostSmokeApp.getSnapshot().combo.hasVisibleCombo
+) {
+  failures.push(`First host safe press should start a silent chain: ${JSON.stringify(hostSmokeApp.getSnapshot().combo)}`);
 }
 const repeatPress = hostSmokeApp.press('btn-0');
 if (repeatPress.accepted || repeatPress.reason !== 'already_pressed') {
   failures.push(`Host repeat press should be rejected by shared input state: ${JSON.stringify(repeatPress)}`);
+}
+const secondSafePress = hostSmokeApp.press('btn-2');
+if (
+  !secondSafePress.accepted ||
+  secondSafePress.result !== 'safe' ||
+  hostSmokeApp.getSnapshot().run.score !== 20 ||
+  hostSmokeApp.getSnapshot().combo.comboText !== 'COMBO x2' ||
+  hostSmokeApp.getSnapshot().combo.rewardText !== 'DMG +1'
+) {
+  failures.push(`Second host safe press should expose COMBO x2: ${JSON.stringify({ secondSafePress, combo: hostSmokeApp.getSnapshot().combo })}`);
 }
 const fatalPress = hostSmokeApp.press('btn-1');
 if (!fatalPress.accepted || fatalPress.result !== 'fatal' || hostSmokeApp.getSnapshot().status !== 'finished') {
@@ -950,7 +1030,11 @@ if (debugApi) {
     failures.push(`Debug API wrong-click recap changed: ${JSON.stringify(debugWrongRecap)}`);
   }
   const debugCombatPreview = debugApi.previewCombatRoundClear({ timeLeftMs: 18000, streak: 3 });
-  if (debugCombatPreview.damage.appliedDamage !== 24 || debugCombatPreview.combo.multiplierLabel !== 'x1.1') {
+  if (
+    debugCombatPreview.damage.appliedDamage !== 24 ||
+    debugCombatPreview.combo.comboText !== 'COMBO x3' ||
+    debugCombatPreview.combo.rewardText !== 'DMG +2'
+  ) {
     failures.push(`Debug API combat preview changed: ${JSON.stringify(debugCombatPreview)}`);
   }
 

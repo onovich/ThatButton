@@ -149,7 +149,7 @@ Phase 7 playtest questions still pending:
 
 Estimated conversation rounds: 8
 Goal guide: [docs/phase-7a-hazard-feel-mobile-validation-goal-guide.md](docs/phase-7a-hazard-feel-mobile-validation-goal-guide.md)
-Status: Planned after Phase 7 PASS; ready for executor implementation as a particle/VFX overhaul plus validation and tuning pass before new mechanics or engine embedding.
+Status: READY_FOR_CHECK after executor implementation; see [docs/phase-7a-hazard-feel-mobile-validation-record.md](docs/phase-7a-hazard-feel-mobile-validation-record.md), [docs/phase-7a-browser-smoke-results.json](docs/phase-7a-browser-smoke-results.json), and [docs/phase-7a-final-report.md](docs/phase-7a-final-report.md).
 
 - Overhaul current particle/VFX feedback because attack, combo, wrong-press, enemy-hit, and reward effects are visually weak, aesthetically mismatched, and not satisfying enough for the RPG combat loop.
 - Define a coherent retro-futurist terminal VFX language: CRT/vector tracers, pixel sparks, scanline streaks, phosphor afterimages, data projectiles, and chunky neon fragments.
@@ -160,6 +160,12 @@ Status: Planned after Phase 7 PASS; ready for executor implementation as a parti
 - Preserve first enemy / first upgrade hazard-free onboarding and Phase 6A combat feel.
 - Keep iOS Safari, Android Chrome, and human fairness/readability playtest evidence explicitly marked as passed or pending.
 - Do not add new hazards, Unity/WebView/native/3D work, roguelite meta-progression, new dependencies, framework work, CDN resources, or Phase 1 difficulty retuning.
+
+Phase 7A pending real-world evidence:
+
+- iOS Safari real-device touch/audio/vibration review.
+- Android Chrome real-device touch/layout/vibration review.
+- Human playtest for VFX satisfaction, wrong-press feel, upgrade reward feel, moving-button fairness, and interference readability.
 
 ## Current Recommendation
 

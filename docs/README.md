@@ -34,3 +34,6 @@
 - [Phase 7 Advanced Hazards And Spatial Interaction Record](phase-7-advanced-hazards-spatial-interaction-record.md) - implementation rounds, hazard scheduling decisions, validation evidence, host/debug contract notes, and pending playtest questions for Phase 7.
 - [Phase 7 Final Report](phase-7-final-report.md) - completed Phase 7 summary, hazard pacing, validation evidence, architecture checks, non-scope, and readiness payload.
 - [Phase 7A VFX Feel And Hazard Validation Goal Guide](phase-7a-hazard-feel-mobile-validation-goal-guide.md) - goal-mode execution guide for particle/VFX style overhaul, real-browser/mobile hazard smoke, readability evidence, and conservative hazard tuning before new mechanics or engine embedding.
+- [Phase 7A VFX Feel And Hazard Validation Record](phase-7a-hazard-feel-mobile-validation-record.md) - Phase 7A round log, VFX audit/implementation evidence, browser smoke results, tuning gate, and manual playtest checklist.
+- [Phase 7A Browser Smoke Results](phase-7a-browser-smoke-results.json) - lightweight Chrome/CDP geometry and VFX marker evidence for desktop, mobile, short-mobile, active hazards, and upgrade overlay states.
+- [Phase 7A Final Report](phase-7a-final-report.md) - completed Phase 7A VFX/hazard validation summary, evidence, architecture checks, pending real-device playtests, and readiness payload.

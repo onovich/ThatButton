@@ -91,7 +91,7 @@ for (const marker of [
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
 const renderSource = sources.get('src/ui/render.js') || '';
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewSessionProgression', 'previewHostEventPayloads', 'previewPlaytestReport', 'thatbutton.playtestReport', 'isPrivacySafePlaytestReport', 'stageLabel', 'tierLabel', 'commandLevelTag', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewSessionProgression', 'previewHostEventPayloads', 'previewPlaytestReport', 'previewRuntimePlaytestReport', 'getLastPlaytestReport', 'thatbutton.playtestReport', 'isPrivacySafePlaytestReport', 'createPlaytestRunState', 'recordPlaytestRound', 'recordPlaytestButtonPress', 'buildPlaytestReportFromRunState', 'lastPlaytestReport', 'stageLabel', 'tierLabel', 'commandLevelTag', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
@@ -502,7 +502,8 @@ const {
   previewCombatBalance,
   previewHazardSchedule,
   previewSessionProgression,
-  previewHostEventPayloads
+  previewHostEventPayloads,
+  previewRuntimePlaytestReport
 } = debugModule;
 const {
   BEST_RECORD_KEY,
@@ -537,12 +538,21 @@ const {
 const {
   PLAYTEST_REPORT_KIND,
   PLAYTEST_REPORT_VERSION,
+  buildPlaytestReportFromRunState,
   buildPlaytestReport,
   buildPlaytestReportExport,
   classifyViewport,
+  createPlaytestRunState,
   createPlaytestReportFixture,
   formatPlaytestReportSummary,
   isPrivacySafePlaytestReport,
+  recordPlaytestButtonPress,
+  recordPlaytestCombo,
+  recordPlaytestEnemyDefeated,
+  recordPlaytestPlayerDamage,
+  recordPlaytestRound,
+  recordPlaytestUpgradeOffered,
+  recordPlaytestUpgradeSelected,
   serializePlaytestReport
 } = playtestReportModule;
 const {
@@ -1671,6 +1681,12 @@ const requiredDebugHelpers = [
   'previewHazardSchedule',
   'previewSessionProgression',
   'previewHostEventPayloads',
+  'previewPlaytestReport',
+  'previewPlaytestReportExport',
+  'previewRuntimePlaytestReport',
+  'buildPlaytestReport',
+  'isPrivacySafePlaytestReport',
+  'getLastPlaytestReport',
   'getCombatState',
   'getComboState',
   'getBestRecord',
@@ -1746,6 +1762,9 @@ if (
   !isJsonSafeValue(createHazardPayload(firstSnapshot.hazards))
 ) {
   failures.push(`Host snapshot missing initial hazard facts: ${JSON.stringify(firstSnapshot.hazards)}`);
+}
+if (firstSnapshot.lastPlaytestReport !== null) {
+  failures.push(`Host snapshot should expose a null playtest report before the run ends: ${JSON.stringify(firstSnapshot.lastPlaytestReport)}`);
 }
 const safePress = hostSmokeApp.press('btn-0');
 if (!safePress.accepted || safePress.result !== 'safe' || hostSmokeApp.getSnapshot().run.score !== 10) {
@@ -1981,6 +2000,26 @@ const runFinishedEvent = lethalBridge.getEvents().find((event) => event.type ===
 if (runFinishedEvent?.payload?.recap?.pressedButton?.id !== 'btn-1') {
   failures.push(`Host run_finished event lost fatal recap facts: ${JSON.stringify(runFinishedEvent)}`);
 }
+const lethalPlaytestReport = lethalSnapshot.lastPlaytestReport;
+const lethalDebugPlaytestReport = lethalApp.getDebugApi().getLastPlaytestReport();
+if (
+  !lethalPlaytestReport ||
+  JSON.stringify(lethalPlaytestReport) !== JSON.stringify(lethalDebugPlaytestReport) ||
+  !isJsonSafeValue(lethalPlaytestReport) ||
+  !isPrivacySafePlaytestReport(lethalPlaytestReport) ||
+  lethalPlaytestReport.run.result !== 'failure' ||
+  lethalPlaytestReport.run.reason !== 'wrong_click' ||
+  lethalPlaytestReport.run.inputMode !== 'host' ||
+  lethalPlaytestReport.combat.wrongPresses !== 1 ||
+  lethalPlaytestReport.combat.playerDamageTaken !== 10 ||
+  lethalPlaytestReport.rounds.length < 1 ||
+  lethalPlaytestReport.rounds[0].level !== 1
+) {
+  failures.push(`Lethal wrong-press smoke should expose a local-only playtest report: ${JSON.stringify({
+    lethalPlaytestReport,
+    lethalDebugPlaytestReport
+  })}`);
+}
 
 const victoryBridge = createCaptureHostBridge();
 const victoryWindow = {
@@ -2191,6 +2230,68 @@ if (debugApi) {
   const playtestReportB = createPlaytestReportFixture();
   const debugPlaytestReport = debugApi.previewPlaytestReport();
   const playtestExport = debugApi.previewPlaytestReportExport();
+  const directRuntimePlaytestReport = previewRuntimePlaytestReport();
+  const debugRuntimePlaytestReport = debugApi.previewRuntimePlaytestReport();
+  let runtimeRunState = createPlaytestRunState({
+    seed: 'phase9-run-state',
+    startedAtMs: 100,
+    viewportClass: classifyViewport({ width: 1280, height: 720 })
+  });
+  runtimeRunState = recordPlaytestRound(runtimeRunState, {
+    level: 6,
+    enemyIndex: 1,
+    gridSize: '3x3',
+    fatalCount: 2,
+    safeCount: 7,
+    ruleTier: 'singleVisual',
+    timeLimitMs: 15500,
+    timeLeftMs: 14400
+  });
+  runtimeRunState = recordPlaytestRound(runtimeRunState, {
+    level: 24,
+    enemyIndex: 2,
+    gridSize: '3x3',
+    fatalCount: 4,
+    safeCount: 5,
+    ruleTier: 'orColor',
+    timeLimitMs: 10000,
+    timeLeftMs: 8800,
+    hazardTypes: [HAZARD_TYPES.MOVING_BUTTON, HAZARD_TYPES.INTERFERENCE],
+    activeHazardTypes: [HAZARD_TYPES.MOVING_BUTTON, HAZARD_TYPES.INTERFERENCE]
+  });
+  runtimeRunState = recordPlaytestButtonPress(runtimeRunState, { result: 'safe', source: 'host' });
+  runtimeRunState = recordPlaytestButtonPress(runtimeRunState, { result: 'safe', source: 'dom', pointerType: 'mouse' });
+  runtimeRunState = recordPlaytestButtonPress(runtimeRunState, { result: 'fatal', source: 'dom', pointerType: 'touch' });
+  runtimeRunState = recordPlaytestCombo(runtimeRunState, { streak: 2, hasVisibleCombo: true });
+  runtimeRunState = recordPlaytestPlayerDamage(runtimeRunState, { appliedDamage: 18 });
+  runtimeRunState = recordPlaytestEnemyDefeated(runtimeRunState, {
+    enemyIndex: 1,
+    enemyName: 'REACTOR WARDEN',
+    stageLabel: 'S01 CORE LOCK',
+    tierLabel: 'ONBOARDING',
+    hp: 0,
+    maxHp: 500
+  });
+  runtimeRunState = recordPlaytestUpgradeOffered(runtimeRunState, [{ id: 'base-attack-plus' }]);
+  runtimeRunState = recordPlaytestUpgradeSelected(runtimeRunState, {
+    id: 'base-attack-plus',
+    type: 'base_attack',
+    label: 'HOTTER SIGNAL',
+    shortLabel: 'DMG',
+    value: 1,
+    enemyIndex: 1,
+    sequence: 1
+  });
+  const runtimeBuiltReport = buildPlaytestReportFromRunState(runtimeRunState, {
+    result: 'failure',
+    reason: 'wrong_click',
+    level: 24,
+    score: 220,
+    endedAtMs: 2100,
+    createdAt: '2026-06-24T00:00:00.000Z',
+    combat: getCombatSummary(createCombatState({ enemyIndex: 2 })),
+    combo: { streak: 0, hasVisibleCombo: false }
+  });
   const rebuiltReport = buildPlaytestReport({
     createdAt: '2026-06-24T00:00:00.000Z',
     seed: 'phase9-rebuild',
@@ -2241,6 +2342,33 @@ if (debugApi) {
     playtestReportA.upgrades.selectedCount !== 1 ||
     playtestReportA.hazards.firstMovingLevel !== 19 ||
     playtestReportA.hazards.firstInterferenceLevel !== 24 ||
+    JSON.stringify(directRuntimePlaytestReport) !== JSON.stringify(debugRuntimePlaytestReport) ||
+    !isJsonSafeValue(debugRuntimePlaytestReport) ||
+    !isPrivacySafePlaytestReport(debugRuntimePlaytestReport) ||
+    debugRuntimePlaytestReport.run.seed !== 'phase9-runtime-fixture' ||
+    debugRuntimePlaytestReport.run.viewportClass !== 'short-mobile' ||
+    debugRuntimePlaytestReport.run.inputMode !== 'touch' ||
+    debugRuntimePlaytestReport.progression.enemiesDefeated !== 1 ||
+    debugRuntimePlaytestReport.combat.maxCombo !== 4 ||
+    debugRuntimePlaytestReport.combat.safePresses !== 1 ||
+    debugRuntimePlaytestReport.combat.wrongPresses !== 1 ||
+    debugRuntimePlaytestReport.combat.playerDamageTaken !== 24 ||
+    debugRuntimePlaytestReport.upgrades.offeredCount !== 1 ||
+    debugRuntimePlaytestReport.upgrades.selectedCount !== 1 ||
+    debugRuntimePlaytestReport.hazards.firstMovingLevel !== 24 ||
+    debugRuntimePlaytestReport.hazards.firstInterferenceLevel !== 24 ||
+    !isJsonSafeValue(runtimeBuiltReport) ||
+    !isPrivacySafePlaytestReport(runtimeBuiltReport) ||
+    runtimeBuiltReport.run.seed !== 'phase9-run-state' ||
+    runtimeBuiltReport.run.elapsedMs !== 2000 ||
+    runtimeBuiltReport.run.viewportClass !== 'desktop' ||
+    runtimeBuiltReport.run.inputMode !== 'mixed' ||
+    runtimeBuiltReport.combat.safePresses !== 2 ||
+    runtimeBuiltReport.combat.wrongPresses !== 1 ||
+    runtimeBuiltReport.combat.playerDamageTaken !== 18 ||
+    runtimeBuiltReport.upgrades.selectedCount !== 1 ||
+    runtimeBuiltReport.hazards.firstMovingLevel !== 24 ||
+    runtimeBuiltReport.hazards.firstInterferenceLevel !== 24 ||
     !formatPlaytestReportSummary(playtestReportA).includes('local-only') ||
     !serializePlaytestReport(playtestReportA).includes('"kind": "thatbutton.playtestReport"') ||
     !buildPlaytestReportExport(playtestReportA).includes('THATBUTTON PLAYTEST REPORT') ||
@@ -2253,11 +2381,18 @@ if (debugApi) {
     failures.push(`Playtest report fixture/export changed: ${JSON.stringify({
       report: playtestReportA,
       export: playtestExport,
+      runtimePreview: debugRuntimePlaytestReport,
+      runtimeBuilt: runtimeBuiltReport,
       rebuilt: rebuiltReport
     })}`);
   }
+  const playtestReportCorpus = JSON.stringify([
+    playtestReportA,
+    debugRuntimePlaytestReport,
+    runtimeBuiltReport
+  ]);
   for (const forbiddenReportText of ['userAgent', 'deviceId', 'ipAddress', 'email', 'geolocation', 'trackingId']) {
-    if (JSON.stringify(playtestReportA).includes(forbiddenReportText)) {
+    if (playtestReportCorpus.includes(forbiddenReportText)) {
       failures.push(`Playtest report contains forbidden privacy marker: ${forbiddenReportText}`);
     }
   }

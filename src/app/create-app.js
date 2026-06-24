@@ -20,6 +20,18 @@ import { generateLevelData, getButtonSummary, getRoundSnapshot } from '../core/l
 import { createSeededRng } from '../core/rng.js';
 import { buildFailureRecapFromState } from '../core/run-recaps.js';
 import {
+  buildPlaytestReportFromRunState,
+  classifyViewport,
+  createPlaytestRunState,
+  recordPlaytestButtonPress,
+  recordPlaytestCombo,
+  recordPlaytestEnemyDefeated,
+  recordPlaytestPlayerDamage,
+  recordPlaytestRound,
+  recordPlaytestUpgradeOffered,
+  recordPlaytestUpgradeSelected
+} from '../core/playtest-report.js';
+import {
   buildBestRecordFromRun,
   cloneBestRecord,
   getBestRecordStatusNote,
@@ -65,6 +77,13 @@ export function createApp({
     getState: () => gameState,
     performance
   });
+
+  function getViewportClass() {
+    return classifyViewport({
+      width: browserWindow.innerWidth,
+      height: browserWindow.innerHeight
+    });
+  }
 
   function getSeedFromUrl() {
     const seed = new URLSearchParams(browserWindow.location.search).get('seed');
@@ -118,6 +137,68 @@ export function createApp({
     });
   }
 
+  function getHazardTypesForReport(hazards, phase = null) {
+    const entries = Array.isArray(hazards?.hazards) ? hazards.hazards : [];
+    return [...new Set(entries
+      .filter((hazard) => !phase || hazard.phase === phase)
+      .map((hazard) => hazard.type)
+      .filter(Boolean))];
+  }
+
+  function getCurrentPlaytestRoundFacts(hazards = gameState.hazards) {
+    return {
+      level: gameState.level,
+      enemyIndex: gameState.combat?.enemyIndex || 1,
+      gridSize: gameState.currentDifficulty?.gridSize || 'unknown',
+      fatalCount: gameState.forbiddenIds.length,
+      safeCount: gameState.safeKeysRemaining,
+      ruleTier: gameState.currentRuleTier || 'unknown',
+      timeLimitMs: gameState.timeLimit,
+      timeLeftMs: gameState.timeLeft,
+      hazardTypes: getHazardTypesForReport(hazards),
+      activeHazardTypes: getHazardTypesForReport(hazards, 'active')
+    };
+  }
+
+  function syncPlaytestRound(hazards = gameState.hazards) {
+    if (!gameState.playtestRun) return null;
+    const roundFacts = getCurrentPlaytestRoundFacts(hazards);
+    const signature = [
+      roundFacts.level,
+      roundFacts.enemyIndex,
+      roundFacts.gridSize,
+      roundFacts.safeCount,
+      roundFacts.hazardTypes.join(','),
+      roundFacts.activeHazardTypes.join(',')
+    ].join('|');
+    if (signature === gameState.playtestLastHazardSignature) {
+      return gameState.playtestRun;
+    }
+    gameState.playtestLastHazardSignature = signature;
+    gameState.playtestRun = recordPlaytestRound(gameState.playtestRun, roundFacts);
+    return gameState.playtestRun;
+  }
+
+  function finalizePlaytestReport({ result, reason, recap }) {
+    if (!gameState.playtestRun) return null;
+    syncPlaytestRound(gameState.hazards);
+    const encounterFacts = getEncounterFacts(gameState);
+    const report = buildPlaytestReportFromRunState(gameState.playtestRun, {
+      result,
+      reason,
+      level: gameState.level,
+      score: gameState.score,
+      endedAtMs: performance.now(),
+      createdAt: new Date().toISOString(),
+      combat: encounterFacts.combat,
+      combo: encounterFacts.combo,
+      upgrades: encounterFacts.upgrades,
+      recap
+    });
+    gameState.lastPlaytestReport = report;
+    return report;
+  }
+
   function getCurrentComboWindow(nowMs = performance.now()) {
     return getEncounterComboWindow(gameState.combo, nowMs);
   }
@@ -166,6 +247,7 @@ export function createApp({
         enemyIndex: gameState.combat?.enemyIndex || 1,
         reason: reason || (getHazardsDisabledFromUrl() ? 'query_disabled' : 'disabled')
       });
+      syncPlaytestRound(gameState.hazards);
       return gameState.hazards;
     }
     gameState.hazards = createHazardDirectorState({
@@ -178,6 +260,7 @@ export function createApp({
       forbiddenIds: gameState.forbiddenIds,
       nowMs: roundElapsedMs
     });
+    syncPlaytestRound(gameState.hazards);
     return gameState.hazards;
   }
 
@@ -211,6 +294,9 @@ export function createApp({
 
   function applyComboChange(comboChange, { sourceElement = null, showReward = false } = {}) {
     gameState.combo = comboChange.combo;
+    if (gameState.playtestRun) {
+      gameState.playtestRun = recordPlaytestCombo(gameState.playtestRun, comboChange.combo);
+    }
     renderer.updateCombatStatus(getEncounterFacts(gameState));
     renderer.updateTimer(gameState.timeLeft, gameState.timeLimit, getCurrentComboWindow(
       comboChange.combo.lastEventAtMs ?? performance.now()
@@ -269,6 +355,11 @@ export function createApp({
       pressedButton: getButtonSummary(failedButton),
       failureRecap
     });
+    finalizePlaytestReport({
+      result: 'failure',
+      reason: failureReason,
+      recap: failureRecap
+    });
     hostController.emitRunFinished({
       failureReason,
       recap: failureRecap
@@ -297,6 +388,9 @@ export function createApp({
     });
     gameState.player = playerDamageResult.player;
     gameState.lastPlayerDamage = playerDamageResult.damage;
+    if (gameState.playtestRun) {
+      gameState.playtestRun = recordPlaytestPlayerDamage(gameState.playtestRun, playerDamageResult.damage);
+    }
     applyComboChange(resetEncounterCombo(gameState.combo, 'wrong_press'));
     const encounterFacts = getEncounterFacts(gameState);
     recordDebugEvent('player_damaged', {
@@ -329,6 +423,9 @@ export function createApp({
       enemyIndex: gameState.combat.enemyIndex
     });
     gameState.upgrades = offer.upgrades;
+    if (gameState.playtestRun) {
+      gameState.playtestRun = recordPlaytestUpgradeOffered(gameState.playtestRun, offer.choices);
+    }
     const encounterFacts = getEncounterFacts(gameState);
     renderer.updateCombatStatus(encounterFacts);
     renderer.showUpgradeScreen({
@@ -387,6 +484,9 @@ export function createApp({
     });
     gameState.upgrades = applied.upgrades;
     gameState.player = applied.player || gameState.player;
+    if (gameState.playtestRun) {
+      gameState.playtestRun = recordPlaytestUpgradeSelected(gameState.playtestRun, applied.upgrade);
+    }
     renderer.showUpgradeReward({
       upgrade: applied.upgrade
     });
@@ -448,6 +548,9 @@ export function createApp({
       combo: encounterFacts.combo
     });
     if (combatResult.defeated) {
+      if (gameState.playtestRun) {
+        gameState.playtestRun = recordPlaytestEnemyDefeated(gameState.playtestRun, encounterFacts.combat);
+      }
       recordDebugEvent('enemy_defeated', {
         combatDamage: combatResult.damage,
         combat: encounterFacts.combat
@@ -517,6 +620,14 @@ export function createApp({
         result: 'fatal',
         button
       });
+      if (gameState.playtestRun) {
+        gameState.playtestRun = recordPlaytestButtonPress(gameState.playtestRun, {
+          result: 'fatal',
+          source,
+          pointerType: event?.pointerType || null,
+          key: event?.key || null
+        });
+      }
       const playerDamageResult = applyWrongPressDamage(id, element);
       const result = {
         accepted: true,
@@ -539,6 +650,14 @@ export function createApp({
         atMs: performance.now(),
         windowMs: getEncounterComboWindowMs(gameState.upgrades)
       });
+      if (gameState.playtestRun) {
+        gameState.playtestRun = recordPlaytestButtonPress(gameState.playtestRun, {
+          result: 'safe',
+          source,
+          pointerType: event?.pointerType || null,
+          key: event?.key || null
+        });
+      }
       playSafePressCue(comboChange);
       applyComboChange(comboChange, {
         sourceElement: element,
@@ -625,6 +744,13 @@ export function createApp({
     gameState.level = 1;
     gameState.score = 0;
     resetEncounterState();
+    gameState.playtestRun = createPlaytestRunState({
+      seed: gameState.seed,
+      startedAtMs: performance.now(),
+      viewportClass: getViewportClass()
+    });
+    gameState.playtestLastHazardSignature = '';
+    gameState.lastPlaytestReport = null;
     gameState.currentDifficulty = getDifficultyForLevel(1);
     gameState.timeLimit = getEffectiveRoundTimeLimit(gameState.currentDifficulty);
     gameState.timeLeft = gameState.timeLimit;

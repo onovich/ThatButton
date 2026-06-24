@@ -74,7 +74,8 @@ export function createAppHostApi({ hostBridge, getState, performance }) {
       upgrades: createUpgradePayload(state.upgrades),
       lastFailureRecap: state.lastFailureRecap,
       lastVictoryRecap: state.lastVictoryRecap,
-      lastRunResultRecap: state.lastRunResultRecap
+      lastRunResultRecap: state.lastRunResultRecap,
+      lastPlaytestReport: state.lastPlaytestReport
     }, 'host snapshot');
   }
 

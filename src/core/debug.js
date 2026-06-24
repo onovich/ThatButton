@@ -27,10 +27,19 @@ import {
 import { previewHazardSchedule as previewCoreHazardSchedule } from './hazards.js';
 import {
   buildPlaytestReport,
+  buildPlaytestReportFromRunState,
   buildPlaytestReportExport,
+  createPlaytestRunState,
   createPlaytestReportFixture,
   formatPlaytestReportSummary,
   isPrivacySafePlaytestReport,
+  recordPlaytestButtonPress,
+  recordPlaytestCombo,
+  recordPlaytestEnemyDefeated,
+  recordPlaytestPlayerDamage,
+  recordPlaytestRound,
+  recordPlaytestUpgradeOffered,
+  recordPlaytestUpgradeSelected,
   serializePlaytestReport
 } from './playtest-report.js';
 import { previewSessionProgression as previewCoreSessionProgression } from './session-preview.js';
@@ -443,6 +452,77 @@ export function previewPlaytestReportExport(options = {}) {
   };
 }
 
+export function previewRuntimePlaytestReport() {
+  let runState = createPlaytestRunState({
+    seed: 'phase9-runtime-fixture',
+    startedAtMs: 1000,
+    viewportClass: 'short-mobile'
+  });
+  runState = recordPlaytestRound(runState, {
+    level: 6,
+    enemyIndex: 1,
+    gridSize: '3x3',
+    fatalCount: 2,
+    safeCount: 7,
+    ruleTier: 'singleVisual',
+    timeLimitMs: 15500,
+    timeLeftMs: 14400,
+    hazardTypes: [],
+    activeHazardTypes: []
+  });
+  runState = recordPlaytestRound(runState, {
+    level: 24,
+    enemyIndex: 2,
+    gridSize: '3x3',
+    fatalCount: 4,
+    safeCount: 5,
+    ruleTier: 'orColor',
+    timeLimitMs: 10000,
+    timeLeftMs: 8800,
+    hazardTypes: ['moving_button', 'interference'],
+    activeHazardTypes: ['interference']
+  });
+  runState = recordPlaytestButtonPress(runState, { result: 'safe', source: 'dom', pointerType: 'touch' });
+  runState = recordPlaytestButtonPress(runState, { result: 'fatal', source: 'dom', pointerType: 'touch' });
+  runState = recordPlaytestCombo(runState, { streak: 4, hasVisibleCombo: true });
+  runState = recordPlaytestPlayerDamage(runState, { appliedDamage: 24 });
+  runState = recordPlaytestEnemyDefeated(runState, {
+    enemyIndex: 1,
+    enemyName: 'REACTOR WARDEN',
+    stageLabel: 'S01 CORE LOCK',
+    tierLabel: 'ONBOARDING',
+    hp: 0,
+    maxHp: 500
+  });
+  runState = recordPlaytestUpgradeOffered(runState, [{ id: 'round-time-plus' }]);
+  runState = recordPlaytestUpgradeSelected(runState, {
+    id: 'round-time-plus',
+    type: 'round_time',
+    label: 'SLOW CLOCK',
+    shortLabel: 'TIME',
+    value: 700,
+    enemyIndex: 1,
+    sequence: 1
+  });
+  return buildPlaytestReportFromRunState(runState, {
+    result: 'failure',
+    reason: 'wrong_click',
+    level: 24,
+    score: 1420,
+    endedAtMs: 191000,
+    createdAt: '2026-06-24T00:00:00.000Z',
+    combat: {
+      enemyIndex: 2,
+      enemyName: 'SIGNAL WARDEN',
+      stageLabel: 'S02 DRIFT ARRAY',
+      tierLabel: 'MOVEMENT',
+      hp: 328,
+      maxHp: 580
+    },
+    combo: { streak: 0, hasVisibleCombo: false }
+  });
+}
+
 export function createDebugApi({
   getState,
   loadBestRecord,
@@ -474,8 +554,12 @@ export function createDebugApi({
     previewHostEventPayloads,
     previewPlaytestReport,
     previewPlaytestReportExport,
+    previewRuntimePlaytestReport,
     buildPlaytestReport,
     isPrivacySafePlaytestReport,
+    getLastPlaytestReport: () => getState().lastPlaytestReport
+      ? JSON.parse(JSON.stringify(getState().lastPlaytestReport))
+      : null,
     getDifficultyForLevel,
     getLastFailureRecap: () => cloneFailureRecap(getState().lastFailureRecap),
     getLastVictoryRecap: () => cloneFailureRecap(getState().lastVictoryRecap),

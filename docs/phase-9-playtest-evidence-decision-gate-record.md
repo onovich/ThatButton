@@ -154,8 +154,8 @@ Validation:
 
 Commit/push:
 
-- round commit: reported after commit
-- push: pending
+- round commit: `373e57e docs: record phase 9 report schema`
+- push: PASS
 
 Next round goal:
 
@@ -229,8 +229,71 @@ Validation:
 
 Commit/push:
 
-- Pending.
+- round commit: `67bc209 feat: add local playtest report builder`
+- push: PASS
 
 Next round goal:
 
 - Collect real runtime run facts through the app flow without changing gameplay decisions, then build and retain a final run report at run-end states.
+
+## Round 3 - Runtime Run Collection
+
+Round goal:
+
+- Collect real run facts through the existing app flow.
+- Keep report semantics in the pure core builder and keep the app layer as orchestration only.
+- Store the final local-only report on run end without adding remote analytics, tracking, or network submission.
+
+Changes:
+
+- Added `playtestRun`, `playtestLastHazardSignature`, and `lastPlaytestReport` to app state.
+- Added runtime run-state helpers to `src/core/playtest-report.js` for rounds, button presses, combo peaks, player damage, enemy defeats, upgrade offers/selections, and final report assembly.
+- Wired `src/app/create-app.js` to initialize a run-state on `startGame()`, sync round/hazard facts from `updateHazardState(...)`, record safe/fatal button presses, record combo/player-damage/upgrade/enemy-defeat facts, and finalize `lastPlaytestReport` on failure.
+- Exposed `lastPlaytestReport` through the Host snapshot and `debugApi.getLastPlaytestReport()`.
+- Added `debugApi.previewRuntimePlaytestReport()` and validation coverage for both synthetic runtime state and a real app lethal wrong-press path.
+
+Runtime report smoke facts:
+
+- A real host-driven lethal wrong press now produces a JSON-safe, privacy-safe `lastPlaytestReport`.
+- The report records `result: failure`, `reason: wrong_click`, `inputMode: host`, one wrong press, player damage taken, and at least one round fact.
+- The synthetic runtime fixture records touch input, first `3x3`, enemy defeat, upgrade offer/selection, combo peak, player damage, and moving/interference hazard exposure.
+- Host snapshot and debug API return matching report data after run end.
+
+Debug self-check:
+
+- Smallest runtime fixture is `previewRuntimePlaytestReport()` plus the host-driven lethal wrong-press smoke in `scripts/validate-structure.mjs`.
+- Failure layers are isolated to core run-state recording, app orchestration calls, Host snapshot exposure, and debug API retrieval.
+- Missing or duplicate round facts merge by level/enemy and do not create personal data.
+- Clipboard/download UI, manual templates, and final decision report remain for later rounds.
+
+Architecture self-check:
+
+- Report schema and aggregation remain in `src/core/playtest-report.js`.
+- `src/app/create-app.js` records existing gameplay facts but does not own report formulas or duplicate difficulty/combat/hazard semantics.
+- Host code exposes a JSON-safe snapshot field only; it does not interpret report meaning or submit anything.
+- UI rendering was not changed in this round.
+- No remote analytics, tracking, network submission, new hazards, combat tuning, dependencies, framework work, or distribution changes were added.
+
+Validation:
+
+- `node --check src\core\playtest-report.js`: PASS
+- `node --check src\core\debug.js`: PASS
+- `node --check src\app\create-app.js`: PASS
+- `node --check src\host\app-host-api.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- Active network/privacy API scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- round commit: pending
+- push: pending
+
+Next round goal:
+
+- Add the local export path and player/debug-facing access for the final report, with clipboard/download fallback behavior where feasible.

@@ -101,6 +101,24 @@ function normalizeInputMode(value) {
     : 'unknown';
 }
 
+function mergeInputMode(previous, next) {
+  const normalizedPrevious = normalizeInputMode(previous);
+  const normalizedNext = normalizeInputMode(next);
+  if (normalizedPrevious === 'unknown') return normalizedNext;
+  if (normalizedNext === 'unknown' || normalizedNext === normalizedPrevious) return normalizedPrevious;
+  return 'mixed';
+}
+
+function inferInputMode({ source = null, pointerType = null, key = null } = {}) {
+  const normalizedPointer = normalizeText(pointerType, null);
+  if (normalizedPointer === 'touch') return 'touch';
+  if (normalizedPointer === 'mouse') return 'mouse';
+  if (key) return 'keyboard';
+  if (source === 'host') return 'host';
+  if (source === 'dom') return 'pointer';
+  return 'unknown';
+}
+
 function normalizeBuildFacts(build = {}) {
   return cloneJsonSafeValue({
     app: normalizeText(build.app, DEFAULT_PLAYTEST_BUILD.app),
@@ -139,7 +157,10 @@ function normalizeUpgradeEntry(upgrade = {}) {
 }
 
 function getRoundHazardTypes(round = {}, key) {
-  const values = round.hazards?.[key] || round[key] || [];
+  const aliasKey = key === 'types'
+    ? 'hazardTypes'
+    : (key === 'activeTypes' ? 'activeHazardTypes' : key);
+  const values = round.hazards?.[key] || round[key] || round[aliasKey] || [];
   return Array.isArray(values)
     ? [...new Set(values.map((value) => normalizeText(value)).filter(Boolean))]
     : [];
@@ -163,6 +184,30 @@ function normalizeRoundFacts(round = {}) {
 
 function normalizeRounds(rounds = []) {
   return Array.isArray(rounds) ? rounds.map(normalizeRoundFacts) : [];
+}
+
+function getRoundKey(round) {
+  return `${normalizeLevel(round.level)}:${normalizeLevel(round.enemyIndex)}`;
+}
+
+function mergeRoundFacts(existingRound, nextRound) {
+  const existingHazards = existingRound || {};
+  const mergedHazardTypes = [...new Set([
+    ...(existingHazards.hazardTypes || []),
+    ...(nextRound.hazardTypes || [])
+  ])];
+  const mergedActiveHazardTypes = [...new Set([
+    ...(existingHazards.activeHazardTypes || []),
+    ...(nextRound.activeHazardTypes || [])
+  ])];
+  return {
+    ...nextRound,
+    timeLeftMs: existingRound
+      ? Math.min(existingRound.timeLeftMs, nextRound.timeLeftMs)
+      : nextRound.timeLeftMs,
+    hazardTypes: mergedHazardTypes,
+    activeHazardTypes: mergedActiveHazardTypes
+  };
 }
 
 function deriveHazardExposure(rounds) {
@@ -287,6 +332,169 @@ export function buildPlaytestReport(input = {}) {
     throw new TypeError('Playtest report failed privacy or JSON-safety checks.');
   }
   return clonedReport;
+}
+
+export function createPlaytestRunState({
+  seed = null,
+  startedAtMs = 0,
+  viewportClass = 'unknown',
+  inputMode = 'unknown'
+} = {}) {
+  return cloneJsonSafeValue({
+    seed: normalizeText(seed, null),
+    startedAtMs: normalizeNonNegative(startedAtMs),
+    endedAtMs: null,
+    viewportClass: normalizeViewportClass(viewportClass),
+    inputMode: normalizeInputMode(inputMode),
+    rounds: [],
+    progression: {
+      enemiesReached: 1,
+      enemiesDefeated: 0,
+      defeatedEnemies: []
+    },
+    combatReport: {
+      maxCombo: 0,
+      visibleComboPeak: 0,
+      wrongPresses: 0,
+      playerDamageTaken: 0,
+      safePresses: 0
+    },
+    upgradesReport: {
+      offeredCount: 0,
+      selectedCount: 0,
+      selected: []
+    }
+  }, 'playtest run state');
+}
+
+function clonePlaytestRunState(state = null) {
+  return state ? cloneJsonSafeValue(state, 'playtest run state') : createPlaytestRunState();
+}
+
+export function recordPlaytestRound(state, round = {}) {
+  const next = clonePlaytestRunState(state);
+  const normalizedRound = normalizeRoundFacts(round);
+  const key = getRoundKey(normalizedRound);
+  const existingIndex = next.rounds.findIndex((entry) => getRoundKey(entry) === key);
+  if (existingIndex >= 0) {
+    next.rounds[existingIndex] = mergeRoundFacts(next.rounds[existingIndex], normalizedRound);
+  } else {
+    next.rounds.push(normalizedRound);
+  }
+  if (normalizedRound.gridSize === '3x3' && !next.progression.firstThreeByThreeLevel) {
+    next.progression.firstThreeByThreeLevel = normalizedRound.level;
+  }
+  next.progression.enemiesReached = Math.max(next.progression.enemiesReached, normalizedRound.enemyIndex);
+  return cloneJsonSafeValue(next, 'playtest run state');
+}
+
+export function recordPlaytestButtonPress(state, {
+  result = 'unknown',
+  source = 'unknown',
+  pointerType = null,
+  key = null
+} = {}) {
+  const next = clonePlaytestRunState(state);
+  next.inputMode = mergeInputMode(next.inputMode, inferInputMode({ source, pointerType, key }));
+  if (result === 'safe') {
+    next.combatReport.safePresses += 1;
+  } else if (result === 'fatal') {
+    next.combatReport.wrongPresses += 1;
+  }
+  return cloneJsonSafeValue(next, 'playtest run state');
+}
+
+export function recordPlaytestCombo(state, combo = {}) {
+  const next = clonePlaytestRunState(state);
+  const streak = normalizeNonNegative(combo.streak);
+  next.combatReport.maxCombo = Math.max(next.combatReport.maxCombo, streak);
+  if (combo.hasVisibleCombo) {
+    next.combatReport.visibleComboPeak = Math.max(next.combatReport.visibleComboPeak, streak);
+  }
+  return cloneJsonSafeValue(next, 'playtest run state');
+}
+
+export function recordPlaytestPlayerDamage(state, damage = {}) {
+  const next = clonePlaytestRunState(state);
+  next.combatReport.playerDamageTaken += normalizeNonNegative(damage.appliedDamage);
+  return cloneJsonSafeValue(next, 'playtest run state');
+}
+
+export function recordPlaytestEnemyDefeated(state, combat = {}) {
+  const next = clonePlaytestRunState(state);
+  const enemy = normalizeEnemyFacts(combat);
+  if (enemy) {
+    const exists = next.progression.defeatedEnemies.some((entry) => entry.enemyIndex === enemy.enemyIndex);
+    if (!exists) {
+      next.progression.defeatedEnemies.push(enemy);
+    }
+    next.progression.enemiesDefeated = next.progression.defeatedEnemies.length;
+    next.progression.enemiesReached = Math.max(next.progression.enemiesReached, enemy.enemyIndex);
+  }
+  return cloneJsonSafeValue(next, 'playtest run state');
+}
+
+export function recordPlaytestUpgradeOffered(state, choices = []) {
+  const next = clonePlaytestRunState(state);
+  next.upgradesReport.offeredCount += Array.isArray(choices) && choices.length ? 1 : 0;
+  return cloneJsonSafeValue(next, 'playtest run state');
+}
+
+export function recordPlaytestUpgradeSelected(state, upgrade = null) {
+  const next = clonePlaytestRunState(state);
+  if (upgrade) {
+    next.upgradesReport.selected.push(normalizeUpgradeEntry(upgrade));
+    next.upgradesReport.selectedCount = next.upgradesReport.selected.length;
+  }
+  return cloneJsonSafeValue(next, 'playtest run state');
+}
+
+export function buildPlaytestReportFromRunState(state, {
+  result = 'unknown',
+  reason = 'unknown',
+  level = 1,
+  score = 0,
+  endedAtMs = null,
+  createdAt = null,
+  build = DEFAULT_PLAYTEST_BUILD,
+  combat = null,
+  combo = null,
+  upgrades = null,
+  recap = null
+} = {}) {
+  const runState = clonePlaytestRunState(state);
+  const ended = endedAtMs === null ? runState.endedAtMs : normalizeNonNegative(endedAtMs);
+  const elapsedMs = ended === null
+    ? 0
+    : Math.max(0, ended - normalizeNonNegative(runState.startedAtMs));
+  return buildPlaytestReport({
+    createdAt,
+    seed: runState.seed,
+    build,
+    run: {
+      result,
+      reason,
+      level,
+      score,
+      elapsedMs,
+      viewportClass: runState.viewportClass,
+      inputMode: runState.inputMode
+    },
+    progression: {
+      firstThreeByThreeLevel: runState.progression.firstThreeByThreeLevel || null,
+      enemiesReached: runState.progression.enemiesReached,
+      enemiesDefeated: runState.progression.enemiesDefeated,
+      defeatedEnemies: runState.progression.defeatedEnemies,
+      finalEnemy: combat
+    },
+    combatReport: runState.combatReport,
+    upgradesReport: runState.upgradesReport,
+    upgrades,
+    combat,
+    combo,
+    recap,
+    rounds: runState.rounds
+  });
 }
 
 export function formatPlaytestReportSummary(report) {

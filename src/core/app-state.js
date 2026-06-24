@@ -39,6 +39,9 @@ export function createInitialState({ bestRecord, bestRecordStatus, rng }) {
     lastCombatResult: null,
     lastFailureRecap: null,
     lastVictoryRecap: null,
-    lastRunResultRecap: null
+    lastRunResultRecap: null,
+    playtestRun: null,
+    playtestLastHazardSignature: '',
+    lastPlaytestReport: null
   };
 }

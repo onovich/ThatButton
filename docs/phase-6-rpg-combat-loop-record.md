@@ -282,3 +282,44 @@ Architecture self-check:
 - Host event vocabulary and payload builders remain centralized in `src/core/host-events.js`.
 - DOM clicks and host presses still share `pressButton(...)`.
 - Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.
+
+## Round 6 Enemy Scaling Core Evidence
+
+Implemented:
+
+- Added enemy scaling values to `src/config/battle.js`.
+- Added `src/core/enemy.js` for enemy state creation, HP scaling, attack scaling, damage application, next-enemy creation, and summaries.
+- Updated `src/core/combat.js` to preserve old boss compatibility fields while adding:
+  - `enemyIndex`,
+  - `enemyId`,
+  - `enemyName`,
+  - stable `attack`,
+  - nested enemy summary in `getCombatSummary(...)`.
+- Added enemy attack facts to round-clear damage facts.
+- Added `previewEnemyScaling(...)` to the debug API.
+- Extended validation for enemy HP scaling, enemy attack scaling, stable attack while alive, next-enemy generation, combat summary, debug preview, and host snapshot enemy facts.
+
+Validation run:
+
+- `node --check src\core\enemy.js`: PASS
+- `node --check src\core\combat.js`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `OpenOnlineTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Debug self-check:
+
+- Minimal fixture proves enemy 1 is `540 HP / 18 ATK`, enemy 2 is `660 HP / 24 ATK`, and enemy 3 is `780 HP / 30 ATK`.
+- Damage fixture proves enemy attack stays constant while the same enemy is alive.
+- Host snapshot fixture proves current combat facts include enemy index and attack.
+- Runtime still defeats the current enemy as the Phase 4 victory path until the next round wires transitions/upgrades.
+
+Architecture self-check:
+
+- Enemy HP/attack formulas live in config/core modules.
+- UI and host adapters do not calculate enemy scaling.
+- Existing boss fields remain for compatibility while new enemy fields become the Phase 6 source of truth.
+- No upgrade, combo-window, Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, or framework scope was added.

@@ -26,6 +26,7 @@ const moduleFiles = [
   'src/core/combat.js',
   'src/core/combo.js',
   'src/core/encounter.js',
+  'src/core/enemy.js',
   'src/core/player.js',
   'src/core/rng.js',
   'src/core/rules.js',
@@ -133,6 +134,7 @@ const coreBoundaryFiles = [
   'src/core/combat.js',
   'src/core/combo.js',
   'src/core/encounter.js',
+  'src/core/enemy.js',
   'src/core/player.js',
   'src/core/rng.js',
   'src/core/rules.js',
@@ -230,6 +232,7 @@ const [
   combatModule,
   comboModule,
   debugModule,
+  enemyModule,
   playerModule,
   storageModule,
   recapModule,
@@ -244,6 +247,7 @@ const [
   import(moduleUrl('src/core/combat.js')),
   import(moduleUrl('src/core/combo.js')),
   import(moduleUrl('src/core/debug.js')),
+  import(moduleUrl('src/core/enemy.js')),
   import(moduleUrl('src/core/player.js')),
   import(moduleUrl('src/core/storage.js')),
   import(moduleUrl('src/core/recap.js')),
@@ -282,6 +286,14 @@ const {
   resetCombo
 } = comboModule;
 const {
+  applyEnemyDamage,
+  calculateEnemyAttack,
+  calculateEnemyMaxHp,
+  createEnemyState,
+  createNextEnemyState,
+  getEnemySummary
+} = enemyModule;
+const {
   applyMaxHpChange,
   applyPlayerDamage,
   createPlayerState,
@@ -290,6 +302,7 @@ const {
 const {
   previewSeededLevel,
   previewFailureRecap,
+  previewEnemyScaling,
   previewPlayerDamage
 } = debugModule;
 const {
@@ -563,6 +576,39 @@ if (!isJsonSafeValue(playerDamagePayload) || playerDamagePayload.damage.appliedD
   failures.push(`Player damage payload smoke failed: ${JSON.stringify(playerDamagePayload)}`);
 }
 
+const firstEnemy = createEnemyState({ enemyIndex: 1 });
+const secondEnemy = createEnemyState({ enemyIndex: 2 });
+if (
+  calculateEnemyMaxHp(1) !== 540 ||
+  calculateEnemyMaxHp(2) !== 660 ||
+  calculateEnemyAttack(1) !== 18 ||
+  calculateEnemyAttack(2) !== 24 ||
+  firstEnemy.hp !== 540 ||
+  firstEnemy.attack !== 18 ||
+  secondEnemy.hp !== 660 ||
+  secondEnemy.attack !== 24
+) {
+  failures.push(`Enemy scaling smoke failed: ${JSON.stringify({ firstEnemy, secondEnemy })}`);
+}
+const secondEnemyHit = applyEnemyDamage(secondEnemy, { amount: 30, level: 2 });
+if (
+  secondEnemyHit.enemy.enemyIndex !== 2 ||
+  secondEnemyHit.enemy.hp !== 630 ||
+  secondEnemyHit.enemy.attack !== 24 ||
+  secondEnemyHit.damage.appliedDamage !== 30 ||
+  secondEnemyHit.defeated
+) {
+  failures.push(`Enemy damage should preserve stable attack while alive: ${JSON.stringify(secondEnemyHit)}`);
+}
+const thirdEnemy = createNextEnemyState(secondEnemyHit.enemy);
+if (thirdEnemy.enemyIndex !== 3 || thirdEnemy.maxHp !== 780 || thirdEnemy.attack !== 30) {
+  failures.push(`Next enemy scaling smoke failed: ${JSON.stringify(thirdEnemy)}`);
+}
+const enemySummary = getEnemySummary(secondEnemyHit.enemy);
+if (enemySummary.hpPercent !== 95 || enemySummary.attack !== 24 || enemySummary.enemyIndex !== 2) {
+  failures.push(`Enemy summary smoke failed: ${JSON.stringify(enemySummary)}`);
+}
+
 const initialCombo = createComboState();
 if (
   COMBO_MAX_STREAK !== 12 ||
@@ -643,6 +689,10 @@ if (JSON.stringify(getComboSummary(comboState)) !== JSON.stringify(comboState)) 
 const initialCombat = createCombatState();
 if (
   PROTOTYPE_BOSS_CONFIG.maxHp !== 540 ||
+  initialCombat.enemyIndex !== 1 ||
+  initialCombat.enemyId !== 'reactor-warden-1' ||
+  initialCombat.enemyName !== 'REACTOR WARDEN' ||
+  initialCombat.attack !== 18 ||
   initialCombat.bossId !== 'reactor-warden' ||
   initialCombat.hp !== 540 ||
   initialCombat.status !== 'active'
@@ -661,7 +711,7 @@ const firstCombatHit = applyRoundClearDamage(initialCombat, {
   timeLeftMs: 18000,
   comboState: createComboState({ streak: 3 })
 });
-if (firstCombatHit.damage.appliedDamage !== 24 || firstCombatHit.combat.hp !== 516 || firstCombatHit.defeated) {
+if (firstCombatHit.damage.appliedDamage !== 24 || firstCombatHit.damage.enemyAttack !== 18 || firstCombatHit.combat.hp !== 516 || firstCombatHit.combat.attack !== 18 || firstCombatHit.defeated) {
   failures.push(`Combat damage application smoke failed: ${JSON.stringify(firstCombatHit)}`);
 }
 let defeatCombat = createCombatState();
@@ -967,6 +1017,7 @@ const requiredDebugHelpers = [
   'getLastRunResultRecap',
   'previewCombatRoundClear',
   'previewPlayerDamage',
+  'previewEnemyScaling',
   'getCombatState',
   'getComboState',
   'getBestRecord',
@@ -1013,6 +1064,13 @@ if (
   firstSnapshot.round.player?.hp !== 100
 ) {
   failures.push(`Host snapshot missing player facts: ${JSON.stringify(firstSnapshot.player)}`);
+}
+if (
+  firstSnapshot.combat?.enemyIndex !== 1 ||
+  firstSnapshot.combat?.attack !== 18 ||
+  firstSnapshot.round.combat?.attack !== 18
+) {
+  failures.push(`Host snapshot missing enemy scaling facts: ${JSON.stringify(firstSnapshot.combat)}`);
 }
 const safePress = hostSmokeApp.press('btn-0');
 if (!safePress.accepted || safePress.result !== 'safe' || hostSmokeApp.getSnapshot().run.score !== 10) {
@@ -1201,6 +1259,10 @@ if (debugApi) {
     debugPlayerDamage.defeated
   ) {
     failures.push(`Debug API player-damage preview changed: ${JSON.stringify(debugPlayerDamage)}`);
+  }
+  const debugSecondEnemy = debugApi.previewEnemyScaling(2);
+  if (debugSecondEnemy.enemyIndex !== 2 || debugSecondEnemy.maxHp !== 660 || debugSecondEnemy.attack !== 24) {
+    failures.push(`Debug API enemy-scaling preview changed: ${JSON.stringify(debugSecondEnemy)}`);
   }
 
   const debugInitial = debugApi.getBestRecord();

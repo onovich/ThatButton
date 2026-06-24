@@ -2,6 +2,7 @@ import { getDifficultyForLevel } from '../config/difficulty.js';
 import { resolveWrongPressDamage } from './battle.js';
 import { applyRoundClearDamage, createCombatState, getCombatSummary } from './combat.js';
 import { createComboState, getComboSummary } from './combo.js';
+import { createEnemyState, getEnemySummary } from './enemy.js';
 import { generateLevelData } from './level.js';
 import { createPlayerState, getPlayerSummary } from './player.js';
 import { createSeededRng } from './rng.js';
@@ -119,6 +120,10 @@ export function previewPlayerDamage({ hp = 100, maxHp = 100, enemyAttack = 18, l
   };
 }
 
+export function previewEnemyScaling(enemyIndex = 1) {
+  return getEnemySummary(createEnemyState({ enemyIndex }));
+}
+
 export function createDebugApi({
   getState,
   loadBestRecord,
@@ -140,6 +145,7 @@ export function createDebugApi({
     },
     previewCombatRoundClear,
     previewPlayerDamage,
+    previewEnemyScaling,
     getDifficultyForLevel,
     getLastFailureRecap: () => cloneFailureRecap(getState().lastFailureRecap),
     getLastVictoryRecap: () => cloneFailureRecap(getState().lastVictoryRecap),

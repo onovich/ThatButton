@@ -1,22 +1,27 @@
 import { PROTOTYPE_BOSS_CONFIG } from '../config/combat.js';
-
-function normalizeHp(value, maxHp) {
-  const hp = Math.max(0, Math.floor(Number(value) || 0));
-  return Math.min(maxHp, hp);
-}
+import { createEnemyState, getEnemySummary } from './enemy.js';
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
 export function createCombatState(config = PROTOTYPE_BOSS_CONFIG) {
-  const maxHp = Math.max(1, Math.floor(Number(config.maxHp) || 1));
+  const enemy = createEnemyState({
+    enemyIndex: config.enemyIndex || 1,
+    maxHp: config.maxHp,
+    hp: config.hp,
+    attack: config.attack
+  });
   return {
-    bossId: config.id,
-    bossName: config.name,
-    hp: maxHp,
-    maxHp,
-    status: 'active',
+    enemyIndex: enemy.enemyIndex,
+    enemyId: enemy.enemyId,
+    enemyName: enemy.enemyName,
+    attack: enemy.attack,
+    bossId: config.id || enemy.enemyId,
+    bossName: config.name || enemy.enemyName,
+    hp: enemy.hp,
+    maxHp: enemy.maxHp,
+    status: enemy.status,
     totalDamage: 0,
     roundsCleared: 0,
     lastDamage: null,
@@ -26,16 +31,30 @@ export function createCombatState(config = PROTOTYPE_BOSS_CONFIG) {
 
 export function cloneCombatState(combat = createCombatState()) {
   const maxHp = Math.max(1, Math.floor(Number(combat.maxHp) || PROTOTYPE_BOSS_CONFIG.maxHp));
-  return {
-    bossId: combat.bossId || PROTOTYPE_BOSS_CONFIG.id,
-    bossName: combat.bossName || PROTOTYPE_BOSS_CONFIG.name,
-    hp: normalizeHp(combat.hp, maxHp),
+  const enemy = createEnemyState({
+    enemyIndex: combat.enemyIndex || 1,
+    hp: combat.hp,
     maxHp,
-    status: combat.status === 'defeated' ? 'defeated' : 'active',
-    totalDamage: Math.max(0, Math.floor(Number(combat.totalDamage) || 0)),
+    attack: combat.attack,
+    status: combat.status,
+    totalDamage: combat.totalDamage,
+    lastDamage: combat.lastDamage,
+    defeatedAtLevel: combat.defeatedAtLevel
+  });
+  return {
+    enemyIndex: enemy.enemyIndex,
+    enemyId: enemy.enemyId,
+    enemyName: enemy.enemyName,
+    attack: enemy.attack,
+    bossId: combat.bossId || enemy.enemyId,
+    bossName: combat.bossName || enemy.enemyName,
+    hp: enemy.hp,
+    maxHp: enemy.maxHp,
+    status: enemy.status,
+    totalDamage: enemy.totalDamage,
     roundsCleared: Math.max(0, Math.floor(Number(combat.roundsCleared) || 0)),
-    lastDamage: combat.lastDamage ? { ...combat.lastDamage } : null,
-    defeatedAtLevel: combat.defeatedAtLevel === null ? null : Math.max(1, Math.floor(Number(combat.defeatedAtLevel) || 1))
+    lastDamage: enemy.lastDamage,
+    defeatedAtLevel: enemy.defeatedAtLevel
   };
 }
 
@@ -72,6 +91,10 @@ export function applyRoundClearDamage(combat = createCombatState(), {
   const hpAfter = Math.max(0, hpBefore - appliedDamage);
   const defeated = hpAfter <= 0;
   const damageResult = {
+    enemyIndex: previous.enemyIndex,
+    enemyId: previous.enemyId,
+    enemyName: previous.enemyName,
+    enemyAttack: previous.attack,
     bossId: previous.bossId,
     bossName: previous.bossName,
     level: Math.max(1, Math.floor(Number(level) || 1)),
@@ -103,8 +126,10 @@ export function applyRoundClearDamage(combat = createCombatState(), {
 
 export function getCombatSummary(combat = createCombatState()) {
   const summary = cloneCombatState(combat);
+  const enemy = getEnemySummary(summary);
   return {
     ...summary,
+    enemy,
     hpPercent: Math.round((summary.hp / summary.maxHp) * 100)
   };
 }

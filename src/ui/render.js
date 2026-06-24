@@ -52,6 +52,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     bossHpText: document.getElementById('boss-hp-text'),
     bossHpBar: document.getElementById('boss-hp-bar'),
     comboStatusText: document.getElementById('combo-status-text'),
+    comboRewardText: document.getElementById('combo-reward-text'),
     failureRecapEl: document.getElementById('failure-recap'),
     startScreen: document.getElementById('start-screen'),
     gameOverScreen: document.getElementById('game-over-screen'),
@@ -61,6 +62,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     resultSubtitle: document.getElementById('result-subtitle')
   };
   let typewriterTimeout = null;
+  let comboRewardTimeout = null;
 
   function renderFailureRecap(recap) {
     if (!recap) {
@@ -165,6 +167,30 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     refs.comboStatusText.innerText = `COMBO ${combo.multiplierLabel} / ${combo.streak}`;
   }
 
+  function showComboReward({ previous, combo }) {
+    if (!previous || !combo) return;
+    const bonusChanged = combo.damageBonus > previous.damageBonus;
+    refs.comboRewardText.innerText = bonusChanged ? `DMG +${combo.damageBonus}` : 'STREAK +1';
+    if (bonusChanged) {
+      refs.comboRewardText.classList.add('damage-bonus');
+    } else {
+      refs.comboRewardText.classList.remove('damage-bonus');
+    }
+    refs.comboRewardText.classList.remove('combo-reward-pop');
+    refs.comboStatusText.classList.remove('combo-pulse');
+    void refs.comboRewardText.offsetWidth;
+    refs.comboRewardText.classList.add('combo-reward-pop');
+    refs.comboStatusText.classList.add('combo-pulse');
+    if (comboRewardTimeout !== null) {
+      cancelSchedule(comboRewardTimeout);
+    }
+    comboRewardTimeout = schedule(() => {
+      refs.comboRewardText.classList.remove('combo-reward-pop');
+      refs.comboStatusText.classList.remove('combo-pulse');
+      comboRewardTimeout = null;
+    }, 760);
+  }
+
   function updateTimer(timeLeft, timeLimit) {
     const timePercent = Math.max(0, (timeLeft / timeLimit) * 100);
     refs.timerBarEl.style.width = `${timePercent}%`;
@@ -246,6 +272,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     renderFailureRecap,
     updateBestRecordUi,
     updateCombatStatus,
+    showComboReward,
     updateTimer,
     updateScore,
     hideStartScreen,

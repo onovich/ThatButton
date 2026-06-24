@@ -167,6 +167,10 @@ export function createApp({
     gameState.combo = comboChange.combo;
     renderer.updateCombatStatus(getEncounterFacts(gameState));
     if (comboChange.changed) {
+      renderer.showComboReward({
+        previous: comboChange.previous,
+        combo: comboChange.combo
+      });
       hostController.emitComboChanged({
         previous: comboChange.previous,
         combo: comboChange.combo,

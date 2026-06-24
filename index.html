@@ -175,6 +175,7 @@
             align-items: center;
             color: var(--crt-yellow);
             letter-spacing: 0;
+            position: relative;
         }
 
         .boss-avatar-shell {
@@ -226,6 +227,61 @@
             color: var(--crt-green);
             text-align: right;
             white-space: nowrap;
+        }
+
+        .combo-status-text.combo-pulse {
+            animation: combo-pulse 0.36s ease-out;
+        }
+
+        .combo-reward-text {
+            position: absolute;
+            right: 0.45rem;
+            top: -0.72rem;
+            padding: 0.08rem 0.32rem;
+            border: 1px solid rgba(74, 246, 38, 0.55);
+            background: rgba(0, 18, 0, 0.88);
+            color: var(--crt-green);
+            border-radius: 3px;
+            opacity: 0;
+            transform: translateY(4px) scale(0.96);
+            pointer-events: none;
+            letter-spacing: 0;
+            box-shadow: 0 0 8px rgba(74, 246, 38, 0.28);
+        }
+
+        .combo-reward-text.combo-reward-pop {
+            animation: combo-reward-pop 0.72s ease-out;
+        }
+
+        .combo-reward-text.damage-bonus {
+            border-color: rgba(255, 204, 0, 0.7);
+            color: var(--crt-yellow);
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.32);
+        }
+
+        @keyframes combo-pulse {
+            0% { transform: scale(1); text-shadow: none; }
+            35% { transform: scale(1.08); text-shadow: 0 0 10px rgba(74, 246, 38, 0.65); }
+            100% { transform: scale(1); text-shadow: none; }
+        }
+
+        @keyframes combo-reward-pop {
+            0% {
+                opacity: 0;
+                transform: translateY(4px) scale(0.96);
+            }
+            18% {
+                opacity: 1;
+                transform: translateY(-2px) scale(1);
+            }
+            78% {
+                opacity: 1;
+                transform: translateY(-8px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-14px) scale(0.98);
+            }
         }
 
         .terminal-box {
@@ -465,6 +521,12 @@
                 min-width: 0;
             }
 
+            .combo-reward-text {
+                top: -0.62rem;
+                right: 0.35rem;
+                font-size: 0.62rem;
+            }
+
             #warning-text {
                 font-size: 0.75rem;
             }
@@ -642,6 +704,7 @@
             <span id="boss-hp-text" class="combat-label">BOSS: --</span>
             <span class="combat-hp-track"><span id="boss-hp-bar" class="combat-hp-bar"></span></span>
             <span id="combo-status-text" class="combo-status-text">COMBO x1.0</span>
+            <span id="combo-reward-text" class="combo-reward-text" aria-hidden="true">STREAK +1</span>
         </div>
 
         <div class="timer-container">

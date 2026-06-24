@@ -49,6 +49,7 @@ for (const marker of [
   'id="combat-status"',
   'id="boss-hp-bar"',
   'id="combo-status-text"',
+  'id="combo-reward-text"',
   'id="failure-recap"',
   '致命条件',
   '禁止按键',
@@ -60,13 +61,13 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'updateCombatStatus']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'updateCombatStatus', 'showComboReward']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
 }
 
-for (const marker of ['id="boss-avatar"', '.boss-avatar-shell', 'grid-template-areas:', '"avatar label combo"', '.combat-hp-bar', 'display: block;', '@media (max-width: 520px)']) {
+for (const marker of ['id="boss-avatar"', '.boss-avatar-shell', 'grid-template-areas:', '"avatar label combo"', '.combat-hp-bar', 'display: block;', 'id="combo-reward-text"', '.combo-reward-text', '@keyframes combo-reward-pop', '@media (max-width: 520px)']) {
   if (!html.includes(marker)) {
     failures.push(`Missing combat mobile layout marker in index.html: ${marker}`);
   }

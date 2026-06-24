@@ -89,8 +89,9 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
   let comboImpactTimeout = null;
   let comboShakeTimeout = null;
   let wrongPressFlashTimeout = null;
+  let upgradeRewardTimeout = null;
   let hazardMotionButtonIds = new Set();
-  const terminalGlyphs = ['>', '/', '+', '#'];
+  const terminalGlyphs = ['>', '/', '+', '#', '!', '$'];
 
   function removeNode(node) {
     if (node && typeof node.remove === 'function') {
@@ -103,6 +104,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       return {
         label: `MAX COMBO x${combo.streak}`,
         className: 'max-combo',
+        tier: 'combo-capped',
         color: '#ffffff',
         strong: true
       };
@@ -111,6 +113,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       return {
         label: `${combo.comboText} ${combo.rewardText}`.trim(),
         className: 'combo-stage-two',
+        tier: 'combo-x2',
         color: 'var(--crt-yellow)',
         strong: true
       };
@@ -119,6 +122,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       return {
         label: `${combo.comboText} ${combo.rewardText}`.trim(),
         className: 'combo-stage-high',
+        tier: 'combo-high',
         color: '#ffffff',
         strong: true
       };
@@ -127,6 +131,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       return {
         label: combo.rewardText,
         className: 'damage-bonus',
+        tier: 'damage-bonus',
         color: 'var(--crt-yellow)',
         strong: true
       };
@@ -134,9 +139,17 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     return {
       label: combo.comboText || 'CHAIN BONUS',
       className: '',
+      tier: 'combo-bonus',
       color: 'var(--crt-green)',
       strong: false
     };
+  }
+
+  function getVfxTierClass(tier = 'safe-success') {
+    return `vfx-tier-${String(tier || 'safe-success')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, '-')}`;
   }
 
   function spawnButtonToEnemyTracers({
@@ -144,17 +157,19 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     color = 'var(--crt-green)',
     strong = false,
     combo = false,
-    count = null
+    count = null,
+    tier = 'safe-success'
   } = {}) {
     if (!sourceElement || !document.body || typeof document.body.appendChild !== 'function') return false;
     const source = getElementCenter(sourceElement);
     const target = getElementCenter(refs.bossAvatarShell);
     if (!source || !target) return false;
 
-    const tracerCount = count || (strong ? 14 : 7);
+    const tierClass = getVfxTierClass(tier);
+    const tracerCount = count || (strong ? 20 : 10);
     for (let index = 0; index < tracerCount; index++) {
       const tracer = document.createElement('span');
-      const isGlyph = combo && index % 5 === 0;
+      const isGlyph = combo ? index % 4 === 0 : index % 7 === 0;
       const targetJitterX = (random() - 0.5) * target.width * (strong ? 0.42 : 0.28);
       const targetJitterY = (random() - 0.5) * target.height * (strong ? 0.42 : 0.28);
       const sourceJitterX = (random() - 0.5) * source.width * 0.2;
@@ -166,7 +181,11 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
         'button-combo-spark',
         'button-to-enemy-tracer',
         'retro-crt-tracer',
+        'vfx-data-projectile',
+        'vfx-phosphor-afterimage',
+        tierClass,
         combo ? 'combo-directional-tracer' : '',
+        strong ? 'chunky-neon-fragment' : '',
         isGlyph ? 'terminal-glyph-fragment' : (index % 2 === 0 ? 'pixel-spark' : 'scanline-streak')
       ].filter(Boolean).join(' ');
       if (isGlyph) {
@@ -178,22 +197,23 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       tracer.style.setProperty('--dy', `${dy}px`);
       tracer.style.setProperty('--tracer-angle', `${angle}rad`);
       tracer.style.setProperty('--particle-color', color);
-      tracer.style.setProperty('--particle-size', `${strong ? 7 : 5}px`);
-      tracer.style.setProperty('--tracer-width', `${strong ? 24 : 17}px`);
-      tracer.style.setProperty('--tracer-height', `${strong ? 5 : 4}px`);
+      tracer.style.setProperty('--particle-size', `${strong ? 8 : 6}px`);
+      tracer.style.setProperty('--tracer-width', `${strong ? 30 : 20}px`);
+      tracer.style.setProperty('--tracer-height', `${strong ? 6 : 4}px`);
       document.body.appendChild(tracer);
       schedule(() => removeNode(tracer), 820);
     }
     return true;
   }
 
-  function spawnComboParticles({ strong, color, sourceElement = null }) {
+  function spawnComboParticles({ strong, color, sourceElement = null, tier = 'combo-high' }) {
     if (spawnButtonToEnemyTracers({
       sourceElement,
       color,
       strong,
       combo: true,
-      count: strong ? 18 : 10
+      count: strong ? 24 : 12,
+      tier
     })) {
       return;
     }
@@ -208,7 +228,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       const particle = document.createElement('span');
       const angle = (200 + random() * 140) * (Math.PI / 180);
       const distance = (strong ? 34 : 24) + random() * (strong ? 32 : 22);
-      particle.className = 'combo-particle retro-crt-tracer pixel-spark';
+      particle.className = `combo-particle retro-crt-tracer pixel-spark vfx-terminal-packet ${getVfxTierClass(tier)}`;
       particle.style.left = `${originX}px`;
       particle.style.top = `${originY}px`;
       particle.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
@@ -220,30 +240,50 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     }
   }
 
-  function spawnButtonReward({ sourceElement, label, className, color, strong, directional = false, combo = false }) {
+  function spawnButtonReward({
+    sourceElement,
+    label,
+    className,
+    color,
+    strong,
+    directional = false,
+    combo = false,
+    tier = 'safe-success'
+  }) {
     if (!sourceElement || typeof sourceElement.getBoundingClientRect !== 'function') return;
     if (!document.body || typeof document.body.appendChild !== 'function') return;
     const rect = sourceElement.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
+    const tierClass = getVfxTierClass(tier);
     const originX = rect.left + rect.width / 2;
     const originY = rect.top + rect.height * 0.46;
     const floatText = document.createElement('span');
-    floatText.className = `button-float-text ${className}`.trim();
+    floatText.className = `button-float-text ${className} ${tierClass}`.trim();
+    floatText.dataset.vfxTier = tier;
     floatText.innerText = label;
     floatText.style.left = `${originX}px`;
     floatText.style.top = `${originY}px`;
     document.body.appendChild(floatText);
     schedule(() => removeNode(floatText), 900);
     if (directional) {
-      spawnButtonToEnemyTracers({ sourceElement, color, strong, combo });
+      spawnButtonToEnemyTracers({ sourceElement, color, strong, combo, tier });
     }
 
-    const sparkCount = directional ? (strong ? 5 : 3) : (strong ? 14 : 8);
+    const sparkCount = directional ? (strong ? 8 : 5) : (strong ? 18 : 10);
     for (let index = 0; index < sparkCount; index++) {
       const spark = document.createElement('span');
       const angle = random() * Math.PI * 2;
       const distance = rect.width * (0.22 + random() * (strong ? 0.48 : 0.32));
-      spark.className = `button-combo-spark retro-crt-tracer ${index % 2 === 0 ? 'pixel-spark' : 'scanline-streak'}`;
+      spark.className = [
+        'button-combo-spark',
+        'retro-crt-tracer',
+        'vfx-terminal-packet',
+        tierClass,
+        className === 'wrong-press' ? 'wrong-impact-vector' : '',
+        className === 'upgrade-reward-burst' ? 'upgrade-reward-burst' : '',
+        strong ? 'chunky-neon-fragment' : '',
+        index % 2 === 0 ? 'pixel-spark' : 'scanline-streak'
+      ].filter(Boolean).join(' ');
       spark.style.left = `${originX}px`;
       spark.style.top = `${originY}px`;
       spark.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
@@ -458,7 +498,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     hazardMotionButtonIds = nextMotionButtonIds;
   }
 
-  function spawnBossProjectile({ sourceElement, strong }) {
+  function spawnBossProjectile({ sourceElement, strong, defeated = false }) {
     if (!document.body || typeof document.body.appendChild !== 'function') return;
     const target = getElementCenter(refs.bossAvatarShell);
     if (!target) return;
@@ -473,7 +513,16 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     const projectile = document.createElement('span');
     const dx = target.x - source.x;
     const dy = target.y - source.y;
-    projectile.className = 'boss-projectile button-to-enemy-tracer retro-crt-tracer scanline-streak';
+    projectile.className = [
+      'boss-projectile',
+      'button-to-enemy-tracer',
+      'retro-crt-tracer',
+      'scanline-streak',
+      'vfx-data-projectile',
+      'enemy-hit-vector',
+      defeated ? 'enemy-defeat-burst' : '',
+      strong ? 'chunky-neon-fragment' : ''
+    ].filter(Boolean).join(' ');
     projectile.style.left = `${source.x}px`;
     projectile.style.top = `${source.y}px`;
     projectile.style.setProperty('--dx', `${dx}px`);
@@ -492,18 +541,25 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     schedule(() => removeNode(projectile), 520);
   }
 
-  function spawnBossHitSparks(strong) {
+  function spawnBossHitSparks(strong, defeated = false) {
     if (!document.body || typeof document.body.appendChild !== 'function') return;
     const target = getElementCenter(refs.bossAvatarShell);
     if (!target) return;
-    const count = strong ? 18 : 12;
+    const count = defeated ? 28 : (strong ? 20 : 12);
     const color = strong ? 'var(--crt-yellow)' : 'var(--crt-green)';
     for (let index = 0; index < count; index++) {
       const spark = document.createElement('span');
       const angle = random() * Math.PI * 2;
       const distance = target.width * (0.18 + random() * (strong ? 0.44 : 0.34));
-      spark.className = `boss-hit-spark retro-crt-tracer ${index % 2 === 0 ? 'pixel-spark' : 'terminal-glyph-fragment'}`;
-      if (index % 2 === 1) {
+      spark.className = [
+        'boss-hit-spark',
+        'retro-crt-tracer',
+        'enemy-hit-vector',
+        defeated ? 'enemy-defeat-burst' : '',
+        strong ? 'chunky-neon-fragment' : '',
+        index % 2 === 0 ? 'pixel-spark' : 'terminal-glyph-fragment'
+      ].filter(Boolean).join(' ');
+      if (index % 2 === 1 || (defeated && index % 5 === 0)) {
         spark.textContent = terminalGlyphs[index % terminalGlyphs.length];
       }
       spark.style.left = `${target.x}px`;
@@ -663,8 +719,8 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     if (defeated) {
       refs.bossAvatarShell.classList.add('boss-defeated');
     }
-    spawnBossProjectile({ sourceElement, strong });
-    schedule(() => spawnBossHitSparks(strong), 320);
+    spawnBossProjectile({ sourceElement, strong, defeated });
+    schedule(() => spawnBossHitSparks(strong, defeated), 320);
     schedule(() => {
       refs.bossDamageText.classList.remove('boss-damage-pop');
       refs.bossAvatarShell.classList.remove('boss-hit');
@@ -695,8 +751,9 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       label: chainStarted ? 'CHAIN READY' : 'SUCCESS',
       className: chainStarted ? 'chain-start' : 'safe-success',
       color: chainStarted ? '#b7ff8a' : 'var(--crt-green)',
-      strong: false,
-      directional: true
+      strong: chainStarted,
+      directional: true,
+      tier: chainStarted ? 'chain-start' : 'safe-success'
     });
   }
 
@@ -704,6 +761,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     const appliedDamage = Math.max(0, Math.floor(Number(damage?.appliedDamage) || 0));
     if (sourceElement?.classList) {
       sourceElement.classList.add('wrong-press');
+      schedule(() => sourceElement.classList.remove('wrong-press'), 360);
     }
     flashWrongPress();
     triggerVibration(defeated ? [35, 25, 70] : [25, 15, 35]);
@@ -713,7 +771,8 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       label: appliedDamage > 0 ? `HIT -${appliedDamage}` : 'WRONG',
       className: 'wrong-press',
       color: 'var(--crt-red)',
-      strong: true
+      strong: true,
+      tier: 'wrong-press'
     });
   }
 
@@ -733,7 +792,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     refs.comboRewardText.classList.add('combo-reward-pop');
     refs.comboStatusText.classList.add('combo-pulse');
     refs.combatStatus.classList.add(reward.strong ? 'combo-tier-impact' : 'combo-impact');
-    spawnComboParticles({ ...reward, sourceElement });
+    spawnComboParticles({ ...reward, sourceElement, tier: reward.tier });
     spawnButtonReward({
       sourceElement,
       label: reward.label,
@@ -741,7 +800,8 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       color: reward.color,
       strong: reward.strong,
       directional: true,
-      combo: true
+      combo: true,
+      tier: reward.tier
     });
     playComboShake(reward.strong);
     if (comboRewardTimeout !== null) {
@@ -821,6 +881,38 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     refs.upgradeScreen.classList.remove('hidden');
   }
 
+  function showUpgradeReward({ upgrade = null } = {}) {
+    const upgradeCards = typeof refs.upgradeChoiceList.querySelectorAll === 'function'
+      ? [...refs.upgradeChoiceList.querySelectorAll('.upgrade-card')]
+      : [...(refs.upgradeChoiceList.children || [])];
+    const selectedCard = upgradeCards
+      .find((card) => card.dataset.upgradeId === upgrade?.id);
+    const sourceElement = selectedCard || refs.upgradeScreen;
+    if (selectedCard?.classList) {
+      selectedCard.classList.add('upgrade-selected');
+    }
+    document.body.classList.remove('upgrade-reward-flash');
+    void document.body.offsetWidth;
+    document.body.classList.add('upgrade-reward-flash');
+    spawnButtonReward({
+      sourceElement,
+      label: upgrade?.shortLabel ? `${upgrade.shortLabel} +${upgrade.value}` : 'UPGRADE',
+      className: 'upgrade-reward-burst',
+      color: 'var(--crt-yellow)',
+      strong: true,
+      directional: false,
+      tier: 'upgrade'
+    });
+    if (upgradeRewardTimeout !== null) {
+      cancelSchedule(upgradeRewardTimeout);
+    }
+    upgradeRewardTimeout = schedule(() => {
+      selectedCard?.classList?.remove('upgrade-selected');
+      document.body.classList.remove('upgrade-reward-flash');
+      upgradeRewardTimeout = null;
+    }, 520);
+  }
+
   function hideUpgradeScreen() {
     refs.upgradeScreen.classList.add('hidden');
     refs.upgradeChoiceList.innerHTML = '';
@@ -894,6 +986,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     hideStartScreen,
     hideGameOverScreen,
     showUpgradeScreen,
+    showUpgradeReward,
     hideUpgradeScreen,
     showGameOverScreen,
     setWarningVisible,

@@ -86,13 +86,14 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewHostEventPayloads', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+const renderSource = sources.get('src/ui/render.js') || '';
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewHostEventPayloads', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
 }
 
-for (const marker of ['id="boss-avatar"', '.battle-stage', '.player-hud', '.command-panel', '.upgrade-screen', '.upgrade-card', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '"avatar hp attack"', '.combat-hp-bar', '.player-hp-bar', '.enemy-attack-text', '.player-damage-text', '@keyframes player-damage-pop', 'display: block;', 'id="combo-window-bar"', '.combo-window-bar', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-stage-two', '.combo-stage-high', '.combo-particle', '.button-float-text', '.safe-success', '.chain-start', '.wrong-press-flash', '.combo-shake-strong', '.button-to-enemy-tracer', '.combo-directional-tracer', '.retro-crt-tracer', '.pixel-spark', '.scanline-streak', '.terminal-glyph-fragment', 'image-rendering: pixelated', '--tracer-angle', '.hazard-status-text', '.hazard-layer', '.hazard-marker', '.hazard-marker-telegraph', '.hazard-marker-active', '.hazard-board-marker', '.btn-grid::after', '--hazard-interference-opacity', '@keyframes hazard-marker-telegraph', '@keyframes signal-interference', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
+for (const marker of ['id="boss-avatar"', '.battle-stage', '.player-hud', '.command-panel', '.upgrade-screen', '.upgrade-card', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '"avatar hp attack"', '.combat-hp-bar', '.player-hp-bar', '.enemy-attack-text', '.player-damage-text', '@keyframes player-damage-pop', 'display: block;', 'id="combo-window-bar"', '.combo-window-bar', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-stage-two', '.combo-stage-high', '.combo-particle', '.button-float-text', '.safe-success', '.chain-start', '.wrong-press-flash', '.combo-shake-strong', '.button-to-enemy-tracer', '.combo-directional-tracer', '.retro-crt-tracer', '.pixel-spark', '.scanline-streak', '.terminal-glyph-fragment', '.vfx-data-projectile', '.vfx-phosphor-afterimage', '.vfx-terminal-packet', '.chunky-neon-fragment', '.vfx-tier-safe-success', '.vfx-tier-chain-start', '.vfx-tier-combo-x2', '.vfx-tier-combo-high', '.vfx-tier-combo-capped', '.vfx-tier-wrong-press', '.upgrade-reward-burst', '.enemy-hit-vector', '.enemy-defeat-burst', '.wrong-impact-vector', 'image-rendering: pixelated', '--tracer-angle', '.hazard-status-text', '.hazard-layer', '.hazard-marker', '.hazard-marker-telegraph', '.hazard-marker-active', '.hazard-board-marker', '.btn-grid::after', '--hazard-interference-opacity', '@keyframes hazard-marker-telegraph', '@keyframes signal-interference', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
   if (!html.includes(marker)) {
     failures.push(`Missing combat mobile layout marker in index.html: ${marker}`);
   }
@@ -142,6 +143,16 @@ for (const forbiddenParticleMarker of ['border-radius: 999px', 'filter: blur', '
     failures.push(`Particle styling should stay low-fi CRT/vector, found: ${forbiddenParticleMarker}`);
   }
 }
+for (const forbiddenVfxLanguage of ['confetti', 'firework', 'magic-particle', 'glossy-particle', 'blur-blob']) {
+  if (`${html}\n${renderSource}`.includes(forbiddenVfxLanguage)) {
+    failures.push(`VFX language should stay retro terminal/data-signal, found forbidden marker: ${forbiddenVfxLanguage}`);
+  }
+}
+for (const requiredVfxTier of ['vfx-tier-safe-success', 'vfx-tier-chain-start', 'vfx-tier-combo-x2', 'vfx-tier-combo-high', 'vfx-tier-combo-capped', 'vfx-tier-wrong-press', 'vfx-tier-upgrade']) {
+  if (!html.includes(requiredVfxTier) && !renderSource.includes(requiredVfxTier)) {
+    failures.push(`Missing VFX tier marker: ${requiredVfxTier}`);
+  }
+}
 
 const interferenceStyleStart = html.indexOf('.btn-grid::after');
 const interferenceStyleEnd = html.indexOf('@keyframes signal-interference');
@@ -163,7 +174,6 @@ if (!html.includes('.button-combo-spark') || !html.includes('z-index: 80') || !h
   failures.push('Button/combo feedback should remain layered above interference.');
 }
 
-const renderSource = sources.get('src/ui/render.js') || '';
 const hazardPresentationMarkers = [
   'refs.commandPanel.dataset.hazardPhase',
   'refs.commandPanel.dataset.hazardTypes',

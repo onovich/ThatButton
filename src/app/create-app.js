@@ -387,6 +387,9 @@ export function createApp({
     });
     gameState.upgrades = applied.upgrades;
     gameState.player = applied.player || gameState.player;
+    renderer.showUpgradeReward({
+      upgrade: applied.upgrade
+    });
     renderer.hideUpgradeScreen();
     audio.playLevelUp();
     const encounterFacts = getEncounterFacts(gameState);

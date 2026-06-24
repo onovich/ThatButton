@@ -555,6 +555,58 @@
             text-shadow: 0 0 8px var(--particle-color, var(--crt-green));
         }
 
+        .vfx-data-projectile {
+            outline: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.86), 0 0 12px var(--particle-color, var(--crt-green));
+        }
+
+        .vfx-phosphor-afterimage {
+            text-shadow: 0 0 9px var(--particle-color, var(--crt-green)), 1px 0 0 rgba(255, 255, 255, 0.32);
+        }
+
+        .vfx-terminal-packet {
+            clip-path: polygon(0 0, 100% 0, 100% 72%, 72% 72%, 72% 100%, 0 100%);
+        }
+
+        .chunky-neon-fragment {
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.92), 0 0 15px var(--particle-color, var(--crt-yellow));
+        }
+
+        .enemy-hit-vector {
+            --particle-color: var(--crt-green);
+        }
+
+        .enemy-defeat-burst {
+            --particle-color: var(--crt-yellow);
+        }
+
+        .wrong-impact-vector {
+            --particle-color: var(--crt-red);
+        }
+
+        .vfx-tier-safe-success {
+            --particle-color: var(--crt-green);
+        }
+
+        .vfx-tier-chain-start {
+            --particle-color: #b7ff8a;
+        }
+
+        .vfx-tier-combo-x2,
+        .vfx-tier-damage-bonus,
+        .vfx-tier-upgrade {
+            --particle-color: var(--crt-yellow);
+        }
+
+        .vfx-tier-combo-high,
+        .vfx-tier-combo-capped {
+            --particle-color: #fff;
+        }
+
+        .vfx-tier-wrong-press {
+            --particle-color: var(--crt-red);
+        }
+
         .combo-particle {
             animation: combo-particle-burst 0.82s ease-out forwards;
         }
@@ -604,7 +656,14 @@
 
         .button-float-text.max-combo {
             color: #fff;
-            text-shadow: 0 0 10px var(--crt-green), 0 2px 0 rgba(0, 0, 0, 0.7);
+            font-size: 1.16rem;
+            text-shadow: 0 0 12px var(--crt-green), 0 0 18px rgba(255, 204, 0, 0.72), 0 2px 0 rgba(0, 0, 0, 0.7);
+        }
+
+        .button-float-text.upgrade-reward-burst {
+            color: var(--crt-yellow);
+            font-size: 1rem;
+            text-shadow: 0 0 13px rgba(255, 204, 0, 0.9), 0 2px 0 rgba(0, 0, 0, 0.76);
         }
 
         @keyframes combo-pulse {
@@ -1070,14 +1129,14 @@
 
         .button-float-text.safe-success {
             color: var(--crt-green);
-            font-size: 0.82rem;
-            text-shadow: 0 0 8px rgba(74, 246, 38, 0.72), 0 2px 0 rgba(0, 0, 0, 0.72);
+            font-size: 0.9rem;
+            text-shadow: 0 0 10px rgba(74, 246, 38, 0.82), 0 2px 0 rgba(0, 0, 0, 0.72);
         }
 
         .button-float-text.wrong-press {
             color: var(--crt-red);
-            font-size: 0.98rem;
-            text-shadow: 0 0 12px rgba(255, 42, 42, 0.86), 0 2px 0 rgba(0, 0, 0, 0.78);
+            font-size: 1.08rem;
+            text-shadow: 0 0 14px rgba(255, 42, 42, 0.92), 0 2px 0 rgba(0, 0, 0, 0.78);
         }
 
         /* Timer Bar */
@@ -1144,10 +1203,29 @@
             animation: wrong-press-flash 0.24s ease-out both;
         }
 
+        body.wrong-press-flash::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 79;
+            pointer-events: none;
+            background:
+                repeating-linear-gradient(90deg, rgba(255, 42, 42, 0.22) 0 2px, transparent 2px 10px),
+                repeating-linear-gradient(0deg, rgba(255, 204, 0, 0.12) 0 1px, transparent 1px 8px);
+            image-rendering: pixelated;
+            animation: wrong-press-vector-flash 0.24s steps(3, end) both;
+        }
+
         @keyframes wrong-press-flash {
             0% { background-color: var(--bg-color); }
             24% { background-color: #300000; }
             100% { background-color: var(--bg-color); }
+        }
+
+        @keyframes wrong-press-vector-flash {
+            0% { opacity: 0; transform: translateX(-2px); }
+            35% { opacity: 0.78; transform: translateX(2px); }
+            100% { opacity: 0; transform: translateX(0); }
         }
 
         /* Overlays */
@@ -1226,6 +1304,28 @@
             border-color: var(--crt-yellow);
             color: var(--crt-yellow);
             box-shadow: 0 0 16px rgba(255, 204, 0, 0.38), inset 0 0 14px rgba(255, 204, 0, 0.12);
+        }
+
+        .upgrade-card.upgrade-selected {
+            border-color: #fff;
+            color: var(--crt-yellow);
+            animation: upgrade-card-lock 0.34s steps(2, end) both;
+        }
+
+        body.upgrade-reward-flash .upgrade-title {
+            animation: upgrade-title-signal 0.46s steps(3, end) both;
+        }
+
+        @keyframes upgrade-card-lock {
+            0% { transform: translateX(0); box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.08), 0 0 8px rgba(255, 204, 0, 0.18); }
+            36% { transform: translateX(2px); box-shadow: inset 0 0 20px rgba(255, 204, 0, 0.2), 0 0 18px rgba(255, 204, 0, 0.5); }
+            100% { transform: translateX(0); box-shadow: inset 0 0 12px rgba(255, 204, 0, 0.12), 0 0 12px rgba(255, 204, 0, 0.3); }
+        }
+
+        @keyframes upgrade-title-signal {
+            0% { text-shadow: 0 0 8px rgba(255, 204, 0, 0.4); }
+            40% { text-shadow: 0 0 18px rgba(255, 204, 0, 0.92), 2px 0 0 rgba(74, 246, 38, 0.5); }
+            100% { text-shadow: 0 0 12px rgba(255, 204, 0, 0.58); }
         }
 
         .upgrade-card-label {

@@ -97,6 +97,38 @@
         {
           "ok": true,
           "message": "upgrade overlay has hazards disabled/harmless"
+        },
+        {
+          "ok": true,
+          "message": "upgrade reward VFX marker rendered"
+        },
+        {
+          "ok": true,
+          "message": "safe and chain-start VFX markers rendered"
+        },
+        {
+          "ok": true,
+          "message": "combo tier VFX markers rendered"
+        },
+        {
+          "ok": true,
+          "message": "wrong-press VFX marker rendered"
+        },
+        {
+          "ok": true,
+          "message": "enemy hit/defeat VFX markers rendered"
+        },
+        {
+          "ok": true,
+          "message": "retro terminal projectile VFX markers rendered"
+        },
+        {
+          "ok": true,
+          "message": "button-to-enemy VFX originates from current button rect"
+        },
+        {
+          "ok": true,
+          "message": "combat VFX remains above active board interference"
         }
       ],
       "layout": {
@@ -193,6 +225,36 @@
         "hidden": false,
         "boardDataset": "none",
         "opacityVar": "0.000"
+      },
+      "vfx": {
+        "counts": {
+          "safeSuccess": 16,
+          "chainStart": 29,
+          "comboX2": 53,
+          "comboHigh": 53,
+          "comboCapped": 53,
+          "wrongPress": 18,
+          "enemyHit": 29,
+          "enemyDefeat": 29,
+          "upgradeReward": 19,
+          "dataProjectile": 163,
+          "phosphorAfterimage": 162,
+          "chunkyNeonFragment": 249
+        },
+        "sourceCenter": {
+          "x": 641.99,
+          "y": 578.32
+        },
+        "firstTracerStart": {
+          "x": 641.992,
+          "y": 578.32
+        },
+        "tracerOriginDelta": {
+          "x": 0,
+          "y": 0
+        },
+        "particleZIndex": 80,
+        "interferenceBoardDataset": "active"
       }
     },
     {
@@ -287,6 +349,38 @@
         {
           "ok": true,
           "message": "upgrade overlay has hazards disabled/harmless"
+        },
+        {
+          "ok": true,
+          "message": "upgrade reward VFX marker rendered"
+        },
+        {
+          "ok": true,
+          "message": "safe and chain-start VFX markers rendered"
+        },
+        {
+          "ok": true,
+          "message": "combo tier VFX markers rendered"
+        },
+        {
+          "ok": true,
+          "message": "wrong-press VFX marker rendered"
+        },
+        {
+          "ok": true,
+          "message": "enemy hit/defeat VFX markers rendered"
+        },
+        {
+          "ok": true,
+          "message": "retro terminal projectile VFX markers rendered"
+        },
+        {
+          "ok": true,
+          "message": "button-to-enemy VFX originates from current button rect"
+        },
+        {
+          "ok": true,
+          "message": "combat VFX remains above active board interference"
         }
       ],
       "layout": {
@@ -383,6 +477,36 @@
         "hidden": false,
         "boardDataset": "none",
         "opacityVar": "0.000"
+      },
+      "vfx": {
+        "counts": {
+          "safeSuccess": 16,
+          "chainStart": 29,
+          "comboX2": 53,
+          "comboHigh": 53,
+          "comboCapped": 53,
+          "wrongPress": 18,
+          "enemyHit": 29,
+          "enemyDefeat": 29,
+          "upgradeReward": 19,
+          "dataProjectile": 163,
+          "phosphorAfterimage": 162,
+          "chunkyNeonFragment": 249
+        },
+        "sourceCenter": {
+          "x": 197,
+          "y": 656.19
+        },
+        "firstTracerStart": {
+          "x": 197,
+          "y": 656.188
+        },
+        "tracerOriginDelta": {
+          "x": 0,
+          "y": 0
+        },
+        "particleZIndex": 80,
+        "interferenceBoardDataset": "active"
       }
     },
     {
@@ -477,6 +601,38 @@
         {
           "ok": true,
           "message": "upgrade overlay has hazards disabled/harmless"
+        },
+        {
+          "ok": true,
+          "message": "upgrade reward VFX marker rendered"
+        },
+        {
+          "ok": true,
+          "message": "safe and chain-start VFX markers rendered"
+        },
+        {
+          "ok": true,
+          "message": "combo tier VFX markers rendered"
+        },
+        {
+          "ok": true,
+          "message": "wrong-press VFX marker rendered"
+        },
+        {
+          "ok": true,
+          "message": "enemy hit/defeat VFX markers rendered"
+        },
+        {
+          "ok": true,
+          "message": "retro terminal projectile VFX markers rendered"
+        },
+        {
+          "ok": true,
+          "message": "button-to-enemy VFX originates from current button rect"
+        },
+        {
+          "ok": true,
+          "message": "combat VFX remains above active board interference"
         }
       ],
       "layout": {
@@ -573,6 +729,36 @@
         "hidden": false,
         "boardDataset": "none",
         "opacityVar": "0.000"
+      },
+      "vfx": {
+        "counts": {
+          "safeSuccess": 16,
+          "chainStart": 29,
+          "comboX2": 53,
+          "comboHigh": 53,
+          "comboCapped": 53,
+          "wrongPress": 18,
+          "enemyHit": 29,
+          "enemyDefeat": 29,
+          "upgradeReward": 19,
+          "dataProjectile": 163,
+          "phosphorAfterimage": 162,
+          "chunkyNeonFragment": 249
+        },
+        "sourceCenter": {
+          "x": 181.99,
+          "y": 568.32
+        },
+        "firstTracerStart": {
+          "x": 181.992,
+          "y": 568.32
+        },
+        "tracerOriginDelta": {
+          "x": 0,
+          "y": 0
+        },
+        "particleZIndex": 80,
+        "interferenceBoardDataset": "active"
       }
     }
   ]

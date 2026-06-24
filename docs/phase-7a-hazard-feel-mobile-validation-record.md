@@ -209,3 +209,81 @@ Commit/push:
 
 - round commit: `fd5876a`
 - push: `origin/main` PASS
+
+## Round 4 - VFX Feel Overhaul And Evidence
+
+Changes:
+
+- Defined VFX presentation markers for retro terminal/data-signal effects:
+  - `vfx-data-projectile`
+  - `vfx-phosphor-afterimage`
+  - `vfx-terminal-packet`
+  - `chunky-neon-fragment`
+  - `vfx-tier-safe-success`
+  - `vfx-tier-chain-start`
+  - `vfx-tier-combo-x2`
+  - `vfx-tier-combo-high`
+  - `vfx-tier-combo-capped`
+  - `vfx-tier-wrong-press`
+  - `vfx-tier-upgrade`
+- Reworked button-to-enemy tracers to carry data-projectile/phosphor markers and stronger tiered counts.
+- Reworked safe press and chain-start feedback so non-combo success remains visible while chain start is brighter.
+- Reworked combo reward feedback so `COMBO x2`, high combo, and capped combo have distinct tier markers.
+- Reworked enemy hit/defeat feedback with `enemy-hit-vector` and `enemy-defeat-burst` markers.
+- Reworked wrong-press feedback with button-local `wrong-impact-vector`, screen vector flash, player damage float, error audio path, and vibration path preservation.
+- Added upgrade reward feedback through `showUpgradeReward(...)` and `upgrade-reward-burst` markers.
+- Extended `npm run smoke:hazards` to trigger and record VFX marker evidence across desktop, mobile, and short mobile.
+- Extended structure validation with VFX tier markers and anti-pattern guards for non-terminal particle language.
+
+Browser VFX evidence:
+
+- desktop `1280x720`: PASS
+- mobile `390x844`: PASS
+- short mobile `360x740`: PASS
+- safe success marker count: 16 per viewport
+- chain-start marker count: 29 per viewport
+- `COMBO x2` marker count: 53 per viewport
+- high-combo marker count: 53 per viewport
+- capped-combo marker count: 53 per viewport
+- wrong-press marker count: 18 per viewport
+- enemy-hit marker count: 29 per viewport
+- enemy-defeat marker count: 29 per viewport
+- upgrade-reward marker count: 19 per viewport
+- data-projectile marker count: 163 per viewport
+- phosphor-afterimage marker count: 162 per viewport
+- chunky-neon-fragment marker count: 249 per viewport
+- first button-to-enemy tracer origin delta: `0,0` in all three viewports
+- combat VFX z-index: `80` with board interference dataset `active`
+
+Debug self-check:
+
+- VFX changes are localized to `src/ui/render.js`, `index.html`, and browser/structure validation.
+- `src/app/create-app.js` only calls the new renderer upgrade reward method after core upgrade application; upgrade formulas remain in core/config.
+- Wrong-press audio remains on the existing `audio.playError()` path, with renderer vibration/screen/button feedback only.
+- No hazard, combat, combo, enemy, player, or upgrade formula changed.
+
+Architecture self-check:
+
+- UI renders already-computed facts and DOM geometry only.
+- No gameplay decisions moved into UI or host code.
+- Hazard config/core and Host Bridge payload semantics remain unchanged.
+- No new dependencies, frameworks, external runtime URLs, Unity/WebView/native/3D, or roguelite scope.
+
+Validation:
+
+- `node --check src\ui\render.js`: PASS
+- `node --check src\app\create-app.js`: PASS
+- `node --check scripts\smoke-hazards-browser.mjs`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- pending

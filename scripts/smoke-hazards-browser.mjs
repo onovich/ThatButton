@@ -130,6 +130,14 @@ function compactSmokeResult(result) {
       hidden: result.upgrade.hidden,
       boardDataset: result.upgrade.boardDataset,
       opacityVar: result.upgrade.opacityVar
+    },
+    vfx: {
+      counts: result.vfx.counts,
+      sourceCenter: result.vfx.sourceCenter,
+      firstTracerStart: result.vfx.firstTracerStart,
+      tracerOriginDelta: result.vfx.tracerOriginDelta,
+      particleZIndex: result.vfx.particleZIndex,
+      interferenceBoardDataset: result.vfx.interferenceBoardDataset
     }
   };
 }
@@ -512,7 +520,114 @@ function getSmokeExpression(viewport) {
     pushCheck(!upgrade.hidden && upgrade.cardCount === 3 ? pass('upgrade overlay renders three cards', upgrade) : fail('upgrade overlay missing cards', upgrade));
     pushCheck(withinViewport(upgrade.overlay, 2) ? pass('upgrade overlay fits viewport', upgrade) : fail('upgrade overlay outside viewport', upgrade));
     pushCheck(upgrade.boardDataset === 'none' && Number(upgrade.opacityVar) === 0 ? pass('upgrade overlay has hazards disabled/harmless', upgrade) : fail('upgrade overlay hazard state mismatch', upgrade));
+    renderer.showUpgradeReward({
+      id: 'smoke-fast-hands',
+      label: 'Fast Hands',
+      shortLabel: 'TIME',
+      value: 2
+    });
+    void document.body.offsetWidth;
+    const upgradeRewardCount = document.querySelectorAll('.upgrade-reward-burst.vfx-tier-upgrade').length;
+    pushCheck(upgradeRewardCount > 0 ? pass('upgrade reward VFX marker rendered', { upgradeRewardCount }) : fail('upgrade reward VFX marker missing', { upgradeRewardCount }));
     renderer.hideUpgradeScreen();
+
+    renderer.updateHazardPresentation(interferenceHazards);
+    const vfxSourceElement = document.querySelector('#btn-4') || document.querySelector('#btn-grid [role="button"]');
+    const sourceCenterBeforeVfx = rect('#' + vfxSourceElement.id);
+    renderer.showSafePressFeedback({
+      sourceElement: vfxSourceElement,
+      previous: { streak: 0 },
+      combo: { streak: 0 }
+    });
+    renderer.showSafePressFeedback({
+      sourceElement: vfxSourceElement,
+      previous: { streak: 0 },
+      combo: { streak: 1 }
+    });
+    renderer.showComboReward({
+      previous: { streak: 1, damageBonus: 0 },
+      combo: { streak: 2, comboText: 'COMBO x2', rewardText: 'DMG +1', damageBonus: 1, hasVisibleCombo: true },
+      sourceElement: vfxSourceElement
+    });
+    renderer.showComboReward({
+      previous: { streak: 2, damageBonus: 1 },
+      combo: { streak: 4, comboText: 'COMBO x4', rewardText: 'DMG +3', damageBonus: 3, hasVisibleCombo: true },
+      sourceElement: vfxSourceElement
+    });
+    renderer.showComboReward({
+      previous: { streak: 12, damageBonus: 8 },
+      combo: { streak: 12, comboText: 'COMBO x12', rewardText: 'DMG +8', damageBonus: 8, isCapped: true, hasVisibleCombo: true },
+      capped: true,
+      sourceElement: vfxSourceElement
+    });
+    renderer.showWrongPressFeedback({
+      sourceElement: vfxSourceElement,
+      damage: { appliedDamage: 18 },
+      defeated: false
+    });
+    renderer.showBossHit({
+      sourceElement: vfxSourceElement,
+      damage: { appliedDamage: 32 },
+      defeated: true
+    });
+    await new Promise((resolve) => setTimeout(resolve, 360));
+    renderer.updateHazardPresentation(interferenceHazards);
+    void document.body.offsetWidth;
+    const firstTracer = document.querySelector('.button-to-enemy-tracer.vfx-data-projectile');
+    const firstTracerStart = firstTracer ? {
+      x: Number.parseFloat(firstTracer.style.left || '0'),
+      y: Number.parseFloat(firstTracer.style.top || '0')
+    } : null;
+    const sourceCenter = sourceCenterBeforeVfx ? {
+      x: sourceCenterBeforeVfx.centerX,
+      y: sourceCenterBeforeVfx.centerY
+    } : null;
+    const tracerOriginDelta = firstTracerStart && sourceCenter ? {
+      x: Number((firstTracerStart.x - sourceCenter.x).toFixed(2)),
+      y: Number((firstTracerStart.y - sourceCenter.y).toFixed(2))
+    } : null;
+    const vfx = {
+      counts: {
+        safeSuccess: document.querySelectorAll('.vfx-tier-safe-success').length,
+        chainStart: document.querySelectorAll('.vfx-tier-chain-start').length,
+        comboX2: document.querySelectorAll('.vfx-tier-combo-x2').length,
+        comboHigh: document.querySelectorAll('.vfx-tier-combo-high').length,
+        comboCapped: document.querySelectorAll('.vfx-tier-combo-capped').length,
+        wrongPress: document.querySelectorAll('.wrong-impact-vector.vfx-tier-wrong-press').length,
+        enemyHit: document.querySelectorAll('.enemy-hit-vector').length,
+        enemyDefeat: document.querySelectorAll('.enemy-defeat-burst').length,
+        upgradeReward: upgradeRewardCount,
+        dataProjectile: document.querySelectorAll('.vfx-data-projectile').length,
+        phosphorAfterimage: document.querySelectorAll('.vfx-phosphor-afterimage').length,
+        chunkyNeonFragment: document.querySelectorAll('.chunky-neon-fragment').length
+      },
+      sourceCenter,
+      firstTracerStart,
+      tracerOriginDelta,
+      particleZIndex: Number.parseInt(getComputedStyle(document.querySelector('.button-combo-spark')).zIndex || '0', 10),
+      interferenceBoardDataset: document.querySelector('#command-panel')?.dataset.hazardBoard || ''
+    };
+    pushCheck(vfx.counts.safeSuccess > 0 && vfx.counts.chainStart > 0
+      ? pass('safe and chain-start VFX markers rendered', vfx.counts)
+      : fail('safe or chain-start VFX markers missing', vfx.counts));
+    pushCheck(vfx.counts.comboX2 > 0 && vfx.counts.comboHigh > 0 && vfx.counts.comboCapped > 0
+      ? pass('combo tier VFX markers rendered', vfx.counts)
+      : fail('combo tier VFX markers missing', vfx.counts));
+    pushCheck(vfx.counts.wrongPress > 0
+      ? pass('wrong-press VFX marker rendered', vfx.counts)
+      : fail('wrong-press VFX marker missing', vfx.counts));
+    pushCheck(vfx.counts.enemyHit > 0 && vfx.counts.enemyDefeat > 0
+      ? pass('enemy hit/defeat VFX markers rendered', vfx.counts)
+      : fail('enemy hit/defeat VFX markers missing', vfx.counts));
+    pushCheck(vfx.counts.dataProjectile > 0 && vfx.counts.phosphorAfterimage > 0 && vfx.counts.chunkyNeonFragment > 0
+      ? pass('retro terminal projectile VFX markers rendered', vfx.counts)
+      : fail('retro terminal projectile VFX markers missing', vfx.counts));
+    pushCheck(vfx.tracerOriginDelta && Math.abs(vfx.tracerOriginDelta.x) <= sourceCenterBeforeVfx.width * 0.7 && Math.abs(vfx.tracerOriginDelta.y) <= sourceCenterBeforeVfx.height * 0.7
+      ? pass('button-to-enemy VFX originates from current button rect', vfx)
+      : fail('button-to-enemy VFX origin is detached from button rect', vfx));
+    pushCheck(vfx.interferenceBoardDataset === 'active' && vfx.particleZIndex >= 80
+      ? pass('combat VFX remains above active board interference', vfx)
+      : fail('combat VFX layering over interference is weak', vfx));
 
     return {
       viewport,
@@ -524,7 +639,8 @@ function getSmokeExpression(viewport) {
         movedButtons
       },
       interference,
-      upgrade
+      upgrade,
+      vfx
     };
   })()`;
 }

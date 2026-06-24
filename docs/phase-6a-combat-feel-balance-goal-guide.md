@@ -59,10 +59,18 @@ This phase must use the Phase 6 implementation as the source of truth. Do not ad
   - wrong press should feel damaging and readable without visually muddying the next decision.
   - upgrade selection should feel like a reward moment, not just a modal interruption.
 - Improve combat UI readability without redesigning the game.
-  - player HUD remains separate from enemy identity.
+  - player HUD remains separate from enemy identity and should move to the bottom combat/control area, not the enemy stage.
   - enemy stage remains enemy-owned.
   - combo timer overlay remains readable but secondary to the main pressure timer.
   - upgrade cards fit short desktop and mobile viewports.
+- Rework attack and combo particle directionality.
+  - Correct safe-press attacks should visually originate from the pressed button location and travel toward the enemy/avatar or enemy hit point.
+  - Combo particles should follow the same input-to-enemy direction instead of playing only around the combo/status text.
+  - Button-origin projectiles must still work for DOM clicks and host-driven `press(buttonId)` when a button element can be resolved.
+- Restyle particles to match the game's retro-futurist terminal aesthetic.
+  - Prefer low-fi CRT/vector tracer, pixel spark, scanline streak, terminal glyph, or chunky neon fragments.
+  - Avoid glossy, high-resolution, overly smooth, modern fantasy/magic, or photorealistic particle looks.
+  - Effects should feel like an old machine firing data/electric signals, not a polished modern particle system.
 - Add or refine deterministic validation smokes.
   - fixed-seed early-run balance preview
   - combo feedback tier markers
@@ -162,6 +170,9 @@ Every round must answer:
    - Keep changes small and record before/after evidence.
 4. Feedback polish pass.
    - Refine existing combo, no-combo success, wrong-press, enemy-damage, and upgrade-choice feedback.
+   - Move player HUD/status to the bottom combat/control area while preserving mobile fit.
+   - Rework attack/combo particles so they launch from the pressed button toward the enemy.
+   - Restyle particles into a lower-fidelity retro-futurist/CRT visual language.
    - Add validation markers for feedback tier separation.
 5. Layout and copy readability pass.
    - Tighten mobile/short desktop fit.
@@ -195,6 +206,9 @@ Required checks or smokes:
 - Wrong-press survivability and player-death smoke.
 - Combo expiry and post-expiry first-safe behavior smoke.
 - Combo tier feedback marker smoke for no-combo success, chain start, `COMBO x2`, higher combo, and capped combo.
+- Attack projectile smoke proving the visual starts near the pressed button and travels toward the enemy hit point.
+- Combo particle smoke proving combo feedback is tied to the pressed button and enemy direction, not only the combo/status text area.
+- Particle style marker scan proving retro-futurist/CRT tracer styling is present and high-polish generic particle styling has not returned.
 - Upgrade choice diversity and deterministic repeatability smoke.
 - Host snapshot/event JSON-safety smoke after any state or payload change.
 - Desktop 1280x720 playing and upgrade-overlay layout smoke.
@@ -207,7 +221,9 @@ Phase 6A is ready for planner check only when all are true:
 - Phase 6 RPG combat loop still works end to end.
 - Tuning changes are backed by fixed-seed evidence, browser smoke, or recorded designer judgment.
 - Combo, wrong-press, enemy-damage, and upgrade feedback are more legible and satisfying than Phase 6 baseline.
-- Player HUD remains separate from enemy identity.
+- Player HUD remains separate from enemy identity and is positioned in the bottom combat/control area.
+- Correct attacks and combo feedback originate from the pressed button and travel toward the enemy.
+- Particle styling matches the retro-futurist terminal look and avoids high-resolution glossy modern particles.
 - Upgrade choices remain deterministic and exactly three choices are offered.
 - No new mechanics or deferred scope were added.
 - Core/config remain the source of truth for formulas and tuning.

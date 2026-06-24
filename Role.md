@@ -2,7 +2,7 @@
 
 workspace: D:\WebProjects\ThatButton
 created_at: 2026-06-23T01:45:53.5461407+08:00
-updated_at: 2026-06-24T20:42:54.3507582+08:00
+updated_at: 2026-06-24T20:47:10.7259935+08:00
 
 planner:
   role: architect
@@ -25,8 +25,8 @@ executor:
 idempotency:
   active_goal_guide: docs/phase-8-playtest-calibration-content-goal-guide.md
   active_goal_phase: Phase 8 - Playtest Calibration And Content Expansion
-  last_planner_dispatch: 2026-06-24T20:42:54.3507582+08:00
-  last_planner_dispatch_status: ready_to_send
+  last_planner_dispatch: 2026-06-24T20:47:10.7259935+08:00
+  last_planner_dispatch_status: sent
   last_planner_dispatch_guide: docs/phase-8-playtest-calibration-content-goal-guide.md
   last_planner_dispatch_commit: 0b000ae4e3e40d31c64f15b558f16f6443a431f2
   last_executor_report_commit: fc495e2749b0f26c7384b3cddbbd937bffdce59a

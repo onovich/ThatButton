@@ -414,8 +414,8 @@ Round 5 validation:
 
 Commit / push:
 
-- commit: pending
-- push: pending
+- commit: `b633f05` (`feat: add gentle moving button hazard`)
+- push: PASS
 - buffer round consumed: no
 
 Next:

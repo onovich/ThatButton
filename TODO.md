@@ -116,7 +116,7 @@ Status: Accepted by CheckAndGoal; see [docs/phase-6-rpg-combat-loop-record.md](d
 
 Estimated conversation rounds: 8
 Goal guide: [docs/phase-6a-combat-feel-balance-goal-guide.md](docs/phase-6a-combat-feel-balance-goal-guide.md)
-Status: Planned after Phase 6 PASS to polish and calibrate the existing RPG combat loop before adding new hazards or engine scope.
+Status: Ready for CheckAndGoal after implementation; see [docs/phase-6a-combat-feel-balance-record.md](docs/phase-6a-combat-feel-balance-record.md) and [docs/phase-6a-final-report.md](docs/phase-6a-final-report.md).
 
 - Record fixed-seed baseline metrics for first enemy defeat timing, first upgrade timing, wrong-press survivability, combo-window forgiveness, and upgrade cadence.
 - Tune only existing Phase 6 numbers when evidence supports it: player HP, enemy HP/attack progression, base attack, combo window, combo reward, upgrade values, and decision-time modifiers.
@@ -136,4 +136,4 @@ Estimated conversation rounds: 2-5
 
 ## Current Recommendation
 
-After Phase 6 acceptance, run Phase 6A to polish combat feel and collect balance/playtest evidence. Use Phase 6A evidence to decide whether Phase 7 hazards/spatial interaction should come before any engine embedding. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge and Phase 6 host/debug contracts only after the HTML gameplay loop proves itself.
+After Phase 6A acceptance, use its balance and feedback evidence to decide whether Phase 7 hazards/spatial interaction should come before any engine embedding. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge and Phase 6 host/debug contracts only after the HTML gameplay loop proves itself.

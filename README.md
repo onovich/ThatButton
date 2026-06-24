@@ -56,6 +56,10 @@ Phase 5 removes runtime third-party resources from the playable demo. The page n
 
 Phase 6 adds the first RPG combat loop: safe-button round clears damage a scaling enemy, wrong presses damage player HP instead of ending the run immediately, combo chains expire on a short window, and enemy defeat offers three deterministic upgrade choices before the next stronger enemy starts.<br/>**Phase 6 加入第一版 RPG 战斗循环：清空安全键会伤害逐步变强的敌人，错按会扣除玩家 HP 而不是立刻结束，连击会在短时间窗口内维持，击败敌人后会出现三个确定性的升级选项，然后进入下一个更强敌人。**
 
+## Combat Feel Calibration
+
+Phase 6A calibrates that loop before new hazards: first-enemy pacing is shorter, player HUD facts live in the bottom command area, and safe/combo attack tracers launch from pressed buttons toward the enemy using low-fi CRT/vector styling. Fixed-seed previews and viewport smokes cover balance, upgrade timing, combo expiry, wrong-press survivability, projectile direction, and mobile layout fit.
+
 ## Deployment
 
 GitHub Pages deployment is configured with `.github/workflows/deploy.yml` and publishes the generated `dist/` folder from the `main` branch.<br/>**项目已通过 `.github/workflows/deploy.yml` 配置 GitHub Pages 部署，从 `main` 分支生成并发布 `dist/` 目录。**

@@ -2,7 +2,7 @@
 
 workspace: D:\WebProjects\ThatButton
 created_at: 2026-06-23T01:45:53.5461407+08:00
-updated_at: 2026-06-23T17:03:25.0872228+08:00
+updated_at: 2026-06-24T16:54:58.2265879+08:00
 
 planner:
   role: architect
@@ -29,8 +29,8 @@ idempotency:
   last_planner_dispatch_status: sent
   last_planner_dispatch_guide: docs/phase-6-rpg-combat-loop-goal-guide.md
   last_planner_dispatch_commit: 6ff7e41
-  last_executor_report_commit: bed80bff15d3796d27031d056e84eed0106968fb
+  last_executor_report_commit: 843e7b31aacbac5205289d308b62be8d4821a799
   last_executor_report_status: ready_for_check
-  last_executor_report_at: 2026-06-23T17:03:25.0872228+08:00
-  last_executor_report_guide: docs/phase-5-demo-stability-distribution-goal-guide.md
+  last_executor_report_at: 2026-06-24T16:54:58.2265879+08:00
+  last_executor_report_guide: docs/phase-6-rpg-combat-loop-goal-guide.md
   last_check_status: dispatched

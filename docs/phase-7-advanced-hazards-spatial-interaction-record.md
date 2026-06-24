@@ -542,3 +542,62 @@ Commit / push:
 Next:
 
 - Round 8: interference validation and tuning for readability and feedback coexistence.
+
+## Round 8 Interference Validation And Tuning
+
+Implemented:
+
+- Added a hard opacity cap for interference presentation:
+  - active board interference maxes at `0.160`,
+  - telegraph board interference maxes at `0.100`.
+- Extended validation:
+  - fake-geometry smoke checks active intensity `1` still clamps to opacity `0.160`,
+  - selector guard confirms interference remains scoped to `btn-grid::after`,
+  - style guard confirms the interference layer stays below button/combo feedback z-indexes,
+  - existing selector guard continues to reject interference targeting rule text or player HUD.
+
+Tuning evidence:
+
+- Config intensity remains `0.34`.
+- Current telegraph opacity at intensity `0.34` remains `0.087`.
+- Current active opacity at intensity `0.34` remains below the cap.
+- Button float text and button/combo tracers remain above the interference layer (`z-index: 81` and `80` vs grid layer `5`).
+- Enemy feedback, combo status, rule text, timer, player HUD, and upgrade overlay are outside the interference selector scope.
+
+Debug self-check:
+
+- The change is explained by fixed fake-geometry opacity smokes and CSS selector/layer guards.
+- Failures localize to renderer opacity mapping, interference CSS scope, or z-index guardrails.
+- First enemy / first upgrade path remains hazard-free because unlock thresholds were not changed.
+- Moving-button clamp and deterministic offsets remain unchanged.
+
+Architecture self-check:
+
+- Core/config timing and intensity facts remain the source of truth.
+- UI only caps and maps intensity into visual opacity.
+- App and host code were not changed in this round.
+- Rule, fatal-button, combat, combo, upgrade, and difficulty semantics were not duplicated.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, framework work, and Phase 1 retuning remain out of scope.
+- Validation now guards readability caps and feedback coexistence.
+
+Round 8 validation:
+
+- `node --check src\ui\render.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Round 9: spatial grouping facts pass and future-engine 2D data validation.

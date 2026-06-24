@@ -390,9 +390,12 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     const boardHazard = activeHazards.find((hazard) => hazard.target === 'board');
     const boardHazardPhase = toDatasetToken(boardHazard?.phase, 'none');
     const boardIntensity = Math.max(0, Math.min(1, Number(boardHazard?.interference?.intensity) || 0));
-    const boardOpacity = boardHazard
+    const rawBoardOpacity = boardHazard
       ? (boardHazardPhase === 'active' ? 0.08 + boardIntensity * 0.18 : 0.06 + boardIntensity * 0.08)
       : 0;
+    const boardOpacity = boardHazardPhase === 'active'
+      ? Math.min(0.16, rawBoardOpacity)
+      : Math.min(0.1, rawBoardOpacity);
 
     if (refs.commandPanel?.dataset) {
       refs.commandPanel.dataset.hazardPhase = phase;

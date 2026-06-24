@@ -151,10 +151,16 @@ const interferenceStyleSnippet = interferenceStyleStart >= 0 && interferenceStyl
 if (!interferenceStyleSnippet.includes('.btn-grid::after')) {
   failures.push('Interference presentation should be scoped to the button grid pseudo-layer.');
 }
+if (!interferenceStyleSnippet.includes('z-index: 5')) {
+  failures.push('Interference grid layer should stay below floating button/combo feedback.');
+}
 for (const forbiddenInterferenceTarget of ['.terminal-box', '.player-hud', '#clue-text', '#player-hud']) {
   if (interferenceStyleSnippet.includes(forbiddenInterferenceTarget)) {
     failures.push(`Interference presentation should not target rule text or player HUD: ${forbiddenInterferenceTarget}`);
   }
+}
+if (!html.includes('.button-combo-spark') || !html.includes('z-index: 80') || !html.includes('.button-float-text') || !html.includes('z-index: 81')) {
+  failures.push('Button/combo feedback should remain layered above interference.');
 }
 
 const renderSource = sources.get('src/ui/render.js') || '';
@@ -171,6 +177,7 @@ const hazardPresentationMarkers = [
   'dataset.hazardOffsetX',
   'dataset.hazardOffsetY',
   "style.setProperty('--hazard-interference-opacity'",
+  'Math.min(0.16, rawBoardOpacity)',
   'boardHazard?.interference?.intensity',
   'getButtonElement(buttonId)',
   'getBoundingClientRect',
@@ -1533,6 +1540,30 @@ if (
   failures.push(`Moving-button edge clamp smoke failed: ${JSON.stringify({
     btn0Style: hazardUiElements.get('btn-0').style,
     btn0Dataset: hazardUiElements.get('btn-0').dataset
+  })}`);
+}
+hazardRenderer.updateHazardPresentation({
+  enabled: true,
+  unlocked: true,
+  phase: HAZARD_PHASES.ACTIVE,
+  hazards: [
+    {
+      type: HAZARD_TYPES.INTERFERENCE,
+      phase: HAZARD_PHASES.ACTIVE,
+      target: 'board',
+      interference: {
+        intensity: 1
+      }
+    }
+  ]
+});
+if (
+  hazardCommandPanel.dataset.hazardBoard !== HAZARD_PHASES.ACTIVE ||
+  hazardCommandPanel.style['--hazard-interference-opacity'] !== '0.160'
+) {
+  failures.push(`Interference opacity cap smoke failed: ${JSON.stringify({
+    commandPanelDataset: hazardCommandPanel.dataset,
+    commandPanelStyle: hazardCommandPanel.style
   })}`);
 }
 

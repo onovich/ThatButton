@@ -62,7 +62,7 @@ Phase 6A calibrates that loop before new hazards: first-enemy pacing is shorter,
 
 ## Advanced Hazards
 
-Phase 7 is implementing an HTML-first Hazard Director V1: gentle moving-button drift unlocks after early RPG onboarding, brief CRT/signal interference unlocks later, and 2D board-zone facts prepare future host/engine consumers without adding Unity/WebView/3D scope. Current implementation evidence lives in [`docs/phase-7-advanced-hazards-spatial-interaction-record.md`](docs/phase-7-advanced-hazards-spatial-interaction-record.md); the final report will be added after the final validation pass.
+Phase 7 implements an HTML-first Hazard Director V1: gentle moving-button drift unlocks after early RPG onboarding, brief CRT/signal interference unlocks later, and 2D board-zone facts prepare future host/engine consumers without adding Unity/WebView/3D scope. Implementation evidence lives in [`docs/phase-7-advanced-hazards-spatial-interaction-record.md`](docs/phase-7-advanced-hazards-spatial-interaction-record.md) and [`docs/phase-7-final-report.md`](docs/phase-7-final-report.md).
 
 ## Deployment
 

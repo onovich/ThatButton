@@ -130,7 +130,7 @@ Status: Accepted by CheckAndGoal; see [docs/phase-6a-combat-feel-balance-record.
 
 Estimated conversation rounds: 16
 Goal guide: [docs/phase-7-advanced-hazards-spatial-interaction-goal-guide.md](docs/phase-7-advanced-hazards-spatial-interaction-goal-guide.md)
-Status: Implementation in progress; see [docs/phase-7-advanced-hazards-spatial-interaction-record.md](docs/phase-7-advanced-hazards-spatial-interaction-record.md). Final report target: [docs/phase-7-final-report.md](docs/phase-7-final-report.md).
+Status: Implemented and ready for planner check after final validation; see [docs/phase-7-advanced-hazards-spatial-interaction-record.md](docs/phase-7-advanced-hazards-spatial-interaction-record.md) and [docs/phase-7-final-report.md](docs/phase-7-final-report.md).
 
 - Prototype moving buttons and temporary visual interference as separate difficulty axes after the first learnable RPG loop, not in the opening onboarding sequence. V1 implemented; pending human readability playtest.
 - Keep the first enemy / first upgrade cadence from Phase 6A readable; do not stack motion, interference, short timers, and complex clues too early. Current schedule keeps early levels hazard-free and delays interference beyond first movement exposure.

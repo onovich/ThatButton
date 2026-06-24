@@ -841,3 +841,61 @@ Commit / push:
 Next:
 
 - Round 13: buffer only if integration, geometry, input, documentation, or validation regressions appear.
+
+## Rounds 13-15 Buffer Review
+
+Buffer status:
+
+- Round 13: not consumed; no integration, geometry, input, documentation, or validation regression required a repair round.
+- Round 14: not consumed; no UX clarity, motion speed, interference intensity, or mobile-fit retune was justified by new evidence.
+- Round 15: not consumed; no remaining browser, host, debug, or validation blocker was found.
+
+Decision:
+
+- Proceeded directly to Round 16 final validation and report after Round 12 status was pushed.
+- In-app browser observation loaded the local page at `1280x720`, but screenshot and locator-click browser automation timed out in this environment. This is recorded as an additional observation only, not as claimed PASS evidence.
+- Real mobile/browser screenshot and human playtest evidence remain pending instead of being overclaimed.
+
+## Round 16 Final Validation And Report
+
+Implemented:
+
+- Created `docs/phase-7-final-report.md`.
+- Added the Phase 7 final report to `docs/README.md`.
+- Updated `TODO.md` and `README.md` to point to the final report and implementation record.
+- Preserved the Phase 7 artifact links required by the guide.
+
+Debug self-check:
+
+- The final report summarizes fixed-seed hazard schedule evidence, structured validation smokes, and pending real-device/human evidence.
+- Failures can still localize to hazard config, hazard core, debug preview, app orchestration, UI render, host payloads, or validation.
+- First enemy / first upgrade path remains hazard-free.
+- Interactive in-app browser screenshot/click smoke was not counted as PASS because the automation surface timed out.
+
+Architecture self-check:
+
+- Final-round changes are documentation only.
+- Runtime ownership remains unchanged: config/core own hazard semantics, UI renders facts, host transports JSON-safe facts, and app orchestration coordinates.
+- No rule, fatal-button, combat, combo, upgrade, difficulty, or hazard formula semantics were moved into UI/host/docs.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, PWA/service-worker work, and redesign remain out of scope.
+
+Round 16 validation:
+
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+- GitHub Pages workflow after final push: pending
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Push final report commit, check GitHub Pages workflow, and return READY_FOR_CHECK to the planner thread.

@@ -355,9 +355,87 @@ Validation:
 
 Commit/push:
 
+- round commit: `d5cef3e feat: add local playtest report export`
+- push: PASS
+
+Next round goal:
+
+- Add manual playtest templates and browser smoke coverage for report creation/export markers across desktop, mobile, and short-mobile.
+
+## Round 5 - Playtest Templates And Browser Smoke
+
+Round goal:
+
+- Add manual playtest scripts/templates for desktop, iOS Safari, Android Chrome, and human observations.
+- Extend browser smoke coverage to report/export UI across desktop, mobile, and short-mobile.
+- Keep prior hazard/VFX/layout smoke evidence intact.
+
+Changes:
+
+- Added `docs/phase-9-playtest-script-and-template.md`.
+- Added `docs/phase-9-browser-smoke-results.json` as Phase 9 browser smoke evidence.
+- Updated `docs/README.md` with Phase 9 record, template, and browser smoke entries.
+- Extended `scripts/smoke-hazards-browser.mjs` so the existing Chrome/CDP smoke also checks report export UI, report JSON markers, privacy summary text, copy/select fallback state, and textarea viewport fit across desktop, mobile, and short-mobile.
+- Kept the legacy `docs/phase-7a-browser-smoke-results.json` output path for Phase 7A references while also writing the Phase 9 smoke result path.
+- Adjusted post-run report panel CSS to use `box-sizing: border-box`, a shorter fallback textarea, and top-aligned game-over overlay layout so report export/fallback controls fit viewports.
+
+Browser smoke evidence:
+
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- Result paths:
+  - `docs/phase-7a-browser-smoke-results.json`
+  - `docs/phase-9-browser-smoke-results.json`
+- Covered viewports:
+  - desktop `1280x720`
+  - mobile `390x844`
+  - short-mobile `360x740`
+- Report/export checks:
+  - export panel appears after run end
+  - summary includes local-only privacy text
+  - export text includes `thatbutton.playtestReport`
+  - fallback textarea becomes selectable with copy state `fallback`
+  - report panel/textarea fit viewport
+- Existing hazard/VFX/layout checks remain covered in the same smoke run.
+
+Manual evidence kit:
+
+- Desktop browser pass template
+- iOS Safari pass template
+- Android Chrome pass template
+- Human observation notes
+- Decision gate rollup fields
+- Privacy reminder against personal data, exact user agent strings, identifiers, geolocation, or remote submission
+
+Debug self-check:
+
+- Smallest browser fixture is `debugApi.previewPlaytestReportExport()` rendered into the real game-over overlay in Chrome/CDP.
+- Failure layers are localized to manual template docs, browser smoke expression, report overlay layout, clipboard/select fallback, and result JSON writing.
+- Clipboard denied/fallback remains covered by structure validation; browser smoke covers user-visible SELECT fallback and viewport fit.
+- Real iOS Safari, Android Chrome, and human playtest results are template-ready but still pending actual devices/players.
+
+Architecture self-check:
+
+- Browser smoke uses existing debug/report APIs and renderer UI; it does not add gameplay formulas or new hazard semantics.
+- Manual templates are docs only and collect non-personal local facts.
+- No remote analytics, tracking, network submission, dependencies, framework migration, PWA, Unity/WebView/native/3D, roguelite meta, new hazards, or gameplay tuning were added.
+- Phase 8 progression labels, Phase 7A VFX markers, bottom player HUD, button-origin tracers, hazard layout, and static delivery remain guarded by validation.
+
+Validation:
+
+- `node --check scripts\smoke-hazards-browser.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- Active network/privacy API scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
 - round commit: pending
 - push: pending
 
 Next round goal:
 
-- Add manual playtest templates and browser smoke coverage for report creation/export markers across desktop, mobile, and short-mobile.
+- Use buffer time for evidence cleanup, privacy guardrails, final docs preparation, and any validation gaps before the final report.

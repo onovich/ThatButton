@@ -10,6 +10,7 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(scriptDir, '..');
 const docsDir = join(projectRoot, 'docs');
 const resultPath = join(docsDir, 'phase-7a-browser-smoke-results.json');
+const phase9ResultPath = join(docsDir, 'phase-9-browser-smoke-results.json');
 const smokeSeed = 'phase3a-baseline';
 const smokeUrlPath = `/?seed=${encodeURIComponent(smokeSeed)}&debug=1`;
 const browserCandidates = [
@@ -137,6 +138,17 @@ function compactSmokeResult(result) {
       hidden: result.upgrade.hidden,
       boardDataset: result.upgrade.boardDataset,
       opacityVar: result.upgrade.opacityVar
+    },
+    reportExport: {
+      status: result.reportExport.status,
+      copyState: result.reportExport.copyState,
+      statusText: result.reportExport.statusText,
+      panelHidden: result.reportExport.panelHidden,
+      textHidden: result.reportExport.textHidden,
+      exportIncludesKind: result.reportExport.exportIncludesKind,
+      summaryIncludesPrivacy: result.reportExport.summaryIncludesPrivacy,
+      panel: compactRect(result.reportExport.panel),
+      textarea: compactRect(result.reportExport.textarea)
     },
     vfx: {
       counts: result.vfx.counts,
@@ -429,6 +441,73 @@ function getSmokeExpression(viewport) {
     pushCheck(contains(layout.commandPanel, layout.playerHud, 2) ? pass('player HUD is inside command panel') : fail('player HUD is not inside command panel', layout));
     pushCheck(!contains(layout.battleStage, layout.playerHud, -1) ? pass('player HUD is not inside battle stage') : fail('player HUD is inside battle stage', layout));
 
+    let reportExport = {
+      status: 'not-run',
+      copyState: '',
+      statusText: '',
+      panelHidden: true,
+      textHidden: true,
+      exportIncludesKind: false,
+      summaryIncludesPrivacy: false,
+      panel: null,
+      textarea: null
+    };
+    const reportPreview = window.__THAT_BUTTON_DEBUG__?.previewPlaytestReportExport?.();
+    if (!reportPreview?.exportText || !reportPreview?.summaryText) {
+      pushCheck(fail('debug report export preview is unavailable', { reportPreview }));
+    } else {
+      renderer.showGameOverScreen({
+        level: reportPreview.report?.run?.level || 1,
+        isTimeout: false,
+        recap: window.__THAT_BUTTON_DEBUG__.previewFailureRecap('${smokeSeed}', 1),
+        playtestReportExport: reportPreview
+      });
+      await waitFrame();
+      const reportCopyButton = document.querySelector('#playtest-report-copy');
+      const reportSelectButton = document.querySelector('#playtest-report-select');
+      try {
+        Object.defineProperty(navigator, 'clipboard', {
+          configurable: true,
+          value: {
+            writeText() {
+              throw new Error('denied');
+            }
+          }
+        });
+      } catch (error) {
+        // Headless browser descriptors can be locked; SELECT still exercises the fallback surface.
+      }
+      reportCopyButton?.click();
+      await Promise.resolve();
+      reportSelectButton?.click();
+      await waitFrame();
+      const reportPanel = document.querySelector('#playtest-report-export');
+      const reportSummary = document.querySelector('#playtest-report-summary');
+      const reportText = document.querySelector('#playtest-report-text');
+      reportExport = {
+        status: 'checked',
+        copyState: reportPanel?.dataset.copyState || '',
+        statusText: document.querySelector('#playtest-report-status')?.innerText || '',
+        panelHidden: reportPanel?.classList.contains('hidden') ?? true,
+        textHidden: reportText?.classList.contains('hidden') ?? true,
+        exportIncludesKind: Boolean(reportText?.value.includes('"kind": "thatbutton.playtestReport"')),
+        summaryIncludesPrivacy: Boolean(reportSummary?.innerText.includes('local-only')),
+        panel: rect('#playtest-report-export'),
+        textarea: rect('#playtest-report-text')
+      };
+      pushCheck(!reportExport.panelHidden && withinViewport(reportExport.panel, 2)
+        ? pass('playtest report export panel renders after run end', reportExport)
+        : fail('playtest report export panel missing or outside viewport', reportExport));
+      pushCheck(reportExport.summaryIncludesPrivacy && reportExport.exportIncludesKind
+        ? pass('playtest report export contains privacy summary and JSON kind', reportExport)
+        : fail('playtest report export lost privacy summary or JSON kind', reportExport));
+      pushCheck(!reportExport.textHidden && reportExport.copyState === 'fallback' && reportExport.statusText === 'SELECTABLE' && withinViewport(reportExport.textarea, 2)
+        ? pass('playtest report export fallback text area is selectable', reportExport)
+        : fail('playtest report export fallback text area did not become selectable', reportExport));
+      renderer.hideGameOverScreen();
+      await waitFrame();
+    }
+
     const syntheticButtons = Array.from({ length: 9 }, (_, index) => ({
       id: 'btn-' + index,
       number: index + 1,
@@ -690,6 +769,7 @@ function getSmokeExpression(viewport) {
       },
       interference,
       upgrade,
+      reportExport,
       vfx
     };
   })()`;
@@ -762,7 +842,7 @@ async function main() {
 
     const summary = {
       status: results.every((result) => result.ok) ? 'PASS' : 'FAIL',
-      smoke: 'phase-7a-browser-hazard-smoke',
+      smoke: 'phase-9-browser-hazard-report-smoke',
       browserExecutable,
       servedPath: smokeUrlPath,
       seed: smokeSeed,
@@ -770,11 +850,17 @@ async function main() {
     };
     mkdirSync(docsDir, { recursive: true });
     const jsonLineEnding = process.platform === 'win32' ? '\r\n' : '\n';
-    const jsonOutput = `${JSON.stringify(summary, null, 2)}\n`.replace(/\n/g, jsonLineEnding);
-    writeFileSync(resultPath, jsonOutput, 'utf8');
+    const legacySummary = {
+      ...summary,
+      smoke: 'phase-7a-browser-hazard-smoke'
+    };
+    const legacyJsonOutput = `${JSON.stringify(legacySummary, null, 2)}\n`.replace(/\n/g, jsonLineEnding);
+    const phase9JsonOutput = `${JSON.stringify(summary, null, 2)}\n`.replace(/\n/g, jsonLineEnding);
+    writeFileSync(resultPath, legacyJsonOutput, 'utf8');
+    writeFileSync(phase9ResultPath, phase9JsonOutput, 'utf8');
 
     if (summary.status !== 'PASS') {
-      console.error(`Hazard browser smoke failed. Results written to ${resultPath}`);
+      console.error(`Hazard/report browser smoke failed. Results written to ${resultPath} and ${phase9ResultPath}`);
       for (const result of results) {
         const failures = result.checks.filter((check) => !check.ok);
         if (failures.length) {
@@ -785,7 +871,7 @@ async function main() {
       return;
     }
 
-    console.log(`Hazard browser smoke passed. Results written to ${resultPath}`);
+    console.log(`Hazard/report browser smoke passed. Results written to ${resultPath} and ${phase9ResultPath}`);
   } finally {
     if (client) {
       await client.send('Browser.close').catch(() => {});

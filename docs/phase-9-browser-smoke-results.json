@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "smoke": "phase-7a-browser-hazard-smoke",
+  "smoke": "phase-9-browser-hazard-report-smoke",
   "browserExecutable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
   "servedPath": "/?seed=phase3a-baseline&debug=1",
   "seed": "phase3a-baseline",

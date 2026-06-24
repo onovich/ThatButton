@@ -41,3 +41,6 @@
 - [Phase 8 Playtest Calibration And Content Expansion Record](phase-8-playtest-calibration-content-record.md) - Phase 8 round log, deterministic baseline/session preview evidence, tuning decisions, browser smoke notes, and architecture self-checks.
 - [Phase 8 Final Report](phase-8-final-report.md) - completed Phase 8 summary, progression/content evidence, conservative balance tuning, validation matrix, pending playtests, and readiness payload.
 - [Phase 9 Playtest Evidence And Decision Gate Goal Guide](phase-9-playtest-evidence-decision-gate-goal-guide.md) - goal-mode execution guide for local run reports, playtest templates, privacy guardrails, and a decision gate before more gameplay or engine work.
+- [Phase 9 Playtest Evidence And Decision Gate Record](phase-9-playtest-evidence-decision-gate-record.md) - Phase 9 round log, report schema, runtime/export evidence, validation notes, and privacy guardrails.
+- [Phase 9 Playtest Script And Evidence Template](phase-9-playtest-script-and-template.md) - local-only desktop, iOS Safari, Android Chrome, and human observation playtest templates.
+- [Phase 9 Browser Smoke Results](phase-9-browser-smoke-results.json) - Chrome/CDP desktop, mobile, and short-mobile evidence for report export UI, fallback behavior, hazards, VFX, and layout preservation.

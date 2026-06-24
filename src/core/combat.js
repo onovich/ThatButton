@@ -59,6 +59,13 @@ export function cloneCombatState(combat = createCombatState()) {
   };
 }
 
+export function createNextCombatState(combat = createCombatState()) {
+  const previous = cloneCombatState(combat);
+  return createCombatState({
+    enemyIndex: previous.enemyIndex + 1
+  });
+}
+
 export function calculateRoundDamage({
   timeLeftMs = 0,
   comboState = null,

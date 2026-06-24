@@ -67,6 +67,8 @@ for (const marker of [
   'id="combo-window-bar"',
   'id="combo-reward-text"',
   'id="combo-particle-layer"',
+  'id="upgrade-screen"',
+  'id="upgrade-choice-list"',
   'id="command-panel"',
   'id="clue-title"',
   '别按那个按钮！',
@@ -80,13 +82,13 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'updateComboWindow', 'spawnComboParticles', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'updateComboWindow', 'spawnComboParticles', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
 }
 
-for (const marker of ['id="boss-avatar"', '.battle-stage', '.player-hud', '.command-panel', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '"avatar hp attack"', '.combat-hp-bar', '.player-hp-bar', '.enemy-attack-text', '.player-damage-text', '@keyframes player-damage-pop', 'display: block;', 'id="combo-window-bar"', '.combo-window-bar', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-stage-two', '.combo-stage-high', '.combo-particle', '.button-float-text', '.safe-success', '.chain-start', '.wrong-press-flash', '.combo-shake-strong', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
+for (const marker of ['id="boss-avatar"', '.battle-stage', '.player-hud', '.command-panel', '.upgrade-screen', '.upgrade-card', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '"avatar hp attack"', '.combat-hp-bar', '.player-hp-bar', '.enemy-attack-text', '.player-damage-text', '@keyframes player-damage-pop', 'display: block;', 'id="combo-window-bar"', '.combo-window-bar', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-stage-two', '.combo-stage-high', '.combo-particle', '.button-float-text', '.safe-success', '.chain-start', '.wrong-press-flash', '.combo-shake-strong', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
   if (!html.includes(marker)) {
     failures.push(`Missing combat mobile layout marker in index.html: ${marker}`);
   }
@@ -305,6 +307,7 @@ const {
   applyRoundClearDamage,
   calculateRoundDamage,
   createCombatState,
+  createNextCombatState,
   getCombatSummary
 } = combatModule;
 const {
@@ -882,6 +885,15 @@ if (
 ) {
   failures.push(`Initial combat state changed: ${JSON.stringify(initialCombat)}`);
 }
+const nextCombat = createNextCombatState(initialCombat);
+if (
+  nextCombat.enemyIndex !== 2 ||
+  nextCombat.maxHp !== 660 ||
+  nextCombat.attack !== 24 ||
+  nextCombat.status !== 'active'
+) {
+  failures.push(`Next combat state scaling failed: ${JSON.stringify(nextCombat)}`);
+}
 const roundDamage = calculateRoundDamage({
   timeLeftMs: 18000,
   comboState: createComboState({ streak: 3 })
@@ -1186,7 +1198,13 @@ app.init();
 if (app.hostBridge.getEvents()[0]?.type !== HOST_EVENT_TYPES.HOST_BRIDGE_READY) {
   failures.push(`App did not emit host bridge ready during init: ${JSON.stringify(app.hostBridge.getEvents())}`);
 }
-if (typeof app.press !== 'function' || typeof app.getSnapshot !== 'function' || typeof fakeWindow.__THAT_BUTTON_HOST__?.press !== 'function') {
+if (
+  typeof app.press !== 'function' ||
+  typeof app.selectUpgrade !== 'function' ||
+  typeof app.getSnapshot !== 'function' ||
+  typeof fakeWindow.__THAT_BUTTON_HOST__?.press !== 'function' ||
+  typeof fakeWindow.__THAT_BUTTON_HOST__?.selectUpgrade !== 'function'
+) {
   failures.push('Host-facing input API is missing from app boundary or browser window.');
 }
 
@@ -1411,27 +1429,47 @@ for (let guard = 0; guard < 26 && victoryApp.getSnapshot().status === 'playing';
   safeIds.forEach((buttonId) => victoryApp.press(buttonId));
 }
 const victorySnapshot = victoryApp.getSnapshot();
-if (victorySnapshot.status !== 'finished' || victorySnapshot.lastVictoryRecap?.result !== 'victory' || victorySnapshot.combat.status !== 'defeated') {
-  failures.push(`Fixed-seed boss defeat path failed: ${JSON.stringify(victorySnapshot)}`);
+if (
+  victorySnapshot.status !== 'upgrade_pending' ||
+  !victorySnapshot.upgrades.pending ||
+  victorySnapshot.upgrades.choices.length !== 3 ||
+  victorySnapshot.combat.status !== 'defeated'
+) {
+  failures.push(`Fixed-seed enemy defeat should pause for three upgrade choices: ${JSON.stringify(victorySnapshot)}`);
 }
 if (victorySnapshot.combat.defeatedAtLevel < 18 || victorySnapshot.combat.roundsCleared < 18) {
-  failures.push(`Boss encounter ends before 3x3 has room to develop: ${JSON.stringify(victorySnapshot.combat)}`);
+  failures.push(`First enemy encounter ends before 3x3 has room to develop: ${JSON.stringify(victorySnapshot.combat)}`);
+}
+const selectedUpgrade = victorySnapshot.upgrades.choices[0];
+const upgradeSelection = victoryApp.selectUpgrade(selectedUpgrade.id);
+const afterUpgradeSnapshot = victoryApp.getSnapshot();
+if (
+  !upgradeSelection.accepted ||
+  afterUpgradeSnapshot.status !== 'playing' ||
+  afterUpgradeSnapshot.upgrades.pending ||
+  afterUpgradeSnapshot.upgrades.applied.length !== 1 ||
+  afterUpgradeSnapshot.upgrades.applied[0].id !== selectedUpgrade.id ||
+  afterUpgradeSnapshot.combat.enemyIndex !== 2 ||
+  afterUpgradeSnapshot.combat.maxHp !== 660 ||
+  afterUpgradeSnapshot.combat.attack !== 24 ||
+  afterUpgradeSnapshot.round.level <= victorySnapshot.round.level
+) {
+  failures.push(`Upgrade selection should apply one upgrade and continue into stronger enemy 2: ${JSON.stringify({ selectedUpgrade, upgradeSelection, afterUpgradeSnapshot })}`);
 }
 const victoryEventTypes = victoryBridge.getEvents().map((event) => event.type);
 for (const requiredType of [
   HOST_EVENT_TYPES.BOSS_DAMAGED,
-  HOST_EVENT_TYPES.BOSS_DEFEATED,
-  HOST_EVENT_TYPES.RUN_FINISHED
+  HOST_EVENT_TYPES.BOSS_DEFEATED
 ]) {
   if (!victoryEventTypes.includes(requiredType)) {
-    failures.push(`Victory host event smoke missed ${requiredType}: ${JSON.stringify(victoryEventTypes)}`);
+    failures.push(`Enemy-defeat host event smoke missed ${requiredType}: ${JSON.stringify(victoryEventTypes)}`);
   }
 }
-const victoryFinishedEvent = victoryBridge.getEvents().find((event) =>
+const unexpectedVictoryFinishedEvent = victoryBridge.getEvents().find((event) =>
   event.type === HOST_EVENT_TYPES.RUN_FINISHED && event.payload.result === 'victory'
 );
-if (victoryFinishedEvent?.payload?.reason !== 'boss_defeated') {
-  failures.push(`Victory run_finished event lost result facts: ${JSON.stringify(victoryFinishedEvent)}`);
+if (unexpectedVictoryFinishedEvent) {
+  failures.push(`Enemy defeat should offer upgrades instead of ending the run as victory: ${JSON.stringify(unexpectedVictoryFinishedEvent)}`);
 }
 
 if (debugApi) {

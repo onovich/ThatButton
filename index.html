@@ -1034,6 +1034,56 @@
             background: var(--crt-red); color: #fff; box-shadow: 0 0 20px rgba(255, 42, 42, 0.6);
         }
 
+        .upgrade-screen {
+            gap: 0.8rem;
+        }
+
+        .upgrade-title {
+            color: var(--crt-yellow);
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-shadow: 0 0 14px rgba(255, 204, 0, 0.58);
+        }
+
+        .upgrade-choice-list {
+            width: min(100%, 420px);
+            display: grid;
+            gap: 0.65rem;
+        }
+
+        .upgrade-card {
+            min-height: 74px;
+            border: 2px solid rgba(74, 246, 38, 0.58);
+            border-radius: 6px;
+            background: rgba(0, 18, 0, 0.82);
+            color: var(--crt-green);
+            text-align: left;
+            padding: 0.65rem 0.75rem;
+            cursor: pointer;
+            box-shadow: inset 0 0 14px rgba(74, 246, 38, 0.1), 0 0 12px rgba(74, 246, 38, 0.12);
+        }
+
+        .upgrade-card:hover,
+        .upgrade-card:focus-visible {
+            outline: none;
+            border-color: var(--crt-yellow);
+            color: var(--crt-yellow);
+            box-shadow: 0 0 16px rgba(255, 204, 0, 0.38), inset 0 0 14px rgba(255, 204, 0, 0.12);
+        }
+
+        .upgrade-card-label {
+            display: block;
+            font-weight: 900;
+            font-size: 0.96rem;
+            margin-bottom: 0.18rem;
+        }
+
+        .upgrade-card-effect {
+            display: block;
+            font-size: 0.78rem;
+            opacity: 0.82;
+        }
+
         .failure-recap {
             width: 100%;
             max-width: 360px;
@@ -1264,6 +1314,19 @@
             .btn-ui {
                 width: 100%;
                 margin-top: 0.75rem;
+            }
+
+            .upgrade-title {
+                font-size: 1.65rem;
+            }
+
+            .upgrade-choice-list {
+                gap: 0.5rem;
+            }
+
+            .upgrade-card {
+                min-height: 64px;
+                padding: 0.55rem 0.65rem;
             }
 
             .failure-title {
@@ -1554,6 +1617,12 @@
             </p>
             <div id="failure-recap" class="failure-recap text-xs crt-font"></div>
             <button class="btn-ui btn-ui-red" onclick="resetGame()">重新进入面板</button>
+        </div>
+
+        <div id="upgrade-screen" class="overlay upgrade-screen hidden">
+            <h2 class="upgrade-title crt-font">UPGRADE</h2>
+            <p class="text-sm text-yellow-400 opacity-90">ENEMY DOWN / SELECT ONE</p>
+            <div id="upgrade-choice-list" class="upgrade-choice-list"></div>
         </div>
     </div>
 

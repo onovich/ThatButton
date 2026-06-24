@@ -544,3 +544,66 @@ Architecture self-check:
 - UI was not changed in this round.
 - Host code only clones upgrade facts into JSON-safe payloads.
 - Deferred upgrade overlay UI, native bridge integration, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.
+
+## Round 11 Upgrade UI And Enemy Transition Evidence
+
+Implemented:
+
+- Added `createNextCombatState(...)` so a defeated enemy can advance into the next scaled enemy encounter.
+- Added encounter wrappers for:
+  - offering deterministic upgrade choices,
+  - applying an upgrade choice,
+  - creating the next combat state.
+- Changed enemy defeat flow:
+  - enemy HP reaching zero no longer ends the run as a victory,
+  - the run pauses with `upgrades.pending=true`,
+  - exactly three upgrade choices are shown,
+  - selecting one upgrade applies its modifiers,
+  - combo resets for the next encounter,
+  - enemy 2 spawns with higher HP and attack,
+  - the next puzzle round starts.
+- Added `selectUpgrade(...)` to the app and browser host/debug surface without changing existing `press(buttonId)` behavior.
+- Added `upgrade_pending` host snapshot status.
+- Added upgrade overlay UI:
+  - `#upgrade-screen`,
+  - `#upgrade-choice-list`,
+  - `.upgrade-card` choices,
+  - mobile sizing rules.
+- Extended validation so the fixed-seed enemy-defeat path verifies:
+  - pending three-choice upgrade state,
+  - no premature `run_finished victory`,
+  - successful upgrade selection,
+  - exactly one applied upgrade,
+  - transition into enemy 2 with `660 HP / 24 ATK`.
+
+Validation run:
+
+- `node --check src\core\combat.js`: PASS
+- `node --check src\core\encounter.js`: PASS
+- `node --check src\app\create-app.js`: PASS
+- `node --check src\ui\render.js`: PASS
+- `node --check src\host\app-host-api.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `OpenOnlineTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- Local HTTP marker smoke on `http://127.0.0.1:5184/`: PASS; upgrade overlay, player HUD, and combo-window markers present
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Debug self-check:
+
+- Fixed-seed app smoke now proves the first enemy defeat pauses on three deterministic upgrade choices.
+- The same smoke selects one offered upgrade and verifies the run resumes against stronger enemy 2.
+- Failure localization is clear: core combat transition, core upgrade application, app orchestration, renderer overlay, or host snapshot status.
+- No hidden nondeterminism was added beyond consuming the existing seeded RNG path for choices.
+
+Architecture self-check:
+
+- Enemy scaling and upgrade application remain in core modules.
+- App orchestration owns pause/resume flow and delegates formulas to encounter/core helpers.
+- UI renders upgrade choices only and does not apply modifiers or calculate next enemy stats.
+- Host still uses JSON-safe snapshots and shared app input paths.
+- Deferred native bridge integration, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.

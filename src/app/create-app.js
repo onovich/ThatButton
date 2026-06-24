@@ -3,19 +3,22 @@ import { createInitialState } from '../core/app-state.js';
 import { resolveWrongPressDamage } from '../core/battle.js';
 import { createDebugApi } from '../core/debug.js';
 import {
+  applyEncounterUpgradeChoice,
   applySafePressCombo,
   createEncounterState,
+  createNextEncounterCombat,
   expireEncounterComboIfNeeded,
   getEncounterComboWindow,
   getEncounterComboWindowMs,
   getEncounterFacts,
   getEncounterRoundTimeLimitMs,
+  offerEncounterUpgradeChoices,
   resetEncounterCombo,
   resolveRoundClearCombat
 } from '../core/encounter.js';
 import { generateLevelData, getButtonSummary, getRoundSnapshot } from '../core/level.js';
 import { createSeededRng } from '../core/rng.js';
-import { buildFailureRecapFromState, buildVictoryRecapFromState } from '../core/run-recaps.js';
+import { buildFailureRecapFromState } from '../core/run-recaps.js';
 import {
   buildBestRecordFromRun,
   cloneBestRecord,
@@ -285,6 +288,68 @@ export function createApp({
     return playerDamageResult;
   }
 
+  function showUpgradeChoices() {
+    const offer = offerEncounterUpgradeChoices(gameState.upgrades, {
+      rng: gameState.rng,
+      enemyIndex: gameState.combat.enemyIndex
+    });
+    gameState.upgrades = offer.upgrades;
+    const encounterFacts = getEncounterFacts(gameState);
+    renderer.updateCombatStatus(encounterFacts);
+    renderer.showUpgradeScreen({
+      choices: offer.choices,
+      onSelect: selectUpgrade
+    });
+    recordDebugEvent('upgrades_offered', {
+      choices: offer.choices,
+      upgrades: encounterFacts.upgrades,
+      combat: encounterFacts.combat
+    });
+    return offer;
+  }
+
+  function continueAfterUpgrade() {
+    gameState.combat = createNextEncounterCombat(gameState.combat);
+    gameState.lastCombatResult = null;
+    gameState.level++;
+    const nextDifficulty = getDifficultyForLevel(gameState.level);
+    gameState.currentDifficulty = nextDifficulty;
+    gameState.timeLimit = getEffectiveRoundTimeLimit(nextDifficulty);
+    gameState.timeLeft = gameState.timeLimit;
+    applyComboChange(resetEncounterCombo(gameState.combo, 'upgrade_selected'));
+    renderer.updateCombatStatus(getEncounterFacts(gameState));
+    renderer.updateTimer(gameState.timeLeft, gameState.timeLimit, getCurrentComboWindow());
+    renderer.setWarningVisible(nextDifficulty.feedbackIntensity === 'critical');
+    setTimeout(() => {
+      startRound();
+    }, 450);
+  }
+
+  function selectUpgrade(upgradeId) {
+    if (!gameState.upgrades.pending) {
+      return { accepted: false, reason: 'no_pending_upgrade', upgradeId };
+    }
+    const applied = applyEncounterUpgradeChoice(gameState.upgrades, upgradeId, {
+      player: gameState.player
+    });
+    gameState.upgrades = applied.upgrades;
+    gameState.player = applied.player || gameState.player;
+    renderer.hideUpgradeScreen();
+    audio.playLevelUp();
+    recordDebugEvent('upgrade_selected', {
+      upgrade: applied.upgrade,
+      upgrades: applied.upgrades,
+      player: getEncounterFacts(gameState).player
+    });
+    continueAfterUpgrade();
+    return {
+      accepted: true,
+      upgrade: applied.upgrade,
+      upgrades: applied.upgrades,
+      nextEnemy: gameState.combat
+    };
+  }
+
   function levelComplete({ sourceElement = null } = {}) {
     gameState.isPlaying = false;
     const combatResult = resolveRoundClearCombat({
@@ -315,31 +380,18 @@ export function createApp({
       combo: encounterFacts.combo
     });
     if (combatResult.defeated) {
-      const victoryRecap = finalizeBestRecordForRun(buildVictoryRecapFromState(gameState));
-      gameState.lastVictoryRecap = victoryRecap;
-      gameState.lastRunResultRecap = victoryRecap;
-      recordDebugEvent('victory', {
+      recordDebugEvent('enemy_defeated', {
         combatDamage: combatResult.damage,
-        victoryRecap
+        combat: encounterFacts.combat
       });
       hostController.emitBossDefeated({
         damage: combatResult.damage,
         combat: encounterFacts.combat,
         combo: encounterFacts.combo
       });
-      hostController.emitRunFinished({
-        result: 'victory',
-        reason: 'boss_defeated',
-        recap: victoryRecap
-      });
       audio.playLevelUp();
       setTimeout(() => {
-        renderer.showGameOverScreen({
-          level: gameState.level,
-          isTimeout: false,
-          isVictory: true,
-          recap: victoryRecap
-        });
+        showUpgradeChoices();
       }, 600);
       return;
     }
@@ -486,6 +538,7 @@ export function createApp({
     audio.resume();
     renderer.hideStartScreen();
     renderer.hideGameOverScreen();
+    renderer.hideUpgradeScreen();
     renderer.resetFailureShake();
     renderer.renderFailureRecap(null);
     syncBestRecordFromStorage();
@@ -559,6 +612,7 @@ export function createApp({
       start: startGame,
       reset: resetGame,
       press: (buttonId) => pressButton(buttonId, { source: 'host' }),
+      selectUpgrade,
       getSnapshot: () => hostController.getSnapshot(),
       getDebugApi: () => debugApi
     };
@@ -574,6 +628,7 @@ export function createApp({
     start: startGame,
     reset: resetGame,
     press: (buttonId) => pressButton(buttonId, { source: 'host' }),
+    selectUpgrade,
     getSnapshot: () => hostController.getSnapshot(),
     getDebugApi: () => debugApi,
     startGame,

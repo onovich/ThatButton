@@ -1,4 +1,4 @@
-import { applyRoundClearDamage, createCombatState, getCombatSummary } from './combat.js';
+import { applyRoundClearDamage, createCombatState, createNextCombatState, getCombatSummary } from './combat.js';
 import {
   createComboState,
   expireComboIfNeeded,
@@ -12,7 +12,9 @@ import {
   createUpgradeState,
   getEffectiveComboWindowMs,
   getEffectiveRoundTimeLimitMs,
-  getUpgradeSummary
+  getUpgradeSummary,
+  offerUpgradeChoices,
+  applyUpgradeChoice
 } from './upgrades.js';
 
 export function createEncounterState() {
@@ -57,6 +59,18 @@ export function getEncounterComboWindowMs(upgrades) {
 
 export function getEncounterRoundTimeLimitMs(difficulty, upgrades) {
   return getEffectiveRoundTimeLimitMs(difficulty.timeLimitMs, upgrades);
+}
+
+export function offerEncounterUpgradeChoices(upgrades, options = {}) {
+  return offerUpgradeChoices(upgrades, options);
+}
+
+export function applyEncounterUpgradeChoice(upgrades, choiceId, options = {}) {
+  return applyUpgradeChoice(upgrades, choiceId, options);
+}
+
+export function createNextEncounterCombat(combat) {
+  return createNextCombatState(combat);
 }
 
 export function resetEncounterCombo(combo, reason) {

@@ -74,6 +74,8 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     failureRecapEl: document.getElementById('failure-recap'),
     startScreen: document.getElementById('start-screen'),
     gameOverScreen: document.getElementById('game-over-screen'),
+    upgradeScreen: document.getElementById('upgrade-screen'),
+    upgradeChoiceList: document.getElementById('upgrade-choice-list'),
     finalLevel: document.getElementById('final-level'),
     deathReason: document.getElementById('death-reason'),
     resultTitle: document.getElementById('result-title'),
@@ -550,6 +552,28 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     refs.gameOverScreen.classList.add('hidden');
   }
 
+  function showUpgradeScreen({ choices = [], onSelect }) {
+    refs.upgradeChoiceList.innerHTML = '';
+    choices.forEach((choice) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'upgrade-card crt-font';
+      card.dataset.upgradeId = choice.id;
+      card.innerHTML = `
+                    <span class="upgrade-card-label">${escapeHtml(choice.label)}</span>
+                    <span class="upgrade-card-effect">${escapeHtml(choice.shortLabel)} / +${choice.value}</span>
+                `;
+      card.addEventListener('click', () => onSelect(choice.id));
+      refs.upgradeChoiceList.appendChild(card);
+    });
+    refs.upgradeScreen.classList.remove('hidden');
+  }
+
+  function hideUpgradeScreen() {
+    refs.upgradeScreen.classList.add('hidden');
+    refs.upgradeChoiceList.innerHTML = '';
+  }
+
   function showGameOverScreen({ level, isTimeout, recap, isVictory = false }) {
     refs.finalLevel.innerText = level;
     refs.resultTitle.innerText = isVictory ? 'ENCOUNTER CLEAR' : 'SYSTEM FAILURE';
@@ -616,6 +640,8 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     updateScore,
     hideStartScreen,
     hideGameOverScreen,
+    showUpgradeScreen,
+    hideUpgradeScreen,
     showGameOverScreen,
     setWarningVisible,
     resetFailureShake,

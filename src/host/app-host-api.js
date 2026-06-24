@@ -55,7 +55,9 @@ export function createAppHostApi({ hostBridge, getState, performance }) {
     const state = getState();
     return cloneJsonSafeValue({
       version: HOST_EVENT_VERSION,
-      status: state.isPlaying ? 'playing' : (state.lastRunResultRecap ? 'finished' : 'idle'),
+      status: state.isPlaying
+        ? 'playing'
+        : (state.upgrades?.pending ? 'upgrade_pending' : (state.lastRunResultRecap ? 'finished' : 'idle')),
       run: getRunPayload(),
       round: getRoundPayload(),
       player: createPlayerPayload(state.player),
@@ -79,7 +81,7 @@ export function createAppHostApi({ hostBridge, getState, performance }) {
     getSnapshot,
     emitBridgeReady: () => emit(HOST_EVENT_TYPES.HOST_BRIDGE_READY, {
       eventVersion: HOST_EVENT_VERSION,
-      inputApi: ['start', 'reset', 'press', 'getSnapshot', 'getDebugApi']
+      inputApi: ['start', 'reset', 'press', 'selectUpgrade', 'getSnapshot', 'getDebugApi']
     }),
     emitRunStarted: () => emit(HOST_EVENT_TYPES.RUN_STARTED, {
       run: getRunPayload()

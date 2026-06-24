@@ -2,7 +2,7 @@
 
 workspace: D:\WebProjects\ThatButton
 created_at: 2026-06-23T01:45:53.5461407+08:00
-updated_at: 2026-06-24T21:29:48.5526623+08:00
+updated_at: 2026-06-24T22:34:39.2770963+08:00
 
 planner:
   role: architect
@@ -29,10 +29,10 @@ idempotency:
   last_planner_dispatch_status: sent
   last_planner_dispatch_guide: docs/phase-8-playtest-calibration-content-goal-guide.md
   last_planner_dispatch_commit: 0b000ae4e3e40d31c64f15b558f16f6443a431f2
-  last_executor_report_commit: final head reported in READY_FOR_CHECK payload after final push
+  last_executor_report_commit: 50395d4e97ff06c755937b21e07f7a1a77b3c121
   last_executor_report_status: ready_for_check
   last_executor_report_at: 2026-06-24T21:29:48.5526623+08:00
   last_executor_report_guide: docs/phase-8-playtest-calibration-content-goal-guide.md
   last_check_status: pass
-  last_check_phase: Phase 7A - VFX Feel And Hazard Validation
-  last_check_at: 2026-06-24T20:09:41.4037492+08:00
+  last_check_phase: Phase 8 - Playtest Calibration And Content Expansion
+  last_check_at: 2026-06-24T22:34:39.2770963+08:00

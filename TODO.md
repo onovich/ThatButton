@@ -171,7 +171,7 @@ Phase 7A pending real-world evidence:
 
 Estimated conversation rounds: 12
 Goal guide: [docs/phase-8-playtest-calibration-content-goal-guide.md](docs/phase-8-playtest-calibration-content-goal-guide.md)
-Status: Implemented by executor; ready for CheckAndGoal. See [docs/phase-8-playtest-calibration-content-record.md](docs/phase-8-playtest-calibration-content-record.md) and [docs/phase-8-final-report.md](docs/phase-8-final-report.md).
+Status: Accepted by CheckAndGoal; see [docs/phase-8-playtest-calibration-content-record.md](docs/phase-8-playtest-calibration-content-record.md) and [docs/phase-8-final-report.md](docs/phase-8-final-report.md).
 
 - Establish deterministic progression/session evidence before changing more gameplay. Done through `previewSessionProgression(...)` and recorded fixed-seed session summaries.
 - Extend the playable arc so reaching `3x3` is not the practical end of interesting play. Done through longer-session evidence and data-driven encounter/stage identity.
@@ -182,4 +182,4 @@ Status: Implemented by executor; ready for CheckAndGoal. See [docs/phase-8-playt
 
 ## Current Recommendation
 
-Run CheckAndGoal on Phase 8. If accepted, choose the next phase from real playtest evidence: either continue HTML gameplay calibration around longer-run retention and hazard readability, or start a separate engine-embedding preparation phase that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7/7A/8 deterministic facts without adding new gameplay formulas to the host layer.
+Run Phase 9 as a narrow playtest evidence and decision-gate phase before another gameplay or engine phase. The next product decision should be based on comparable local/human/device reports rather than more simulated tuning alone: either continue HTML gameplay calibration around longer-run retention and hazard readability, or start a separate engine-embedding preparation phase that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7/7A/8 deterministic facts without adding new gameplay formulas to the host layer.

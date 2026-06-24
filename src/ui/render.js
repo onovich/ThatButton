@@ -89,6 +89,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
   let comboImpactTimeout = null;
   let comboShakeTimeout = null;
   let wrongPressFlashTimeout = null;
+  let hazardMotionButtonIds = new Set();
   const terminalGlyphs = ['>', '/', '+', '#'];
 
   function removeNode(node) {
@@ -331,6 +332,29 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     return true;
   }
 
+  function resetHazardMotion(buttonId) {
+    const buttonElement = getButtonElement(buttonId);
+    if (!buttonElement?.style) return;
+    buttonElement.style.setProperty('--hazard-x', '0px');
+    buttonElement.style.setProperty('--hazard-y', '0px');
+    if (buttonElement.dataset) {
+      buttonElement.dataset.hazardMotion = 'none';
+    }
+  }
+
+  function applyHazardMotion({ buttonId, hazard, phase }) {
+    const buttonElement = getButtonElement(buttonId);
+    if (!buttonElement?.style) return false;
+    const offsetX = Math.round(Number(hazard?.motion?.offsetXPx) || 0);
+    const offsetY = Math.round(Number(hazard?.motion?.offsetYPx) || 0);
+    buttonElement.style.setProperty('--hazard-x', `${offsetX}px`);
+    buttonElement.style.setProperty('--hazard-y', `${offsetY}px`);
+    if (buttonElement.dataset) {
+      buttonElement.dataset.hazardMotion = phase === 'active' ? 'active' : 'telegraph';
+    }
+    return true;
+  }
+
   function updateHazardPresentation(hazards = null) {
     const phase = toDatasetToken(hazards?.phase, 'inactive');
     const activeHazards = Array.isArray(hazards?.hazards)
@@ -361,12 +385,20 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     if (refs.hazardLayer) {
       refs.hazardLayer.innerHTML = '';
     }
-    if (!activeHazards.length) return;
+    const nextMotionButtonIds = new Set();
+    if (!activeHazards.length) {
+      hazardMotionButtonIds.forEach(resetHazardMotion);
+      hazardMotionButtonIds = nextMotionButtonIds;
+      return;
+    }
 
     activeHazards.forEach((hazard) => {
       const hazardPhase = toDatasetToken(hazard.phase, phase);
       if (Array.isArray(hazard.targetButtonIds)) {
         hazard.targetButtonIds.forEach((buttonId) => {
+          if (applyHazardMotion({ buttonId, hazard, phase: hazardPhase })) {
+            nextMotionButtonIds.add(buttonId);
+          }
           createHazardMarker({
             hazard,
             phase: hazardPhase,
@@ -384,6 +416,12 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
         });
       }
     });
+    hazardMotionButtonIds.forEach((buttonId) => {
+      if (!nextMotionButtonIds.has(buttonId)) {
+        resetHazardMotion(buttonId);
+      }
+    });
+    hazardMotionButtonIds = nextMotionButtonIds;
   }
 
   function spawnBossProjectile({ sourceElement, strong }) {
@@ -515,13 +553,16 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       buttonEl.innerHTML = `
                     <span class="btn-number crt-font">${String(button.number).padStart(2, '0')}</span>
                     <span class="btn-shape">${button.shape.char}</span>
-                `;
+      `;
       buttonEl.style.opacity = '0';
-      buttonEl.style.transform = 'scale(0.8)';
+      buttonEl.style.setProperty('--hazard-x', '0px');
+      buttonEl.style.setProperty('--hazard-y', '0px');
+      buttonEl.style.setProperty('--button-press-y', '0px');
+      buttonEl.style.setProperty('--button-scale', '0.8');
       schedule(() => {
         buttonEl.style.transition = 'all 0.2s cubic-bezier(.36,.07,.19,.97)';
         buttonEl.style.opacity = '1';
-        buttonEl.style.transform = 'scale(1)';
+        buttonEl.style.setProperty('--button-scale', '1');
       }, index * 40);
 
       buttonEl.addEventListener('pointerdown', (event) => onButtonInput(button.id, buttonEl, event), { passive: false });

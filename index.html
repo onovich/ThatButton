@@ -965,6 +965,10 @@
         }
 
         .game-btn {
+            --hazard-x: 0px;
+            --hazard-y: 0px;
+            --button-press-y: 0px;
+            --button-scale: 1;
             aspect-ratio: 1 / 1;
             border-radius: 8px;
             display: flex;
@@ -979,6 +983,7 @@
             position: relative;
             border: 2px solid rgba(0,0,0,0.5);
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            transform: translate3d(var(--hazard-x), calc(var(--hazard-y) + var(--button-press-y)), 0) scale(var(--button-scale));
             transform-style: preserve-3d;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
@@ -1002,7 +1007,7 @@
         }
 
         .game-btn:active, .game-btn.pressed {
-            transform: translateY(8px);
+            --button-press-y: 8px;
             box-shadow: 0 0px 0 rgba(0,0,0,0.8), 0 2px 5px rgba(0,0,0,0.5), inset 0 4px 6px rgba(0,0,0,0.6);
         }
 
@@ -1010,7 +1015,7 @@
             opacity: 0.3;
             pointer-events: none;
             filter: grayscale(0.8);
-            transform: translateY(8px);
+            --button-press-y: 8px;
             box-shadow: 0 0px 0 rgba(0,0,0,0.8);
         }
         
@@ -1018,7 +1023,8 @@
             background-color: var(--crt-red) !important;
             box-shadow: 0 0 30px var(--crt-red) !important;
             border-color: #fff;
-            transform: scale(1.1) translateY(0);
+            --button-press-y: 0px;
+            --button-scale: 1.1;
             z-index: 20;
         }
 
@@ -1397,11 +1403,12 @@
             .game-btn:active,
             .game-btn.pressed,
             .game-btn.disabled {
-                transform: translateY(6px);
+                --button-press-y: 6px;
             }
 
             .game-btn.explode {
-                transform: scale(1.08) translateY(0);
+                --button-press-y: 0px;
+                --button-scale: 1.08;
             }
 
             .btn-shape {

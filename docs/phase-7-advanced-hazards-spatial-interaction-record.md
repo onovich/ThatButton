@@ -350,3 +350,74 @@ Commit / push:
 Next:
 
 - Round 5: add gentle moving-button behavior using the current marker foundation.
+
+## Round 5 Moving-Button Hazard V1
+
+Implemented:
+
+- Added deterministic moving-button offset facts in `src/core/hazards.js`:
+  - active movement uses bounded sine-wave offsets,
+  - telegraph, cooldown, expired, disabled, and inactive states keep `0px` offsets,
+  - `sampledAtMs` is exposed on active hazard director state for debug/host inspection.
+- Updated button transforms to be CSS-variable driven:
+  - `--hazard-x` and `--hazard-y` control hazard drift,
+  - `--button-press-y` preserves pressed/disabled feedback,
+  - `--button-scale` preserves spawn/explode scale feedback.
+- Updated renderer hazard presentation:
+  - applies motion offsets to the actual target button element,
+  - keeps marker geometry based on current button rects,
+  - resets prior target buttons when hazards leave active/telegraph presentation.
+- Extended validation:
+  - core smoke checks active movement offset and telegraph zero offset,
+  - fake-geometry renderer smoke checks CSS motion variables on target buttons,
+  - structure guards require moving-button CSS variables and renderer motion application markers.
+
+Tuning:
+
+- Movement remains bounded by the Round 2 config:
+  - amplitude X: `10px`
+  - amplitude Y: `6px`
+  - cycle: `2400ms`
+- The first active fixed-seed validation sample at Level 19 / enemy 2 / `2000ms` produces a gentle `3px, 3px` drift.
+
+Debug self-check:
+
+- The change is explained by fixed-seed core hazard samples and a fake-geometry renderer smoke.
+- Failures localize to core offset calculation, CSS variable transform composition, renderer motion application, or structure validation.
+- First enemy / first upgrade path remains hazard-free because unlock thresholds were not changed.
+- Disabled, inactive, telegraph, active, cooldown, and expired movement states remain covered by existing and extended validation.
+- Moving buttons use transforms on the button element itself, so click target and visual target stay unified.
+- Attack/combo tracers still use `getBoundingClientRect()` on the pressed button, so future active motion remains compatible with current rect sourcing.
+
+Architecture self-check:
+
+- Movement timing and offset facts are pure core data.
+- UI only applies provided offsets to CSS variables and measures presentation geometry.
+- App orchestration was not changed in this round.
+- Host payload code was not changed in this round; hazard facts remain JSON-safe through existing payload smokes.
+- Rule, fatal-button, combat, combo, upgrade, and difficulty semantics were not duplicated.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, framework work, and Phase 1 retuning remain out of scope.
+- Validation now guards current-rect markers, CSS motion variables, and deterministic active/telegraph movement offsets.
+
+Round 5 validation:
+
+- `node --check src\core\hazards.js`: PASS
+- `node --check src\ui\render.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Round 6: moving-button validation and tuning with stronger geometry/overlap guards.

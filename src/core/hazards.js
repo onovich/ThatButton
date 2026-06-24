@@ -66,6 +66,22 @@ function buildScheduleTiming({ telegraphDelayMs, telegraphDurationMs, durationMs
   };
 }
 
+function calculateMotionOffset({ phase, timing, nowMs, amplitudeXPx, amplitudeYPx, cycleMs }) {
+  if (phase !== HAZARD_PHASES.ACTIVE) {
+    return {
+      offsetXPx: 0,
+      offsetYPx: 0
+    };
+  }
+  const cycle = Math.max(1, Math.floor(Number(cycleMs) || 1));
+  const activeElapsed = Math.max(0, normalizeTime(nowMs) - normalizeTime(timing.startsAtMs));
+  const progress = (activeElapsed % cycle) / cycle;
+  return {
+    offsetXPx: Math.round(Math.sin(progress * Math.PI * 2) * Math.max(0, Math.floor(Number(amplitudeXPx) || 0))),
+    offsetYPx: Math.round(Math.sin(progress * Math.PI * 4) * Math.max(0, Math.floor(Number(amplitudeYPx) || 0)))
+  };
+}
+
 export function createBoardZoneFacts({ rows = 3, cols = 3 } = {}) {
   const normalizedRows = normalizeRows(rows);
   const normalizedCols = normalizeCols(cols);
@@ -132,6 +148,15 @@ function createMovementHazard({
     return null;
   }
   const timing = buildScheduleTiming(movementConfig);
+  const phase = getPhaseForTiming(timing, nowMs);
+  const offset = calculateMotionOffset({
+    phase,
+    timing,
+    nowMs,
+    amplitudeXPx: movementConfig.amplitudeXPx,
+    amplitudeYPx: movementConfig.amplitudeYPx,
+    cycleMs: movementConfig.cycleMs
+  });
   const targets = pickTargets({
     rng,
     buttonIds,
@@ -141,14 +166,15 @@ function createMovementHazard({
   return {
     id: `${HAZARD_TYPES.MOVING_BUTTON}:L${normalizeLevel(level)}:E${normalizeEnemyIndex(enemyIndex)}`,
     type: HAZARD_TYPES.MOVING_BUTTON,
-    phase: getPhaseForTiming(timing, nowMs),
+    phase,
     seed,
     targetButtonIds: targets,
     timing,
     motion: {
       amplitudeXPx: Math.max(0, Math.floor(Number(movementConfig.amplitudeXPx) || 0)),
       amplitudeYPx: Math.max(0, Math.floor(Number(movementConfig.amplitudeYPx) || 0)),
-      cycleMs: Math.max(1, Math.floor(Number(movementConfig.cycleMs) || 1))
+      cycleMs: Math.max(1, Math.floor(Number(movementConfig.cycleMs) || 1)),
+      ...offset
     }
   };
 }
@@ -246,6 +272,7 @@ export function createHazardDirectorState({
     reason: unlocked ? 'scheduled' : 'onboarding_safe',
     level: normalizedLevel,
     enemyIndex: normalizedEnemyIndex,
+    sampledAtMs: normalizeTime(nowMs),
     hazards,
     boardZones
   };

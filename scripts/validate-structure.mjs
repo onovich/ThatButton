@@ -150,6 +150,9 @@ const hazardPresentationMarkers = [
   'refs.commandPanel.dataset.hazardTargetCount',
   'refs.gridEl.dataset.hazardPhase',
   'refs.hazardLayer.innerHTML =',
+  'applyHazardMotion',
+  "buttonElement.style.setProperty('--hazard-x'",
+  "buttonElement.style.setProperty('--hazard-y'",
   'getButtonElement(buttonId)',
   'getBoundingClientRect',
   'targetRect.left - panelRect.left',
@@ -158,6 +161,18 @@ const hazardPresentationMarkers = [
 for (const marker of hazardPresentationMarkers) {
   if (!renderSource.includes(marker)) {
     failures.push(`Missing hazard presentation guard marker in renderer: ${marker}`);
+  }
+}
+
+for (const marker of [
+  '--hazard-x: 0px',
+  '--hazard-y: 0px',
+  '--button-press-y: 0px',
+  '--button-scale: 1',
+  'translate3d(var(--hazard-x), calc(var(--hazard-y) + var(--button-press-y)), 0) scale(var(--button-scale))'
+]) {
+  if (!html.includes(marker)) {
+    failures.push(`Missing moving-button CSS variable marker in index.html: ${marker}`);
   }
 }
 
@@ -1314,6 +1329,11 @@ class FakeAudioContext {
 }
 
 function fakeElement() {
+  const style = {
+    setProperty(name, value) {
+      this[name] = String(value);
+    }
+  };
   return {
     classList: {
       add() {},
@@ -1321,7 +1341,7 @@ function fakeElement() {
       contains() { return false; }
     },
     dataset: {},
-    style: { setProperty() {} },
+    style,
     addEventListener() {},
     appendChild() {},
     setAttribute() {},
@@ -1393,7 +1413,11 @@ hazardRenderer.updateHazardPresentation({
     {
       type: HAZARD_TYPES.MOVING_BUTTON,
       phase: HAZARD_PHASES.ACTIVE,
-      targetButtonIds: ['btn-0', 'btn-4']
+      targetButtonIds: ['btn-0', 'btn-4'],
+      motion: {
+        offsetXPx: 4,
+        offsetYPx: -2
+      }
     },
     {
       type: HAZARD_TYPES.INTERFERENCE,
@@ -1414,6 +1438,9 @@ if (
   hazardUiElements.get('btn-grid').dataset.hazardPhase !== HAZARD_PHASES.ACTIVE ||
   hazardUiElements.get('hazard-status-text').innerText !== 'HAZARD ACTIVE' ||
   hazardLayerChildren.length !== 3 ||
+  hazardUiElements.get('btn-0').style['--hazard-x'] !== '4px' ||
+  hazardUiElements.get('btn-0').style['--hazard-y'] !== '-2px' ||
+  hazardUiElements.get('btn-4').dataset.hazardMotion !== 'active' ||
   firstHazardMarker?.style.left !== '10px' ||
   firstHazardMarker?.style.top !== '110px' ||
   firstHazardMarker?.style.width !== '100px' ||
@@ -1429,6 +1456,8 @@ if (
     gridDataset: hazardUiElements.get('btn-grid').dataset,
     status: hazardUiElements.get('hazard-status-text').innerText,
     markerCount: hazardLayerChildren.length,
+    btn0Style: hazardUiElements.get('btn-0').style,
+    btn4Dataset: hazardUiElements.get('btn-4').dataset,
     first: firstHazardMarker?.style,
     second: secondHazardMarker?.style,
     board: boardHazardMarker?.style,
@@ -1949,6 +1978,7 @@ if (debugApi) {
     forbiddenIds: ['btn-0'],
     nowMs: 9100
   });
+  const movementTelegraphHazard = movementTelegraph.hazards.find((hazard) => hazard.type === HAZARD_TYPES.MOVING_BUTTON);
   const movementHazard = movementActive.hazards.find((hazard) => hazard.type === HAZARD_TYPES.MOVING_BUTTON);
   if (
     !movementTelegraph.unlocked ||
@@ -1958,7 +1988,12 @@ if (debugApi) {
     movementExpired.hazards[0]?.phase !== HAZARD_PHASES.EXPIRED ||
     movementHazard?.targetButtonIds.length !== BASE_HAZARD_CONFIG.movingButton.targetCount ||
     movementHazard.targetButtonIds.includes('btn-0') ||
-    movementHazard.motion.amplitudeXPx !== BASE_HAZARD_CONFIG.movingButton.amplitudeXPx
+    movementHazard.motion.amplitudeXPx !== BASE_HAZARD_CONFIG.movingButton.amplitudeXPx ||
+    movementHazard.motion.offsetXPx !== 3 ||
+    movementHazard.motion.offsetYPx !== 3 ||
+    movementTelegraphHazard?.motion?.offsetXPx !== 0 ||
+    movementTelegraphHazard?.motion?.offsetYPx !== 0 ||
+    movementActive.sampledAtMs !== 2000
   ) {
     failures.push(`Moving-button hazard schedule changed: ${JSON.stringify({ movementTelegraph, movementActive, movementCooldown, movementExpired })}`);
   }

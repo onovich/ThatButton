@@ -184,6 +184,161 @@ export function previewUpgradeApplication(upgradeId = 'chain-span-plus') {
   };
 }
 
+function previewFirstEnemyRun({
+  seed = 'phase6a-baseline',
+  safePressCadenceMs = 700,
+  interRoundDelayMs = 600,
+  maxLevels = 40
+} = {}) {
+  const rng = createSeededRng(seed);
+  let combat = createCombatState();
+  let combo = createComboState();
+  const upgrades = createUpgradeState();
+  let nowMs = 0;
+  let totalSafePresses = 0;
+  const rounds = [];
+
+  for (let level = 1; level <= maxLevels; level++) {
+    const difficulty = getDifficultyForLevel(level);
+    const timeLimitMs = getEffectiveRoundTimeLimitMs(difficulty.timeLimitMs, upgrades);
+    const levelData = generateLevelData({ level, difficulty, rng });
+    let timeLeftMs = timeLimitMs;
+
+    for (let pressIndex = 0; pressIndex < levelData.safeKeysRemaining; pressIndex++) {
+      nowMs += safePressCadenceMs;
+      timeLeftMs = Math.max(0, timeLeftMs - safePressCadenceMs);
+      combo = expireComboIfNeeded(combo, nowMs).combo;
+      combo = incrementCombo(combo, 'safe_press', {
+        atMs: nowMs,
+        windowMs: getEffectiveComboWindowMs(upgrades)
+      }).combo;
+      totalSafePresses++;
+    }
+
+    const combatResult = applyRoundClearDamage(combat, {
+      level,
+      timeLeftMs,
+      comboState: combo,
+      upgrades
+    });
+    combat = combatResult.combat;
+    rounds.push({
+      level,
+      difficultyId: difficulty.id,
+      safeCount: levelData.safeKeysRemaining,
+      timeLimitMs,
+      timeLeftMs,
+      comboText: combo.comboText || combo.statusText,
+      damage: combatResult.damage.appliedDamage,
+      enemyHpAfter: combat.hp,
+      defeated: combatResult.defeated
+    });
+
+    if (combatResult.defeated) {
+      const choices = generateUpgradeChoices({
+        rng,
+        enemyIndex: combat.enemyIndex
+      });
+      return {
+        seed,
+        safePressCadenceMs,
+        interRoundDelayMs,
+        enemyDefeatedAtLevel: level,
+        firstUpgradeAtLevel: level,
+        totalSafePresses,
+        elapsedMs: nowMs,
+        enemy: getCombatSummary(combat),
+        choices,
+        rounds
+      };
+    }
+
+    nowMs += interRoundDelayMs;
+    combo = expireComboIfNeeded(combo, nowMs).combo;
+  }
+
+  return {
+    seed,
+    safePressCadenceMs,
+    interRoundDelayMs,
+    enemyDefeatedAtLevel: null,
+    firstUpgradeAtLevel: null,
+    totalSafePresses,
+    elapsedMs: nowMs,
+    enemy: getCombatSummary(combat),
+    choices: [],
+    rounds
+  };
+}
+
+function previewWrongPressSurvivability(enemyIndex = 1) {
+  const combat = createCombatState({ enemyIndex });
+  let player = createPlayerState();
+  const hits = [];
+
+  for (let hit = 1; hit <= 12 && player.status === 'active'; hit++) {
+    const result = resolveWrongPressDamage({
+      player,
+      enemyAttack: combat.attack,
+      level: hit,
+      buttonId: `wrong-${hit}`
+    });
+    player = result.player;
+    hits.push({
+      hit,
+      damage: result.damage.appliedDamage,
+      hpAfter: player.hp,
+      defeated: result.defeated
+    });
+  }
+
+  return {
+    enemyIndex,
+    enemyAttack: combat.attack,
+    hitsToDeath: hits.length,
+    survivedWrongPresses: hits.filter((hit) => !hit.defeated).length,
+    hits
+  };
+}
+
+function previewComboCadence(cadenceMs) {
+  const firstAtMs = 1000;
+  const secondAtMs = firstAtMs + Math.max(0, Math.floor(Number(cadenceMs) || 0));
+  const first = incrementCombo(createComboState(), 'safe_press', { atMs: firstAtMs }).combo;
+  const expiry = expireComboIfNeeded(first, secondAtMs);
+  const second = incrementCombo(expiry.combo, 'safe_press', { atMs: secondAtMs }).combo;
+  return {
+    cadenceMs: secondAtMs - firstAtMs,
+    expiredBeforeSecond: expiry.expired,
+    secondStatus: second.statusText,
+    secondComboText: second.comboText,
+    remainingMs: second.remainingMs
+  };
+}
+
+export function previewCombatBalance({
+  seeds = ['phase6a-baseline', 'phase6a-alt-a', 'phase6a-alt-b'],
+  safePressCadenceMs = 700,
+  slowerCadenceMs = 1100,
+  interRoundDelayMs = 600,
+  comboCadencesMs = [600, 900, 1200, 1800, 2400, 2500]
+} = {}) {
+  return {
+    firstEnemyRuns: seeds.map((seed) => previewFirstEnemyRun({
+      seed,
+      safePressCadenceMs,
+      interRoundDelayMs
+    })),
+    slowerComparison: previewFirstEnemyRun({
+      seed: seeds[0],
+      safePressCadenceMs: slowerCadenceMs,
+      interRoundDelayMs
+    }),
+    wrongPressSurvivability: [1, 2, 3].map(previewWrongPressSurvivability),
+    comboWindowReadability: comboCadencesMs.map(previewComboCadence)
+  };
+}
+
 export function previewHostEventPayloads() {
   const player = getPlayerSummary(createPlayerState());
   const combo = getComboSummary(createComboState({ streak: 3 }));
@@ -280,6 +435,7 @@ export function createDebugApi({
     previewComboWindow,
     previewUpgradeChoices,
     previewUpgradeApplication,
+    previewCombatBalance,
     previewHostEventPayloads,
     getDifficultyForLevel,
     getLastFailureRecap: () => cloneFailureRecap(getState().lastFailureRecap),

@@ -77,6 +77,48 @@ Current feedback markers:
 - Android Chrome real device: pending. Check touch/layout fit, supported vibration behavior, bottom HUD readability, and projectile visibility.
 - Human playtest: pending. Ask whether HP pressure feels fair, whether `2400ms` combo expiry feels understandable, whether first upgrade timing feels too late, and whether the run invites retry after a wrong press.
 
+## Round 2 Balance Preview Helper And Tuning Plan
+
+Implemented a repeatable pure debug preview, `previewCombatBalance()`, backed by existing core/config modules:
+
+- Fixed-seed first-enemy run preview for `phase6a-baseline`, `phase6a-alt-a`, and `phase6a-alt-b`.
+- Slower `1100ms` safe-press cadence comparison for `phase6a-baseline`.
+- Wrong-press survivability preview for enemies 1-3.
+- Combo-window cadence preview for `600ms`, `900ms`, `1200ms`, `1800ms`, `2400ms`, and `2500ms`.
+
+Structure validation now locks the current baseline:
+
+- The three default fixed-seed first-enemy previews defeat enemy 1 at Level 20 and offer exactly three upgrades.
+- The slower comparison also defeats enemy 1 at Level 20.
+- Enemy 1/2/3 survived wrong presses remain `5`, `4`, and `3`.
+- `2500ms` between safe presses expires the current combo window and restarts as `CHAIN READY`.
+
+Conservative tuning targets for Round 3:
+
+- Move fast fixed-seed first-upgrade timing from Level 20 toward Level 18.
+- Keep the slower `1100ms` cadence path around Level 19-20 so the reward comes earlier without collapsing the first encounter.
+- Keep player HP, enemy attack, wrong-press damage, and combo window unchanged unless later smoke evidence says they became unclear.
+- Prefer enemy base HP tuning over player HP or combo-window tuning because the baseline shows survivability and combo forgiveness are already readable.
+
+Round 2 validation:
+
+- `node --check src\core\debug.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `npm run validate`: PASS
+
+Debug self-check:
+
+- The change is explained by fixed seeds, short input cadences, and wrong-press fixtures.
+- Failures localize to debug preview composition, seeded level generation, core combat/combo/player/upgrades helpers, or structure validation.
+- No tuning has been applied yet, so early failure, timeout, combo expiry, wrong press, upgrade offer, and enemy transition behavior are preserved.
+
+Architecture self-check:
+
+- The preview helper lives in `src/core/debug.js` and calls existing pure modules only.
+- No UI, host adapter, or app orchestration formula was added.
+- Host payload compatibility is unchanged.
+- Deferred hazards, engine work, roguelite meta systems, dependencies, framework work, and Phase 1 difficulty retuning remain out of scope.
+
 ## Round 1 Self-Checks
 
 Debug self-check:

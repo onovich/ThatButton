@@ -82,7 +82,7 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewHostEventPayloads', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHostEventPayloads', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
@@ -358,6 +358,7 @@ const {
   previewUpgradeChoices,
   previewEnemyScaling,
   previewPlayerDamage,
+  previewCombatBalance,
   previewHostEventPayloads
 } = debugModule;
 const {
@@ -1298,6 +1299,7 @@ const requiredDebugHelpers = [
   'previewComboWindow',
   'previewUpgradeChoices',
   'previewUpgradeApplication',
+  'previewCombatBalance',
   'previewHostEventPayloads',
   'getCombatState',
   'getComboState',
@@ -1632,6 +1634,18 @@ if (debugApi) {
     debugUpgradeApplication.timeLimitMs !== 18000
   ) {
     failures.push(`Debug API upgrade application changed: ${JSON.stringify(debugUpgradeApplication)}`);
+  }
+  const debugCombatBalance = debugApi.previewCombatBalance();
+  if (
+    debugCombatBalance.firstEnemyRuns.length !== 3 ||
+    debugCombatBalance.firstEnemyRuns.some((run) => run.enemyDefeatedAtLevel !== 20 || run.choices.length !== 3) ||
+    debugCombatBalance.slowerComparison.enemyDefeatedAtLevel !== 20 ||
+    debugCombatBalance.wrongPressSurvivability[0].survivedWrongPresses !== 5 ||
+    debugCombatBalance.wrongPressSurvivability[1].survivedWrongPresses !== 4 ||
+    debugCombatBalance.wrongPressSurvivability[2].survivedWrongPresses !== 3 ||
+    !debugCombatBalance.comboWindowReadability.find((entry) => entry.cadenceMs === 2500 && entry.expiredBeforeSecond && entry.secondStatus === 'CHAIN READY')
+  ) {
+    failures.push(`Debug API combat balance preview changed: ${JSON.stringify(debugCombatBalance)}`);
   }
   const debugHostEvents = debugApi.previewHostEventPayloads();
   const debugHostEventTypes = Object.values(debugHostEvents).map((event) => event.type).sort();

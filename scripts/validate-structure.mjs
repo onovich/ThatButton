@@ -50,8 +50,9 @@ for (const marker of [
   'id="boss-hp-bar"',
   'id="combo-status-text"',
   'id="combo-reward-text"',
+  'id="clue-title"',
+  '别按那个按钮！',
   'id="failure-recap"',
-  '致命条件',
   '禁止按键',
   '安全键'
 ]) {
@@ -97,9 +98,13 @@ for (const staleCopy of [
   '目标：按下其它安全键',
   '备用判定',
   '你按下了那个致命键',
-  '未能及时释放压力'
+  '未能及时释放压力',
+  'FATAL_CONDITION // READ FIRST',
+  '匹配者是禁止按键',
+  '按其他安全键',
+  'terminal-hint'
 ]) {
-  if (html.includes(staleCopy)) {
+  if ((html + combinedRuntimeSource).includes(staleCopy)) {
     failures.push(`Stale Phase 2 copy remains: ${staleCopy}`);
   }
 }
@@ -300,7 +305,7 @@ const baselineFixtures = [
     ruleId: 'shape',
     timeLimitMs: 18000,
     timeRewardMs: 2200,
-    ruleText: '致命条件：形状为【正方形】。匹配者是禁止按键；按其他安全键。',
+    ruleText: '形状为【正方形】',
     forbiddenIds: ['btn-1'],
     buttons: [
       { color: 'red', shape: 'circle', number: 4 },
@@ -320,7 +325,7 @@ const baselineFixtures = [
     ruleId: 'color',
     timeLimitMs: 16500,
     timeRewardMs: 1800,
-    ruleText: '致命条件：颜色为【紫色】。匹配者是禁止按键；按其他安全键。',
+    ruleText: '颜色为【紫色】',
     forbiddenIds: ['btn-0'],
     buttons: [
       { color: 'purple', shape: 'circle', number: 2 },
@@ -342,7 +347,7 @@ const baselineFixtures = [
     ruleId: 'color',
     timeLimitMs: 14700,
     timeRewardMs: 1300,
-    ruleText: '致命条件：颜色为【蓝色】。匹配者是禁止按键；按其他安全键。',
+    ruleText: '颜色为【蓝色】',
     forbiddenIds: ['btn-3'],
     buttons: [
       { color: 'purple', shape: 'square', number: 1 },
@@ -367,7 +372,7 @@ const baselineFixtures = [
     ruleId: 'not-color-shape',
     timeLimitMs: 13100,
     timeRewardMs: 900,
-    ruleText: '致命条件：颜色不是【蓝色】且形状为【正方形】。匹配者是禁止按键；按其他安全键。',
+    ruleText: '颜色不是【蓝色】且形状为【正方形】',
     forbiddenIds: ['btn-5', 'btn-8'],
     buttons: [
       { color: 'yellow', shape: 'triangle', number: 7 },
@@ -392,7 +397,7 @@ const baselineFixtures = [
     ruleId: 'two-colors-or',
     timeLimitMs: 11500,
     timeRewardMs: 700,
-    ruleText: '致命条件：颜色为【红色】或【黄色】。匹配者是禁止按键；按其他安全键。',
+    ruleText: '颜色为【红色】或【黄色】',
     forbiddenIds: ['btn-0', 'btn-4', 'btn-5', 'btn-6'],
     buttons: [
       { color: 'yellow', shape: 'circle', number: 2 },
@@ -413,9 +418,9 @@ for (const expected of baselineFixtures) {
   for (const key of Object.keys(expected)) {
     assertEqual(`Seed fixture level ${expected.level}.${key}`, preview[key], expected[key]);
   }
-  for (const requiredCopy of ['致命条件', '禁止按键', '安全键']) {
-    if (!preview.ruleText.includes(requiredCopy)) {
-      failures.push(`Rule copy for level ${expected.level} is missing ${requiredCopy}: ${preview.ruleText}`);
+  for (const staleRuleCopy of ['致命条件：', '匹配者是禁止按键', '按其他安全键']) {
+    if (preview.ruleText.includes(staleRuleCopy)) {
+      failures.push(`Rule copy for level ${expected.level} is still too verbose: ${preview.ruleText}`);
     }
   }
 }
@@ -523,8 +528,10 @@ for (const recap of [wrongRecap, timeoutRecap]) {
   if (recap.level !== 8 || recap.difficultyId !== 'baseline' || recap.gridSize !== '3x3') {
     failures.push(`Recap lost level/difficulty context: ${JSON.stringify(recap)}`);
   }
-  if (!recap.ruleText.includes('致命条件') || !recap.ruleText.includes('禁止按键') || !recap.ruleText.includes('安全键')) {
-    failures.push(`Recap rule text lost Phase 2 terminology: ${recap.ruleText}`);
+  for (const staleRuleCopy of ['致命条件：', '匹配者是禁止按键', '按其他安全键']) {
+    if (recap.ruleText.includes(staleRuleCopy)) {
+      failures.push(`Recap rule text is still too verbose: ${recap.ruleText}`);
+    }
   }
   if (recap.forbiddenButtons.length !== recap.fatalCount || recap.forbiddenButtons.length === 0) {
     failures.push(`Recap forbidden-button list does not match fatal count: ${JSON.stringify(recap)}`);

@@ -1,7 +1,6 @@
 import { COLORS, SHAPES, getDifficultyForLevel } from '../config/difficulty.js';
 
-export const SAFE_ACTION_TEXT = '匹配者是禁止按键；按其他安全键。';
-export const formatFatalRule = (conditionText) => `致命条件：${conditionText}。${SAFE_ACTION_TEXT}`;
+export const formatFatalRule = (conditionText) => conditionText;
 
 export function generateRule(buttons, level, difficulty = getDifficultyForLevel(level), randomTools) {
   const { randomItem, randomValue } = randomTools;

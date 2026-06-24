@@ -23,6 +23,8 @@ The current combo display is misleading and must be fixed first:
 - Damage bonus should be shown separately, such as `DMG +4`, `CHAIN BONUS`, or similar short feedback.
 - A combo expires when the player misses the combo time window. The next safe press after expiry starts a new chain and should not show combo text yet.
 - Wrong presses need immediate damage feedback: error audio, supported-device vibration, a brief background/screen flash, player-damage floating text, and a clear wrong-press marker near the pressed button.
+- Player HP and other player-owned facts must not be placed beside the enemy avatar. The enemy portrait/stage should read as enemy-only; player HP, player buffs, and player damage should live in a separate player HUD/status area.
+- Feedback intensity must ramp by chain stage. Non-combo success, chain start/`x1`, `COMBO x2`, and later combo stages need different floating text treatment and different audio cues so the interaction feels increasingly satisfying.
 
 ## 1. Required Reading
 
@@ -60,6 +62,7 @@ The current combo display is misleading and must be fixed first:
   - Player death ends the run only when HP reaches zero.
   - Wrong press breaks combo and resets combo reward.
   - Wrong press feedback must be unmistakable: distinct error audio, supported-device vibration, brief background/screen flash, pressed-button feedback, and floating text such as `WRONG`, `HIT -12`, or another concise HP-loss message.
+  - Player HP and player status must render in a separate player HUD/status area, not in the enemy avatar grid, not next to the enemy portrait, and not as a sibling label inside the enemy identity cluster.
 - Add enemy scaling.
   - Treat the current boss as an enemy encounter, not the only permanent combat object.
   - Each enemy has a stable attack value while alive.
@@ -83,6 +86,13 @@ The current combo display is misleading and must be fixed first:
   - Combo particles should feel more noticeable than Phase 5 without becoming noisy.
   - Use compact dynamic feedback: floating text, stronger particle burst, subtle screen/body impact, and optional vibration when supported.
   - Non-combo successful safe presses should still show a smaller success floating text so every correct action feels acknowledged.
+  - Feedback must have clear tiers:
+    - no active combo: calm success float such as `SUCCESS` / `SAFE`, soft audio, small or no particles.
+    - chain start / effective `x1`: distinct ready/start float such as `CHAIN READY` or `x1`, brighter audio than no-combo, modest particles, but do not show misleading persistent `COMBO x1` status.
+    - `COMBO x2`: visible combo float, stronger upward-pitch audio, stronger particles.
+    - `COMBO x3+`: progressively larger/brighter float, richer audio layering or pitch, stronger but controlled particles/body impact.
+    - high/capped combo: short peak feedback that feels rewarding without blocking rule text or buttons.
+  - The player should be able to feel the chain getting better even before reading the number: audio, timing, particle density, float size/color, and impact should all escalate.
   - Respect mobile readability and avoid layout shift.
 - Update Host Bridge events and snapshots.
   - Preserve existing host input methods: `start`, `reset`, `press(buttonId)`, `getSnapshot()`, `getDebugApi()`.
@@ -150,6 +160,10 @@ Architecture constraints are mandatory:
 - `src/config/` owns tunable data only.
 - `src/core/` owns gameplay rules and formulas only. It must not read DOM, `window`, `document`, `localStorage`, URL query, CSS class names, or AudioContext.
 - `src/ui/` owns presentation only. It may render HP, combo, upgrades, particles, and timer overlays, but it must not duplicate damage, enemy attack, combo expiry, upgrade application, or difficulty formulas.
+- UI layout must keep ownership visually legible:
+  - enemy avatar, enemy name, enemy HP, and enemy attack belong to the enemy stage;
+  - player HP, player max HP, player buffs/upgrades, and player damage feedback belong to a separate player HUD/status area;
+  - combo feedback can be spatially tied to the pressed button or combat strip, but it must not make player state look like enemy identity state.
 - `src/app/create-app.js` owns orchestration only: input flow, calling pure core functions, updating renderers, and emitting host events.
 - `src/host/` owns adapter/event transport only. It must not calculate gameplay outcomes.
 - New host event payloads must be JSON-safe and versioned through `src/core/host-events.js`.
@@ -219,7 +233,7 @@ Every round must answer:
    - Ensure first safe press is silent and second safe press displays `COMBO x2`.
    - Keep old damage preview tests updated intentionally.
 3. Combo UI and feedback pass.
-   - Update combo status text, non-combo success floating text, floating rewards, and stronger particles.
+   - Update combo status text, non-combo success floating text, chain-start/`x1` floating text, combo-stage floating rewards, tiered audio cues, and stronger particles.
    - Add CSS/DOM markers to structure validation.
    - Smoke desktop and mobile layout.
 4. Player state core.
@@ -233,7 +247,8 @@ Every round must answer:
    - Convert single boss config into enemy encounter data.
    - Add enemy index, HP scaling, attack scaling, and stable per-enemy attack.
 7. Enemy UI.
-   - Render player HP, enemy HP, enemy attack, damage-to-player feedback, and enemy transition states.
+   - Render enemy HP, enemy attack, damage-to-player feedback, and enemy transition states.
+   - Move player HP and player-owned facts into a separate player HUD/status area away from the enemy avatar and enemy identity cluster.
    - Keep the RPG battle layout responsive.
 8. Combo time window core.
    - Add combo window start/refresh/expiry.
@@ -279,6 +294,7 @@ Required automated/structured smokes:
 
 - Initial combo state does not display a visible combo reward.
 - First safe press does not show combo text, but does show non-combo success floating text.
+- Chain-start/`x1`, `COMBO x2`, and later combo stages use distinct floating text classes/labels and distinct audio cue paths.
 - Second safe press shows `COMBO x2`.
 - Later chained presses increment combo count by exactly one.
 - Combo expiry resets chain and suppresses combo text on the next single safe press.
@@ -301,8 +317,10 @@ Required visual/manual or headless smokes when UI changes:
 
 - Desktop 1280x720 layout does not overlap.
 - Mobile 390x844 layout does not overlap.
+- Player HP/status is visually separated from the enemy avatar/name/HP cluster on desktop and mobile.
 - Combo particles and floating text are visible without covering the rule text.
 - Non-combo success floating text is visible but calmer than combo feedback.
+- Chain-start/`x1`, `COMBO x2`, and higher combo feedback visibly and audibly escalate.
 - Player damage feedback is visible and brief.
 - Wrong-press screen/background flash is noticeable but does not obscure the next readable state.
 - Upgrade overlay/cards fit mobile and can be selected by pointer/touch.
@@ -313,7 +331,9 @@ Phase 6 is ready for planner check only when all are true:
 
 - Combo display semantics match the design in this guide.
 - Safe presses with no active combo still produce concise success feedback without being labeled as combo.
+- Combo feedback has clearly separated tiers for no combo, chain start/`x1`, `COMBO x2`, and later combo stages, with escalating float visuals and audio cues.
 - Player HP exists, wrong presses damage HP, and HP zero is the run failure condition for wrong-press damage.
+- Player HP and player-owned facts are not placed beside the enemy avatar or inside the enemy identity cluster.
 - Wrong presses break combo.
 - Wrong presses have clear multimodal feedback: audio, vibration when supported, brief screen/background flash, button feedback, and floating text.
 - Combo has a time window and visible timer-bar representation.

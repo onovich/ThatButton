@@ -864,9 +864,11 @@
             width: 100%;
             max-width: var(--board-max-width, 500px);
             margin: 0 auto;
+            position: relative;
         }
 
         .command-panel {
+            --hazard-interference-opacity: 0;
             position: relative;
             border: 2px solid rgba(74, 246, 38, 0.55);
             border-radius: 6px;
@@ -959,9 +961,41 @@
             border-style: dashed;
         }
 
+        .btn-grid::after {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            background:
+                repeating-linear-gradient(90deg, rgba(255, 204, 0, 0.32) 0 1px, transparent 1px 13px),
+                repeating-linear-gradient(0deg, rgba(74, 246, 38, 0.24) 0 1px, transparent 1px 5px);
+            box-shadow: inset 0 0 18px rgba(255, 204, 0, 0.08);
+            image-rendering: pixelated;
+        }
+
+        .command-panel[data-hazard-board="telegraph"] .btn-grid::after,
+        .command-panel[data-hazard-board="active"] .btn-grid::after {
+            opacity: var(--hazard-interference-opacity);
+            animation: signal-interference 0.24s steps(2, end) infinite;
+        }
+
+        .command-panel[data-hazard-board="active"] .btn-grid::after {
+            background:
+                repeating-linear-gradient(90deg, rgba(255, 42, 42, 0.28) 0 1px, transparent 1px 11px),
+                repeating-linear-gradient(0deg, rgba(255, 204, 0, 0.28) 0 1px, transparent 1px 6px);
+        }
+
         @keyframes hazard-marker-telegraph {
             0%, 100% { opacity: 0.42; }
             50% { opacity: 0.94; }
+        }
+
+        @keyframes signal-interference {
+            0% { transform: translateX(-1px); }
+            50% { transform: translateX(1px); }
+            100% { transform: translateX(0); }
         }
 
         .game-btn {

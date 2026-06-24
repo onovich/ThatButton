@@ -483,3 +483,62 @@ Commit / push:
 Next:
 
 - Round 7: add temporary CRT/signal interference hazard V1.
+
+## Round 7 Interference Hazard V1
+
+Implemented:
+
+- Added a low-fi CRT/signal interference presentation layer scoped to `btn-grid::after`.
+- The interference layer:
+  - is pointer-events-free,
+  - uses low-opacity scanline/vector bands,
+  - animates with short stepped signal jitter,
+  - stays inside the button grid rather than rule text, timer, player HUD, upgrade cards, or enemy identity.
+- Renderer now maps board-target interference facts into presentation:
+  - writes `data-hazard-board` using the board hazard's own phase,
+  - computes `--hazard-interference-opacity` from `interference.intensity`,
+  - clears the opacity back to `0.000` when no board hazard is present.
+- Extended validation:
+  - structure markers require the `btn-grid::after` interference layer and signal animation,
+  - renderer marker guards require intensity-to-opacity wiring,
+  - fake-geometry smoke verifies `data-hazard-board="telegraph"` and opacity `0.087` for intensity `0.34`,
+  - selector guard fails if interference targets rule text or player HUD selectors.
+
+Debug self-check:
+
+- The change is explained by fixed interference facts and a fake-geometry renderer smoke.
+- Failures localize to CSS selector scope, renderer fact mapping, or structure validation.
+- First enemy / first upgrade path remains hazard-free because unlock thresholds were not changed.
+- Interference is brief and bounded by existing core timing; this round only renders active/telegraph facts.
+- Moving-button clamp and marker geometry remain unchanged.
+
+Architecture self-check:
+
+- Interference timing and intensity remain core/config facts.
+- UI only maps provided board-target facts into a scoped visual overlay.
+- App and host code were not changed in this round.
+- Rule, fatal-button, combat, combo, upgrade, and difficulty semantics were not duplicated.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, framework work, and Phase 1 retuning remain out of scope.
+- Validation now guards interference style scope and opacity fact wiring.
+
+Round 7 validation:
+
+- `node --check src\ui\render.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Round 8: interference validation and tuning for readability and feedback coexistence.

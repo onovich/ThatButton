@@ -92,7 +92,7 @@ for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBes
   }
 }
 
-for (const marker of ['id="boss-avatar"', '.battle-stage', '.player-hud', '.command-panel', '.upgrade-screen', '.upgrade-card', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '"avatar hp attack"', '.combat-hp-bar', '.player-hp-bar', '.enemy-attack-text', '.player-damage-text', '@keyframes player-damage-pop', 'display: block;', 'id="combo-window-bar"', '.combo-window-bar', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-stage-two', '.combo-stage-high', '.combo-particle', '.button-float-text', '.safe-success', '.chain-start', '.wrong-press-flash', '.combo-shake-strong', '.button-to-enemy-tracer', '.combo-directional-tracer', '.retro-crt-tracer', '.pixel-spark', '.scanline-streak', '.terminal-glyph-fragment', 'image-rendering: pixelated', '--tracer-angle', '.hazard-status-text', '.hazard-layer', '.hazard-marker', '.hazard-marker-telegraph', '.hazard-marker-active', '.hazard-board-marker', '@keyframes hazard-marker-telegraph', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
+for (const marker of ['id="boss-avatar"', '.battle-stage', '.player-hud', '.command-panel', '.upgrade-screen', '.upgrade-card', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '"avatar hp attack"', '.combat-hp-bar', '.player-hp-bar', '.enemy-attack-text', '.player-damage-text', '@keyframes player-damage-pop', 'display: block;', 'id="combo-window-bar"', '.combo-window-bar', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-stage-two', '.combo-stage-high', '.combo-particle', '.button-float-text', '.safe-success', '.chain-start', '.wrong-press-flash', '.combo-shake-strong', '.button-to-enemy-tracer', '.combo-directional-tracer', '.retro-crt-tracer', '.pixel-spark', '.scanline-streak', '.terminal-glyph-fragment', 'image-rendering: pixelated', '--tracer-angle', '.hazard-status-text', '.hazard-layer', '.hazard-marker', '.hazard-marker-telegraph', '.hazard-marker-active', '.hazard-board-marker', '.btn-grid::after', '--hazard-interference-opacity', '@keyframes hazard-marker-telegraph', '@keyframes signal-interference', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
   if (!html.includes(marker)) {
     failures.push(`Missing combat mobile layout marker in index.html: ${marker}`);
   }
@@ -143,6 +143,20 @@ for (const forbiddenParticleMarker of ['border-radius: 999px', 'filter: blur', '
   }
 }
 
+const interferenceStyleStart = html.indexOf('.btn-grid::after');
+const interferenceStyleEnd = html.indexOf('@keyframes signal-interference');
+const interferenceStyleSnippet = interferenceStyleStart >= 0 && interferenceStyleEnd > interferenceStyleStart
+  ? html.slice(interferenceStyleStart, interferenceStyleEnd)
+  : '';
+if (!interferenceStyleSnippet.includes('.btn-grid::after')) {
+  failures.push('Interference presentation should be scoped to the button grid pseudo-layer.');
+}
+for (const forbiddenInterferenceTarget of ['.terminal-box', '.player-hud', '#clue-text', '#player-hud']) {
+  if (interferenceStyleSnippet.includes(forbiddenInterferenceTarget)) {
+    failures.push(`Interference presentation should not target rule text or player HUD: ${forbiddenInterferenceTarget}`);
+  }
+}
+
 const renderSource = sources.get('src/ui/render.js') || '';
 const hazardPresentationMarkers = [
   'refs.commandPanel.dataset.hazardPhase',
@@ -156,6 +170,8 @@ const hazardPresentationMarkers = [
   "buttonElement.style.setProperty('--hazard-y'",
   'dataset.hazardOffsetX',
   'dataset.hazardOffsetY',
+  "style.setProperty('--hazard-interference-opacity'",
+  'boardHazard?.interference?.intensity',
   'getButtonElement(buttonId)',
   'getBoundingClientRect',
   'targetRect.left - panelRect.left',
@@ -1437,7 +1453,10 @@ hazardRenderer.updateHazardPresentation({
     {
       type: HAZARD_TYPES.INTERFERENCE,
       phase: HAZARD_PHASES.TELEGRAPH,
-      target: 'board'
+      target: 'board',
+      interference: {
+        intensity: 0.34
+      }
     }
   ]
 });
@@ -1451,6 +1470,8 @@ if (
   !hazardCommandPanel.dataset.hazardTypes.includes(HAZARD_TYPES.MOVING_BUTTON) ||
   hazardCommandPanel.dataset.hazardTargetCount !== '2' ||
   hazardUiElements.get('btn-grid').dataset.hazardPhase !== HAZARD_PHASES.ACTIVE ||
+  hazardCommandPanel.dataset.hazardBoard !== HAZARD_PHASES.TELEGRAPH ||
+  hazardCommandPanel.style['--hazard-interference-opacity'] !== '0.087' ||
   hazardUiElements.get('hazard-status-text').innerText !== 'HAZARD ACTIVE' ||
   hazardLayerChildren.length !== 3 ||
   hazardUiElements.get('btn-0').style['--hazard-x'] !== '4px' ||

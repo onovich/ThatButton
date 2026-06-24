@@ -387,14 +387,22 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     const targetButtonIds = activeHazards.flatMap((hazard) => Array.isArray(hazard.targetButtonIds)
       ? hazard.targetButtonIds
       : []);
-    const hasBoardHazard = activeHazards.some((hazard) => hazard.target === 'board');
+    const boardHazard = activeHazards.find((hazard) => hazard.target === 'board');
+    const boardHazardPhase = toDatasetToken(boardHazard?.phase, 'none');
+    const boardIntensity = Math.max(0, Math.min(1, Number(boardHazard?.interference?.intensity) || 0));
+    const boardOpacity = boardHazard
+      ? (boardHazardPhase === 'active' ? 0.08 + boardIntensity * 0.18 : 0.06 + boardIntensity * 0.08)
+      : 0;
 
     if (refs.commandPanel?.dataset) {
       refs.commandPanel.dataset.hazardPhase = phase;
       refs.commandPanel.dataset.hazardTypes = typeTokens.length ? typeTokens.join(' ') : 'none';
       refs.commandPanel.dataset.hazardUnlocked = hazards?.unlocked ? 'true' : 'false';
       refs.commandPanel.dataset.hazardTargetCount = String(targetButtonIds.length);
-      refs.commandPanel.dataset.hazardBoard = hasBoardHazard ? phase : 'none';
+      refs.commandPanel.dataset.hazardBoard = boardHazard ? boardHazardPhase : 'none';
+    }
+    if (refs.commandPanel?.style) {
+      refs.commandPanel.style.setProperty('--hazard-interference-opacity', boardOpacity.toFixed(3));
     }
     if (refs.gridEl?.dataset) {
       refs.gridEl.dataset.hazardPhase = phase;

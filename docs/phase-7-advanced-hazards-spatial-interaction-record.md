@@ -535,8 +535,8 @@ Round 7 validation:
 
 Commit / push:
 
-- commit: pending
-- push: pending
+- commit: `0ca9316` (`feat: add signal interference hazard`)
+- push: PASS
 - buffer round consumed: no
 
 Next:

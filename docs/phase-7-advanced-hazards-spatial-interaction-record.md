@@ -343,8 +343,8 @@ Round 4 validation:
 
 Commit / push:
 
-- commit: pending
-- push: pending
+- commit: `aed0280` (`feat: add phase 7 hazard marker foundation`)
+- push: PASS
 - buffer round consumed: no
 
 Next:

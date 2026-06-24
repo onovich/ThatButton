@@ -479,9 +479,54 @@ Validation:
 
 Commit/push:
 
+- round commit: `db2c4e5 test: guard phase 9 evidence artifacts`
+- push: PASS
+
+Next round goal:
+
+- Use the remaining buffer for final validation/report prep, launcher dry-runs, and README/TODO/Role updates before READY_FOR_CHECK.
+
+## Round 7 - Buffer Final Validation Preflight
+
+Round goal:
+
+- Use remaining buffer time for final validation preflight.
+- Verify launchers and browser smoke before final report work.
+- Leave final docs/TODO/Role updates for the final round so final commit evidence is accurate.
+
+Changes:
+
+- No product/source changes.
+- Recorded full validation preflight results.
+
+Debug self-check:
+
+- Smallest current proof is the full local validation matrix preflight.
+- Failure layers covered: structure/static validation, build, dist validation, browser smoke, launcher dry-runs, external URL scan, active network/privacy API scan, and whitespace.
+- No final docs were changed yet beyond this record, so final report can cite the final commit accurately in Round 8.
+
+Architecture self-check:
+
+- No gameplay, UI, report schema, host bridge, smoke script, or docs-index behavior changed.
+- Non-scope remains preserved: no analytics, tracking, network submission, engine embedding, 3D, roguelite meta, new hazards, dependencies, PWA, framework work, or tuning.
+
+Validation:
+
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- `powershell -NoProfile -ExecutionPolicy Bypass -File .\StartLocalTest.ps1 -DryRun`: PASS
+- `powershell -NoProfile -ExecutionPolicy Bypass -File .\OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- Active network/privacy API scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS
+
+Commit/push:
+
 - round commit: pending
 - push: pending
 
 Next round goal:
 
-- Use the remaining buffer for final validation/report prep, launcher dry-runs, and README/TODO/Role updates before READY_FOR_CHECK.
+- Final validation, final report, TODO/docs/Role updates, final commit/push, and READY_FOR_CHECK planner routing.

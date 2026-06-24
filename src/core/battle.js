@@ -1,5 +1,6 @@
 import { BASE_BATTLE_CONFIG } from '../config/battle.js';
 import { applyPlayerDamage, createPlayerState } from './player.js';
+import { getEffectiveBaseAttack, getEffectiveComboRewardBonus } from './upgrades.js';
 
 export function calculateWrongPressDamage({
   enemyAttack = BASE_BATTLE_CONFIG.wrongPressDamage
@@ -25,10 +26,12 @@ export function resolveWrongPressDamage({
 
 export function calculatePlayerAttackDamage({
   baseAttack = BASE_BATTLE_CONFIG.baseAttackDamage,
-  combo = null
+  combo = null,
+  upgrades = null
 } = {}) {
-  const baseDamage = Math.max(0, Math.floor(Number(baseAttack) || 0));
-  const comboBonus = Math.max(0, Math.floor(Number(combo?.damageBonus) || 0));
+  const baseDamage = getEffectiveBaseAttack(baseAttack, upgrades);
+  const comboRewardBonus = combo?.hasVisibleCombo ? getEffectiveComboRewardBonus(upgrades) : 0;
+  const comboBonus = Math.max(0, Math.floor(Number(combo?.damageBonus) || 0)) + comboRewardBonus;
   return {
     baseDamage,
     comboBonus,

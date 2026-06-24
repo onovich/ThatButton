@@ -7,6 +7,14 @@ import { generateLevelData } from './level.js';
 import { createPlayerState, getPlayerSummary } from './player.js';
 import { createSeededRng } from './rng.js';
 import {
+  applyUpgradeChoice,
+  createUpgradeState,
+  generateUpgradeChoices,
+  getEffectiveComboWindowMs,
+  getEffectiveRoundTimeLimitMs,
+  getUpgradeSummary
+} from './upgrades.js';
+import {
   BEST_RECORD_KEY,
   BEST_RECORD_VERSION,
   buildBestRecordFromRun,
@@ -141,6 +149,31 @@ export function previewComboWindow({
   };
 }
 
+export function previewUpgradeChoices(seed = 'phase6-upgrades', enemyIndex = 1) {
+  return generateUpgradeChoices({
+    rng: createSeededRng(seed),
+    enemyIndex
+  });
+}
+
+export function previewUpgradeApplication(upgradeId = 'chain-span-plus') {
+  const choices = previewUpgradeChoices('phase6-upgrades', 1);
+  const choice = choices.find((entry) => entry.id === upgradeId) || choices[0];
+  const player = createPlayerState();
+  const applied = applyUpgradeChoice(createUpgradeState({
+    choices,
+    pending: true
+  }), choice.id, { player });
+  const difficulty = getDifficultyForLevel(1);
+  return {
+    selected: applied.upgrade,
+    upgrades: getUpgradeSummary(applied.upgrades),
+    player: getPlayerSummary(applied.player),
+    comboWindowMs: getEffectiveComboWindowMs(applied.upgrades),
+    timeLimitMs: getEffectiveRoundTimeLimitMs(difficulty.timeLimitMs, applied.upgrades)
+  };
+}
+
 export function createDebugApi({
   getState,
   loadBestRecord,
@@ -164,6 +197,8 @@ export function createDebugApi({
     previewPlayerDamage,
     previewEnemyScaling,
     previewComboWindow,
+    previewUpgradeChoices,
+    previewUpgradeApplication,
     getDifficultyForLevel,
     getLastFailureRecap: () => cloneFailureRecap(getState().lastFailureRecap),
     getLastVictoryRecap: () => cloneFailureRecap(getState().lastVictoryRecap),

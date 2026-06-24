@@ -7,7 +7,9 @@ import {
   createEncounterState,
   expireEncounterComboIfNeeded,
   getEncounterComboWindow,
+  getEncounterComboWindowMs,
   getEncounterFacts,
+  getEncounterRoundTimeLimitMs,
   resetEncounterCombo,
   resolveRoundClearCombat
 } from '../core/encounter.js';
@@ -108,6 +110,10 @@ export function createApp({
 
   function getCurrentComboWindow(nowMs = performance.now()) {
     return getEncounterComboWindow(gameState.combo, nowMs);
+  }
+
+  function getEffectiveRoundTimeLimit(difficulty) {
+    return getEncounterRoundTimeLimitMs(difficulty, gameState.upgrades);
   }
 
   function recordDebugEvent(type, details = {}) {
@@ -285,7 +291,8 @@ export function createApp({
       combat: gameState.combat,
       level: gameState.level,
       timeLeft: gameState.timeLeft,
-      combo: gameState.combo
+      combo: gameState.combo,
+      upgrades: gameState.upgrades
     });
     gameState.combat = combatResult.combat;
     gameState.lastCombatResult = combatResult;
@@ -341,7 +348,7 @@ export function createApp({
 
     const nextDifficulty = getDifficultyForLevel(gameState.level);
     gameState.currentDifficulty = nextDifficulty;
-    gameState.timeLimit = nextDifficulty.timeLimitMs;
+    gameState.timeLimit = getEffectiveRoundTimeLimit(nextDifficulty);
     gameState.timeLeft = Math.min(
       gameState.timeLimit,
       gameState.timeLeft + (gameState.timeLimit * nextDifficulty.carryoverRatio)
@@ -402,7 +409,10 @@ export function createApp({
       gameState.safeKeysRemaining--;
       gameState.score += 10;
       renderer.updateScore(gameState.score);
-      const comboChange = applySafePressCombo(gameState.combo, { atMs: performance.now() });
+      const comboChange = applySafePressCombo(gameState.combo, {
+        atMs: performance.now(),
+        windowMs: getEncounterComboWindowMs(gameState.upgrades)
+      });
       playSafePressCue(comboChange);
       applyComboChange(comboChange, {
         sourceElement: element,
@@ -454,8 +464,8 @@ export function createApp({
     const difficulty = getDifficultyForLevel(gameState.level);
     gameState.currentDifficulty = difficulty;
     if (!gameState.timeLimit) {
-      gameState.timeLimit = difficulty.timeLimitMs;
-      gameState.timeLeft = difficulty.timeLimitMs;
+      gameState.timeLimit = getEffectiveRoundTimeLimit(difficulty);
+      gameState.timeLeft = gameState.timeLimit;
     }
     generateCurrentLevelData(difficulty);
     recordDebugEvent('round_start');
@@ -484,12 +494,12 @@ export function createApp({
     gameState.debugLog = [];
     gameState.level = 1;
     gameState.score = 0;
+    resetEncounterState();
     gameState.currentDifficulty = getDifficultyForLevel(1);
-    gameState.timeLimit = gameState.currentDifficulty.timeLimitMs;
-    gameState.timeLeft = gameState.currentDifficulty.timeLimitMs;
+    gameState.timeLimit = getEffectiveRoundTimeLimit(gameState.currentDifficulty);
+    gameState.timeLeft = gameState.timeLimit;
     gameState.lastFailureRecap = null;
     gameState.lastRunComparison = null;
-    resetEncounterState();
     renderer.updateCombatStatus(getEncounterFacts(gameState));
     renderer.updateTimer(gameState.timeLeft, gameState.timeLimit, getCurrentComboWindow());
     renderer.setWarningVisible(false);

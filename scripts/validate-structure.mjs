@@ -21,6 +21,7 @@ const moduleFiles = [
   'src/config/difficulty.js',
   'src/config/battle.js',
   'src/config/combat.js',
+  'src/config/upgrades.js',
   'src/core/app-state.js',
   'src/core/battle.js',
   'src/core/combat.js',
@@ -28,6 +29,7 @@ const moduleFiles = [
   'src/core/encounter.js',
   'src/core/enemy.js',
   'src/core/player.js',
+  'src/core/upgrades.js',
   'src/core/rng.js',
   'src/core/rules.js',
   'src/core/level.js',
@@ -147,6 +149,7 @@ const coreBoundaryFiles = [
   'src/config/difficulty.js',
   'src/config/battle.js',
   'src/config/combat.js',
+  'src/config/upgrades.js',
   'src/core/app-state.js',
   'src/core/battle.js',
   'src/core/combat.js',
@@ -154,6 +157,7 @@ const coreBoundaryFiles = [
   'src/core/encounter.js',
   'src/core/enemy.js',
   'src/core/player.js',
+  'src/core/upgrades.js',
   'src/core/rng.js',
   'src/core/rules.js',
   'src/core/level.js',
@@ -252,6 +256,9 @@ const [
   debugModule,
   enemyModule,
   playerModule,
+  rngModule,
+  upgradeConfigModule,
+  upgradeModule,
   storageModule,
   recapModule,
   hostEventsModule,
@@ -267,6 +274,9 @@ const [
   import(moduleUrl('src/core/debug.js')),
   import(moduleUrl('src/core/enemy.js')),
   import(moduleUrl('src/core/player.js')),
+  import(moduleUrl('src/core/rng.js')),
+  import(moduleUrl('src/config/upgrades.js')),
+  import(moduleUrl('src/core/upgrades.js')),
   import(moduleUrl('src/core/storage.js')),
   import(moduleUrl('src/core/recap.js')),
   import(moduleUrl('src/core/host-events.js')),
@@ -321,9 +331,28 @@ const {
   getPlayerSummary
 } = playerModule;
 const {
+  createSeededRng
+} = rngModule;
+const {
+  UPGRADE_DEFINITIONS,
+  UPGRADE_TYPES
+} = upgradeConfigModule;
+const {
+  applyUpgradeChoice,
+  createUpgradeState,
+  generateUpgradeChoices,
+  getEffectiveBaseAttack,
+  getEffectiveComboRewardBonus,
+  getEffectiveComboWindowMs,
+  getEffectiveRoundTimeLimitMs,
+  getUpgradeSummary
+} = upgradeModule;
+const {
   previewSeededLevel,
   previewFailureRecap,
   previewComboWindow,
+  previewUpgradeApplication,
+  previewUpgradeChoices,
   previewEnemyScaling,
   previewPlayerDamage
 } = debugModule;
@@ -346,6 +375,7 @@ const {
   createComboPayload,
   createPlayerDamagePayload,
   createPlayerPayload,
+  createUpgradePayload,
   createRoundPayload,
   createRunResultPayload,
   isJsonSafeValue
@@ -596,6 +626,76 @@ const playerDamagePayload = createPlayerDamagePayload({
 });
 if (!isJsonSafeValue(playerDamagePayload) || playerDamagePayload.damage.appliedDamage !== 18 || playerDamagePayload.player.hp !== 82) {
   failures.push(`Player damage payload smoke failed: ${JSON.stringify(playerDamagePayload)}`);
+}
+
+const initialUpgrades = createUpgradeState();
+if (
+  UPGRADE_DEFINITIONS.length !== 5 ||
+  !Object.values(UPGRADE_TYPES).includes('combo_window') ||
+  initialUpgrades.pending ||
+  initialUpgrades.applied.length !== 0 ||
+  initialUpgrades.choices.length !== 0 ||
+  initialUpgrades.modifiers.comboWindowBonusMs !== 0
+) {
+  failures.push(`Initial upgrade state smoke failed: ${JSON.stringify({ UPGRADE_DEFINITIONS, UPGRADE_TYPES, initialUpgrades })}`);
+}
+const fixedUpgradeChoicesA = generateUpgradeChoices({
+  rng: createSeededRng('phase6-upgrades'),
+  enemyIndex: 2
+});
+const fixedUpgradeChoicesB = generateUpgradeChoices({
+  rng: createSeededRng('phase6-upgrades'),
+  enemyIndex: 2
+});
+if (
+  fixedUpgradeChoicesA.length !== 3 ||
+  JSON.stringify(fixedUpgradeChoicesA) !== JSON.stringify(fixedUpgradeChoicesB) ||
+  new Set(fixedUpgradeChoicesA.map((choice) => choice.id)).size !== 3 ||
+  fixedUpgradeChoicesA.some((choice) => choice.enemyIndex !== 2)
+) {
+  failures.push(`Deterministic upgrade choices smoke failed: ${JSON.stringify({ fixedUpgradeChoicesA, fixedUpgradeChoicesB })}`);
+}
+const comboWindowUpgrade = applyUpgradeChoice(initialUpgrades, 'chain-span-plus').upgrades;
+if (getEffectiveComboWindowMs(comboWindowUpgrade) !== 2900 || comboWindowUpgrade.modifiers.comboWindowBonusMs !== 500) {
+  failures.push(`Combo-window upgrade smoke failed: ${JSON.stringify(comboWindowUpgrade)}`);
+}
+const hpUpgrade = applyUpgradeChoice(initialUpgrades, 'max-hp-plus', {
+  player: createPlayerState({ hp: 80, maxHp: 100 })
+});
+if (
+  hpUpgrade.upgrades.modifiers.maxHpBonus !== 24 ||
+  hpUpgrade.player.maxHp !== 124 ||
+  hpUpgrade.player.hp !== 104
+) {
+  failures.push(`Max-HP upgrade smoke failed: ${JSON.stringify(hpUpgrade)}`);
+}
+const roundTimeUpgrade = applyUpgradeChoice(initialUpgrades, 'round-time-plus').upgrades;
+if (getEffectiveRoundTimeLimitMs(level1.timeLimitMs, roundTimeUpgrade) !== 19200) {
+  failures.push(`Round-time upgrade smoke failed: ${JSON.stringify(roundTimeUpgrade)}`);
+}
+const baseAttackUpgrade = applyUpgradeChoice(initialUpgrades, 'base-attack-plus').upgrades;
+if (
+  getEffectiveBaseAttack(18, baseAttackUpgrade) !== 22 ||
+  calculatePlayerAttackDamage({ baseAttack: 18, combo: createComboState({ streak: 1 }), upgrades: baseAttackUpgrade }).baseDamage !== 22
+) {
+  failures.push(`Base-attack upgrade smoke failed: ${JSON.stringify(baseAttackUpgrade)}`);
+}
+const comboRewardUpgrade = applyUpgradeChoice(initialUpgrades, 'combo-reward-plus').upgrades;
+const upgradedComboDamage = calculateRoundDamage({
+  timeLeftMs: 0,
+  comboState: createComboState({ streak: 2 }),
+  upgrades: comboRewardUpgrade
+});
+if (
+  getEffectiveComboRewardBonus(comboRewardUpgrade) !== 1 ||
+  upgradedComboDamage.comboBonus !== 2 ||
+  upgradedComboDamage.totalDamage !== 20
+) {
+  failures.push(`Combo-reward upgrade smoke failed: ${JSON.stringify({ comboRewardUpgrade, upgradedComboDamage })}`);
+}
+const upgradePayload = createUpgradePayload(getUpgradeSummary(comboWindowUpgrade));
+if (!isJsonSafeValue(upgradePayload) || upgradePayload.modifiers.comboWindowBonusMs !== 500) {
+  failures.push(`Upgrade payload smoke failed: ${JSON.stringify(upgradePayload)}`);
 }
 
 const firstEnemy = createEnemyState({ enemyIndex: 1 });
@@ -1102,6 +1202,8 @@ const requiredDebugHelpers = [
   'previewPlayerDamage',
   'previewEnemyScaling',
   'previewComboWindow',
+  'previewUpgradeChoices',
+  'previewUpgradeApplication',
   'getCombatState',
   'getComboState',
   'getBestRecord',
@@ -1161,6 +1263,13 @@ if (
   firstSnapshot.round.combo?.statusText !== 'CHAIN --'
 ) {
   failures.push(`Host snapshot missing combo-window facts: ${JSON.stringify(firstSnapshot.combo)}`);
+}
+if (
+  firstSnapshot.upgrades?.pending ||
+  firstSnapshot.upgrades?.applied?.length !== 0 ||
+  firstSnapshot.round.upgrades?.modifiers?.baseAttackBonus !== 0
+) {
+  failures.push(`Host snapshot missing initial upgrade facts: ${JSON.stringify(firstSnapshot.upgrades)}`);
 }
 const safePress = hostSmokeApp.press('btn-0');
 if (!safePress.accepted || safePress.result !== 'safe' || hostSmokeApp.getSnapshot().run.score !== 10) {
@@ -1365,6 +1474,21 @@ if (debugApi) {
     debugComboWindow.restarted.comboText !== ''
   ) {
     failures.push(`Debug API combo-window preview changed: ${JSON.stringify(debugComboWindow)}`);
+  }
+  const debugUpgradeChoices = debugApi.previewUpgradeChoices('phase6-upgrades', 2);
+  if (
+    debugUpgradeChoices.length !== 3 ||
+    JSON.stringify(debugUpgradeChoices) !== JSON.stringify(fixedUpgradeChoicesA)
+  ) {
+    failures.push(`Debug API upgrade choices changed: ${JSON.stringify(debugUpgradeChoices)}`);
+  }
+  const debugUpgradeApplication = debugApi.previewUpgradeApplication('chain-span-plus');
+  if (
+    debugUpgradeApplication.upgrades.modifiers.comboWindowBonusMs !== 500 ||
+    debugUpgradeApplication.comboWindowMs !== 2900 ||
+    debugUpgradeApplication.timeLimitMs !== 18000
+  ) {
+    failures.push(`Debug API upgrade application changed: ${JSON.stringify(debugUpgradeApplication)}`);
   }
 
   const debugInitial = debugApi.getBestRecord();

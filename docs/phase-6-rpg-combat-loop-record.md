@@ -477,3 +477,70 @@ Architecture self-check:
 - UI renders player HUD, enemy stage, timer overlay, and feedback classes without owning gameplay outcomes.
 - Host input compatibility is preserved because DOM clicks and host `press(buttonId)` still share `pressButton(...)`.
 - Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.
+
+## Round 10 Upgrade Core Evidence
+
+Implemented:
+
+- Added `src/config/upgrades.js` with five Phase 6 upgrade definitions:
+  - combo-window increase,
+  - max HP increase,
+  - round decision time increase,
+  - base attack increase,
+  - combo reward increase.
+- Added `src/core/upgrades.js` for:
+  - base upgrade modifiers,
+  - deterministic three-choice generation from the existing seeded RNG path,
+  - upgrade state creation and summaries,
+  - applying a selected upgrade,
+  - effective combo-window, round-time, base-attack, and combo-reward helpers.
+- Connected upgrade modifiers to pure combat/battle calculations:
+  - base attack changes round-clear damage and player attack previews,
+  - combo reward increases visible combo damage only when a visible combo exists,
+  - round-time and combo-window helpers are available to app orchestration.
+- Added upgrade state to initial app/encounter state.
+- Updated app orchestration to consume effective combo-window and round-time values from core helpers.
+- Added JSON-safe upgrade facts to round payloads and host snapshots.
+- Added debug previews:
+  - `previewUpgradeChoices(...)`,
+  - `previewUpgradeApplication(...)`.
+- Extended structure validation for deterministic choices, all five upgrade applications, host upgrade payloads, debug previews, and core boundary coverage.
+
+Validation run:
+
+- `node --check src\config\upgrades.js`: PASS
+- `node --check src\core\upgrades.js`: PASS
+- `node --check src\core\battle.js`: PASS
+- `node --check src\core\combat.js`: PASS
+- `node --check src\core\encounter.js`: PASS
+- `node --check src\core\debug.js`: PASS
+- `node --check src\core\host-events.js`: PASS
+- `node --check src\host\app-host-api.js`: PASS
+- `node --check src\app\create-app.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `OpenOnlineTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Debug self-check:
+
+- Fixed-seed upgrade choice smoke proves three unique choices are deterministic for the same seed and enemy index.
+- Modifier smokes prove each upgrade type affects the intended fact:
+  - combo window `2400 -> 2900`,
+  - max HP `100 -> 124`,
+  - level 1 round time `18000 -> 19200`,
+  - base attack `18 -> 22`,
+  - visible combo reward `+1 -> +2`.
+- Host snapshot smoke proves initial upgrade facts are JSON-safe and present in top-level and round payloads.
+
+Architecture self-check:
+
+- Upgrade definitions live in config and upgrade formulas live in core.
+- App orchestration consumes effective facts from core helpers; it does not calculate upgrade formulas.
+- UI was not changed in this round.
+- Host code only clones upgrade facts into JSON-safe payloads.
+- Deferred upgrade overlay UI, native bridge integration, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.

@@ -1,5 +1,6 @@
 import { PROTOTYPE_BOSS_CONFIG } from '../config/combat.js';
 import { createEnemyState, getEnemySummary } from './enemy.js';
+import { getEffectiveBaseAttack, getEffectiveComboRewardBonus } from './upgrades.js';
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -61,15 +62,17 @@ export function cloneCombatState(combat = createCombatState()) {
 export function calculateRoundDamage({
   timeLeftMs = 0,
   comboState = null,
-  config = PROTOTYPE_BOSS_CONFIG
+  config = PROTOTYPE_BOSS_CONFIG,
+  upgrades = null
 } = {}) {
   const timeBonus = clamp(
     Math.floor(Math.max(0, Number(timeLeftMs) || 0) / config.timeBonusDivisorMs),
     0,
     config.maxTimeBonus
   );
-  const comboBonus = Math.max(0, Math.floor(Number(comboState?.damageBonus) || 0));
-  const baseDamage = Math.max(0, Math.floor(Number(config.baseRoundDamage) || 0));
+  const comboRewardBonus = comboState?.hasVisibleCombo ? getEffectiveComboRewardBonus(upgrades) : 0;
+  const comboBonus = Math.max(0, Math.floor(Number(comboState?.damageBonus) || 0)) + comboRewardBonus;
+  const baseDamage = getEffectiveBaseAttack(config.baseRoundDamage, upgrades);
   return {
     baseDamage,
     timeBonus,
@@ -82,10 +85,11 @@ export function applyRoundClearDamage(combat = createCombatState(), {
   level = 1,
   timeLeftMs = 0,
   comboState = null,
-  config = PROTOTYPE_BOSS_CONFIG
+  config = PROTOTYPE_BOSS_CONFIG,
+  upgrades = null
 } = {}) {
   const previous = cloneCombatState(combat);
-  const damage = calculateRoundDamage({ timeLeftMs, comboState, config });
+  const damage = calculateRoundDamage({ timeLeftMs, comboState, config, upgrades });
   const hpBefore = previous.hp;
   const appliedDamage = previous.status === 'defeated' ? 0 : Math.min(hpBefore, damage.totalDamage);
   const hpAfter = Math.max(0, hpBefore - appliedDamage);

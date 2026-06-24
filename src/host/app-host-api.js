@@ -13,7 +13,8 @@ import {
   createPlayerPayload,
   createRoundPayload,
   createRunPayload,
-  createRunResultPayload
+  createRunResultPayload,
+  createUpgradePayload
 } from '../core/host-events.js';
 
 export function createAppHostApi({ hostBridge, getState, performance }) {
@@ -35,7 +36,8 @@ export function createAppHostApi({ hostBridge, getState, performance }) {
       timeLeft: state.timeLeft,
       player: state.player,
       combat: state.combat,
-      combo: state.combo
+      combo: state.combo,
+      upgrades: state.upgrades
     });
   }
 
@@ -59,6 +61,7 @@ export function createAppHostApi({ hostBridge, getState, performance }) {
       player: createPlayerPayload(state.player),
       combat: createCombatPayload(state.combat),
       combo: createComboPayload(state.combo),
+      upgrades: createUpgradePayload(state.upgrades),
       lastFailureRecap: state.lastFailureRecap,
       lastVictoryRecap: state.lastVictoryRecap,
       lastRunResultRecap: state.lastRunResultRecap

@@ -24,8 +24,8 @@ export function getEncounterFacts({ player, combat, combo, lastPlayerDamage, las
   };
 }
 
-export function applySafePressCombo(combo) {
-  return incrementCombo(combo, 'safe_press');
+export function applySafePressCombo(combo, options = {}) {
+  return incrementCombo(combo, 'safe_press', options);
 }
 
 export function resetEncounterCombo(combo, reason) {

@@ -359,3 +359,53 @@ Architecture self-check:
 - App orchestration only calls the renderer after pure damage resolution.
 - Host payloads and core formulas remain unchanged in this round.
 - Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.
+
+## Round 8 Combo Time Window Core Evidence
+
+Implemented:
+
+- Added combo-window facts to `src/core/combo.js`:
+  - `comboWindowMs`,
+  - `expiresAtMs`,
+  - `remainingMs`,
+  - `lastEventAtMs`,
+  - `lastExpiredAtMs`,
+  - `isWindowActive`.
+- Added pure combo expiry via `expireComboIfNeeded(...)`.
+- Updated safe-press combo changes to carry the current `performance.now()` timestamp through the shared DOM/host press path.
+- Preserved required combo semantics:
+  - first safe press arms the chain silently,
+  - second chained safe press shows `COMBO x2`,
+  - expiry resets the chain,
+  - the next safe press after expiry restarts as a silent first press.
+- Added `previewComboWindow(...)` to the debug API.
+- Extended structure validation for combo-window state, expiry, restart behavior, debug preview, and host snapshot combo-window facts.
+
+Validation run:
+
+- `node --check src\core\combo.js`: PASS
+- `node --check src\core\debug.js`: PASS
+- `node --check src\core\encounter.js`: PASS
+- `node --check src\app\create-app.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `OpenOnlineTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Debug self-check:
+
+- Timed fixture proves `1000ms` first safe press arms a silent window through `3400ms`.
+- Timed fixture proves `1800ms` second safe press refreshes the visible `COMBO x2` window through `4200ms`.
+- Timed fixture proves `4201ms` expiry resets the chain with `combo_expired`.
+- Timed fixture proves `4300ms` next safe press restarts as `CHAIN READY` with no visible combo reward.
+
+Architecture self-check:
+
+- Combo-window math lives in `src/core/combo.js`.
+- App orchestration only supplies the current input timestamp.
+- UI and host consumers receive JSON-safe combo facts and do not calculate expiry or chain semantics.
+- Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.

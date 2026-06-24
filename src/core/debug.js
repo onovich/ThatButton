@@ -1,7 +1,7 @@
 import { getDifficultyForLevel } from '../config/difficulty.js';
 import { resolveWrongPressDamage } from './battle.js';
 import { applyRoundClearDamage, createCombatState, getCombatSummary } from './combat.js';
-import { createComboState, getComboSummary } from './combo.js';
+import { createComboState, expireComboIfNeeded, getComboSummary, incrementCombo } from './combo.js';
 import { createEnemyState, getEnemySummary } from './enemy.js';
 import { generateLevelData } from './level.js';
 import { createPlayerState, getPlayerSummary } from './player.js';
@@ -124,6 +124,23 @@ export function previewEnemyScaling(enemyIndex = 1) {
   return getEnemySummary(createEnemyState({ enemyIndex }));
 }
 
+export function previewComboWindow({
+  firstAtMs = 1000,
+  secondAtMs = 1800,
+  expiredAtMs = 4201
+} = {}) {
+  const first = incrementCombo(createComboState(), 'safe_press', { atMs: firstAtMs }).combo;
+  const second = incrementCombo(first, 'safe_press', { atMs: secondAtMs }).combo;
+  const expiry = expireComboIfNeeded(second, expiredAtMs);
+  const restarted = incrementCombo(second, 'safe_press', { atMs: expiredAtMs }).combo;
+  return {
+    first: getComboSummary(first),
+    second: getComboSummary(second),
+    expired: getComboSummary(expiry.combo),
+    restarted: getComboSummary(restarted)
+  };
+}
+
 export function createDebugApi({
   getState,
   loadBestRecord,
@@ -146,6 +163,7 @@ export function createDebugApi({
     previewCombatRoundClear,
     previewPlayerDamage,
     previewEnemyScaling,
+    previewComboWindow,
     getDifficultyForLevel,
     getLastFailureRecap: () => cloneFailureRecap(getState().lastFailureRecap),
     getLastVictoryRecap: () => cloneFailureRecap(getState().lastVictoryRecap),

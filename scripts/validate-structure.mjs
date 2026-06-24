@@ -285,6 +285,8 @@ const {
 } = combatModule;
 const {
   createComboState,
+  expireComboIfNeeded,
+  getComboWindowRemaining,
   getComboSummary,
   incrementCombo,
   resetCombo
@@ -306,6 +308,7 @@ const {
 const {
   previewSeededLevel,
   previewFailureRecap,
+  previewComboWindow,
   previewEnemyScaling,
   previewPlayerDamage
 } = debugModule;
@@ -624,7 +627,11 @@ if (
   initialCombo.statusText !== 'CHAIN --' ||
   initialCombo.hasVisibleCombo ||
   initialCombo.rewardText !== '' ||
-  initialCombo.damageBonus !== 0
+  initialCombo.damageBonus !== 0 ||
+  initialCombo.comboWindowMs !== BASE_BATTLE_CONFIG.comboWindowMs ||
+  initialCombo.expiresAtMs !== null ||
+  initialCombo.remainingMs !== 0 ||
+  initialCombo.isWindowActive
 ) {
   failures.push(`Initial combo state changed: ${JSON.stringify(initialCombo)}`);
 }
@@ -688,6 +695,54 @@ if (
 }
 if (JSON.stringify(getComboSummary(comboState)) !== JSON.stringify(comboState)) {
   failures.push('Combo summary should be a stable plain-data clone.');
+}
+const timedFirstCombo = incrementCombo(initialCombo, 'safe_press', { atMs: 1000 }).combo;
+if (
+  timedFirstCombo.streak !== 1 ||
+  timedFirstCombo.comboText !== '' ||
+  timedFirstCombo.statusText !== 'CHAIN READY' ||
+  timedFirstCombo.expiresAtMs !== 3400 ||
+  timedFirstCombo.remainingMs !== 2400 ||
+  !timedFirstCombo.isWindowActive
+) {
+  failures.push(`Timed first safe press should arm a silent combo window: ${JSON.stringify(timedFirstCombo)}`);
+}
+const timedSecondCombo = incrementCombo(timedFirstCombo, 'safe_press', { atMs: 1800 }).combo;
+if (
+  timedSecondCombo.streak !== 2 ||
+  timedSecondCombo.comboText !== 'COMBO x2' ||
+  timedSecondCombo.rewardText !== 'DMG +1' ||
+  timedSecondCombo.expiresAtMs !== 4200 ||
+  timedSecondCombo.remainingMs !== 2400 ||
+  getComboWindowRemaining(timedSecondCombo, 3000) !== 1200
+) {
+  failures.push(`Timed second safe press should refresh a visible combo window: ${JSON.stringify(timedSecondCombo)}`);
+}
+const activeComboWindow = expireComboIfNeeded(timedSecondCombo, 4200);
+if (activeComboWindow.expired || activeComboWindow.combo.streak !== 2) {
+  failures.push(`Combo window should still be active exactly at expiry time: ${JSON.stringify(activeComboWindow)}`);
+}
+const expiredComboWindow = expireComboIfNeeded(timedSecondCombo, 4201);
+if (
+  !expiredComboWindow.expired ||
+  expiredComboWindow.combo.streak !== 0 ||
+  expiredComboWindow.combo.statusText !== 'CHAIN --' ||
+  expiredComboWindow.combo.lastExpiredAtMs !== 4201 ||
+  expiredComboWindow.combo.lastChangeReason !== 'combo_expired'
+) {
+  failures.push(`Combo expiry should reset the chain with explicit expiry facts: ${JSON.stringify(expiredComboWindow)}`);
+}
+const restartedAfterExpiry = incrementCombo(timedSecondCombo, 'safe_press', { atMs: 4300 });
+if (
+  !restartedAfterExpiry.expired ||
+  restartedAfterExpiry.combo.streak !== 1 ||
+  restartedAfterExpiry.combo.comboText !== '' ||
+  restartedAfterExpiry.combo.statusText !== 'CHAIN READY' ||
+  restartedAfterExpiry.combo.expiresAtMs !== 6700 ||
+  restartedAfterExpiry.combo.remainingMs !== 2400 ||
+  restartedAfterExpiry.combo.lastExpiredAtMs !== 4300
+) {
+  failures.push(`Safe press after combo expiry should restart as a silent first press: ${JSON.stringify(restartedAfterExpiry)}`);
 }
 
 const initialCombat = createCombatState();
@@ -1022,6 +1077,7 @@ const requiredDebugHelpers = [
   'previewCombatRoundClear',
   'previewPlayerDamage',
   'previewEnemyScaling',
+  'previewComboWindow',
   'getCombatState',
   'getComboState',
   'getBestRecord',
@@ -1076,6 +1132,12 @@ if (
 ) {
   failures.push(`Host snapshot missing enemy scaling facts: ${JSON.stringify(firstSnapshot.combat)}`);
 }
+if (
+  firstSnapshot.combo?.comboWindowMs !== BASE_BATTLE_CONFIG.comboWindowMs ||
+  firstSnapshot.round.combo?.statusText !== 'CHAIN --'
+) {
+  failures.push(`Host snapshot missing combo-window facts: ${JSON.stringify(firstSnapshot.combo)}`);
+}
 const safePress = hostSmokeApp.press('btn-0');
 if (!safePress.accepted || safePress.result !== 'safe' || hostSmokeApp.getSnapshot().run.score !== 10) {
   failures.push(`Host safe press did not reuse gameplay scoring: ${JSON.stringify(safePress)}`);
@@ -1084,7 +1146,9 @@ if (
   hostSmokeApp.getSnapshot().combo.streak !== 1 ||
   hostSmokeApp.getSnapshot().combo.comboText !== '' ||
   hostSmokeApp.getSnapshot().combo.statusText !== 'CHAIN READY' ||
-  hostSmokeApp.getSnapshot().combo.hasVisibleCombo
+  hostSmokeApp.getSnapshot().combo.hasVisibleCombo ||
+  hostSmokeApp.getSnapshot().combo.expiresAtMs !== 4400 ||
+  hostSmokeApp.getSnapshot().combo.remainingMs !== 2400
 ) {
   failures.push(`First host safe press should start a silent chain: ${JSON.stringify(hostSmokeApp.getSnapshot().combo)}`);
 }
@@ -1267,6 +1331,16 @@ if (debugApi) {
   const debugSecondEnemy = debugApi.previewEnemyScaling(2);
   if (debugSecondEnemy.enemyIndex !== 2 || debugSecondEnemy.maxHp !== 660 || debugSecondEnemy.attack !== 24) {
     failures.push(`Debug API enemy-scaling preview changed: ${JSON.stringify(debugSecondEnemy)}`);
+  }
+  const debugComboWindow = debugApi.previewComboWindow();
+  if (
+    debugComboWindow.first.statusText !== 'CHAIN READY' ||
+    debugComboWindow.second.comboText !== 'COMBO x2' ||
+    debugComboWindow.expired.streak !== 0 ||
+    debugComboWindow.restarted.statusText !== 'CHAIN READY' ||
+    debugComboWindow.restarted.comboText !== ''
+  ) {
+    failures.push(`Debug API combo-window preview changed: ${JSON.stringify(debugComboWindow)}`);
   }
 
   const debugInitial = debugApi.getBestRecord();

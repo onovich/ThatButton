@@ -377,7 +377,7 @@ export function createApp({
       gameState.safeKeysRemaining--;
       gameState.score += 10;
       renderer.updateScore(gameState.score);
-      applyComboChange(applySafePressCombo(gameState.combo), {
+      applyComboChange(applySafePressCombo(gameState.combo, { atMs: performance.now() }), {
         sourceElement: element,
         showReward: true
       });

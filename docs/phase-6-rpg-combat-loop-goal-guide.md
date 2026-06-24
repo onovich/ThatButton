@@ -17,10 +17,12 @@ This phase must also change wrong presses from instant run failure into player d
 The current combo display is misleading and must be fixed first:
 
 - Do not show combo text or combo reward for the first safe press.
+- The first safe press still needs immediate non-combo feedback. Use a short floating text such as `SUCCESS`, `SAFE`, or an equivalent concise word, but do not label it as combo.
 - Show `COMBO x2` only from the second valid chained safe press.
 - `COMBO xN` is the chain count, not the damage multiplier label.
 - Damage bonus should be shown separately, such as `DMG +4`, `CHAIN BONUS`, or similar short feedback.
 - A combo expires when the player misses the combo time window. The next safe press after expiry starts a new chain and should not show combo text yet.
+- Wrong presses need immediate damage feedback: error audio, supported-device vibration, a brief background/screen flash, player-damage floating text, and a clear wrong-press marker near the pressed button.
 
 ## 1. Required Reading
 
@@ -48,6 +50,7 @@ The current combo display is misleading and must be fixed first:
 
 - Correct combo semantics and display.
   - First safe press starts a chain silently.
+  - First safe press is silent only with respect to combo; it must still show non-combo success feedback such as `SUCCESS`.
   - Second safe press shows `COMBO x2`.
   - Each later chained safe press increases the displayed count by 1.
   - Existing x1.1/x1.2/x1.3 labels should no longer be the primary visible combo text.
@@ -56,6 +59,7 @@ The current combo display is misleading and must be fixed first:
   - Wrong safe/fatal decision damages the player instead of immediately ending the run.
   - Player death ends the run only when HP reaches zero.
   - Wrong press breaks combo and resets combo reward.
+  - Wrong press feedback must be unmistakable: distinct error audio, supported-device vibration, brief background/screen flash, pressed-button feedback, and floating text such as `WRONG`, `HIT -12`, or another concise HP-loss message.
 - Add enemy scaling.
   - Treat the current boss as an enemy encounter, not the only permanent combat object.
   - Each enemy has a stable attack value while alive.
@@ -78,6 +82,7 @@ The current combo display is misleading and must be fixed first:
 - Strengthen combo feedback.
   - Combo particles should feel more noticeable than Phase 5 without becoming noisy.
   - Use compact dynamic feedback: floating text, stronger particle burst, subtle screen/body impact, and optional vibration when supported.
+  - Non-combo successful safe presses should still show a smaller success floating text so every correct action feels acknowledged.
   - Respect mobile readability and avoid layout shift.
 - Update Host Bridge events and snapshots.
   - Preserve existing host input methods: `start`, `reset`, `press(buttonId)`, `getSnapshot()`, `getDebugApi()`.
@@ -214,7 +219,7 @@ Every round must answer:
    - Ensure first safe press is silent and second safe press displays `COMBO x2`.
    - Keep old damage preview tests updated intentionally.
 3. Combo UI and feedback pass.
-   - Update combo status text, floating rewards, and stronger particles.
+   - Update combo status text, non-combo success floating text, floating rewards, and stronger particles.
    - Add CSS/DOM markers to structure validation.
    - Smoke desktop and mobile layout.
 4. Player state core.
@@ -222,6 +227,7 @@ Every round must answer:
    - Add debug summaries and validation smokes.
 5. Wrong-press flow.
    - Wrong press damages player, breaks combo, records recap facts, and only ends when HP reaches zero.
+   - Add wrong-press feedback: error audio, vibration when supported, background/screen flash, pressed-button marker, and player-damage floating text.
    - Preserve timeout as a run-ending failure unless the planner later changes it.
 6. Enemy scaling core.
    - Convert single boss config into enemy encounter data.
@@ -272,12 +278,13 @@ git diff --check
 Required automated/structured smokes:
 
 - Initial combo state does not display a visible combo reward.
-- First safe press does not show combo text.
+- First safe press does not show combo text, but does show non-combo success floating text.
 - Second safe press shows `COMBO x2`.
 - Later chained presses increment combo count by exactly one.
 - Combo expiry resets chain and suppresses combo text on the next single safe press.
 - Wrong press damages player by current enemy attack.
 - Wrong press resets combo reward.
+- Wrong press triggers distinct feedback markers for audio path, vibration path when available, background/screen flash, pressed-button feedback, and player-damage floating text.
 - Player HP reaching zero ends the run with a failure recap.
 - Player surviving a wrong press can continue the run.
 - Enemy HP and attack increase across enemy index.
@@ -295,7 +302,9 @@ Required visual/manual or headless smokes when UI changes:
 - Desktop 1280x720 layout does not overlap.
 - Mobile 390x844 layout does not overlap.
 - Combo particles and floating text are visible without covering the rule text.
+- Non-combo success floating text is visible but calmer than combo feedback.
 - Player damage feedback is visible and brief.
+- Wrong-press screen/background flash is noticeable but does not obscure the next readable state.
 - Upgrade overlay/cards fit mobile and can be selected by pointer/touch.
 
 ## 10. PASS Criteria
@@ -303,8 +312,10 @@ Required visual/manual or headless smokes when UI changes:
 Phase 6 is ready for planner check only when all are true:
 
 - Combo display semantics match the design in this guide.
+- Safe presses with no active combo still produce concise success feedback without being labeled as combo.
 - Player HP exists, wrong presses damage HP, and HP zero is the run failure condition for wrong-press damage.
 - Wrong presses break combo.
+- Wrong presses have clear multimodal feedback: audio, vibration when supported, brief screen/background flash, button feedback, and floating text.
 - Combo has a time window and visible timer-bar representation.
 - At least one enemy can be defeated, and defeating it offers deterministic three-choice upgrades.
 - The next enemy is stronger and has a higher attack value than the previous enemy.

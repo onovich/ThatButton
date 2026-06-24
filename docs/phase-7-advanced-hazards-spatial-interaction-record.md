@@ -725,8 +725,8 @@ Round 10 validation:
 
 Commit / push:
 
-- commit: pending
-- push: pending
+- commit: `df36b5d` (`tune: pace hazard stacking`)
+- push: PASS
 - buffer round consumed: no
 
 Next:

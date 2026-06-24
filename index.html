@@ -1377,6 +1377,88 @@
             padding-left: 1rem;
         }
 
+        .playtest-report-export {
+            width: 100%;
+            max-width: 360px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 204, 0, 0.38);
+            border-radius: 4px;
+            background:
+                linear-gradient(180deg, rgba(35, 24, 0, 0.66), rgba(0, 18, 10, 0.58)),
+                repeating-linear-gradient(90deg, rgba(74, 246, 38, 0.06) 0 1px, transparent 1px 12px);
+            padding: 0.7rem;
+            text-align: left;
+            box-shadow: inset 0 0 16px rgba(255, 204, 0, 0.09);
+        }
+
+        .playtest-report-header,
+        .playtest-report-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .playtest-report-header {
+            color: var(--crt-yellow);
+            font-size: 0.72rem;
+            font-weight: 900;
+            margin-bottom: 0.45rem;
+        }
+
+        .playtest-report-status {
+            color: var(--crt-green);
+            font-size: 0.68rem;
+        }
+
+        .playtest-report-summary {
+            max-height: 7.8rem;
+            overflow: auto;
+            white-space: pre-wrap;
+            margin: 0 0 0.55rem;
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 0.68rem;
+            line-height: 1.42;
+        }
+
+        .report-action-button {
+            flex: 1;
+            min-height: 36px;
+            border: 1px solid rgba(74, 246, 38, 0.72);
+            border-radius: 2px;
+            background: rgba(0, 16, 0, 0.78);
+            color: var(--crt-green);
+            font: inherit;
+            font-size: 0.72rem;
+            font-weight: 900;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .report-action-button:hover,
+        .playtest-report-export[data-copy-state="copied"] .report-action-button:first-child {
+            background: var(--crt-green);
+            color: #001000;
+        }
+
+        .playtest-report-text {
+            width: 100%;
+            min-height: 116px;
+            max-height: 180px;
+            margin-top: 0.55rem;
+            box-sizing: border-box;
+            resize: vertical;
+            border: 1px solid rgba(74, 246, 38, 0.45);
+            border-radius: 2px;
+            background: rgba(0, 0, 0, 0.72);
+            color: var(--crt-green);
+            padding: 0.5rem;
+            font: inherit;
+            font-size: 0.66rem;
+            line-height: 1.42;
+            user-select: text;
+        }
+
         /* Utility Color Classes for Buttons */
         .color-red { background: linear-gradient(145deg, #ff4d4d, #cc0000); color: #fff; }
         .color-blue { background: linear-gradient(145deg, #4da6ff, #0066cc); color: #fff; }
@@ -1598,6 +1680,20 @@
                 font-size: 0.78rem;
                 padding: 0.65rem;
                 margin-bottom: 0.65rem;
+            }
+
+            .playtest-report-export {
+                max-width: none;
+                margin-bottom: 0.65rem;
+                padding: 0.62rem;
+            }
+
+            .playtest-report-summary {
+                max-height: 6.8rem;
+            }
+
+            .playtest-report-text {
+                max-height: 28dvh;
             }
         }
 
@@ -1876,6 +1972,18 @@
                 已触发禁止按键。
             </p>
             <div id="failure-recap" class="failure-recap text-xs crt-font"></div>
+            <div id="playtest-report-export" class="playtest-report-export hidden crt-font" data-copy-state="idle">
+                <div class="playtest-report-header">
+                    <span>LOCAL REPORT</span>
+                    <span id="playtest-report-status" class="playtest-report-status">READY</span>
+                </div>
+                <pre id="playtest-report-summary" class="playtest-report-summary"></pre>
+                <div class="playtest-report-actions">
+                    <button id="playtest-report-copy" type="button" class="report-action-button">COPY</button>
+                    <button id="playtest-report-select" type="button" class="report-action-button">SELECT</button>
+                </div>
+                <textarea id="playtest-report-text" class="playtest-report-text hidden" readonly></textarea>
+            </div>
             <button class="btn-ui btn-ui-red" onclick="resetGame()">重新进入面板</button>
         </div>
 

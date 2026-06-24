@@ -291,9 +291,73 @@ Validation:
 
 Commit/push:
 
+- round commit: `a8c6c7d feat: collect runtime playtest reports`
+- push: PASS
+
+Next round goal:
+
+- Add the local export path and player/debug-facing access for the final report, with clipboard/download fallback behavior where feasible.
+
+## Round 4 - Export UI And Debug API
+
+Round goal:
+
+- Add a compact local report export path after run end.
+- Add clipboard support with a denied-permission fallback.
+- Keep the active battle screen uncluttered and mobile-safe.
+
+Changes:
+
+- Added a hidden `LOCAL REPORT` panel inside the game-over overlay.
+- The panel shows compact summary text, a `COPY` action, a `SELECT` fallback action, and a hidden readonly textarea for local/manual copy fallback.
+- `src/ui/render.js` now renders an already-built report export bundle, attempts `navigator.clipboard.writeText(...)`, and falls back to selecting the local textarea if clipboard access is unavailable or denied.
+- `src/app/create-app.js` now converts the final `lastPlaytestReport` into summary/export text and passes it to the game-over overlay after failure/timeout.
+- `src/core/debug.js` now exposes `getLastPlaytestReportExport()` for debug access to the last report/export bundle.
+- `scripts/validate-structure.mjs` now validates export markers, the debug export helper, real run-end export data, and a simulated clipboard-denied renderer fallback.
+
+Export behavior:
+
+- Active gameplay UI is unchanged.
+- The export panel appears only in the post-run game-over overlay when a report exists.
+- `COPY` uses browser clipboard when permitted.
+- Clipboard denial falls back to a visible readonly textarea, marks status `SELECTABLE`, and never requires network access.
+- Debug export bundle includes report, summary text, JSON text, export text, and a privacy-safe flag.
+
+Debug self-check:
+
+- Smallest export fixture is a generated report passed to `renderer.showGameOverScreen(...)` with a fake denied clipboard.
+- Failure layers are localized to renderer export controls, browser clipboard permission, app report formatting, and debug bundle exposure.
+- Empty/missing report hides the export panel.
+- Clipboard denied fallback is covered by structure validation; broader browser/mobile export smoke remains for Round 5.
+
+Architecture self-check:
+
+- Core report schema remains in `src/core/playtest-report.js`.
+- App orchestration formats an existing report but does not decide report metrics or gameplay outcomes.
+- UI owns only presentation, clipboard attempt, and local textarea fallback.
+- No storage, remote analytics, network submission, new dependencies, gameplay tuning, new hazards, or broad visual redesign were added.
+- Report UI is compact, post-run only, and does not move the bottom player HUD or hazard layout.
+
+Validation:
+
+- `node --check src\ui\render.js`: PASS
+- `node --check src\app\create-app.js`: PASS
+- `node --check src\core\debug.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- Active network/privacy API scan across `index.html`, `src`, and `dist`: PASS / no matches
+- Clipboard-denied fallback smoke: PASS via `scripts/validate-structure.mjs`
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
 - round commit: pending
 - push: pending
 
 Next round goal:
 
-- Add the local export path and player/debug-facing access for the final report, with clipboard/download fallback behavior where feasible.
+- Add manual playtest templates and browser smoke coverage for report creation/export markers across desktop, mobile, and short-mobile.

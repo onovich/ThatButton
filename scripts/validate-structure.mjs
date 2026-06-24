@@ -81,6 +81,11 @@ for (const marker of [
   'id="clue-title"',
   '别按那个按钮！',
   'id="failure-recap"',
+  'id="playtest-report-export"',
+  'id="playtest-report-summary"',
+  'id="playtest-report-copy"',
+  'id="playtest-report-select"',
+  'id="playtest-report-text"',
   '禁止按键',
   '安全键'
 ]) {
@@ -91,7 +96,7 @@ for (const marker of [
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
 const renderSource = sources.get('src/ui/render.js') || '';
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewSessionProgression', 'previewHostEventPayloads', 'previewPlaytestReport', 'previewRuntimePlaytestReport', 'getLastPlaytestReport', 'thatbutton.playtestReport', 'isPrivacySafePlaytestReport', 'createPlaytestRunState', 'recordPlaytestRound', 'recordPlaytestButtonPress', 'buildPlaytestReportFromRunState', 'lastPlaytestReport', 'stageLabel', 'tierLabel', 'commandLevelTag', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewSessionProgression', 'previewHostEventPayloads', 'previewPlaytestReport', 'previewRuntimePlaytestReport', 'getLastPlaytestReport', 'getLastPlaytestReportExport', 'showPlaytestReportExport', 'clipboard.writeText', 'SELECTABLE', 'thatbutton.playtestReport', 'isPrivacySafePlaytestReport', 'createPlaytestRunState', 'recordPlaytestRound', 'recordPlaytestButtonPress', 'buildPlaytestReportFromRunState', 'lastPlaytestReport', 'stageLabel', 'tierLabel', 'commandLevelTag', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
@@ -1478,6 +1483,36 @@ function fakeGeometryElement(rect = {}) {
   return element;
 }
 
+function fakeInteractiveElement(rect = {}) {
+  const element = fakeGeometryElement(rect);
+  const classNames = new Set();
+  const listeners = new Map();
+  element.classList = {
+    add(...values) {
+      values.forEach((value) => classNames.add(value));
+    },
+    remove(...values) {
+      values.forEach((value) => classNames.delete(value));
+    },
+    contains(value) {
+      return classNames.has(value);
+    }
+  };
+  element.addEventListener = (type, handler) => {
+    listeners.set(type, handler);
+  };
+  element.click = () => {
+    listeners.get('click')?.({ preventDefault() {} });
+  };
+  element.focus = () => {
+    element.focused = true;
+  };
+  element.select = () => {
+    element.selected = true;
+  };
+  return element;
+}
+
 const { createRenderer } = renderModule;
 const hazardUiElements = new Map([
   ['command-panel', fakeGeometryElement({ left: 10, top: 300, width: 360, height: 380 })],
@@ -1627,6 +1662,83 @@ if (
   })}`);
 }
 
+const reportUiElements = new Map();
+for (const id of [
+  'game-over-screen',
+  'final-level',
+  'result-title',
+  'result-subtitle',
+  'death-reason',
+  'failure-recap',
+  'playtest-report-export',
+  'playtest-report-summary',
+  'playtest-report-status',
+  'playtest-report-copy',
+  'playtest-report-select',
+  'playtest-report-text'
+]) {
+  reportUiElements.set(id, fakeInteractiveElement({ left: 0, top: 0, width: 320, height: 80 }));
+}
+reportUiElements.get('playtest-report-export').classList.add('hidden');
+reportUiElements.get('playtest-report-text').classList.add('hidden');
+const reportClipboardCalls = [];
+const reportRenderer = createRenderer({
+  document: {
+    body: fakeInteractiveElement({ left: 0, top: 0, width: 390, height: 844 }),
+    documentElement: fakeInteractiveElement({ left: 0, top: 0, width: 390, height: 844 }),
+    defaultView: {
+      navigator: {
+        clipboard: {
+          writeText(text) {
+            reportClipboardCalls.push(text);
+            throw new Error('denied');
+          }
+        }
+      }
+    },
+    getElementById: (id) => reportUiElements.get(id) || fakeInteractiveElement(),
+    createElement: () => fakeInteractiveElement()
+  },
+  timers: {
+    setTimeout: () => 0,
+    clearTimeout() {}
+  },
+  random: () => 0.5,
+  audio: {
+    playBeep() {}
+  }
+});
+const reportUiFixture = createPlaytestReportFixture();
+const reportUiExport = {
+  summaryText: formatPlaytestReportSummary(reportUiFixture),
+  exportText: buildPlaytestReportExport(reportUiFixture)
+};
+reportRenderer.showGameOverScreen({
+  level: 24,
+  isTimeout: false,
+  recap: previewFailureRecap('phase3a-baseline', 1),
+  playtestReportExport: reportUiExport
+});
+reportUiElements.get('playtest-report-copy').click();
+if (
+  reportUiElements.get('playtest-report-export').classList.contains('hidden') ||
+  !reportUiElements.get('playtest-report-text').selected ||
+  reportUiElements.get('playtest-report-text').classList.contains('hidden') ||
+  reportUiElements.get('playtest-report-text').value !== reportUiExport.exportText ||
+  reportUiElements.get('playtest-report-status').innerText !== 'SELECTABLE' ||
+  reportUiElements.get('playtest-report-export').dataset.copyState !== 'fallback' ||
+  reportClipboardCalls[0] !== reportUiExport.exportText
+) {
+  failures.push(`Playtest report clipboard-denied fallback smoke failed: ${JSON.stringify({
+    shellHidden: reportUiElements.get('playtest-report-export').classList.contains('hidden'),
+    textHidden: reportUiElements.get('playtest-report-text').classList.contains('hidden'),
+    selected: reportUiElements.get('playtest-report-text').selected,
+    status: reportUiElements.get('playtest-report-status').innerText,
+    copyState: reportUiElements.get('playtest-report-export').dataset.copyState,
+    clipboardCalls: reportClipboardCalls.length
+  })}`);
+}
+
 const appStorage = fakeStorage();
 const fakeWindow = {
   location: { search: '?seed=phase3a-baseline&debug=1' },
@@ -1687,6 +1799,7 @@ const requiredDebugHelpers = [
   'buildPlaytestReport',
   'isPrivacySafePlaytestReport',
   'getLastPlaytestReport',
+  'getLastPlaytestReportExport',
   'getCombatState',
   'getComboState',
   'getBestRecord',
@@ -2019,6 +2132,17 @@ if (
     lethalPlaytestReport,
     lethalDebugPlaytestReport
   })}`);
+}
+const lethalPlaytestExport = lethalApp.getDebugApi().getLastPlaytestReportExport();
+if (
+  !lethalPlaytestExport ||
+  JSON.stringify(lethalPlaytestExport.report) !== JSON.stringify(lethalPlaytestReport) ||
+  !lethalPlaytestExport.privacySafe ||
+  !lethalPlaytestExport.summaryText.includes('local-only') ||
+  !lethalPlaytestExport.exportText.includes('THATBUTTON PLAYTEST REPORT') ||
+  !lethalPlaytestExport.exportText.includes('"kind": "thatbutton.playtestReport"')
+) {
+  failures.push(`Lethal wrong-press smoke should expose a local export bundle: ${JSON.stringify(lethalPlaytestExport)}`);
 }
 
 const victoryBridge = createCaptureHostBridge();

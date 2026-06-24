@@ -20,9 +20,11 @@ import { generateLevelData, getButtonSummary, getRoundSnapshot } from '../core/l
 import { createSeededRng } from '../core/rng.js';
 import { buildFailureRecapFromState } from '../core/run-recaps.js';
 import {
+  buildPlaytestReportExport,
   buildPlaytestReportFromRunState,
   classifyViewport,
   createPlaytestRunState,
+  formatPlaytestReportSummary,
   recordPlaytestButtonPress,
   recordPlaytestCombo,
   recordPlaytestEnemyDefeated,
@@ -183,20 +185,36 @@ export function createApp({
     if (!gameState.playtestRun) return null;
     syncPlaytestRound(gameState.hazards);
     const encounterFacts = getEncounterFacts(gameState);
-    const report = buildPlaytestReportFromRunState(gameState.playtestRun, {
-      result,
-      reason,
-      level: gameState.level,
-      score: gameState.score,
-      endedAtMs: performance.now(),
-      createdAt: new Date().toISOString(),
-      combat: encounterFacts.combat,
-      combo: encounterFacts.combo,
-      upgrades: encounterFacts.upgrades,
-      recap
-    });
-    gameState.lastPlaytestReport = report;
-    return report;
+    try {
+      const report = buildPlaytestReportFromRunState(gameState.playtestRun, {
+        result,
+        reason,
+        level: gameState.level,
+        score: gameState.score,
+        endedAtMs: performance.now(),
+        createdAt: new Date().toISOString(),
+        combat: encounterFacts.combat,
+        combo: encounterFacts.combo,
+        upgrades: encounterFacts.upgrades,
+        recap
+      });
+      gameState.lastPlaytestReport = report;
+      return report;
+    } catch (error) {
+      gameState.lastPlaytestReport = null;
+      recordDebugEvent('playtest_report_failed', {
+        error: error instanceof Error ? error.message : 'unknown'
+      });
+      return null;
+    }
+  }
+
+  function getPlaytestReportExportView(report = gameState.lastPlaytestReport) {
+    if (!report) return null;
+    return {
+      summaryText: formatPlaytestReportSummary(report),
+      exportText: buildPlaytestReportExport(report)
+    };
   }
 
   function getCurrentComboWindow(nowMs = performance.now()) {
@@ -355,7 +373,7 @@ export function createApp({
       pressedButton: getButtonSummary(failedButton),
       failureRecap
     });
-    finalizePlaytestReport({
+    const playtestReport = finalizePlaytestReport({
       result: 'failure',
       reason: failureReason,
       recap: failureRecap
@@ -374,7 +392,8 @@ export function createApp({
       renderer.showGameOverScreen({
         level: gameState.level,
         isTimeout,
-        recap: failureRecap
+        recap: failureRecap,
+        playtestReportExport: getPlaytestReportExportView(playtestReport)
       });
     }, 800);
   }

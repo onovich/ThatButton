@@ -83,7 +83,13 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     finalLevel: document.getElementById('final-level'),
     deathReason: document.getElementById('death-reason'),
     resultTitle: document.getElementById('result-title'),
-    resultSubtitle: document.getElementById('result-subtitle')
+    resultSubtitle: document.getElementById('result-subtitle'),
+    playtestReportExport: document.getElementById('playtest-report-export'),
+    playtestReportSummary: document.getElementById('playtest-report-summary'),
+    playtestReportStatus: document.getElementById('playtest-report-status'),
+    playtestReportCopyButton: document.getElementById('playtest-report-copy'),
+    playtestReportSelectButton: document.getElementById('playtest-report-select'),
+    playtestReportText: document.getElementById('playtest-report-text')
   };
   let typewriterTimeout = null;
   let comboRewardTimeout = null;
@@ -91,6 +97,8 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
   let comboShakeTimeout = null;
   let wrongPressFlashTimeout = null;
   let upgradeRewardTimeout = null;
+  let reportStatusTimeout = null;
+  let currentPlaytestReportExportText = '';
   let hazardMotionButtonIds = new Set();
   const terminalGlyphs = ['>', '/', '+', '#', '!', '$'];
 
@@ -871,8 +879,110 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     refs.startScreen.classList.add('hidden');
   }
 
+  function setPlaytestReportStatus(label, state = 'idle', resetAfterMs = 0) {
+    if (reportStatusTimeout !== null) {
+      cancelSchedule(reportStatusTimeout);
+      reportStatusTimeout = null;
+    }
+    if (refs.playtestReportStatus) {
+      refs.playtestReportStatus.innerText = label;
+    }
+    if (refs.playtestReportExport?.dataset) {
+      refs.playtestReportExport.dataset.copyState = state;
+    }
+    if (resetAfterMs > 0) {
+      reportStatusTimeout = schedule(() => {
+        if (refs.playtestReportStatus) {
+          refs.playtestReportStatus.innerText = 'READY';
+        }
+        if (refs.playtestReportExport?.dataset) {
+          refs.playtestReportExport.dataset.copyState = 'idle';
+        }
+        reportStatusTimeout = null;
+      }, resetAfterMs);
+    }
+  }
+
+  function setPlaytestReportFallbackVisible(visible) {
+    if (!refs.playtestReportText) return;
+    refs.playtestReportText.classList[visible ? 'remove' : 'add']('hidden');
+    if (visible) {
+      refs.playtestReportText.value = currentPlaytestReportExportText;
+    }
+  }
+
+  function selectPlaytestReportText() {
+    if (!currentPlaytestReportExportText) return;
+    setPlaytestReportFallbackVisible(true);
+    if (typeof refs.playtestReportText.focus === 'function') {
+      refs.playtestReportText.focus();
+    }
+    if (typeof refs.playtestReportText.select === 'function') {
+      refs.playtestReportText.select();
+    }
+    setPlaytestReportStatus('SELECTABLE', 'fallback');
+  }
+
+  async function copyPlaytestReportText() {
+    if (!currentPlaytestReportExportText) return;
+    const clipboard = document.defaultView?.navigator?.clipboard;
+    if (clipboard && typeof clipboard.writeText === 'function') {
+      try {
+        await clipboard.writeText(currentPlaytestReportExportText);
+        setPlaytestReportFallbackVisible(false);
+        setPlaytestReportStatus('COPIED', 'copied', 1600);
+        return;
+      } catch (error) {
+        // Clipboard can be blocked on static pages or mobile browsers; fall through to local text.
+      }
+    }
+    selectPlaytestReportText();
+  }
+
+  function bindPlaytestReportExportControls() {
+    if (typeof refs.playtestReportCopyButton?.addEventListener === 'function') {
+      refs.playtestReportCopyButton.addEventListener('click', () => {
+        void copyPlaytestReportText();
+      });
+    }
+    if (typeof refs.playtestReportSelectButton?.addEventListener === 'function') {
+      refs.playtestReportSelectButton.addEventListener('click', selectPlaytestReportText);
+    }
+  }
+
+  function clearPlaytestReportExport() {
+    currentPlaytestReportExportText = '';
+    refs.playtestReportExport?.classList?.add('hidden');
+    if (refs.playtestReportSummary) {
+      refs.playtestReportSummary.innerText = '';
+    }
+    if (refs.playtestReportText) {
+      refs.playtestReportText.value = '';
+    }
+    setPlaytestReportFallbackVisible(false);
+    setPlaytestReportStatus('READY');
+  }
+
+  function showPlaytestReportExport({ summaryText = '', exportText = '' } = {}) {
+    if (!exportText) {
+      clearPlaytestReportExport();
+      return;
+    }
+    currentPlaytestReportExportText = exportText;
+    if (refs.playtestReportSummary) {
+      refs.playtestReportSummary.innerText = summaryText || exportText.slice(0, 420);
+    }
+    if (refs.playtestReportText) {
+      refs.playtestReportText.value = exportText;
+    }
+    setPlaytestReportFallbackVisible(false);
+    setPlaytestReportStatus('READY');
+    refs.playtestReportExport?.classList?.remove('hidden');
+  }
+
   function hideGameOverScreen() {
     refs.gameOverScreen.classList.add('hidden');
+    clearPlaytestReportExport();
   }
 
   function showUpgradeScreen({ choices = [], onSelect }) {
@@ -929,7 +1039,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     refs.upgradeChoiceList.innerHTML = '';
   }
 
-  function showGameOverScreen({ level, isTimeout, recap, isVictory = false }) {
+  function showGameOverScreen({ level, isTimeout, recap, isVictory = false, playtestReportExport = null }) {
     refs.finalLevel.innerText = level;
     refs.resultTitle.innerText = isVictory ? 'ENCOUNTER CLEAR' : 'SYSTEM FAILURE';
     refs.resultTitle.className = isVictory
@@ -942,6 +1052,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
         ? '倒计时归零。<br>面板未清空，反应堆越过临界线。'
         : '你按下了禁止按键。');
     renderFailureRecap(recap);
+    showPlaytestReportExport(playtestReportExport);
     refs.gameOverScreen.classList.remove('hidden');
   }
 
@@ -980,6 +1091,8 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     return document.getElementById(buttonId);
   }
 
+  bindPlaytestReportExportControls();
+
   return {
     renderBoard,
     renderFailureRecap,
@@ -996,6 +1109,8 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     updateScore,
     hideStartScreen,
     hideGameOverScreen,
+    showPlaytestReportExport,
+    clearPlaytestReportExport,
     showUpgradeScreen,
     showUpgradeReward,
     hideUpgradeScreen,

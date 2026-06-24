@@ -441,15 +441,19 @@ export function previewPlaytestReport(options = {}) {
   return createPlaytestReportFixture(options);
 }
 
-export function previewPlaytestReportExport(options = {}) {
-  const report = previewPlaytestReport(options);
+function buildPlaytestReportExportBundle(report) {
   return {
-    report,
+    report: JSON.parse(JSON.stringify(report)),
     summaryText: formatPlaytestReportSummary(report),
     jsonText: serializePlaytestReport(report),
     exportText: buildPlaytestReportExport(report),
     privacySafe: isPrivacySafePlaytestReport(report)
   };
+}
+
+export function previewPlaytestReportExport(options = {}) {
+  const report = previewPlaytestReport(options);
+  return buildPlaytestReportExportBundle(report);
 }
 
 export function previewRuntimePlaytestReport() {
@@ -559,6 +563,9 @@ export function createDebugApi({
     isPrivacySafePlaytestReport,
     getLastPlaytestReport: () => getState().lastPlaytestReport
       ? JSON.parse(JSON.stringify(getState().lastPlaytestReport))
+      : null,
+    getLastPlaytestReportExport: () => getState().lastPlaytestReport
+      ? buildPlaytestReportExportBundle(getState().lastPlaytestReport)
       : null,
     getDifficultyForLevel,
     getLastFailureRecap: () => cloneFailureRecap(getState().lastFailureRecap),

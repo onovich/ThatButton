@@ -16,6 +16,14 @@
       "checks": [
         {
           "ok": true,
+          "message": "encounter stage label renders compact identity"
+        },
+        {
+          "ok": true,
+          "message": "encounter stage label fits combat status and viewport"
+        },
+        {
+          "ok": true,
           "message": "clue fits viewport"
         },
         {
@@ -173,6 +181,29 @@
           "centerY": 414.2
         }
       },
+      "encounterLabel": {
+        "text": "CIPHER WARDEN // S03 NOISE GATE: 714/740",
+        "label": {
+          "left": 482.39,
+          "top": 119.7,
+          "right": 816.22,
+          "bottom": 135.7,
+          "width": 333.83,
+          "height": 16,
+          "centerX": 649.3,
+          "centerY": 127.7
+        },
+        "combatStatus": {
+          "left": 390,
+          "top": 84.78,
+          "right": 890,
+          "bottom": 182.3,
+          "width": 500,
+          "height": 97.52,
+          "centerX": 640,
+          "centerY": 133.54
+        }
+      },
       "moving": {
         "phase": "active",
         "targetCount": 2,
@@ -266,6 +297,14 @@
       },
       "ok": true,
       "checks": [
+        {
+          "ok": true,
+          "message": "encounter stage label renders compact identity"
+        },
+        {
+          "ok": true,
+          "message": "encounter stage label fits combat status and viewport"
+        },
         {
           "ok": true,
           "message": "clue fits viewport"
@@ -425,6 +464,29 @@
           "centerY": 454.36
         }
       },
+      "encounterLabel": {
+        "text": "CIPHER WARDEN // S03 NOISE GATE: 714/740",
+        "label": {
+          "left": 105.98,
+          "top": 139.17,
+          "right": 306.17,
+          "bottom": 155.17,
+          "width": 200.19,
+          "height": 16,
+          "centerX": 206.08,
+          "centerY": 147.17
+        },
+        "combatStatus": {
+          "left": 22.8,
+          "top": 99.97,
+          "right": 367.2,
+          "bottom": 200.77,
+          "width": 344.41,
+          "height": 100.8,
+          "centerX": 195,
+          "centerY": 150.37
+        }
+      },
       "moving": {
         "phase": "active",
         "targetCount": 2,
@@ -518,6 +580,14 @@
       },
       "ok": true,
       "checks": [
+        {
+          "ok": true,
+          "message": "encounter stage label renders compact identity"
+        },
+        {
+          "ok": true,
+          "message": "encounter stage label fits combat status and viewport"
+        },
         {
           "ok": true,
           "message": "clue fits viewport"
@@ -675,6 +745,29 @@
           "height": 35.66,
           "centerX": 180,
           "centerY": 408.3
+        }
+      },
+      "encounterLabel": {
+        "text": "CIPHER WARDEN // S03 NOISE GATE: 714/740",
+        "label": {
+          "left": 107.98,
+          "top": 126.08,
+          "right": 277.75,
+          "bottom": 142.08,
+          "width": 169.77,
+          "height": 16,
+          "centerX": 192.87,
+          "centerY": 134.08
+        },
+        "combatStatus": {
+          "left": 22.8,
+          "top": 89.16,
+          "right": 337.2,
+          "bottom": 186.67,
+          "width": 314.41,
+          "height": 97.52,
+          "centerX": 180,
+          "centerY": 137.91
         }
       },
       "moving": {

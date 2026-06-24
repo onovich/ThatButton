@@ -1,4 +1,5 @@
 import { BASE_BATTLE_CONFIG } from '../config/battle.js';
+import { getEncounterIdentity } from '../config/encounters.js';
 
 function normalizeEnemyIndex(value) {
   return Math.max(1, Math.floor(Number(value) || 1));
@@ -37,11 +38,16 @@ export function createEnemyState({
   const normalizedMaxHp = Math.max(1, Math.floor(Number(maxHp) || calculateEnemyMaxHp(index)));
   const normalizedHp = normalizeHp(hp === null ? normalizedMaxHp : hp, normalizedMaxHp);
   const normalizedAttack = Math.max(0, Math.floor(Number(attack) || calculateEnemyAttack(index)));
-  const romanSuffix = index === 1 ? '' : ` ${index}`;
+  const identity = getEncounterIdentity(index);
   return {
     enemyIndex: index,
     enemyId: `reactor-warden-${index}`,
-    enemyName: `REACTOR WARDEN${romanSuffix}`,
+    enemyName: identity.enemyName,
+    stageLabel: identity.stageLabel,
+    tierLabel: identity.tierLabel,
+    avatarGlyph: identity.avatarGlyph,
+    sequenceLabel: identity.sequenceLabel,
+    identityKey: identity.identityKey,
     hp: normalizedHp,
     maxHp: normalizedMaxHp,
     attack: normalizedAttack,

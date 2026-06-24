@@ -361,6 +361,8 @@ export function previewSessionProgression({
       const defeatedEnemy = {
         enemyIndex: combatBefore.enemyIndex,
         enemyName: combatBefore.enemyName,
+        stageLabel: combatBefore.stageLabel,
+        tierLabel: combatBefore.tierLabel,
         defeatedAtLevel: level,
         roundsCleared: combat.roundsCleared,
         maxHp: combatBefore.maxHp,

@@ -21,6 +21,7 @@ const moduleFiles = [
   'src/config/difficulty.js',
   'src/config/battle.js',
   'src/config/combat.js',
+  'src/config/encounters.js',
   'src/config/upgrades.js',
   'src/config/hazards.js',
   'src/core/app-state.js',
@@ -88,7 +89,7 @@ for (const marker of [
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
 const renderSource = sources.get('src/ui/render.js') || '';
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewSessionProgression', 'previewHostEventPayloads', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewSessionProgression', 'previewHostEventPayloads', 'stageLabel', 'tierLabel', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
@@ -258,6 +259,7 @@ const coreBoundaryFiles = [
   'src/config/difficulty.js',
   'src/config/battle.js',
   'src/config/combat.js',
+  'src/config/encounters.js',
   'src/config/upgrades.js',
   'src/config/hazards.js',
   'src/core/app-state.js',
@@ -363,6 +365,7 @@ const [
   battleConfigModule,
   battleModule,
   combatConfigModule,
+  encounterConfigModule,
   combatModule,
   comboModule,
   debugModule,
@@ -384,6 +387,7 @@ const [
   import(moduleUrl('src/config/battle.js')),
   import(moduleUrl('src/core/battle.js')),
   import(moduleUrl('src/config/combat.js')),
+  import(moduleUrl('src/config/encounters.js')),
   import(moduleUrl('src/core/combat.js')),
   import(moduleUrl('src/core/combo.js')),
   import(moduleUrl('src/core/debug.js')),
@@ -419,6 +423,10 @@ const {
   PROTOTYPE_BOSS_CONFIG,
   COMBO_MAX_STREAK
 } = combatConfigModule;
+const {
+  ENCOUNTER_IDENTITIES,
+  getEncounterIdentity
+} = encounterConfigModule;
 const {
   applyRoundClearDamage,
   calculateRoundDamage,
@@ -841,17 +849,27 @@ if (!isJsonSafeValue(upgradePayload) || upgradePayload.modifiers.comboWindowBonu
 
 const firstEnemy = createEnemyState({ enemyIndex: 1 });
 const secondEnemy = createEnemyState({ enemyIndex: 2 });
+const thirdIdentity = getEncounterIdentity(3);
 if (
+  ENCOUNTER_IDENTITIES.length < 4 ||
+  getEncounterIdentity(1).enemyName !== 'REACTOR WARDEN' ||
+  getEncounterIdentity(2).enemyName !== 'SIGNAL WARDEN' ||
+  thirdIdentity.stageLabel !== 'S03 NOISE GATE' ||
+  !isJsonSafeValue(ENCOUNTER_IDENTITIES) ||
   calculateEnemyMaxHp(1) !== 500 ||
   calculateEnemyMaxHp(2) !== 620 ||
   calculateEnemyAttack(1) !== 18 ||
   calculateEnemyAttack(2) !== 24 ||
   firstEnemy.hp !== 500 ||
   firstEnemy.attack !== 18 ||
+  firstEnemy.stageLabel !== 'S01 CORE LOCK' ||
   secondEnemy.hp !== 620 ||
-  secondEnemy.attack !== 24
+  secondEnemy.attack !== 24 ||
+  secondEnemy.enemyName !== 'SIGNAL WARDEN' ||
+  secondEnemy.stageLabel !== 'S02 DRIFT ARRAY' ||
+  secondEnemy.tierLabel !== 'MOVEMENT'
 ) {
-  failures.push(`Enemy scaling smoke failed: ${JSON.stringify({ firstEnemy, secondEnemy })}`);
+  failures.push(`Enemy scaling/identity smoke failed: ${JSON.stringify({ firstEnemy, secondEnemy, thirdIdentity })}`);
 }
 const secondEnemyHit = applyEnemyDamage(secondEnemy, { amount: 30, level: 2 });
 if (
@@ -868,7 +886,7 @@ if (thirdEnemy.enemyIndex !== 3 || thirdEnemy.maxHp !== 740 || thirdEnemy.attack
   failures.push(`Next enemy scaling smoke failed: ${JSON.stringify(thirdEnemy)}`);
 }
 const enemySummary = getEnemySummary(secondEnemyHit.enemy);
-if (enemySummary.hpPercent !== 95 || enemySummary.attack !== 24 || enemySummary.enemyIndex !== 2) {
+if (enemySummary.hpPercent !== 95 || enemySummary.attack !== 24 || enemySummary.enemyIndex !== 2 || enemySummary.stageLabel !== 'S02 DRIFT ARRAY') {
   failures.push(`Enemy summary smoke failed: ${JSON.stringify(enemySummary)}`);
 }
 
@@ -1017,6 +1035,7 @@ if (
   initialCombat.enemyIndex !== 1 ||
   initialCombat.enemyId !== 'reactor-warden-1' ||
   initialCombat.enemyName !== 'REACTOR WARDEN' ||
+  initialCombat.stageLabel !== 'S01 CORE LOCK' ||
   initialCombat.attack !== 18 ||
   initialCombat.bossId !== 'reactor-warden' ||
   initialCombat.hp !== 500 ||
@@ -1027,6 +1046,8 @@ if (
 const nextCombat = createNextCombatState(initialCombat);
 if (
   nextCombat.enemyIndex !== 2 ||
+  nextCombat.enemyName !== 'SIGNAL WARDEN' ||
+  nextCombat.stageLabel !== 'S02 DRIFT ARRAY' ||
   nextCombat.maxHp !== 620 ||
   nextCombat.attack !== 24 ||
   nextCombat.status !== 'active'
@@ -2139,6 +2160,7 @@ if (debugApi) {
     debugSessionPreview.summary.firstUpgradeLevel < 16 ||
     debugSessionPreview.summary.hazardExposure.firstMovingLevel < BASE_HAZARD_CONFIG.movingButton.unlockLevel ||
     debugSessionPreview.summary.hazardExposure.firstInterferenceLevel < BASE_HAZARD_CONFIG.interference.unlockLevel ||
+    debugSessionPreview.defeatedEnemies[0]?.stageLabel !== 'S01 CORE LOCK' ||
     debugSessionPreview.upgradeLog.length < 1 ||
     !debugSessionPreview.rounds.some((round) => round.hazards.activeTypes.includes(HAZARD_TYPES.INTERFERENCE)) ||
     !['max_levels_reached', 'max_enemies_reached', 'timeout'].includes(debugSessionPreview.result.reason)

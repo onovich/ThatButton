@@ -31,7 +31,7 @@ function getCombatRecapRows(recap) {
     ? `<div class="failure-recap-row">PLAYER DAMAGE: -${recap.lastPlayerDamage.appliedDamage}</div>`
     : '';
   const combatLine = recap.combat
-    ? `<div class="failure-recap-row">BOSS: ${escapeHtml(recap.combat.bossName)} ${recap.combat.hp}/${recap.combat.maxHp}</div>`
+    ? `<div class="failure-recap-row">BOSS: ${escapeHtml(recap.combat.enemyName || recap.combat.bossName)} / ${escapeHtml(recap.combat.stageLabel || 'STAGE --')} ${recap.combat.hp}/${recap.combat.maxHp}</div>`
     : '';
   const damageLine = recap.lastDamage
     ? `<div class="failure-recap-row">DAMAGE: ${recap.lastDamage.appliedDamage} (${recap.lastDamage.baseDamage}+${recap.lastDamage.timeBonus}+${recap.lastDamage.comboBonus})</div>`
@@ -690,7 +690,13 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
   function updateCombatStatus({ player, combat, combo }) {
     if (!combat || !combo) return;
     const hpPercent = Math.max(0, Math.min(100, Math.round((combat.hp / combat.maxHp) * 100)));
-    refs.bossHpText.innerText = `${combat.enemyName || combat.bossName}: ${combat.hp}/${combat.maxHp}`;
+    const stageLabel = combat.stageLabel ? ` // ${combat.stageLabel}` : '';
+    refs.bossHpText.innerText = `${combat.enemyName || combat.bossName}${stageLabel}: ${combat.hp}/${combat.maxHp}`;
+    if (refs.bossAvatarShell?.dataset) {
+      refs.bossAvatarShell.dataset.enemyTier = combat.tierLabel || 'UNKNOWN';
+      refs.bossAvatarShell.dataset.enemyIndex = String(combat.enemyIndex || 1);
+      refs.bossAvatarShell.dataset.enemyStage = combat.stageLabel || '';
+    }
     refs.bossHpBar.style.width = `${hpPercent}%`;
     if (player) {
       const playerPercent = Math.max(0, Math.min(100, Math.round((player.hp / player.maxHp) * 100)));

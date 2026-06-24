@@ -191,8 +191,94 @@ Validation:
 
 Commit/push:
 
-- pending.
+- round commit: `401d588`
+- push: `origin/main` PASS
 
 Next round goal:
 
 - Use the new session preview evidence to add data-driven progression/content structure so the long middle game reads as an intentional arc, not only numeric `REACTOR WARDEN N` repetition.
+
+## Round 3 - Progression And Encounter Identity Structure
+
+Round goal:
+
+- Add lightweight, data-driven encounter/stage identity so the long middle game reads as a progression arc.
+- Preserve gameplay formulas and use the new session preview as evidence.
+- Avoid broad visual redesign.
+
+Changes:
+
+- Added `src/config/encounters.js` with data-driven encounter identity facts:
+  - enemy 1: `REACTOR WARDEN`, `S01 CORE LOCK`, `ONBOARDING`
+  - enemy 2: `SIGNAL WARDEN`, `S02 DRIFT ARRAY`, `MOVEMENT`
+  - enemy 3: `CIPHER WARDEN`, `S03 NOISE GATE`, `INTERFERENCE`
+  - enemy 4+: `NULL WARDEN` / deep-loop stage labels
+- Extended `src/core/enemy.js` and `src/core/combat.js` so enemy/combat summaries carry `stageLabel`, `tierLabel`, `avatarGlyph`, `sequenceLabel`, and `identityKey`.
+- Kept stable enemy IDs such as `reactor-warden-1` for compatibility.
+- Updated `src/ui/render.js` to render the existing enemy label with compact stage facts only.
+- Extended `src/core/session-preview.js` so defeated enemy evidence includes stage/tier labels.
+- Extended `scripts/validate-structure.mjs` to cover the new config module, JSON-safe identity facts, and stage labels in enemy/combat/session preview summaries.
+- Extended `scripts/smoke-hazards-browser.mjs` to verify a later-stage `CIPHER WARDEN // S03 NOISE GATE` label fits desktop, mobile, and short-mobile combat status geometry.
+
+Progression/content evidence:
+
+```json
+{
+  "defeated": [
+    { "enemyIndex": 1, "enemyName": "REACTOR WARDEN", "stageLabel": "S01 CORE LOCK", "tierLabel": "ONBOARDING", "defeatedAtLevel": 18 },
+    { "enemyIndex": 2, "enemyName": "SIGNAL WARDEN", "stageLabel": "S02 DRIFT ARRAY", "tierLabel": "MOVEMENT", "defeatedAtLevel": 41 }
+  ],
+  "final": { "enemyName": "CIPHER WARDEN", "stage": "S03 NOISE GATE", "tier": "INTERFERENCE", "hp": 714 }
+}
+```
+
+Browser layout evidence:
+
+- `docs/phase-7a-browser-smoke-results.json` now records `encounterLabel.text = "CIPHER WARDEN // S03 NOISE GATE: 714/740"` in desktop `1280x720`, mobile `390x844`, and short-mobile `360x740`.
+- The smoke verifies the label remains inside `#combat-status` and inside the viewport in all three viewports.
+
+Round 3 diagnosis:
+
+- The new structure improves progression readability without changing board rules, damage, HP, combo, upgrade values, or hazard schedules.
+- The preview still shows enemy 2 lasting from Level 19 to Level 41, so the next round should tune combat/difficulty cadence from evidence rather than assuming content labels are enough.
+
+Debug self-check:
+
+- Smallest fixture: `previewSessionProgression({ seed: 'phase8-validate', maxLevels: 42, maxEnemies: 4 })`.
+- The change localizes to config/core facts plus UI rendering of already-computed facts.
+- Host/debug payloads remain JSON-safe because combat facts are plain cloned objects.
+- No balance changes were made in Round 3.
+
+Architecture self-check:
+
+- Encounter identity data lives in `src/config/encounters.js`.
+- Core enemy/combat/session preview modules own derived enemy facts.
+- UI renders `stageLabel` and `tierLabel` but does not decide stage progression or combat formulas.
+- Host Bridge semantics remain compatible; IDs and event shapes are not replaced.
+- No non-scope systems were added.
+
+Validation:
+
+- `node --check src\config\encounters.js`: PASS
+- `node --check src\core\enemy.js`: PASS
+- `node --check src\core\combat.js`: PASS
+- `node --check src\core\session-preview.js`: PASS
+- `node --check src\ui\render.js`: PASS
+- `node --check scripts\smoke-hazards-browser.mjs`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches after rerun; first parallel attempt raced with `dist` rebuild and produced missing-path errors only
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- pending.
+
+Next round goal:
+
+- Tune existing combat/difficulty cadence with before/after session preview evidence, focusing on enemy 2/3 pacing and keeping first `3x3`, first upgrade, and hazard onboarding readable.

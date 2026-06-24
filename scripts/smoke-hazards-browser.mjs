@@ -113,6 +113,11 @@ function compactSmokeResult(result) {
       commandPanel: compactRect(result.layout.commandPanel),
       playerHud: compactRect(result.layout.playerHud)
     },
+    encounterLabel: {
+      text: result.encounterLabel.text,
+      label: compactRect(result.encounterLabel.label),
+      combatStatus: compactRect(result.encounterLabel.combatStatus)
+    },
     moving: {
       phase: result.moving.hazards.phase,
       targetCount: result.moving.movedButtons.length,
@@ -356,13 +361,42 @@ function getSmokeExpression(viewport) {
       random: () => 0.5,
       audio: null
     });
-
     const failures = [];
     const checks = [];
     const pushCheck = (check) => {
       checks.push(check);
       if (!check.ok) failures.push(check);
     };
+    renderer.updateCombatStatus({
+      player: { hp: 100, maxHp: 100 },
+      combat: {
+        enemyIndex: 3,
+        enemyName: 'CIPHER WARDEN',
+        stageLabel: 'S03 NOISE GATE',
+        tierLabel: 'INTERFERENCE',
+        hp: 714,
+        maxHp: 740,
+        attack: 30,
+        status: 'active'
+      },
+      combo: { statusText: 'COMBO x12' }
+    });
+    await waitFrame();
+    const encounterLabel = {
+      text: document.querySelector('#boss-hp-text')?.innerText || '',
+      label: rect('#boss-hp-text'),
+      combatStatus: rect('#combat-status')
+    };
+    pushCheck(
+      encounterLabel.text.includes('CIPHER WARDEN') && encounterLabel.text.includes('S03 NOISE GATE')
+        ? pass('encounter stage label renders compact identity', encounterLabel)
+        : fail('encounter stage label missing identity text', encounterLabel)
+    );
+    pushCheck(
+      withinViewport(encounterLabel.label) && contains(encounterLabel.combatStatus, encounterLabel.label, 2)
+        ? pass('encounter stage label fits combat status and viewport', encounterLabel)
+        : fail('encounter stage label overflows combat status or viewport', encounterLabel)
+    );
 
     const layout = {
       clue: rect('#clue-text'),
@@ -634,6 +668,7 @@ function getSmokeExpression(viewport) {
       ok: failures.length === 0,
       checks,
       layout,
+      encounterLabel,
       moving: {
         hazards: movingHazards,
         movedButtons

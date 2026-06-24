@@ -116,7 +116,9 @@ function compactSmokeResult(result) {
     encounterLabel: {
       text: result.encounterLabel.text,
       label: compactRect(result.encounterLabel.label),
-      combatStatus: compactRect(result.encounterLabel.combatStatus)
+      combatStatus: compactRect(result.encounterLabel.combatStatus),
+      commandTagText: result.encounterLabel.commandTagText,
+      commandTag: compactRect(result.encounterLabel.commandTag)
     },
     moving: {
       phase: result.moving.hazards.phase,
@@ -385,7 +387,10 @@ function getSmokeExpression(viewport) {
     const encounterLabel = {
       text: document.querySelector('#boss-hp-text')?.innerText || '',
       label: rect('#boss-hp-text'),
-      combatStatus: rect('#combat-status')
+      combatStatus: rect('#combat-status'),
+      commandTagText: document.querySelector('#command-level-tag')?.innerText || '',
+      commandTag: rect('#command-level-tag'),
+      commandPanel: rect('#command-panel')
     };
     pushCheck(
       encounterLabel.text.includes('CIPHER WARDEN') && encounterLabel.text.includes('S03 NOISE GATE')
@@ -396,6 +401,16 @@ function getSmokeExpression(viewport) {
       withinViewport(encounterLabel.label) && contains(encounterLabel.combatStatus, encounterLabel.label, 2)
         ? pass('encounter stage label fits combat status and viewport', encounterLabel)
         : fail('encounter stage label overflows combat status or viewport', encounterLabel)
+    );
+    pushCheck(
+      encounterLabel.commandTagText.includes('E03') && encounterLabel.commandTagText.includes('INTERFERENCE')
+        ? pass('command run-depth tag renders encounter tier', encounterLabel)
+        : fail('command run-depth tag is missing encounter tier', encounterLabel)
+    );
+    pushCheck(
+      withinViewport(encounterLabel.commandTag) && contains(encounterLabel.commandPanel, encounterLabel.commandTag, 2)
+        ? pass('command run-depth tag fits command panel and viewport', encounterLabel)
+        : fail('command run-depth tag overflows command panel or viewport', encounterLabel)
     );
 
     const layout = {

@@ -478,8 +478,68 @@ Validation:
 
 Commit/push:
 
-- pending.
+- round commit: `3129070`
+- push: `origin/main` PASS
 
 Next round goal:
 
 - Review UI/progression feedback for longer sessions and decide whether a compact run-progress summary is needed before final reporting.
+
+## Round 7 - UI Progression Feedback For Longer Sessions
+
+Round goal:
+
+- Add compact progression feedback for longer sessions if needed.
+- Preserve bottom player HUD, enemy-only identity, mobile layout, and Phase 7A VFX/hazard presentation.
+
+Change:
+
+- Updated `src/ui/render.js` so `#command-level-tag` renders compact encounter depth/tier facts such as `E03 INTERFERENCE`.
+- The tag uses core combat facts (`sequenceLabel`, `tierLabel`, and `enemyIndex` fallback) and does not own progression or gameplay formulas.
+- Extended `scripts/smoke-hazards-browser.mjs` to verify the command run-depth tag text and geometry in desktop, mobile, and short-mobile viewports.
+- Extended `scripts/validate-structure.mjs` with `command-level-tag` / `commandLevelTag` guards.
+
+Browser evidence:
+
+- `docs/phase-7a-browser-smoke-results.json` records `commandTagText = "E03 INTERFERENCE"` in desktop `1280x720`, mobile `390x844`, and short-mobile `360x740`.
+- The smoke verifies the tag fits inside the command panel and viewport.
+
+Debug note:
+
+- The first browser smoke attempt in this round caught a fallback bug where a synthetic combat fact lacked `sequenceLabel`, causing the UI to render `E01 INTERFERENCE`.
+- Fixed by deriving a display fallback from `combat.enemyIndex`; rerun smoke passed.
+
+Debug self-check:
+
+- Smallest browser fixture: `npm run smoke:hazards`.
+- UI renders existing core facts only.
+- No combat, combo, upgrade, hazard, or difficulty values changed in Round 7.
+
+Architecture self-check:
+
+- Progression facts remain in config/core.
+- UI renders compact labels and geometry only.
+- Host/debug JSON facts are unchanged except for already-added combat identity fields.
+- No non-scope systems were added.
+
+Validation:
+
+- `node --check src\ui\render.js`: PASS
+- `node --check scripts\smoke-hazards-browser.mjs`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS after fallback fix
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- pending.
+
+Next round goal:
+
+- Run final browser/host/debug coverage review and fill any remaining validation/report gaps before final reporting.

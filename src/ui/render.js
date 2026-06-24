@@ -74,6 +74,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     comboParticleLayer: document.getElementById('combo-particle-layer'),
     hazardLayer: document.getElementById('hazard-layer'),
     hazardStatusText: document.getElementById('hazard-status-text'),
+    commandLevelTag: document.getElementById('command-level-tag'),
     failureRecapEl: document.getElementById('failure-recap'),
     startScreen: document.getElementById('start-screen'),
     gameOverScreen: document.getElementById('game-over-screen'),
@@ -696,6 +697,10 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       refs.bossAvatarShell.dataset.enemyTier = combat.tierLabel || 'UNKNOWN';
       refs.bossAvatarShell.dataset.enemyIndex = String(combat.enemyIndex || 1);
       refs.bossAvatarShell.dataset.enemyStage = combat.stageLabel || '';
+    }
+    if (refs.commandLevelTag) {
+      const fallbackSequence = `E${String(Math.max(1, Math.floor(Number(combat.enemyIndex) || 1))).padStart(2, '0')}`;
+      refs.commandLevelTag.innerText = `${combat.sequenceLabel || fallbackSequence} ${combat.tierLabel || 'INPUT'}`;
     }
     refs.bossHpBar.style.width = `${hpPercent}%`;
     if (player) {

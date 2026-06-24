@@ -75,6 +75,7 @@ for (const marker of [
   'id="upgrade-choice-list"',
   'id="command-panel"',
   'id="hazard-status-text"',
+  'id="command-level-tag"',
   'id="hazard-layer"',
   'id="clue-title"',
   '别按那个按钮！',
@@ -89,7 +90,7 @@ for (const marker of [
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
 const renderSource = sources.get('src/ui/render.js') || '';
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewSessionProgression', 'previewHostEventPayloads', 'stageLabel', 'tierLabel', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewSessionProgression', 'previewHostEventPayloads', 'stageLabel', 'tierLabel', 'commandLevelTag', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }

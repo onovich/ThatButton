@@ -24,6 +24,14 @@
         },
         {
           "ok": true,
+          "message": "command run-depth tag renders encounter tier"
+        },
+        {
+          "ok": true,
+          "message": "command run-depth tag fits command panel and viewport"
+        },
+        {
+          "ok": true,
           "message": "clue fits viewport"
         },
         {
@@ -202,6 +210,17 @@
           "height": 97.52,
           "centerX": 640,
           "centerY": 133.54
+        },
+        "commandTagText": "E03 INTERFERENCE",
+        "commandTag": {
+          "left": 793.47,
+          "top": 373.5,
+          "right": 894.81,
+          "bottom": 387.5,
+          "width": 101.34,
+          "height": 14,
+          "centerX": 844.14,
+          "centerY": 380.5
         }
       },
       "moving": {
@@ -304,6 +323,14 @@
         {
           "ok": true,
           "message": "encounter stage label fits combat status and viewport"
+        },
+        {
+          "ok": true,
+          "message": "command run-depth tag renders encounter tier"
+        },
+        {
+          "ok": true,
+          "message": "command run-depth tag fits command panel and viewport"
         },
         {
           "ok": true,
@@ -485,6 +512,17 @@
           "height": 100.8,
           "centerX": 195,
           "centerY": 150.37
+        },
+        "commandTagText": "E03 INTERFERENCE",
+        "commandTag": {
+          "left": 281.55,
+          "top": 419.94,
+          "right": 368.81,
+          "bottom": 430.94,
+          "width": 87.27,
+          "height": 11,
+          "centerX": 325.18,
+          "centerY": 425.44
         }
       },
       "moving": {
@@ -587,6 +625,14 @@
         {
           "ok": true,
           "message": "encounter stage label fits combat status and viewport"
+        },
+        {
+          "ok": true,
+          "message": "command run-depth tag renders encounter tier"
+        },
+        {
+          "ok": true,
+          "message": "command run-depth tag fits command panel and viewport"
         },
         {
           "ok": true,
@@ -768,6 +814,17 @@
           "height": 97.52,
           "centerX": 180,
           "centerY": 137.91
+        },
+        "commandTagText": "E03 INTERFERENCE",
+        "commandTag": {
+          "left": 251.55,
+          "top": 373.88,
+          "right": 338.81,
+          "bottom": 384.88,
+          "width": 87.27,
+          "height": 11,
+          "centerX": 295.18,
+          "centerY": 379.38
         }
       },
       "moving": {

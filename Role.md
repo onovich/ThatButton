@@ -23,14 +23,14 @@ executor:
   evidence: same-workspace programmer thread owns implementation work for this project.
 
 idempotency:
-  active_goal_guide: docs/phase-5-demo-stability-distribution-goal-guide.md
-  active_goal_phase: Phase 5 - Demo Stability And Distribution
-  last_planner_dispatch: 2026-06-23T16:45:34.7295340+08:00
-  last_planner_dispatch_status: sent
-  last_planner_dispatch_guide: docs/phase-5-demo-stability-distribution-goal-guide.md
-  last_planner_dispatch_commit: b79e7f6e1d3536b505acb7ecaf73ecd18098efec
+  active_goal_guide: docs/phase-6-rpg-combat-loop-goal-guide.md
+  active_goal_phase: Phase 6 - RPG Combat Loop V1
+  last_planner_dispatch: 2026-06-24T14:55:42.9118974+08:00
+  last_planner_dispatch_status: pending
+  last_planner_dispatch_guide: docs/phase-6-rpg-combat-loop-goal-guide.md
+  last_planner_dispatch_commit: pending
   last_executor_report_commit: bed80bff15d3796d27031d056e84eed0106968fb
   last_executor_report_status: ready_for_check
   last_executor_report_at: 2026-06-23T17:03:25.0872228+08:00
   last_executor_report_guide: docs/phase-5-demo-stability-distribution-goal-guide.md
-  last_check_status: pass
+  last_check_status: planning

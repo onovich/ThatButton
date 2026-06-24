@@ -24,3 +24,4 @@
 - [Phase 5 Demo Stability And Distribution Goal Guide](phase-5-demo-stability-distribution-goal-guide.md) - goal-mode execution guide for removing runtime external resources, preserving the demo layout, and hardening local/GitHub Pages distribution.
 - [Phase 5 Demo Stability And Distribution Record](phase-5-demo-stability-distribution-record.md) - runtime resource inventory, local CSS decision, PWA/manifest decision, and implementation evidence.
 - [Phase 5 Final Report](phase-5-final-report.md) - completed Phase 5 summary, validation evidence, non-scope, and remaining risks.
+- [Phase 6 RPG Combat Loop V1 Goal Guide](phase-6-rpg-combat-loop-goal-guide.md) - goal-mode execution guide for correcting combo semantics, adding player HP, enemy scaling, combo windows, upgrade choices, stronger feedback, and host/debug validation.

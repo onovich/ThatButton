@@ -15,6 +15,16 @@ import {
   getUpgradeSummary
 } from './upgrades.js';
 import {
+  HOST_EVENT_TYPES,
+  createEnemyDamagePayload,
+  createEnemyDefeatPayload,
+  createEnemySpawnPayload,
+  createHostEvent,
+  createPlayerDamagePayload,
+  createUpgradeOfferPayload,
+  createUpgradeSelectionPayload
+} from './host-events.js';
+import {
   BEST_RECORD_KEY,
   BEST_RECORD_VERSION,
   buildBestRecordFromRun,
@@ -174,6 +184,77 @@ export function previewUpgradeApplication(upgradeId = 'chain-span-plus') {
   };
 }
 
+export function previewHostEventPayloads() {
+  const player = getPlayerSummary(createPlayerState());
+  const combo = getComboSummary(createComboState({ streak: 3 }));
+  const activeCombat = getCombatSummary(createCombatState());
+  const damageResult = applyRoundClearDamage(createCombatState(), {
+    level: 1,
+    timeLeftMs: 18000,
+    comboState: createComboState({ streak: 3 })
+  });
+  const defeatResult = applyRoundClearDamage(createCombatState({ hp: 10 }), {
+    level: 1,
+    timeLeftMs: 0,
+    comboState: createComboState({ streak: 2 })
+  });
+  const damagedPlayer = previewPlayerDamage();
+  const offered = generateUpgradeChoices({
+    rng: createSeededRng('phase6-host-events'),
+    enemyIndex: activeCombat.enemyIndex
+  });
+  const pendingUpgrades = createUpgradeState({
+    choices: offered,
+    pending: true
+  });
+  const selected = applyUpgradeChoice(pendingUpgrades, offered[0].id, {
+    player: createPlayerState()
+  });
+  const round = null;
+  return {
+    playerDamaged: createHostEvent(HOST_EVENT_TYPES.PLAYER_DAMAGED, createPlayerDamagePayload({
+      damage: damagedPlayer.damage,
+      player: damagedPlayer.player,
+      combo,
+      round
+    })),
+    enemySpawned: createHostEvent(HOST_EVENT_TYPES.ENEMY_SPAWNED, createEnemySpawnPayload({
+      reason: 'debug_preview',
+      combat: activeCombat,
+      player,
+      upgrades: getUpgradeSummary(createUpgradeState()),
+      round
+    })),
+    enemyDamaged: createHostEvent(HOST_EVENT_TYPES.ENEMY_DAMAGED, createEnemyDamagePayload({
+      damage: damageResult.damage,
+      combat: getCombatSummary(damageResult.combat),
+      combo,
+      round
+    })),
+    enemyDefeated: createHostEvent(HOST_EVENT_TYPES.ENEMY_DEFEATED, createEnemyDefeatPayload({
+      damage: defeatResult.damage,
+      combat: getCombatSummary(defeatResult.combat),
+      combo,
+      upgrades: getUpgradeSummary(pendingUpgrades),
+      round
+    })),
+    upgradesOffered: createHostEvent(HOST_EVENT_TYPES.UPGRADES_OFFERED, createUpgradeOfferPayload({
+      choices: offered,
+      upgrades: getUpgradeSummary(pendingUpgrades),
+      combat: activeCombat,
+      player,
+      round
+    })),
+    upgradeSelected: createHostEvent(HOST_EVENT_TYPES.UPGRADE_SELECTED, createUpgradeSelectionPayload({
+      upgrade: selected.upgrade,
+      upgrades: getUpgradeSummary(selected.upgrades),
+      player: getPlayerSummary(selected.player),
+      combat: activeCombat,
+      round
+    }))
+  };
+}
+
 export function createDebugApi({
   getState,
   loadBestRecord,
@@ -199,6 +280,7 @@ export function createDebugApi({
     previewComboWindow,
     previewUpgradeChoices,
     previewUpgradeApplication,
+    previewHostEventPayloads,
     getDifficultyForLevel,
     getLastFailureRecap: () => cloneFailureRecap(getState().lastFailureRecap),
     getLastVictoryRecap: () => cloneFailureRecap(getState().lastVictoryRecap),

@@ -12,6 +12,11 @@ export const HOST_EVENT_TYPES = Object.freeze({
   COMBAT_STARTED: 'combat_started',
   COMBO_CHANGED: 'combo_changed',
   PLAYER_DAMAGED: 'player_damaged',
+  ENEMY_SPAWNED: 'enemy_spawned',
+  ENEMY_DAMAGED: 'enemy_damaged',
+  ENEMY_DEFEATED: 'enemy_defeated',
+  UPGRADES_OFFERED: 'upgrades_offered',
+  UPGRADE_SELECTED: 'upgrade_selected',
   BOSS_DAMAGED: 'boss_damaged',
   BOSS_DEFEATED: 'boss_defeated',
   RUN_FINISHED: 'run_finished',
@@ -211,6 +216,35 @@ export function createPlayerDamagePayload({ damage, player, combo, round = null 
   }, 'player damage payload');
 }
 
+export function createEnemySpawnPayload({ combat, player = null, upgrades = null, round = null, reason = null }) {
+  return cloneJsonSafeValue({
+    reason,
+    combat,
+    player,
+    upgrades,
+    round
+  }, 'enemy spawn payload');
+}
+
+export function createEnemyDamagePayload({ damage, combat, combo, round = null }) {
+  return cloneJsonSafeValue({
+    damage,
+    combat,
+    combo,
+    round
+  }, 'enemy damage payload');
+}
+
+export function createEnemyDefeatPayload({ damage, combat, combo, upgrades = null, round = null }) {
+  return cloneJsonSafeValue({
+    damage,
+    combat,
+    combo,
+    upgrades,
+    round
+  }, 'enemy defeat payload');
+}
+
 export function createBossDamagePayload({ damage, combat, combo, round = null }) {
   return cloneJsonSafeValue({
     damage,
@@ -218,6 +252,26 @@ export function createBossDamagePayload({ damage, combat, combo, round = null })
     combo,
     round
   }, 'boss damage payload');
+}
+
+export function createUpgradeOfferPayload({ choices = [], upgrades, combat = null, player = null, round = null }) {
+  return cloneJsonSafeValue({
+    choices,
+    upgrades,
+    combat,
+    player,
+    round
+  }, 'upgrade offer payload');
+}
+
+export function createUpgradeSelectionPayload({ upgrade, upgrades, player = null, combat = null, round = null }) {
+  return cloneJsonSafeValue({
+    upgrade,
+    upgrades,
+    player,
+    combat,
+    round
+  }, 'upgrade selection payload');
 }
 
 export function createRunResultPayload({

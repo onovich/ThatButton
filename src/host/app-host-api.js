@@ -7,6 +7,9 @@ import {
   createButtonPressPayload,
   createCombatPayload,
   createComboPayload,
+  createEnemyDamagePayload,
+  createEnemyDefeatPayload,
+  createEnemySpawnPayload,
   createFailurePayload,
   createHostEvent,
   createPlayerDamagePayload,
@@ -14,7 +17,9 @@ import {
   createRoundPayload,
   createRunPayload,
   createRunResultPayload,
-  createUpgradePayload
+  createUpgradeOfferPayload,
+  createUpgradePayload,
+  createUpgradeSelectionPayload
 } from '../core/host-events.js';
 
 export function createAppHostApi({ hostBridge, getState, performance }) {
@@ -131,6 +136,29 @@ export function createAppHostApi({ hostBridge, getState, performance }) {
       combo,
       round: getRoundPayload()
     })),
+    emitEnemySpawned: ({ combat = null, player = null, upgrades = null, reason = null } = {}) => {
+      const state = getState();
+      return emit(HOST_EVENT_TYPES.ENEMY_SPAWNED, createEnemySpawnPayload({
+        reason,
+        combat: createCombatPayload(combat || state.combat),
+        player: createPlayerPayload(player || state.player),
+        upgrades: createUpgradePayload(upgrades || state.upgrades),
+        round: getRoundPayload()
+      }));
+    },
+    emitEnemyDamaged: ({ damage, combat, combo }) => emit(HOST_EVENT_TYPES.ENEMY_DAMAGED, createEnemyDamagePayload({
+      damage,
+      combat,
+      combo,
+      round: getRoundPayload()
+    })),
+    emitEnemyDefeated: ({ damage, combat, combo, upgrades = null }) => emit(HOST_EVENT_TYPES.ENEMY_DEFEATED, createEnemyDefeatPayload({
+      damage,
+      combat,
+      combo,
+      upgrades: createUpgradePayload(upgrades || getState().upgrades),
+      round: getRoundPayload()
+    })),
     emitBossDamaged: ({ damage, combat, combo }) => emit(HOST_EVENT_TYPES.BOSS_DAMAGED, createBossDamagePayload({
       damage,
       combat,
@@ -141,6 +169,20 @@ export function createAppHostApi({ hostBridge, getState, performance }) {
       damage,
       combat,
       combo,
+      round: getRoundPayload()
+    })),
+    emitUpgradesOffered: ({ choices, upgrades, combat = null, player = null }) => emit(HOST_EVENT_TYPES.UPGRADES_OFFERED, createUpgradeOfferPayload({
+      choices,
+      upgrades,
+      combat,
+      player,
+      round: getRoundPayload()
+    })),
+    emitUpgradeSelected: ({ upgrade, upgrades, player = null, combat = null }) => emit(HOST_EVENT_TYPES.UPGRADE_SELECTED, createUpgradeSelectionPayload({
+      upgrade,
+      upgrades,
+      player,
+      combat,
       round: getRoundPayload()
     })),
     emitRunFinished: ({ failureReason = null, result = 'failure', reason = failureReason, recap }) => {

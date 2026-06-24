@@ -305,6 +305,12 @@ export function createApp({
       upgrades: encounterFacts.upgrades,
       combat: encounterFacts.combat
     });
+    hostController.emitUpgradesOffered({
+      choices: offer.choices,
+      upgrades: encounterFacts.upgrades,
+      combat: encounterFacts.combat,
+      player: encounterFacts.player
+    });
     return offer;
   }
 
@@ -317,9 +323,21 @@ export function createApp({
     gameState.timeLimit = getEffectiveRoundTimeLimit(nextDifficulty);
     gameState.timeLeft = gameState.timeLimit;
     applyComboChange(resetEncounterCombo(gameState.combo, 'upgrade_selected'));
-    renderer.updateCombatStatus(getEncounterFacts(gameState));
+    const encounterFacts = getEncounterFacts(gameState);
+    renderer.updateCombatStatus(encounterFacts);
     renderer.updateTimer(gameState.timeLeft, gameState.timeLimit, getCurrentComboWindow());
     renderer.setWarningVisible(nextDifficulty.feedbackIntensity === 'critical');
+    recordDebugEvent('enemy_spawned', {
+      reason: 'upgrade_selected',
+      combat: encounterFacts.combat,
+      upgrades: encounterFacts.upgrades
+    });
+    hostController.emitEnemySpawned({
+      reason: 'upgrade_selected',
+      combat: encounterFacts.combat,
+      player: encounterFacts.player,
+      upgrades: encounterFacts.upgrades
+    });
     setTimeout(() => {
       startRound();
     }, 450);
@@ -336,10 +354,17 @@ export function createApp({
     gameState.player = applied.player || gameState.player;
     renderer.hideUpgradeScreen();
     audio.playLevelUp();
+    const encounterFacts = getEncounterFacts(gameState);
     recordDebugEvent('upgrade_selected', {
       upgrade: applied.upgrade,
       upgrades: applied.upgrades,
-      player: getEncounterFacts(gameState).player
+      player: encounterFacts.player
+    });
+    hostController.emitUpgradeSelected({
+      upgrade: applied.upgrade,
+      upgrades: encounterFacts.upgrades,
+      player: encounterFacts.player,
+      combat: encounterFacts.combat
     });
     continueAfterUpgrade();
     return {
@@ -379,6 +404,11 @@ export function createApp({
       combat: encounterFacts.combat,
       combo: encounterFacts.combo
     });
+    hostController.emitEnemyDamaged({
+      damage: combatResult.damage,
+      combat: encounterFacts.combat,
+      combo: encounterFacts.combo
+    });
     if (combatResult.defeated) {
       recordDebugEvent('enemy_defeated', {
         combatDamage: combatResult.damage,
@@ -388,6 +418,12 @@ export function createApp({
         damage: combatResult.damage,
         combat: encounterFacts.combat,
         combo: encounterFacts.combo
+      });
+      hostController.emitEnemyDefeated({
+        damage: combatResult.damage,
+        combat: encounterFacts.combat,
+        combo: encounterFacts.combo,
+        upgrades: encounterFacts.upgrades
       });
       audio.playLevelUp();
       setTimeout(() => {
@@ -558,6 +594,10 @@ export function createApp({
     renderer.setWarningVisible(false);
     hostController.emitRunStarted();
     hostController.emitCombatStarted();
+    hostController.emitEnemySpawned({
+      reason: 'run_started',
+      ...getEncounterFacts(gameState)
+    });
 
     startRound();
     requestAnimationFrame(gameLoop);

@@ -607,3 +607,54 @@ Architecture self-check:
 - UI renders upgrade choices only and does not apply modifiers or calculate next enemy stats.
 - Host still uses JSON-safe snapshots and shared app input paths.
 - Deferred native bridge integration, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.
+
+## Round 12 Host Bridge And Debug Expansion Evidence
+
+Implemented:
+
+- Added Phase 6 host event types:
+  - `enemy_spawned`,
+  - `enemy_damaged`,
+  - `enemy_defeated`,
+  - `upgrades_offered`,
+  - `upgrade_selected`.
+- Added JSON-safe payload builders for enemy spawn/damage/defeat and upgrade offer/selection events.
+- Kept existing `boss_damaged` and `boss_defeated` compatibility events while adding explicit enemy events beside them.
+- Updated the host adapter with thin emitters that only build payloads and emit centralized host events.
+- Updated app orchestration so:
+  - a new enemy emits `enemy_spawned`,
+  - round-clear combat damage emits both compatible boss damage and explicit enemy damage,
+  - enemy defeat emits both compatible boss defeat and explicit enemy defeat,
+  - upgrade offers and selections emit host events with selected JSON-safe facts.
+- Added `previewHostEventPayloads(...)` to the debug API for deterministic Host Bridge payload inspection.
+- Extended structure validation for Phase 6 event types, payload builders, fixed app event capture, upgrade event payload facts, and debug host-event previews.
+
+Validation run:
+
+- `node --check src\core\host-events.js`: PASS
+- `node --check src\host\app-host-api.js`: PASS
+- `node --check src\app\create-app.js`: PASS
+- `node --check src\core\debug.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `OpenOnlineTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Debug self-check:
+
+- Fixed host smokes now prove player damage, enemy spawn, enemy damage, enemy defeat, upgrade offer, and upgrade selection events are captured and JSON-safe.
+- The first enemy spawn and the upgraded second enemy spawn are both visible in the host event stream.
+- Failures localize to core payload builders, host adapter emitters, app orchestration event timing, debug previews, or validation.
+- No hidden nondeterminism was added; upgrade event facts still come from the existing seeded RNG path.
+
+Architecture self-check:
+
+- Host event schemas and JSON-safety remain centralized in `src/core/host-events.js`.
+- Host adapter code does not calculate gameplay outcomes.
+- UI code was not changed in this round.
+- App orchestration emits events at existing state transition points without duplicating damage, upgrade, enemy scaling, or combo formulas.
+- Deferred native bridge integration, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.

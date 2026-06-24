@@ -82,7 +82,7 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'updateComboWindow', 'spawnComboParticles', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewHostEventPayloads', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
@@ -357,7 +357,8 @@ const {
   previewUpgradeApplication,
   previewUpgradeChoices,
   previewEnemyScaling,
-  previewPlayerDamage
+  previewPlayerDamage,
+  previewHostEventPayloads
 } = debugModule;
 const {
   BEST_RECORD_KEY,
@@ -376,9 +377,14 @@ const {
   createButtonPayload,
   createCombatPayload,
   createComboPayload,
+  createEnemyDamagePayload,
+  createEnemyDefeatPayload,
+  createEnemySpawnPayload,
   createPlayerDamagePayload,
   createPlayerPayload,
   createUpgradePayload,
+  createUpgradeOfferPayload,
+  createUpgradeSelectionPayload,
   createRoundPayload,
   createRunResultPayload,
   isJsonSafeValue
@@ -976,6 +982,19 @@ const clonedHostEvent = cloneHostEvent(hostEvent);
 if (clonedHostEvent === hostEvent || clonedHostEvent.payload === hostEvent.payload) {
   failures.push('Host event clone should return detached event and payload objects.');
 }
+for (const requiredPhase6EventType of [
+  HOST_EVENT_TYPES.PLAYER_DAMAGED,
+  HOST_EVENT_TYPES.ENEMY_SPAWNED,
+  HOST_EVENT_TYPES.ENEMY_DAMAGED,
+  HOST_EVENT_TYPES.ENEMY_DEFEATED,
+  HOST_EVENT_TYPES.UPGRADES_OFFERED,
+  HOST_EVENT_TYPES.UPGRADE_SELECTED
+]) {
+  const phase6Event = createHostEvent(requiredPhase6EventType, { ok: true }, { atMs: 99 });
+  if (phase6Event.type !== requiredPhase6EventType || !isJsonSafeValue(phase6Event)) {
+    failures.push(`Phase 6 host event type failed JSON-safe smoke: ${JSON.stringify(phase6Event)}`);
+  }
+}
 
 const hostRoundPreview = previewSeededLevel(baselineSeed, 1);
 const hostRoundPayload = createRoundPayload({
@@ -1025,6 +1044,63 @@ if (
   bossDamagePayload.combo.rewardText !== 'DMG +2'
 ) {
   failures.push(`Boss damage payload smoke failed: ${JSON.stringify(bossDamagePayload)}`);
+}
+const enemySpawnPayload = createEnemySpawnPayload({
+  reason: 'validate',
+  combat: combatPayload,
+  player: playerPayload,
+  upgrades: upgradePayload,
+  round: hostRoundPayload
+});
+if (!isJsonSafeValue(enemySpawnPayload) || enemySpawnPayload.combat.enemyIndex !== 1 || enemySpawnPayload.reason !== 'validate') {
+  failures.push(`Enemy spawn payload smoke failed: ${JSON.stringify(enemySpawnPayload)}`);
+}
+const enemyDamagePayload = createEnemyDamagePayload({
+  damage: firstCombatHit.damage,
+  combat: combatPayload,
+  combo: comboPayload,
+  round: hostRoundPayload
+});
+if (!isJsonSafeValue(enemyDamagePayload) || enemyDamagePayload.damage.enemyAttack !== 18 || enemyDamagePayload.combat.enemy.enemyIndex !== 1) {
+  failures.push(`Enemy damage payload smoke failed: ${JSON.stringify(enemyDamagePayload)}`);
+}
+const enemyDefeatPayload = createEnemyDefeatPayload({
+  damage: {
+    ...firstCombatHit.damage,
+    hpAfter: 0,
+    defeated: true
+  },
+  combat: {
+    ...combatPayload,
+    hp: 0,
+    status: 'defeated'
+  },
+  combo: comboPayload,
+  upgrades: upgradePayload,
+  round: hostRoundPayload
+});
+if (!isJsonSafeValue(enemyDefeatPayload) || !enemyDefeatPayload.damage.defeated || enemyDefeatPayload.combat.status !== 'defeated') {
+  failures.push(`Enemy defeat payload smoke failed: ${JSON.stringify(enemyDefeatPayload)}`);
+}
+const upgradeOfferPayload = createUpgradeOfferPayload({
+  choices: fixedUpgradeChoicesA,
+  upgrades: getUpgradeSummary(createUpgradeState({ choices: fixedUpgradeChoicesA, pending: true })),
+  combat: combatPayload,
+  player: playerPayload,
+  round: hostRoundPayload
+});
+if (!isJsonSafeValue(upgradeOfferPayload) || upgradeOfferPayload.choices.length !== 3 || !upgradeOfferPayload.upgrades.pending) {
+  failures.push(`Upgrade offer payload smoke failed: ${JSON.stringify(upgradeOfferPayload)}`);
+}
+const upgradeSelectionPayload = createUpgradeSelectionPayload({
+  upgrade: fixedUpgradeChoicesA[0],
+  upgrades: upgradePayload,
+  player: playerPayload,
+  combat: combatPayload,
+  round: hostRoundPayload
+});
+if (!isJsonSafeValue(upgradeSelectionPayload) || upgradeSelectionPayload.upgrade.id !== fixedUpgradeChoicesA[0].id) {
+  failures.push(`Upgrade selection payload smoke failed: ${JSON.stringify(upgradeSelectionPayload)}`);
 }
 const victoryPayload = createRunResultPayload({
   result: 'victory',
@@ -1222,6 +1298,7 @@ const requiredDebugHelpers = [
   'previewComboWindow',
   'previewUpgradeChoices',
   'previewUpgradeApplication',
+  'previewHostEventPayloads',
   'getCombatState',
   'getComboState',
   'getBestRecord',
@@ -1334,6 +1411,7 @@ for (const requiredType of [
   HOST_EVENT_TYPES.HOST_BRIDGE_READY,
   HOST_EVENT_TYPES.RUN_STARTED,
   HOST_EVENT_TYPES.COMBAT_STARTED,
+  HOST_EVENT_TYPES.ENEMY_SPAWNED,
   HOST_EVENT_TYPES.ROUND_STARTED,
   HOST_EVENT_TYPES.BUTTON_PRESSED,
   HOST_EVENT_TYPES.SAFE_BUTTON_CLEARED,
@@ -1459,11 +1537,38 @@ if (
 const victoryEventTypes = victoryBridge.getEvents().map((event) => event.type);
 for (const requiredType of [
   HOST_EVENT_TYPES.BOSS_DAMAGED,
-  HOST_EVENT_TYPES.BOSS_DEFEATED
+  HOST_EVENT_TYPES.BOSS_DEFEATED,
+  HOST_EVENT_TYPES.ENEMY_DAMAGED,
+  HOST_EVENT_TYPES.ENEMY_DEFEATED,
+  HOST_EVENT_TYPES.UPGRADES_OFFERED,
+  HOST_EVENT_TYPES.UPGRADE_SELECTED,
+  HOST_EVENT_TYPES.ENEMY_SPAWNED
 ]) {
   if (!victoryEventTypes.includes(requiredType)) {
     failures.push(`Enemy-defeat host event smoke missed ${requiredType}: ${JSON.stringify(victoryEventTypes)}`);
   }
+}
+const upgradesOfferedEvent = victoryBridge.getEvents().find((event) => event.type === HOST_EVENT_TYPES.UPGRADES_OFFERED);
+if (
+  upgradesOfferedEvent?.payload?.choices?.length !== 3 ||
+  !upgradesOfferedEvent.payload.upgrades.pending ||
+  upgradesOfferedEvent.payload.combat.status !== 'defeated'
+) {
+  failures.push(`Upgrades offered host event lost upgrade choices: ${JSON.stringify(upgradesOfferedEvent)}`);
+}
+const upgradeSelectedEvent = victoryBridge.getEvents().find((event) => event.type === HOST_EVENT_TYPES.UPGRADE_SELECTED);
+if (
+  upgradeSelectedEvent?.payload?.upgrade?.id !== selectedUpgrade.id ||
+  upgradeSelectedEvent.payload.upgrades.applied.length !== 1 ||
+  upgradeSelectedEvent.payload.player.hp <= 0
+) {
+  failures.push(`Upgrade selected host event lost applied facts: ${JSON.stringify(upgradeSelectedEvent)}`);
+}
+const spawnedEnemyIndexes = victoryBridge.getEvents()
+  .filter((event) => event.type === HOST_EVENT_TYPES.ENEMY_SPAWNED)
+  .map((event) => event.payload.combat.enemyIndex);
+if (!spawnedEnemyIndexes.includes(1) || !spawnedEnemyIndexes.includes(2)) {
+  failures.push(`Enemy spawned host events should include initial and next enemy indexes: ${JSON.stringify(spawnedEnemyIndexes)}`);
 }
 const unexpectedVictoryFinishedEvent = victoryBridge.getEvents().find((event) =>
   event.type === HOST_EVENT_TYPES.RUN_FINISHED && event.payload.result === 'victory'
@@ -1527,6 +1632,19 @@ if (debugApi) {
     debugUpgradeApplication.timeLimitMs !== 18000
   ) {
     failures.push(`Debug API upgrade application changed: ${JSON.stringify(debugUpgradeApplication)}`);
+  }
+  const debugHostEvents = debugApi.previewHostEventPayloads();
+  const debugHostEventTypes = Object.values(debugHostEvents).map((event) => event.type).sort();
+  if (
+    !isJsonSafeValue(debugHostEvents) ||
+    !debugHostEventTypes.includes(HOST_EVENT_TYPES.PLAYER_DAMAGED) ||
+    !debugHostEventTypes.includes(HOST_EVENT_TYPES.ENEMY_SPAWNED) ||
+    !debugHostEventTypes.includes(HOST_EVENT_TYPES.ENEMY_DAMAGED) ||
+    !debugHostEventTypes.includes(HOST_EVENT_TYPES.ENEMY_DEFEATED) ||
+    !debugHostEventTypes.includes(HOST_EVENT_TYPES.UPGRADES_OFFERED) ||
+    !debugHostEventTypes.includes(HOST_EVENT_TYPES.UPGRADE_SELECTED)
+  ) {
+    failures.push(`Debug API host event payload preview changed: ${JSON.stringify(debugHostEvents)}`);
   }
 
   const debugInitial = debugApi.getBestRecord();

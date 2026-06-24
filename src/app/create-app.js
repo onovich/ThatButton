@@ -246,6 +246,10 @@ export function createApp({
       player: encounterFacts.player,
       combo: encounterFacts.combo
     });
+    renderer.showPlayerHit({
+      damage: playerDamageResult.damage,
+      defeated: playerDamageResult.defeated
+    });
     return playerDamageResult;
   }
 

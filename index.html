@@ -262,7 +262,9 @@
             grid-template-columns: 104px minmax(0, 1fr) auto;
             grid-template-areas:
                 "avatar label combo"
-                "avatar hp hp";
+                "avatar hp hp"
+                "avatar player attack"
+                "avatar playerbar playerbar";
             gap: 0.45rem 0.75rem;
             align-items: center;
             color: var(--crt-yellow);
@@ -326,6 +328,57 @@
             background: linear-gradient(90deg, var(--crt-red), var(--crt-yellow));
             box-shadow: 0 0 8px rgba(255, 204, 0, 0.45);
             transition: width 0.2s ease;
+        }
+
+        .player-hp-text {
+            grid-area: player;
+            color: var(--crt-green);
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+
+        .player-hp-track {
+            grid-area: playerbar;
+            height: 8px;
+            border: 1px solid rgba(74, 246, 38, 0.5);
+            background: rgba(0, 0, 0, 0.62);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .player-hp-bar {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--crt-green), #b7ff8a);
+            box-shadow: 0 0 8px rgba(74, 246, 38, 0.42);
+            transition: width 0.2s ease;
+        }
+
+        .enemy-attack-text {
+            grid-area: attack;
+            color: var(--crt-red);
+            text-align: right;
+            font-size: 0.78rem;
+            white-space: nowrap;
+            text-shadow: 0 0 8px rgba(255, 42, 42, 0.45);
+        }
+
+        .player-damage-text {
+            position: absolute;
+            right: 0.8rem;
+            bottom: 0.24rem;
+            color: var(--crt-red);
+            font-size: 1.05rem;
+            font-weight: 900;
+            opacity: 0;
+            pointer-events: none;
+            text-shadow: 0 0 12px rgba(255, 42, 42, 0.85), 0 2px 0 rgba(0, 0, 0, 0.75);
+            z-index: 5;
+        }
+
+        .player-damage-text.player-damage-pop {
+            animation: player-damage-pop 0.82s cubic-bezier(.18,.89,.32,1.28);
         }
 
         .combo-status-text {
@@ -625,6 +678,25 @@
             48% {
                 transform: translateX(-3px) scale(1.02);
                 filter: brightness(1.25) saturate(1.2);
+            }
+        }
+
+        @keyframes player-damage-pop {
+            0% {
+                opacity: 0;
+                transform: translateY(8px) scale(0.88);
+            }
+            18% {
+                opacity: 1;
+                transform: translateY(-2px) scale(1.1);
+            }
+            68% {
+                opacity: 1;
+                transform: translateY(-12px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-22px) scale(0.94);
             }
         }
 
@@ -956,6 +1028,20 @@
                 height: 10px;
             }
 
+            .player-hp-text,
+            .enemy-attack-text {
+                font-size: 0.62rem;
+            }
+
+            .player-hp-track {
+                height: 7px;
+            }
+
+            .player-damage-text {
+                font-size: 0.88rem;
+                right: 0.55rem;
+            }
+
             .boss-damage-text {
                 font-size: 1.45rem;
             }
@@ -1282,8 +1368,12 @@
                 <span id="boss-hp-text" class="combat-label">BOSS: --</span>
                 <span class="combat-hp-track"><span id="boss-hp-bar" class="combat-hp-bar"></span></span>
                 <span id="combo-status-text" class="combo-status-text">CHAIN --</span>
+                <span id="player-hp-text" class="player-hp-text">HP: --</span>
+                <span class="player-hp-track"><span id="player-hp-bar" class="player-hp-bar"></span></span>
+                <span id="enemy-attack-text" class="enemy-attack-text">ATK --</span>
                 <span id="combo-reward-text" class="combo-reward-text" aria-hidden="true">CHAIN BONUS</span>
                 <span id="combo-particle-layer" class="combo-particle-layer" aria-hidden="true"></span>
+                <span id="player-damage-text" class="player-damage-text" aria-hidden="true">-18</span>
             </div>
             <span id="boss-damage-text" class="boss-damage-text" aria-hidden="true">-24</span>
             <span id="boss-attack-layer" class="boss-attack-layer" aria-hidden="true"></span>

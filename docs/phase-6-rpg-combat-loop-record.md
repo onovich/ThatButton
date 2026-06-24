@@ -323,3 +323,39 @@ Architecture self-check:
 - UI and host adapters do not calculate enemy scaling.
 - Existing boss fields remain for compatibility while new enemy fields become the Phase 6 source of truth.
 - No upgrade, combo-window, Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, or framework scope was added.
+
+## Round 7 Enemy And Player UI Evidence
+
+Implemented:
+
+- Added player HP text/bar to the battle-stage strip.
+- Added enemy attack text to the battle-stage strip.
+- Added a compact player damage pop for wrong-press damage.
+- Updated `src/ui/render.js` to render player HP, enemy attack, and player damage facts from existing encounter state.
+- Updated `src/app/create-app.js` to trigger player damage feedback after pure damage resolution.
+- Extended `scripts/validate-structure.mjs` static/runtime markers for player HP, enemy attack, and player damage feedback.
+
+Validation run:
+
+- `node --check src\ui\render.js`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `OpenOnlineTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- Local HTTP smoke on `http://127.0.0.1:5182/`: PASS; player HP, enemy ATK, player damage, grid-area, and render markers served
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Debug self-check:
+
+- UI change is covered by static markers and local HTTP marker smoke.
+- Damage display consumes `lastPlayerDamage` facts already validated by Round 5.
+- Enemy attack display consumes `combat.attack` facts already validated by Round 6.
+- No enemy transition, upgrade selection, or combo-window expiry was introduced in this round.
+
+Architecture self-check:
+
+- UI renders player/enemy facts only and does not calculate HP, attack, damage, or death.
+- App orchestration only calls the renderer after pure damage resolution.
+- Host payloads and core formulas remain unchanged in this round.
+- Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.

@@ -62,6 +62,10 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     bossHpBar: document.getElementById('boss-hp-bar'),
     bossDamageText: document.getElementById('boss-damage-text'),
     bossAttackLayer: document.getElementById('boss-attack-layer'),
+    playerHpText: document.getElementById('player-hp-text'),
+    playerHpBar: document.getElementById('player-hp-bar'),
+    enemyAttackText: document.getElementById('enemy-attack-text'),
+    playerDamageText: document.getElementById('player-damage-text'),
     comboStatusText: document.getElementById('combo-status-text'),
     comboRewardText: document.getElementById('combo-reward-text'),
     comboParticleLayer: document.getElementById('combo-particle-layer'),
@@ -337,11 +341,17 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     refs.bestStatusNote.innerText = note;
   }
 
-  function updateCombatStatus({ combat, combo }) {
+  function updateCombatStatus({ player, combat, combo }) {
     if (!combat || !combo) return;
     const hpPercent = Math.max(0, Math.min(100, Math.round((combat.hp / combat.maxHp) * 100)));
-    refs.bossHpText.innerText = `${combat.bossName}: ${combat.hp}/${combat.maxHp}`;
+    refs.bossHpText.innerText = `${combat.enemyName || combat.bossName}: ${combat.hp}/${combat.maxHp}`;
     refs.bossHpBar.style.width = `${hpPercent}%`;
+    if (player) {
+      const playerPercent = Math.max(0, Math.min(100, Math.round((player.hp / player.maxHp) * 100)));
+      refs.playerHpText.innerText = `HP: ${player.hp}/${player.maxHp}`;
+      refs.playerHpBar.style.width = `${playerPercent}%`;
+    }
+    refs.enemyAttackText.innerText = `ATK ${combat.attack ?? '--'}`;
     refs.comboStatusText.innerText = combo.statusText || 'CHAIN --';
     if (combat.status === 'defeated') {
       refs.bossAvatarShell.classList.add('boss-defeated');
@@ -369,6 +379,23 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       refs.bossDamageText.classList.remove('boss-damage-pop');
       refs.bossAvatarShell.classList.remove('boss-hit');
     }, 920);
+  }
+
+  function showPlayerHit({ damage, defeated = false }) {
+    const appliedDamage = Math.max(0, Math.floor(Number(damage?.appliedDamage) || 0));
+    if (appliedDamage <= 0) return;
+    refs.playerDamageText.innerText = `-${appliedDamage}`;
+    refs.playerDamageText.classList.remove('player-damage-pop');
+    refs.combatStatus.classList.remove('player-hit');
+    void refs.playerDamageText.offsetWidth;
+    refs.playerDamageText.classList.add('player-damage-pop');
+    if (defeated) {
+      refs.combatStatus.classList.add('player-hit');
+    }
+    schedule(() => {
+      refs.playerDamageText.classList.remove('player-damage-pop');
+      refs.combatStatus.classList.remove('player-hit');
+    }, 880);
   }
 
   function showComboReward({ previous, combo, sourceElement = null, capped = false }) {
@@ -495,6 +522,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     updateBestRecordUi,
     updateCombatStatus,
     showBossHit,
+    showPlayerHit,
     showComboReward,
     updateTimer,
     updateScore,

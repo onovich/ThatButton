@@ -277,8 +277,81 @@ Validation:
 
 Commit/push:
 
-- pending.
+- round commit: `1341ab2`
+- push: `origin/main` PASS
 
 Next round goal:
 
 - Tune existing combat/difficulty cadence with before/after session preview evidence, focusing on enemy 2/3 pacing and keeping first `3x3`, first upgrade, and hazard onboarding readable.
+
+## Round 4 - Difficulty And Combat Cadence Tuning
+
+Round goal:
+
+- Tune existing combat cadence with before/after evidence.
+- Keep first enemy pacing, first upgrade timing, combo semantics, hazard unlocks, and Phase 1 board/rule bands intact.
+
+Change:
+
+- Tuned `BASE_BATTLE_CONFIG.enemyHpPerIndex` from `120` to `80`.
+- This keeps enemy 1 at `500 HP`, but changes later max HP:
+  - enemy 2: `620 -> 580`
+  - enemy 3: `740 -> 660`
+  - enemy 4: `860 -> 740`
+
+Before evidence from Round 2/3:
+
+| Case | Before defeated enemies |
+| --- | --- |
+| 42-level `phase8-validate` | E1 L18, E2 L41 |
+| 72-level `phase8-validate` | E1 L18, E2 L41, E3 L67 |
+| 42-level `phase8-slower` at 1100ms | E1 L18, E2 L41 |
+
+After evidence:
+
+| Case | After defeated enemies | First upgrade | Final preview state |
+| --- | --- | --- | --- |
+| 42-level `phase8-validate` | E1 L18, E2 L39 | L18 | E3 `CIPHER WARDEN`, 576/660 HP |
+| 72-level `phase8-validate` | E1 L18, E2 L39, E3 L62 | L18 | E4 `NULL WARDEN`, 454/740 HP |
+| 42-level `phase8-slower` at 1100ms | E1 L18, E2 L39 | L18 | E3 `CIPHER WARDEN`, 576/660 HP |
+
+Tuning decision:
+
+- Kept the change because it shortens the flat middle without moving first enemy defeat or first upgrade timing.
+- Did not change player HP, enemy attack, base attack, combo window, combo reward, upgrade values, difficulty bands, rule tiers, timers, or hazard timings in this round.
+- Pressure scores remain low/medium in previews, so later tuning should focus on upgrade/combo cadence or hazard readability only if evidence supports it.
+
+Debug self-check:
+
+- Smallest fixture: `previewSessionProgression(...)` with 42-level and 72-level representative seeds.
+- Failure localization is config/core combat scaling only.
+- Wrong-press survivability should remain unchanged because enemy attack scaling was not changed.
+- No UI/VFX/hazard semantics changed.
+
+Architecture self-check:
+
+- Tuning stayed in `src/config/battle.js`.
+- Core combat/enemy/session preview consumed config facts.
+- UI and host code did not receive formulas.
+- No non-scope systems were added.
+
+Validation:
+
+- `node --check src\config\battle.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- pending.
+
+Next round goal:
+
+- Review upgrade and combo cadence with the tuned session previews. Tune only if evidence shows choices are too weak, too obvious, or too late.

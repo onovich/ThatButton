@@ -857,13 +857,13 @@ if (
   thirdIdentity.stageLabel !== 'S03 NOISE GATE' ||
   !isJsonSafeValue(ENCOUNTER_IDENTITIES) ||
   calculateEnemyMaxHp(1) !== 500 ||
-  calculateEnemyMaxHp(2) !== 620 ||
+  calculateEnemyMaxHp(2) !== 580 ||
   calculateEnemyAttack(1) !== 18 ||
   calculateEnemyAttack(2) !== 24 ||
   firstEnemy.hp !== 500 ||
   firstEnemy.attack !== 18 ||
   firstEnemy.stageLabel !== 'S01 CORE LOCK' ||
-  secondEnemy.hp !== 620 ||
+  secondEnemy.hp !== 580 ||
   secondEnemy.attack !== 24 ||
   secondEnemy.enemyName !== 'SIGNAL WARDEN' ||
   secondEnemy.stageLabel !== 'S02 DRIFT ARRAY' ||
@@ -874,7 +874,7 @@ if (
 const secondEnemyHit = applyEnemyDamage(secondEnemy, { amount: 30, level: 2 });
 if (
   secondEnemyHit.enemy.enemyIndex !== 2 ||
-  secondEnemyHit.enemy.hp !== 590 ||
+  secondEnemyHit.enemy.hp !== 550 ||
   secondEnemyHit.enemy.attack !== 24 ||
   secondEnemyHit.damage.appliedDamage !== 30 ||
   secondEnemyHit.defeated
@@ -882,7 +882,7 @@ if (
   failures.push(`Enemy damage should preserve stable attack while alive: ${JSON.stringify(secondEnemyHit)}`);
 }
 const thirdEnemy = createNextEnemyState(secondEnemyHit.enemy);
-if (thirdEnemy.enemyIndex !== 3 || thirdEnemy.maxHp !== 740 || thirdEnemy.attack !== 30) {
+if (thirdEnemy.enemyIndex !== 3 || thirdEnemy.maxHp !== 660 || thirdEnemy.attack !== 30) {
   failures.push(`Next enemy scaling smoke failed: ${JSON.stringify(thirdEnemy)}`);
 }
 const enemySummary = getEnemySummary(secondEnemyHit.enemy);
@@ -1048,7 +1048,7 @@ if (
   nextCombat.enemyIndex !== 2 ||
   nextCombat.enemyName !== 'SIGNAL WARDEN' ||
   nextCombat.stageLabel !== 'S02 DRIFT ARRAY' ||
-  nextCombat.maxHp !== 620 ||
+  nextCombat.maxHp !== 580 ||
   nextCombat.attack !== 24 ||
   nextCombat.status !== 'active'
 ) {
@@ -2017,7 +2017,7 @@ if (
   afterUpgradeSnapshot.upgrades.applied.length !== 1 ||
   afterUpgradeSnapshot.upgrades.applied[0].id !== selectedUpgrade.id ||
   afterUpgradeSnapshot.combat.enemyIndex !== 2 ||
-  afterUpgradeSnapshot.combat.maxHp !== 620 ||
+  afterUpgradeSnapshot.combat.maxHp !== 580 ||
   afterUpgradeSnapshot.combat.attack !== 24 ||
   afterUpgradeSnapshot.round.level <= victorySnapshot.round.level
 ) {
@@ -2094,7 +2094,7 @@ if (debugApi) {
     failures.push(`Debug API player-damage preview changed: ${JSON.stringify(debugPlayerDamage)}`);
   }
   const debugSecondEnemy = debugApi.previewEnemyScaling(2);
-  if (debugSecondEnemy.enemyIndex !== 2 || debugSecondEnemy.maxHp !== 620 || debugSecondEnemy.attack !== 24) {
+  if (debugSecondEnemy.enemyIndex !== 2 || debugSecondEnemy.maxHp !== 580 || debugSecondEnemy.attack !== 24) {
     failures.push(`Debug API enemy-scaling preview changed: ${JSON.stringify(debugSecondEnemy)}`);
   }
   const debugComboWindow = debugApi.previewComboWindow();

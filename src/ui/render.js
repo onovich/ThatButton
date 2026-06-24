@@ -86,6 +86,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
   let comboImpactTimeout = null;
   let comboShakeTimeout = null;
   let wrongPressFlashTimeout = null;
+  const terminalGlyphs = ['>', '/', '+', '#'];
 
   function removeNode(node) {
     if (node && typeof node.remove === 'function') {
@@ -134,7 +135,64 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     };
   }
 
-  function spawnComboParticles({ strong, color }) {
+  function spawnButtonToEnemyTracers({
+    sourceElement = null,
+    color = 'var(--crt-green)',
+    strong = false,
+    combo = false,
+    count = null
+  } = {}) {
+    if (!sourceElement || !document.body || typeof document.body.appendChild !== 'function') return false;
+    const source = getElementCenter(sourceElement);
+    const target = getElementCenter(refs.bossAvatarShell);
+    if (!source || !target) return false;
+
+    const tracerCount = count || (strong ? 14 : 7);
+    for (let index = 0; index < tracerCount; index++) {
+      const tracer = document.createElement('span');
+      const isGlyph = combo && index % 5 === 0;
+      const targetJitterX = (random() - 0.5) * target.width * (strong ? 0.42 : 0.28);
+      const targetJitterY = (random() - 0.5) * target.height * (strong ? 0.42 : 0.28);
+      const sourceJitterX = (random() - 0.5) * source.width * 0.2;
+      const sourceJitterY = (random() - 0.5) * source.height * 0.2;
+      const dx = (target.x + targetJitterX) - (source.x + sourceJitterX);
+      const dy = (target.y + targetJitterY) - (source.y + sourceJitterY);
+      const angle = Math.atan2(dy, dx);
+      tracer.className = [
+        'button-combo-spark',
+        'button-to-enemy-tracer',
+        'retro-crt-tracer',
+        combo ? 'combo-directional-tracer' : '',
+        isGlyph ? 'terminal-glyph-fragment' : (index % 2 === 0 ? 'pixel-spark' : 'scanline-streak')
+      ].filter(Boolean).join(' ');
+      if (isGlyph) {
+        tracer.textContent = terminalGlyphs[index % terminalGlyphs.length];
+      }
+      tracer.style.left = `${source.x + sourceJitterX}px`;
+      tracer.style.top = `${source.y + sourceJitterY}px`;
+      tracer.style.setProperty('--dx', `${dx}px`);
+      tracer.style.setProperty('--dy', `${dy}px`);
+      tracer.style.setProperty('--tracer-angle', `${angle}rad`);
+      tracer.style.setProperty('--particle-color', color);
+      tracer.style.setProperty('--particle-size', `${strong ? 7 : 5}px`);
+      tracer.style.setProperty('--tracer-width', `${strong ? 24 : 17}px`);
+      tracer.style.setProperty('--tracer-height', `${strong ? 5 : 4}px`);
+      document.body.appendChild(tracer);
+      schedule(() => removeNode(tracer), 820);
+    }
+    return true;
+  }
+
+  function spawnComboParticles({ strong, color, sourceElement = null }) {
+    if (spawnButtonToEnemyTracers({
+      sourceElement,
+      color,
+      strong,
+      combo: true,
+      count: strong ? 18 : 10
+    })) {
+      return;
+    }
     if (!refs.comboParticleLayer || typeof refs.comboParticleLayer.appendChild !== 'function') return;
     const width = refs.combatStatus?.clientWidth || 280;
     const height = refs.combatStatus?.clientHeight || 44;
@@ -146,7 +204,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       const particle = document.createElement('span');
       const angle = (200 + random() * 140) * (Math.PI / 180);
       const distance = (strong ? 34 : 24) + random() * (strong ? 32 : 22);
-      particle.className = 'combo-particle';
+      particle.className = 'combo-particle retro-crt-tracer pixel-spark';
       particle.style.left = `${originX}px`;
       particle.style.top = `${originY}px`;
       particle.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
@@ -158,7 +216,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     }
   }
 
-  function spawnButtonReward({ sourceElement, label, className, color, strong }) {
+  function spawnButtonReward({ sourceElement, label, className, color, strong, directional = false, combo = false }) {
     if (!sourceElement || typeof sourceElement.getBoundingClientRect !== 'function') return;
     if (!document.body || typeof document.body.appendChild !== 'function') return;
     const rect = sourceElement.getBoundingClientRect();
@@ -172,17 +230,21 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     floatText.style.top = `${originY}px`;
     document.body.appendChild(floatText);
     schedule(() => removeNode(floatText), 900);
+    if (directional) {
+      spawnButtonToEnemyTracers({ sourceElement, color, strong, combo });
+    }
 
-    const sparkCount = strong ? 14 : 8;
+    const sparkCount = directional ? (strong ? 5 : 3) : (strong ? 14 : 8);
     for (let index = 0; index < sparkCount; index++) {
       const spark = document.createElement('span');
       const angle = random() * Math.PI * 2;
       const distance = rect.width * (0.22 + random() * (strong ? 0.48 : 0.32));
-      spark.className = 'button-combo-spark';
+      spark.className = `button-combo-spark retro-crt-tracer ${index % 2 === 0 ? 'pixel-spark' : 'scanline-streak'}`;
       spark.style.left = `${originX}px`;
       spark.style.top = `${originY}px`;
       spark.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
       spark.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
+      spark.style.setProperty('--tracer-angle', `${angle}rad`);
       spark.style.setProperty('--particle-color', color);
       spark.style.setProperty('--particle-size', `${strong ? 7 : 5}px`);
       document.body.appendChild(spark);
@@ -235,15 +297,21 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       y: Math.min(viewport.height - 120, target.y + 220)
     };
     const projectile = document.createElement('span');
-    projectile.className = 'boss-projectile';
+    const dx = target.x - source.x;
+    const dy = target.y - source.y;
+    projectile.className = 'boss-projectile button-to-enemy-tracer retro-crt-tracer scanline-streak';
     projectile.style.left = `${source.x}px`;
     projectile.style.top = `${source.y}px`;
-    projectile.style.setProperty('--dx', `${target.x - source.x}px`);
-    projectile.style.setProperty('--dy', `${target.y - source.y}px`);
+    projectile.style.setProperty('--dx', `${dx}px`);
+    projectile.style.setProperty('--dy', `${dy}px`);
+    projectile.style.setProperty('--tracer-angle', `${Math.atan2(dy, dx)}rad`);
+    projectile.style.setProperty('--particle-color', strong ? 'var(--crt-yellow)' : 'var(--crt-green)');
+    projectile.style.setProperty('--tracer-width', `${strong ? 26 : 18}px`);
+    projectile.style.setProperty('--tracer-height', `${strong ? 5 : 4}px`);
     if (strong) {
-      projectile.style.width = '16px';
-      projectile.style.height = '16px';
-      projectile.style.boxShadow = '0 0 18px var(--crt-yellow), 0 0 36px rgba(255, 204, 0, 0.5)';
+      projectile.style.width = '26px';
+      projectile.style.height = '5px';
+      projectile.style.boxShadow = '0 0 0 1px rgba(0, 0, 0, 0.82), 0 0 14px var(--crt-yellow)';
       projectile.style.background = 'var(--crt-yellow)';
     }
     document.body.appendChild(projectile);
@@ -260,11 +328,15 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       const spark = document.createElement('span');
       const angle = random() * Math.PI * 2;
       const distance = target.width * (0.18 + random() * (strong ? 0.44 : 0.34));
-      spark.className = 'boss-hit-spark';
+      spark.className = `boss-hit-spark retro-crt-tracer ${index % 2 === 0 ? 'pixel-spark' : 'terminal-glyph-fragment'}`;
+      if (index % 2 === 1) {
+        spark.textContent = terminalGlyphs[index % terminalGlyphs.length];
+      }
       spark.style.left = `${target.x}px`;
       spark.style.top = `${target.y}px`;
       spark.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
       spark.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
+      spark.style.setProperty('--tracer-angle', `${angle}rad`);
       spark.style.setProperty('--particle-color', color);
       spark.style.setProperty('--particle-size', `${strong ? 8 : 6}px`);
       document.body.appendChild(spark);
@@ -446,7 +518,8 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       label: chainStarted ? 'CHAIN READY' : 'SUCCESS',
       className: chainStarted ? 'chain-start' : 'safe-success',
       color: chainStarted ? '#b7ff8a' : 'var(--crt-green)',
-      strong: false
+      strong: false,
+      directional: true
     });
   }
 
@@ -483,13 +556,15 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     refs.comboRewardText.classList.add('combo-reward-pop');
     refs.comboStatusText.classList.add('combo-pulse');
     refs.combatStatus.classList.add(reward.strong ? 'combo-tier-impact' : 'combo-impact');
-    spawnComboParticles(reward);
+    spawnComboParticles({ ...reward, sourceElement });
     spawnButtonReward({
       sourceElement,
       label: reward.label,
       className: reward.className,
       color: reward.color,
-      strong: reward.strong
+      strong: reward.strong,
+      directional: true,
+      combo: true
     });
     playComboShake(reward.strong);
     if (comboRewardTimeout !== null) {

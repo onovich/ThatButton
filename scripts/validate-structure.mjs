@@ -82,13 +82,13 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHostEventPayloads', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHostEventPayloads', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
 }
 
-for (const marker of ['id="boss-avatar"', '.battle-stage', '.player-hud', '.command-panel', '.upgrade-screen', '.upgrade-card', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '"avatar hp attack"', '.combat-hp-bar', '.player-hp-bar', '.enemy-attack-text', '.player-damage-text', '@keyframes player-damage-pop', 'display: block;', 'id="combo-window-bar"', '.combo-window-bar', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-stage-two', '.combo-stage-high', '.combo-particle', '.button-float-text', '.safe-success', '.chain-start', '.wrong-press-flash', '.combo-shake-strong', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
+for (const marker of ['id="boss-avatar"', '.battle-stage', '.player-hud', '.command-panel', '.upgrade-screen', '.upgrade-card', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '"avatar hp attack"', '.combat-hp-bar', '.player-hp-bar', '.enemy-attack-text', '.player-damage-text', '@keyframes player-damage-pop', 'display: block;', 'id="combo-window-bar"', '.combo-window-bar', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-stage-two', '.combo-stage-high', '.combo-particle', '.button-float-text', '.safe-success', '.chain-start', '.wrong-press-flash', '.combo-shake-strong', '.button-to-enemy-tracer', '.combo-directional-tracer', '.retro-crt-tracer', '.pixel-spark', '.scanline-streak', '.terminal-glyph-fragment', 'image-rendering: pixelated', '--tracer-angle', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
   if (!html.includes(marker)) {
     failures.push(`Missing combat mobile layout marker in index.html: ${marker}`);
   }
@@ -96,13 +96,36 @@ for (const marker of ['id="boss-avatar"', '.battle-stage', '.player-hud', '.comm
 
 const combatStatusIndex = html.indexOf('id="combat-status"');
 const playerHudIndex = html.indexOf('id="player-hud"');
+const battleStageIndex = html.indexOf('id="battle-stage"');
+const commandPanelIndex = html.indexOf('id="command-panel"');
+const buttonGridIndex = html.indexOf('id="btn-grid"');
 if (combatStatusIndex < 0 || playerHudIndex < 0 || playerHudIndex <= combatStatusIndex) {
   failures.push('Player HUD should appear after the enemy combat-status area.');
+}
+if (commandPanelIndex < 0 || buttonGridIndex < 0 || playerHudIndex < commandPanelIndex || playerHudIndex > buttonGridIndex) {
+  failures.push('Player HUD should live in the bottom command/control panel before the button grid.');
+}
+if (battleStageIndex >= 0 && commandPanelIndex > battleStageIndex) {
+  const battleStageSnippet = html.slice(battleStageIndex, commandPanelIndex);
+  if (battleStageSnippet.includes('id="player-hud"')) {
+    failures.push('Player HUD should not remain inside the enemy battle stage.');
+  }
 }
 const enemyIdentitySnippet = html.slice(combatStatusIndex, playerHudIndex);
 for (const playerOwnedMarker of ['id="player-hp-text"', 'id="player-hp-bar"', 'id="player-damage-text"']) {
   if (enemyIdentitySnippet.includes(playerOwnedMarker)) {
     failures.push(`Player-owned marker is still inside the enemy combat-status area: ${playerOwnedMarker}`);
+  }
+}
+
+const particleStyleStart = html.indexOf('.retro-crt-tracer');
+const particleStyleEnd = html.indexOf('.button-float-text');
+const particleStyleSnippet = particleStyleStart >= 0 && particleStyleEnd > particleStyleStart
+  ? html.slice(particleStyleStart, particleStyleEnd)
+  : '';
+for (const forbiddenParticleMarker of ['border-radius: 999px', 'filter: blur', 'radial-gradient']) {
+  if (particleStyleSnippet.includes(forbiddenParticleMarker)) {
+    failures.push(`Particle styling should stay low-fi CRT/vector, found: ${forbiddenParticleMarker}`);
   }
 }
 

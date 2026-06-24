@@ -183,6 +183,64 @@ Architecture self-check:
 - UI, host, and app orchestration still consume facts and do not own formulas.
 - Deferred hazards, engine work, roguelite meta systems, dependencies, framework work, and Phase 1 difficulty retuning remain out of scope.
 
+## Round 4 Feedback Polish And Addendum Layout
+
+Implemented:
+
+- Moved `#player-hud` into the bottom `#command-panel` before the button grid.
+- Kept player HUD outside `#battle-stage` and outside `#combat-status`.
+- Added `spawnButtonToEnemyTracers(...)` in UI presentation code for safe-press and combo feedback.
+- Correct safe presses now emit low-fi `button-to-enemy-tracer` particles from the pressed button toward the enemy avatar.
+- Combo feedback now emits `combo-directional-tracer` particles on the same button-to-enemy vector.
+- Restyled projectiles and particles around retro-futurist CRT markers:
+  - `retro-crt-tracer`
+  - `pixel-spark`
+  - `scanline-streak`
+  - `terminal-glyph-fragment`
+  - `image-rendering: pixelated`
+- Added structure validation for bottom player HUD placement, projectile direction markers, combo particle direction markers, and low-fi particle style markers.
+
+Playwright smoke on local static server `http://127.0.0.1:5188/?seed=phase3a-baseline&debug=1`:
+
+| Viewport | HUD in command panel | HUD in battle stage | Safe tracer direction | Combo tracer direction | Viewport fit | Overlap |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1280x720 | PASS | PASS, not present | PASS | PASS | PASS | clue/grid false, HUD/grid false |
+| 390x844 | PASS | PASS, not present | PASS | PASS | PASS | clue/grid false, HUD/grid false |
+
+Smoke details:
+
+- Desktop first tracer class: `button-combo-spark button-to-enemy-tracer retro-crt-tracer pixel-spark`.
+- Desktop combo tracer class: `button-combo-spark button-to-enemy-tracer retro-crt-tracer combo-directional-tracer terminal-glyph-fragment`.
+- Mobile first tracer class: `button-combo-spark button-to-enemy-tracer retro-crt-tracer pixel-spark`.
+- Mobile combo tracer class: `button-combo-spark button-to-enemy-tracer retro-crt-tracer combo-directional-tracer terminal-glyph-fragment`.
+- Both desktop and mobile had `firstTracerDirectionOk=true`, `comboTracerDirectionOk=true`, and nonzero retro/pixel/scanline marker counts.
+
+Debug self-check:
+
+- UI change is explained by measured desktop/mobile viewports and a fixed safe-button sequence: `btn-0` then `btn-2` on `phase3a-baseline`.
+- Failure localization is concrete: HTML placement, render tracer generation, CSS marker styling, or structure validation.
+- Unsupported vibration/audio behavior is unchanged by this round.
+- Real-device and human playtest evidence remains pending.
+
+Architecture self-check:
+
+- UI renders and animates facts only; combat/combo/player/enemy formulas were not moved into UI.
+- App orchestration, host payloads, and core formulas were untouched in this round.
+- Structure validation now guards the new HUD and particle invariants.
+- Deferred hazards, engine work, roguelite meta systems, dependencies, framework work, and Phase 1 difficulty retuning remain out of scope.
+
+Round 4 validation:
+
+- `node --check src\ui\render.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
 ## Round 1 Self-Checks
 
 Debug self-check:

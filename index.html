@@ -234,20 +234,23 @@
         }
 
         .boss-projectile {
-            width: 12px;
-            height: 12px;
-            border-radius: 999px;
+            width: var(--tracer-width, 18px);
+            height: var(--tracer-height, 4px);
+            border-radius: 1px;
             background: var(--crt-green);
-            box-shadow: 0 0 14px var(--crt-green), 0 0 28px rgba(74, 246, 38, 0.45);
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.82), 0 0 12px var(--crt-green);
+            clip-path: polygon(0 0, 100% 50%, 0 100%, 16% 50%);
+            image-rendering: pixelated;
             animation: boss-projectile-flight 0.42s ease-in forwards;
         }
 
         .boss-hit-spark {
             width: var(--particle-size, 7px);
             height: var(--particle-size, 7px);
-            border-radius: 999px;
+            border-radius: 1px;
             background: var(--particle-color, var(--crt-yellow));
-            box-shadow: 0 0 12px var(--particle-color, var(--crt-yellow));
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.82), 0 0 9px var(--particle-color, var(--crt-yellow));
+            image-rendering: pixelated;
             animation: boss-hit-spark 0.76s ease-out forwards;
         }
 
@@ -359,7 +362,7 @@
             display: flex;
             align-items: center;
             gap: 0.55rem;
-            margin: -0.2rem 0 0.55rem;
+            margin: 0 0 0.5rem;
             padding: 0.32rem 0.55rem;
             border: 1px solid rgba(74, 246, 38, 0.42);
             border-radius: 4px;
@@ -512,11 +515,44 @@
             position: absolute;
             width: var(--particle-size, 6px);
             height: var(--particle-size, 6px);
-            border-radius: 999px;
+            border-radius: 1px;
             background: var(--particle-color, var(--crt-green));
-            box-shadow: 0 0 10px var(--particle-color, var(--crt-green));
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.82), 0 0 8px var(--particle-color, var(--crt-green));
+            image-rendering: pixelated;
             pointer-events: none;
             opacity: 0;
+        }
+
+        .retro-crt-tracer,
+        .pixel-spark,
+        .scanline-streak,
+        .terminal-glyph-fragment {
+            image-rendering: pixelated;
+            filter: none;
+        }
+
+        .button-to-enemy-tracer,
+        .combo-directional-tracer {
+            width: var(--tracer-width, 18px);
+            height: var(--tracer-height, 4px);
+            clip-path: polygon(0 0, 100% 50%, 0 100%, 16% 50%);
+            background:
+                repeating-linear-gradient(90deg, var(--particle-color, var(--crt-green)) 0 3px, transparent 3px 5px),
+                var(--particle-color, var(--crt-green));
+            transform-origin: 50% 50%;
+        }
+
+        .terminal-glyph-fragment {
+            width: auto;
+            height: auto;
+            min-width: 1ch;
+            color: var(--particle-color, var(--crt-green));
+            background: transparent;
+            clip-path: none;
+            font-size: 0.72rem;
+            font-weight: 900;
+            line-height: 1;
+            text-shadow: 0 0 8px var(--particle-color, var(--crt-green));
         }
 
         .combo-particle {
@@ -643,15 +679,15 @@
         @keyframes button-combo-spark {
             0% {
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(0.5);
+                transform: translate(-50%, -50%) rotate(var(--tracer-angle, 0deg)) scale(0.5);
             }
             18% {
                 opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
+                transform: translate(-50%, -50%) rotate(var(--tracer-angle, 0deg)) scale(1);
             }
             100% {
                 opacity: 0;
-                transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.12);
+                transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--tracer-angle, 0deg)) scale(0.12);
             }
         }
 
@@ -677,15 +713,15 @@
         @keyframes boss-projectile-flight {
             0% {
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(0.6);
+                transform: translate(-50%, -50%) rotate(var(--tracer-angle, 0deg)) scale(0.6);
             }
             18% {
                 opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
+                transform: translate(-50%, -50%) rotate(var(--tracer-angle, 0deg)) scale(1);
             }
             100% {
                 opacity: 0;
-                transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.42);
+                transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--tracer-angle, 0deg)) scale(0.42);
             }
         }
 
@@ -837,6 +873,11 @@
             background: rgba(0, 16, 0, 0.72);
             box-shadow: inset 0 0 18px rgba(74, 246, 38, 0.1), 0 0 14px rgba(74, 246, 38, 0.14);
             padding: 0.55rem;
+        }
+
+        .command-panel .player-hud {
+            border-color: rgba(74, 246, 38, 0.5);
+            background: rgba(0, 20, 0, 0.78);
         }
 
         .command-panel-header {
@@ -1561,13 +1602,6 @@
             <span id="boss-attack-layer" class="boss-attack-layer" aria-hidden="true"></span>
         </div>
 
-        <div id="player-hud" class="player-hud crt-font" aria-live="polite">
-            <span class="player-hud-label">PLAYER</span>
-            <span id="player-hp-text" class="player-hp-text">HP: --</span>
-            <span class="player-hp-track"><span id="player-hp-bar" class="player-hp-bar"></span></span>
-            <span id="player-damage-text" class="player-damage-text" aria-hidden="true">HIT -18</span>
-        </div>
-
         <!-- Terminal Clue Display -->
         <div class="terminal-box battle-message">
             <div id="clue-title" class="clue-title crt-font">别按那个按钮！</div>
@@ -1587,6 +1621,12 @@
             <div class="command-panel-header crt-font">
                 <span>COMMAND</span>
                 <span id="command-level-tag">INPUT</span>
+            </div>
+            <div id="player-hud" class="player-hud crt-font" aria-live="polite">
+                <span class="player-hud-label">PLAYER</span>
+                <span id="player-hp-text" class="player-hp-text">HP: --</span>
+                <span class="player-hp-track"><span id="player-hp-bar" class="player-hp-bar"></span></span>
+                <span id="player-damage-text" class="player-damage-text" aria-hidden="true">HIT -18</span>
             </div>
             <div id="btn-grid" class="btn-grid">
                 <!-- Buttons generated by JS -->

@@ -165,4 +165,46 @@ Validation:
 
 Commit/push:
 
+- round commit: `3948e9d`
+- push: `origin/main` PASS
+
+## Round 3 - Browser Smoke Review And Tuning Gate
+
+Changes:
+
+- Detected updated Phase 7A guide/TODO scope that expands this phase to VFX Feel And Hazard Validation; treated the working guide as the current source of truth.
+- Reviewed browser smoke evidence before touching tuning values.
+- Kept hazard tuning unchanged because evidence supports the current values.
+- Updated the smoke result writer to preserve platform line endings so repeat runs avoid false content churn.
+
+Evidence reviewed:
+
+- `docs/phase-7a-browser-smoke-results.json` status: PASS
+- desktop `1280x720`, mobile `390x844`, and short mobile `360x740` all report `ok: true`
+- initial layout checks passed for clue/grid/HUD fit, clue-grid separation, grid-player HUD separation, command-panel HUD containment, and battle-stage HUD separation
+- active movement checks passed for two rendered targets, non-zero offsets, in-grid/in-viewport geometry, visual rect movement matching offsets, and marker count
+- active interference checks passed for board dataset scope, opacity cap, pseudo-element opacity, one board marker, and clue/player HUD clear of grid
+- upgrade overlay checks passed for three cards, viewport fit, and disabled/harmless hazard state
+
+Tuning decision:
+
+- No hazard parameter changes in this round.
+- Movement amplitude remains `6px` X / `6px` Y because browser evidence shows the current `2px`/`3px` sampled active offset renders accurately on desktop and mobile, while existing structure validation continues to guard edge clamp behavior.
+- Interference opacity remains capped at `0.160` because browser evidence measured `0.141` active opacity with board-only scope and no clue/player-HUD obstruction.
+- Unlock levels and timings remain unchanged because the phase evidence did not show a readability or fairness regression.
+
+Validation:
+
+- `node --check scripts\smoke-hazards-browser.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
 - pending

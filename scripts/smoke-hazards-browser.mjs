@@ -603,7 +603,9 @@ async function main() {
       viewports: results.map(compactSmokeResult)
     };
     mkdirSync(docsDir, { recursive: true });
-    writeFileSync(resultPath, `${JSON.stringify(summary, null, 2)}\n`, 'utf8');
+    const jsonLineEnding = process.platform === 'win32' ? '\r\n' : '\n';
+    const jsonOutput = `${JSON.stringify(summary, null, 2)}\n`.replace(/\n/g, jsonLineEnding);
+    writeFileSync(resultPath, jsonOutput, 'utf8');
 
     if (summary.status !== 'PASS') {
       console.error(`Hazard browser smoke failed. Results written to ${resultPath}`);

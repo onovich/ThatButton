@@ -224,7 +224,7 @@ export function createApp({
     }, 800);
   }
 
-  function levelComplete() {
+  function levelComplete({ sourceElement = null } = {}) {
     gameState.isPlaying = false;
     const combatResult = resolveRoundClearCombat({
       combat: gameState.combat,
@@ -236,6 +236,11 @@ export function createApp({
     gameState.lastCombatResult = combatResult;
     const encounterFacts = getEncounterFacts(gameState);
     renderer.updateCombatStatus(encounterFacts);
+    renderer.showBossHit({
+      damage: combatResult.damage,
+      defeated: combatResult.defeated,
+      sourceElement
+    });
     recordDebugEvent('level_complete', {
       combatDamage: combatResult.damage,
       combat: encounterFacts.combat,
@@ -332,6 +337,7 @@ export function createApp({
       audio.playSafeClick();
       gameState.safeKeysRemaining--;
       gameState.score += 10;
+      renderer.updateScore(gameState.score);
       applyComboChange(applySafePressCombo(gameState.combo), {
         sourceElement: element,
         showReward: true
@@ -360,7 +366,7 @@ export function createApp({
       hostController.emitScoreChanged({ previousScore });
 
       if (gameState.safeKeysRemaining <= 0) {
-        levelComplete();
+        levelComplete({ sourceElement: element });
       }
       return result;
     }

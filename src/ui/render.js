@@ -49,9 +49,13 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     bestLevelDisplay: document.getElementById('best-level-display'),
     bestScoreDisplay: document.getElementById('best-score-display'),
     bestStatusNote: document.getElementById('best-status-note'),
+    battleStage: document.getElementById('battle-stage'),
     combatStatus: document.getElementById('combat-status'),
+    bossAvatarShell: document.getElementById('boss-avatar-shell'),
     bossHpText: document.getElementById('boss-hp-text'),
     bossHpBar: document.getElementById('boss-hp-bar'),
+    bossDamageText: document.getElementById('boss-damage-text'),
+    bossAttackLayer: document.getElementById('boss-attack-layer'),
     comboStatusText: document.getElementById('combo-status-text'),
     comboRewardText: document.getElementById('combo-reward-text'),
     comboParticleLayer: document.getElementById('combo-particle-layer'),
@@ -152,6 +156,68 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       spark.style.setProperty('--particle-size', `${strong ? 7 : 5}px`);
       document.body.appendChild(spark);
       schedule(() => removeNode(spark), 780);
+    }
+  }
+
+  function getElementCenter(element) {
+    if (!element || typeof element.getBoundingClientRect !== 'function') return null;
+    const rect = element.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+    return {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+      width: rect.width,
+      height: rect.height
+    };
+  }
+
+  function spawnBossProjectile({ sourceElement, strong }) {
+    if (!document.body || typeof document.body.appendChild !== 'function') return;
+    const target = getElementCenter(refs.bossAvatarShell);
+    if (!target) return;
+    const viewport = {
+      width: document.documentElement?.clientWidth || refs.battleStage?.clientWidth || 320,
+      height: document.documentElement?.clientHeight || 640
+    };
+    const source = getElementCenter(sourceElement) || {
+      x: viewport.width / 2,
+      y: Math.min(viewport.height - 120, target.y + 220)
+    };
+    const projectile = document.createElement('span');
+    projectile.className = 'boss-projectile';
+    projectile.style.left = `${source.x}px`;
+    projectile.style.top = `${source.y}px`;
+    projectile.style.setProperty('--dx', `${target.x - source.x}px`);
+    projectile.style.setProperty('--dy', `${target.y - source.y}px`);
+    if (strong) {
+      projectile.style.width = '16px';
+      projectile.style.height = '16px';
+      projectile.style.boxShadow = '0 0 18px var(--crt-yellow), 0 0 36px rgba(255, 204, 0, 0.5)';
+      projectile.style.background = 'var(--crt-yellow)';
+    }
+    document.body.appendChild(projectile);
+    schedule(() => removeNode(projectile), 520);
+  }
+
+  function spawnBossHitSparks(strong) {
+    if (!document.body || typeof document.body.appendChild !== 'function') return;
+    const target = getElementCenter(refs.bossAvatarShell);
+    if (!target) return;
+    const count = strong ? 18 : 12;
+    const color = strong ? 'var(--crt-yellow)' : 'var(--crt-green)';
+    for (let index = 0; index < count; index++) {
+      const spark = document.createElement('span');
+      const angle = random() * Math.PI * 2;
+      const distance = target.width * (0.18 + random() * (strong ? 0.44 : 0.34));
+      spark.className = 'boss-hit-spark';
+      spark.style.left = `${target.x}px`;
+      spark.style.top = `${target.y}px`;
+      spark.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+      spark.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
+      spark.style.setProperty('--particle-color', color);
+      spark.style.setProperty('--particle-size', `${strong ? 8 : 6}px`);
+      document.body.appendChild(spark);
+      schedule(() => removeNode(spark), 820);
     }
   }
 
@@ -271,6 +337,32 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     refs.bossHpText.innerText = `${combat.bossName}: ${combat.hp}/${combat.maxHp}`;
     refs.bossHpBar.style.width = `${hpPercent}%`;
     refs.comboStatusText.innerText = `COMBO ${combo.multiplierLabel} / ${combo.streak}`;
+    if (combat.status === 'defeated') {
+      refs.bossAvatarShell.classList.add('boss-defeated');
+    } else {
+      refs.bossAvatarShell.classList.remove('boss-defeated');
+    }
+  }
+
+  function showBossHit({ damage, defeated = false, sourceElement = null }) {
+    const appliedDamage = Math.max(0, Math.floor(Number(damage?.appliedDamage) || 0));
+    if (appliedDamage <= 0) return;
+    const strong = appliedDamage >= 28 || defeated;
+    refs.bossDamageText.innerText = `-${appliedDamage}`;
+    refs.bossDamageText.classList.remove('boss-damage-pop');
+    refs.bossAvatarShell.classList.remove('boss-hit');
+    void refs.bossDamageText.offsetWidth;
+    refs.bossDamageText.classList.add('boss-damage-pop');
+    refs.bossAvatarShell.classList.add('boss-hit');
+    if (defeated) {
+      refs.bossAvatarShell.classList.add('boss-defeated');
+    }
+    spawnBossProjectile({ sourceElement, strong });
+    schedule(() => spawnBossHitSparks(strong), 320);
+    schedule(() => {
+      refs.bossDamageText.classList.remove('boss-damage-pop');
+      refs.bossAvatarShell.classList.remove('boss-hit');
+    }, 920);
   }
 
   function showComboReward({ previous, combo, sourceElement = null, capped = false }) {
@@ -396,6 +488,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     renderFailureRecap,
     updateBestRecordUi,
     updateCombatStatus,
+    showBossHit,
     showComboReward,
     updateTimer,
     updateScore,

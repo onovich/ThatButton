@@ -118,7 +118,7 @@
 
         /* Game UI Components */
         #game-container {
-            max-width: 500px;
+            max-width: 560px;
             margin: 0 auto;
             width: 100%;
             height: 100vh;
@@ -159,19 +159,111 @@
             color: var(--crt-yellow);
         }
 
+        .battle-stage {
+            position: relative;
+            min-height: 156px;
+            margin-bottom: 0.6rem;
+            border: 2px solid rgba(255, 204, 0, 0.58);
+            border-radius: 6px;
+            background:
+                linear-gradient(180deg, rgba(45, 12, 0, 0.42), rgba(0, 15, 0, 0.56)),
+                repeating-linear-gradient(90deg, rgba(255, 204, 0, 0.06) 0 1px, transparent 1px 24px);
+            box-shadow: inset 0 0 28px rgba(255, 204, 0, 0.09), 0 0 16px rgba(255, 42, 42, 0.16);
+            overflow: visible;
+            padding: 0.55rem 0.75rem 0.65rem;
+        }
+
+        .battle-stage::before {
+            content: "";
+            position: absolute;
+            left: 8%;
+            right: 8%;
+            bottom: 16px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 204, 0, 0.45), transparent);
+            box-shadow: 0 -18px 36px rgba(255, 204, 0, 0.08);
+            pointer-events: none;
+        }
+
+        .enemy-tag,
+        .command-panel-header {
+            color: var(--crt-yellow);
+            letter-spacing: 0;
+            text-shadow: 0 0 8px rgba(255, 204, 0, 0.38);
+        }
+
+        .enemy-tag {
+            position: absolute;
+            top: 0.42rem;
+            left: 0.6rem;
+            font-size: 0.7rem;
+            opacity: 0.82;
+        }
+
+        .boss-damage-text {
+            position: absolute;
+            left: 45%;
+            top: 22%;
+            color: var(--crt-yellow);
+            font-size: 2rem;
+            font-weight: 900;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.86);
+            text-shadow: 0 0 12px rgba(255, 204, 0, 0.85), 0 2px 0 rgba(0, 0, 0, 0.85);
+            pointer-events: none;
+            z-index: 7;
+        }
+
+        .boss-damage-text.boss-damage-pop {
+            animation: boss-damage-pop 0.9s cubic-bezier(.18,.89,.32,1.28);
+        }
+
+        .boss-attack-layer {
+            position: absolute;
+            inset: 0;
+            overflow: visible;
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        .boss-projectile,
+        .boss-hit-spark {
+            position: fixed;
+            pointer-events: none;
+            z-index: 82;
+        }
+
+        .boss-projectile {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            background: var(--crt-green);
+            box-shadow: 0 0 14px var(--crt-green), 0 0 28px rgba(74, 246, 38, 0.45);
+            animation: boss-projectile-flight 0.42s ease-in forwards;
+        }
+
+        .boss-hit-spark {
+            width: var(--particle-size, 7px);
+            height: var(--particle-size, 7px);
+            border-radius: 999px;
+            background: var(--particle-color, var(--crt-yellow));
+            box-shadow: 0 0 12px var(--particle-color, var(--crt-yellow));
+            animation: boss-hit-spark 0.76s ease-out forwards;
+        }
+
         .combat-status {
-            min-height: 46px;
-            border: 1px solid rgba(255, 204, 0, 0.45);
-            background: rgba(26, 12, 0, 0.5);
+            min-height: 112px;
+            border: 0;
+            background: transparent;
             border-radius: 3px;
-            padding: 0.28rem 0.5rem;
-            margin-bottom: 0.5rem;
+            padding: 0.95rem 0.15rem 0;
+            margin-bottom: 0;
             display: grid;
-            grid-template-columns: 34px minmax(0, 1fr) auto;
+            grid-template-columns: 104px minmax(0, 1fr) auto;
             grid-template-areas:
                 "avatar label combo"
                 "avatar hp hp";
-            gap: 0.22rem 0.5rem;
+            gap: 0.45rem 0.75rem;
             align-items: center;
             color: var(--crt-yellow);
             letter-spacing: 0;
@@ -180,13 +272,25 @@
 
         .boss-avatar-shell {
             grid-area: avatar;
-            width: 34px;
-            height: 34px;
-            border: 1px solid rgba(255, 204, 0, 0.55);
+            width: 104px;
+            height: 104px;
+            border: 2px solid rgba(255, 204, 0, 0.74);
             background: radial-gradient(circle at 50% 35%, rgba(255, 204, 0, 0.18), rgba(255, 42, 42, 0.12) 45%, rgba(0, 0, 0, 0.75) 75%);
-            border-radius: 4px;
-            box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.15), 0 0 8px rgba(255, 42, 42, 0.18);
+            border-radius: 6px;
+            box-shadow: inset 0 0 18px rgba(255, 204, 0, 0.18), 0 0 18px rgba(255, 42, 42, 0.24);
             overflow: hidden;
+            align-self: center;
+            transform-origin: center;
+            transition: filter 0.2s ease, opacity 0.2s ease;
+        }
+
+        .boss-avatar-shell.boss-hit {
+            animation: boss-hit-flash 0.34s cubic-bezier(.36,.07,.19,.97);
+        }
+
+        .boss-avatar-shell.boss-defeated {
+            filter: grayscale(0.75) brightness(0.55);
+            opacity: 0.72;
         }
 
         .boss-avatar {
@@ -201,11 +305,14 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            align-self: end;
+            font-size: 0.92rem;
+            text-shadow: 0 0 8px rgba(255, 204, 0, 0.32);
         }
 
         .combat-hp-track {
             grid-area: hp;
-            height: 8px;
+            height: 12px;
             border: 1px solid rgba(255, 204, 0, 0.55);
             background: rgba(0, 0, 0, 0.65);
             border-radius: 2px;
@@ -457,6 +564,70 @@
             }
         }
 
+        @keyframes boss-projectile-flight {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.6);
+            }
+            18% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.42);
+            }
+        }
+
+        @keyframes boss-hit-spark {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            18% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.15);
+            }
+        }
+
+        @keyframes boss-damage-pop {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -30%) scale(0.78);
+            }
+            16% {
+                opacity: 1;
+                transform: translate(-50%, -55%) scale(1.16);
+            }
+            70% {
+                opacity: 1;
+                transform: translate(-50%, -95%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -135%) scale(0.94);
+            }
+        }
+
+        @keyframes boss-hit-flash {
+            0%, 100% {
+                transform: translateX(0) scale(1);
+                filter: none;
+            }
+            22% {
+                transform: translateX(4px) scale(1.04);
+                filter: brightness(1.85) saturate(1.35);
+            }
+            48% {
+                transform: translateX(-3px) scale(1.02);
+                filter: brightness(1.25) saturate(1.2);
+            }
+        }
+
         .combo-shake {
             animation: combo-body-shake 0.16s cubic-bezier(.36,.07,.19,.97) both;
         }
@@ -493,6 +664,12 @@
             gap: 0.45rem;
         }
 
+        .battle-message {
+            border-radius: 6px;
+            background: rgba(0, 12, 0, 0.86);
+            box-shadow: 0 0 12px rgba(74, 246, 38, 0.22), inset 0 0 18px rgba(74, 246, 38, 0.14);
+        }
+
         .clue-title {
             color: var(--crt-red);
             font-size: 2.35rem;
@@ -522,6 +699,23 @@
             width: 100%;
             max-width: var(--board-max-width, 500px);
             margin: 0 auto;
+        }
+
+        .command-panel {
+            position: relative;
+            border: 2px solid rgba(74, 246, 38, 0.55);
+            border-radius: 6px;
+            background: rgba(0, 16, 0, 0.72);
+            box-shadow: inset 0 0 18px rgba(74, 246, 38, 0.1), 0 0 14px rgba(74, 246, 38, 0.14);
+            padding: 0.55rem;
+        }
+
+        .command-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.45rem;
+            font-size: 0.72rem;
         }
 
         .game-btn {
@@ -585,12 +779,27 @@
         /* Timer Bar */
         .timer-container {
             width: 100%;
-            height: 12px;
+            height: 14px;
+            flex: 0 0 14px;
             background-color: #111;
             border: 1px solid var(--crt-green);
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
             border-radius: 2px;
             overflow: hidden;
+            position: relative;
+        }
+
+        .timer-label {
+            position: absolute;
+            left: 0.35rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            color: rgba(0, 0, 0, 0.78);
+            font-size: 0.58rem;
+            font-weight: 900;
+            letter-spacing: 0;
+            pointer-events: none;
         }
 
         #timer-bar {
@@ -712,22 +921,43 @@
                 margin-bottom: 0.4rem;
             }
 
+            .battle-stage {
+                min-height: 128px;
+                padding: 0.45rem 0.55rem 0.55rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .enemy-tag {
+                font-size: 0.62rem;
+                top: 0.32rem;
+                left: 0.45rem;
+            }
+
             .combat-status {
-                min-height: 42px;
-                grid-template-columns: 30px minmax(0, 1fr) auto;
+                min-height: 88px;
+                grid-template-columns: 76px minmax(0, 1fr) auto;
                 gap: 0.2rem 0.35rem;
-                font-size: 0.72rem;
-                padding: 0.25rem 0.45rem;
-                margin-bottom: 0.4rem;
+                font-size: 0.68rem;
+                padding: 0.8rem 0.1rem 0;
+                margin-bottom: 0;
             }
 
             .boss-avatar-shell {
-                width: 30px;
-                height: 30px;
+                width: 76px;
+                height: 76px;
             }
 
             .combat-label {
                 min-width: 0;
+                font-size: 0.7rem;
+            }
+
+            .combat-hp-track {
+                height: 10px;
+            }
+
+            .boss-damage-text {
+                font-size: 1.45rem;
             }
 
             .combo-reward-text {
@@ -747,7 +977,12 @@
 
             .timer-container {
                 height: 10px;
+                flex-basis: 10px;
                 margin-bottom: 0.65rem;
+            }
+
+            .timer-label {
+                font-size: 0.5rem;
             }
 
             .terminal-box {
@@ -769,6 +1004,15 @@
 
             .btn-grid {
                 gap: 9px;
+            }
+
+            .command-panel {
+                padding: 0.45rem;
+            }
+
+            .command-panel-header {
+                margin-bottom: 0.35rem;
+                font-size: 0.62rem;
             }
 
             .game-btn {
@@ -845,7 +1089,18 @@
 
             .combat-status {
                 font-size: 0.66rem;
-                padding: 0.2rem 0.35rem;
+                padding: 0.62rem 0.1rem 0;
+                grid-template-columns: 66px minmax(0, 1fr) auto;
+                min-height: 78px;
+            }
+
+            .battle-stage {
+                min-height: 114px;
+            }
+
+            .boss-avatar-shell {
+                width: 66px;
+                height: 66px;
             }
 
             #clue-text {
@@ -865,19 +1120,117 @@
             }
         }
 
+        @media (max-height: 780px) {
+            #game-container {
+                justify-content: flex-start;
+                padding-top: max(0.55rem, env(safe-area-inset-top));
+                padding-bottom: max(0.55rem, env(safe-area-inset-bottom));
+            }
+
+            .top-status {
+                min-height: 26px;
+                margin-bottom: 0.3rem;
+            }
+
+            .best-status {
+                min-height: 22px;
+                margin-bottom: 0.35rem;
+            }
+
+            .battle-stage {
+                min-height: 120px;
+                margin-bottom: 0.45rem;
+                padding-top: 0.35rem;
+                padding-bottom: 0.45rem;
+            }
+
+            .combat-status {
+                min-height: 86px;
+                grid-template-columns: 78px minmax(0, 1fr) auto;
+                padding-top: 0.72rem;
+            }
+
+            .boss-avatar-shell {
+                width: 78px;
+                height: 78px;
+            }
+
+            .terminal-box {
+                min-height: 88px;
+                margin-bottom: 0.45rem;
+                padding-top: 0.65rem;
+                padding-bottom: 0.65rem;
+            }
+
+            .clue-title {
+                font-size: 1.8rem;
+            }
+
+            #clue-text {
+                min-height: 1.4rem;
+                font-size: 1rem;
+            }
+
+            .timer-container {
+                margin-bottom: 0.45rem;
+            }
+
+            .command-panel {
+                padding: 0.45rem;
+            }
+
+            .command-panel-header {
+                margin-bottom: 0.35rem;
+            }
+
+            .btn-grid {
+                max-width: min(var(--board-max-width, 500px), 306px);
+                gap: 9px;
+            }
+
+            .btn-shape {
+                font-size: 2.2rem;
+            }
+        }
+
         @media (max-height: 700px) {
             #game-container {
                 justify-content: flex-start;
             }
 
             .terminal-box {
-                min-height: 94px;
+                min-height: 82px;
                 padding-top: 0.65rem;
                 padding-bottom: 0.65rem;
             }
 
+            .battle-stage {
+                min-height: 108px;
+                padding-top: 0.35rem;
+                padding-bottom: 0.45rem;
+            }
+
+            .combat-status {
+                min-height: 74px;
+                grid-template-columns: 64px minmax(0, 1fr) auto;
+                padding-top: 0.6rem;
+            }
+
+            .boss-avatar-shell {
+                width: 64px;
+                height: 64px;
+            }
+
             #clue-text {
                 min-height: 1.35rem;
+            }
+
+            .command-panel {
+                padding: 0.4rem;
+            }
+
+            .btn-grid {
+                max-width: min(var(--board-max-width, 500px), 360px);
             }
 
             .start-rules {
@@ -903,49 +1256,61 @@
             <span id="best-status-note" class="best-status-note"></span>
         </div>
 
-        <div id="combat-status" class="combat-status crt-font text-xs" aria-live="polite">
-            <span class="boss-avatar-shell" aria-hidden="true">
-                <svg id="boss-avatar" class="boss-avatar" viewBox="0 0 64 64" role="img">
-                    <defs>
-                        <linearGradient id="boss-face-gradient" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0" stop-color="#ffcc00"/>
-                            <stop offset="0.42" stop-color="#ff5a2a"/>
-                            <stop offset="1" stop-color="#241000"/>
-                        </linearGradient>
-                    </defs>
-                    <path d="M12 24 24 10h16l12 14v24L40 58H24L12 48Z" fill="#140700" stroke="#ffcc00" stroke-width="3"/>
-                    <path d="M18 27 27 17h10l9 10v17l-9 8H27l-9-8Z" fill="url(#boss-face-gradient)" opacity="0.9"/>
-                    <path d="M21 30h12l-4 7H19Z" fill="#050505"/>
-                    <path d="M31 30h12l2 7H35Z" fill="#050505"/>
-                    <path d="M24 33h6" stroke="#4af626" stroke-width="3" stroke-linecap="round"/>
-                    <path d="M36 33h6" stroke="#4af626" stroke-width="3" stroke-linecap="round"/>
-                    <path d="M25 45h14" stroke="#050505" stroke-width="4" stroke-linecap="square"/>
-                    <path d="M10 20 3 16M54 20l7-4M10 50l-7 5M54 50l7 5" stroke="#ff2a2a" stroke-width="3" stroke-linecap="round"/>
-                    <path d="M32 4v10M32 50v10" stroke="#ffcc00" stroke-width="3" stroke-linecap="round"/>
-                </svg>
-            </span>
-            <span id="boss-hp-text" class="combat-label">BOSS: --</span>
-            <span class="combat-hp-track"><span id="boss-hp-bar" class="combat-hp-bar"></span></span>
-            <span id="combo-status-text" class="combo-status-text">COMBO x1.0</span>
-            <span id="combo-reward-text" class="combo-reward-text" aria-hidden="true">STREAK +1</span>
-            <span id="combo-particle-layer" class="combo-particle-layer" aria-hidden="true"></span>
-        </div>
-
-        <div class="timer-container">
-            <div id="timer-bar"></div>
+        <div id="battle-stage" class="battle-stage">
+            <div class="enemy-tag crt-font">ENEMY</div>
+            <div id="combat-status" class="combat-status crt-font text-xs" aria-live="polite">
+                <span id="boss-avatar-shell" class="boss-avatar-shell" aria-hidden="true">
+                    <svg id="boss-avatar" class="boss-avatar" viewBox="0 0 64 64" role="img">
+                        <defs>
+                            <linearGradient id="boss-face-gradient" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="#ffcc00"/>
+                                <stop offset="0.42" stop-color="#ff5a2a"/>
+                                <stop offset="1" stop-color="#241000"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M12 24 24 10h16l12 14v24L40 58H24L12 48Z" fill="#140700" stroke="#ffcc00" stroke-width="3"/>
+                        <path d="M18 27 27 17h10l9 10v17l-9 8H27l-9-8Z" fill="url(#boss-face-gradient)" opacity="0.9"/>
+                        <path d="M21 30h12l-4 7H19Z" fill="#050505"/>
+                        <path d="M31 30h12l2 7H35Z" fill="#050505"/>
+                        <path d="M24 33h6" stroke="#4af626" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M36 33h6" stroke="#4af626" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M25 45h14" stroke="#050505" stroke-width="4" stroke-linecap="square"/>
+                        <path d="M10 20 3 16M54 20l7-4M10 50l-7 5M54 50l7 5" stroke="#ff2a2a" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M32 4v10M32 50v10" stroke="#ffcc00" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <span id="boss-hp-text" class="combat-label">BOSS: --</span>
+                <span class="combat-hp-track"><span id="boss-hp-bar" class="combat-hp-bar"></span></span>
+                <span id="combo-status-text" class="combo-status-text">COMBO x1.0</span>
+                <span id="combo-reward-text" class="combo-reward-text" aria-hidden="true">STREAK +1</span>
+                <span id="combo-particle-layer" class="combo-particle-layer" aria-hidden="true"></span>
+            </div>
+            <span id="boss-damage-text" class="boss-damage-text" aria-hidden="true">-24</span>
+            <span id="boss-attack-layer" class="boss-attack-layer" aria-hidden="true"></span>
         </div>
 
         <!-- Terminal Clue Display -->
-        <div class="terminal-box">
+        <div class="terminal-box battle-message">
             <div id="clue-title" class="clue-title crt-font">别按那个按钮！</div>
             <div id="clue-text" class="crt-font font-bold">
                 <!-- Typewriter text goes here -->
             </div>
         </div>
 
+        <div class="timer-container">
+            <span class="timer-label crt-font">PRESSURE</span>
+            <div id="timer-bar"></div>
+        </div>
+
         <!-- Button Grid -->
-        <div id="btn-grid" class="btn-grid">
-            <!-- Buttons generated by JS -->
+        <div id="command-panel" class="command-panel">
+            <div class="command-panel-header crt-font">
+                <span>COMMAND</span>
+                <span id="command-level-tag">INPUT</span>
+            </div>
+            <div id="btn-grid" class="btn-grid">
+                <!-- Buttons generated by JS -->
+            </div>
         </div>
 
         <!-- Start Screen Overlay -->

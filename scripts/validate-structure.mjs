@@ -46,11 +46,16 @@ const sources = new Map(moduleFiles.map((relativePath) => [relativePath, readPro
 for (const marker of [
   '<script type="module" src="./src/main.js"></script>',
   'id="best-status"',
+  'id="battle-stage"',
   'id="combat-status"',
+  'id="boss-avatar-shell"',
   'id="boss-hp-bar"',
+  'id="boss-damage-text"',
+  'id="boss-attack-layer"',
   'id="combo-status-text"',
   'id="combo-reward-text"',
   'id="combo-particle-layer"',
+  'id="command-panel"',
   'id="clue-title"',
   '别按那个按钮！',
   'id="failure-recap"',
@@ -63,13 +68,13 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'updateCombatStatus', 'showComboReward', 'spawnComboParticles', 'MAX COMBO']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'updateCombatStatus', 'showComboReward', 'spawnComboParticles', 'MAX COMBO', 'showBossHit', 'spawnBossProjectile']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
 }
 
-for (const marker of ['id="boss-avatar"', '.boss-avatar-shell', 'grid-template-areas:', '"avatar label combo"', '.combat-hp-bar', 'display: block;', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-particle', '.button-float-text', '.combo-shake-strong', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
+for (const marker of ['id="boss-avatar"', '.battle-stage', '.command-panel', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '.combat-hp-bar', 'display: block;', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-particle', '.button-float-text', '.combo-shake-strong', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
   if (!html.includes(marker)) {
     failures.push(`Missing combat mobile layout marker in index.html: ${marker}`);
   }

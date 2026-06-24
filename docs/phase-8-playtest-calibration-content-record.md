@@ -538,8 +538,96 @@ Validation:
 
 Commit/push:
 
-- pending.
+- round commit: `b607a29`
+- push: `origin/main` PASS
 
 Next round goal:
 
 - Run final browser/host/debug coverage review and fill any remaining validation/report gaps before final reporting.
+
+## Round 8 - Browser, Host, And Debug Coverage Review
+
+Round goal:
+
+- Confirm longer progression, upgrade cadence, active hazards, VFX/mobile layout, and host/debug JSON-safety are covered before final reporting.
+- Add only small coverage fixes if gaps are found.
+
+Coverage command:
+
+```powershell
+cmd /c node -e "import('./src/core/debug.js').then(async m=>{ /* previewSessionProgression + previewHostEventPayloads JSON safety */ })"
+```
+
+Coverage evidence:
+
+```json
+{
+  "sessionJsonSafe": true,
+  "hostJsonSafe": true,
+  "summary": {
+    "levels": 72,
+    "enemies": 3,
+    "first3x3": 6,
+    "firstUpgrade": 18,
+    "hazard": {
+      "firstMovingLevel": 19,
+      "firstInterferenceLevel": 24,
+      "roundsWithMoving": 54,
+      "roundsWithInterference": 49,
+      "roundsWithActiveHazards": 49
+    }
+  },
+  "hostEventTypes": [
+    "enemy_damaged",
+    "enemy_defeated",
+    "enemy_spawned",
+    "player_damaged",
+    "upgrade_selected",
+    "upgrades_offered"
+  ]
+}
+```
+
+Coverage review:
+
+- Longer progression: guarded by `previewSessionProgression(...)` and structure validation.
+- Upgrade cadence: documented in Rounds 2, 4, and 5.
+- Active hazards: covered by `previewHazardSchedule(...)`, structure validation, and `npm run smoke:hazards`.
+- VFX markers and button-origin tracers: covered by `npm run smoke:hazards`.
+- Desktop/mobile/short-mobile layout: covered by `npm run smoke:hazards`.
+- Later-stage encounter label and command run-depth tag: covered by `npm run smoke:hazards`.
+- Host/debug JSON-safety: covered by `previewHostEventPayloads()`, `previewSessionProgression(...)`, and structure validation.
+
+Decision:
+
+- No additional code change in Round 8. Existing validation covers the Phase 8 PASS criteria added so far.
+
+Debug self-check:
+
+- Smallest fixtures are available for session progression, combat balance, hazard schedule, host payloads, and browser layout/VFX.
+- No validation gap was found that required another tool or dependency.
+
+Architecture self-check:
+
+- No new code in this round.
+- Validation stays zero-dependency.
+- No non-scope systems were added.
+
+Validation:
+
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- pending.
+
+Next round goal:
+
+- Use remaining buffer for final evidence pass and documentation updates, then prepare the final report.

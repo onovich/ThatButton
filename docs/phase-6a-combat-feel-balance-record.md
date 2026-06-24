@@ -241,6 +241,48 @@ Round 4 validation:
 - Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
 - `git diff --check`: PASS with expected Windows line-ending warnings only
 
+## Round 5 Layout And Copy Readability Pass
+
+No additional runtime/CSS change was needed after Round 4. The bottom player HUD, command panel, rule text, button grid, and upgrade cards fit the measured viewports.
+
+Playwright layout smoke on local static server `http://127.0.0.1:5189/?seed=phase3a-baseline&debug=1`:
+
+| Viewport | State | Result |
+| --- | --- | --- |
+| 1280x720 | playing | `playerHudInCommandPanel=true`, `allWithinViewport=true`, `hudGridOverlap=false`, `clueGridOverlap=false`, command bottom `716.5/720` |
+| 390x844 | playing | `playerHudInCommandPanel=true`, `allWithinViewport=true`, `hudGridOverlap=false`, `clueGridOverlap=false`, command bottom `828.56/844` |
+| 360x740 | playing | `playerHudInCommandPanel=true`, `allWithinViewport=true`, `hudGridOverlap=false`, `clueGridOverlap=false`, command bottom `706.5/740` |
+| 1280x720 | upgrade overlay | reached `upgrade_pending` at Level 18, `choices=3`, cards within viewport, no card overlaps |
+| 390x844 | upgrade overlay | reached `upgrade_pending` at Level 18, `choices=3`, cards within viewport, no card overlaps |
+
+Copy readability:
+
+- No new broad copywriting pass was needed.
+- Existing combat/upgrade labels remain compact: `PLAYER`, `HP`, `ATK`, `CHAIN READY`, `COMBO xN`, `ENEMY DOWN / SELECT ONE`.
+- Rule text remained unchanged from Phase 2/Phase 6 semantics.
+
+Debug self-check:
+
+- The layout result is explained by measured desktop/mobile/short-mobile viewports.
+- Upgrade overlay evidence uses a fixed safe path generated from `previewSeededLevel('phase3a-baseline', level)`.
+- Real-device and human playtest evidence remains pending.
+
+Architecture self-check:
+
+- No runtime formulas, host payloads, or app orchestration changed in this round.
+- UI remains fact-driven and player HUD remains bottom-control anchored.
+- Deferred hazards, engine work, roguelite meta systems, dependencies, framework work, and Phase 1 difficulty retuning remain out of scope.
+
+Round 5 validation:
+
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
 ## Round 1 Self-Checks
 
 Debug self-check:

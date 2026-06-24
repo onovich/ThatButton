@@ -72,6 +72,8 @@ for (const marker of [
   'id="upgrade-screen"',
   'id="upgrade-choice-list"',
   'id="command-panel"',
+  'id="hazard-status-text"',
+  'id="hazard-layer"',
   'id="clue-title"',
   '别按那个按钮！',
   'id="failure-recap"',
@@ -84,13 +86,13 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewHostEventPayloads', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewHostEventPayloads', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
 }
 
-for (const marker of ['id="boss-avatar"', '.battle-stage', '.player-hud', '.command-panel', '.upgrade-screen', '.upgrade-card', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '"avatar hp attack"', '.combat-hp-bar', '.player-hp-bar', '.enemy-attack-text', '.player-damage-text', '@keyframes player-damage-pop', 'display: block;', 'id="combo-window-bar"', '.combo-window-bar', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-stage-two', '.combo-stage-high', '.combo-particle', '.button-float-text', '.safe-success', '.chain-start', '.wrong-press-flash', '.combo-shake-strong', '.button-to-enemy-tracer', '.combo-directional-tracer', '.retro-crt-tracer', '.pixel-spark', '.scanline-streak', '.terminal-glyph-fragment', 'image-rendering: pixelated', '--tracer-angle', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
+for (const marker of ['id="boss-avatar"', '.battle-stage', '.player-hud', '.command-panel', '.upgrade-screen', '.upgrade-card', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '"avatar hp attack"', '.combat-hp-bar', '.player-hp-bar', '.enemy-attack-text', '.player-damage-text', '@keyframes player-damage-pop', 'display: block;', 'id="combo-window-bar"', '.combo-window-bar', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-stage-two', '.combo-stage-high', '.combo-particle', '.button-float-text', '.safe-success', '.chain-start', '.wrong-press-flash', '.combo-shake-strong', '.button-to-enemy-tracer', '.combo-directional-tracer', '.retro-crt-tracer', '.pixel-spark', '.scanline-streak', '.terminal-glyph-fragment', 'image-rendering: pixelated', '--tracer-angle', '.hazard-status-text', '.hazard-layer', '.hazard-marker', '.hazard-marker-telegraph', '.hazard-marker-active', '.hazard-board-marker', '@keyframes hazard-marker-telegraph', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
   if (!html.includes(marker)) {
     failures.push(`Missing combat mobile layout marker in index.html: ${marker}`);
   }
@@ -101,11 +103,21 @@ const playerHudIndex = html.indexOf('id="player-hud"');
 const battleStageIndex = html.indexOf('id="battle-stage"');
 const commandPanelIndex = html.indexOf('id="command-panel"');
 const buttonGridIndex = html.indexOf('id="btn-grid"');
+const hazardStatusIndex = html.indexOf('id="hazard-status-text"');
+const hazardLayerIndex = html.indexOf('id="hazard-layer"');
 if (combatStatusIndex < 0 || playerHudIndex < 0 || playerHudIndex <= combatStatusIndex) {
   failures.push('Player HUD should appear after the enemy combat-status area.');
 }
 if (commandPanelIndex < 0 || buttonGridIndex < 0 || playerHudIndex < commandPanelIndex || playerHudIndex > buttonGridIndex) {
   failures.push('Player HUD should live in the bottom command/control panel before the button grid.');
+}
+if (
+  commandPanelIndex < 0 ||
+  hazardStatusIndex < commandPanelIndex ||
+  hazardLayerIndex < commandPanelIndex ||
+  hazardLayerIndex < buttonGridIndex
+) {
+  failures.push('Hazard marker UI should live in the bottom command/control panel after the button grid.');
 }
 if (battleStageIndex >= 0 && commandPanelIndex > battleStageIndex) {
   const battleStageSnippet = html.slice(battleStageIndex, commandPanelIndex);
@@ -128,6 +140,24 @@ const particleStyleSnippet = particleStyleStart >= 0 && particleStyleEnd > parti
 for (const forbiddenParticleMarker of ['border-radius: 999px', 'filter: blur', 'radial-gradient']) {
   if (particleStyleSnippet.includes(forbiddenParticleMarker)) {
     failures.push(`Particle styling should stay low-fi CRT/vector, found: ${forbiddenParticleMarker}`);
+  }
+}
+
+const renderSource = sources.get('src/ui/render.js') || '';
+const hazardPresentationMarkers = [
+  'refs.commandPanel.dataset.hazardPhase',
+  'refs.commandPanel.dataset.hazardTypes',
+  'refs.commandPanel.dataset.hazardTargetCount',
+  'refs.gridEl.dataset.hazardPhase',
+  'refs.hazardLayer.innerHTML =',
+  'getButtonElement(buttonId)',
+  'getBoundingClientRect',
+  'targetRect.left - panelRect.left',
+  'targetRect.top - panelRect.top'
+];
+for (const marker of hazardPresentationMarkers) {
+  if (!renderSource.includes(marker)) {
+    failures.push(`Missing hazard presentation guard marker in renderer: ${marker}`);
   }
 }
 
@@ -294,6 +324,7 @@ const [
   recapModule,
   hostEventsModule,
   hostBridgeModule,
+  renderModule,
   mainModule
 ] = await Promise.all([
   import(moduleUrl('src/config/difficulty.js')),
@@ -314,6 +345,7 @@ const [
   import(moduleUrl('src/core/recap.js')),
   import(moduleUrl('src/core/host-events.js')),
   import(moduleUrl('src/host/browser-host-bridge.js')),
+  import(moduleUrl('src/ui/render.js')),
   import(moduleUrl('src/main.js'))
 ]);
 
@@ -1298,6 +1330,110 @@ function fakeElement() {
     id: '',
     offsetWidth: 1
   };
+}
+
+function fakeGeometryElement(rect = {}) {
+  const element = fakeElement();
+  const children = [];
+  const normalizedRect = {
+    left: Number(rect.left) || 0,
+    top: Number(rect.top) || 0,
+    width: Number(rect.width) || 1,
+    height: Number(rect.height) || 1
+  };
+  const attributes = {};
+  element.children = children;
+  element.attributes = attributes;
+  element.appendChild = (child) => {
+    children.push(child);
+    child.parentNode = element;
+    return child;
+  };
+  element.setAttribute = (name, value) => {
+    attributes[name] = String(value);
+  };
+  element.getBoundingClientRect = () => ({
+    ...normalizedRect,
+    right: normalizedRect.left + normalizedRect.width,
+    bottom: normalizedRect.top + normalizedRect.height
+  });
+  return element;
+}
+
+const { createRenderer } = renderModule;
+const hazardUiElements = new Map([
+  ['command-panel', fakeGeometryElement({ left: 10, top: 300, width: 360, height: 380 })],
+  ['btn-grid', fakeGeometryElement({ left: 20, top: 410, width: 330, height: 330 })],
+  ['hazard-layer', fakeGeometryElement({ left: 10, top: 300, width: 360, height: 380 })],
+  ['hazard-status-text', fakeGeometryElement({ left: 160, top: 314, width: 90, height: 16 })],
+  ['btn-0', fakeGeometryElement({ left: 20, top: 410, width: 100, height: 100 })],
+  ['btn-4', fakeGeometryElement({ left: 130, top: 520, width: 100, height: 100 })]
+]);
+const hazardRenderer = createRenderer({
+  document: {
+    body: fakeGeometryElement({ left: 0, top: 0, width: 390, height: 844 }),
+    documentElement: fakeGeometryElement({ left: 0, top: 0, width: 390, height: 844 }),
+    getElementById: (id) => hazardUiElements.get(id) || fakeGeometryElement(),
+    createElement: () => fakeGeometryElement()
+  },
+  timers: {
+    setTimeout: () => 0,
+    clearTimeout() {}
+  },
+  random: () => 0.5,
+  audio: {
+    playBeep() {}
+  }
+});
+hazardRenderer.updateHazardPresentation({
+  enabled: true,
+  unlocked: true,
+  phase: HAZARD_PHASES.ACTIVE,
+  hazards: [
+    {
+      type: HAZARD_TYPES.MOVING_BUTTON,
+      phase: HAZARD_PHASES.ACTIVE,
+      targetButtonIds: ['btn-0', 'btn-4']
+    },
+    {
+      type: HAZARD_TYPES.INTERFERENCE,
+      phase: HAZARD_PHASES.TELEGRAPH,
+      target: 'board'
+    }
+  ]
+});
+const hazardLayerChildren = hazardUiElements.get('hazard-layer').children;
+const firstHazardMarker = hazardLayerChildren[0];
+const secondHazardMarker = hazardLayerChildren[1];
+const boardHazardMarker = hazardLayerChildren[2];
+const hazardCommandPanel = hazardUiElements.get('command-panel');
+if (
+  hazardCommandPanel.dataset.hazardPhase !== HAZARD_PHASES.ACTIVE ||
+  !hazardCommandPanel.dataset.hazardTypes.includes(HAZARD_TYPES.MOVING_BUTTON) ||
+  hazardCommandPanel.dataset.hazardTargetCount !== '2' ||
+  hazardUiElements.get('btn-grid').dataset.hazardPhase !== HAZARD_PHASES.ACTIVE ||
+  hazardUiElements.get('hazard-status-text').innerText !== 'HAZARD ACTIVE' ||
+  hazardLayerChildren.length !== 3 ||
+  firstHazardMarker?.style.left !== '10px' ||
+  firstHazardMarker?.style.top !== '110px' ||
+  firstHazardMarker?.style.width !== '100px' ||
+  secondHazardMarker?.style.left !== '120px' ||
+  secondHazardMarker?.style.top !== '220px' ||
+  boardHazardMarker?.style.left !== '10px' ||
+  boardHazardMarker?.style.top !== '110px' ||
+  boardHazardMarker?.style.width !== '330px' ||
+  boardHazardMarker?.dataset.hazardGlyph !== '##'
+) {
+  failures.push(`Hazard marker geometry smoke failed: ${JSON.stringify({
+    commandPanelDataset: hazardCommandPanel.dataset,
+    gridDataset: hazardUiElements.get('btn-grid').dataset,
+    status: hazardUiElements.get('hazard-status-text').innerText,
+    markerCount: hazardLayerChildren.length,
+    first: firstHazardMarker?.style,
+    second: secondHazardMarker?.style,
+    board: boardHazardMarker?.style,
+    boardDataset: boardHazardMarker?.dataset
+  })}`);
 }
 
 const appStorage = fakeStorage();

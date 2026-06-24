@@ -323,6 +323,7 @@ export function createApp({
       disabled: true,
       reason: 'upgrade_pending'
     });
+    renderer.updateHazardPresentation(gameState.hazards);
     const offer = offerEncounterUpgradeChoices(gameState.upgrades, {
       rng: gameState.rng,
       enemyIndex: gameState.combat.enemyIndex
@@ -601,6 +602,7 @@ export function createApp({
       score: gameState.score,
       onButtonInput: handleButtonInput
     });
+    renderer.updateHazardPresentation(gameState.hazards);
     gameState.lastTime = performance.now();
     gameState.isPlaying = true;
     hostController.emitRoundStarted();
@@ -630,6 +632,7 @@ export function createApp({
       enemyIndex: 1,
       reason: 'run_reset'
     });
+    renderer.updateHazardPresentation(gameState.hazards);
     renderer.updateCombatStatus(getEncounterFacts(gameState));
     renderer.updateTimer(gameState.timeLeft, gameState.timeLimit, getCurrentComboWindow());
     renderer.setWarningVisible(false);
@@ -660,6 +663,7 @@ export function createApp({
     gameState.lastTime = timestamp;
     gameState.timeLeft -= deltaTime;
     updateHazardState(timestamp - gameState.roundStartedAtMs);
+    renderer.updateHazardPresentation(gameState.hazards);
     const comboExpiry = expireEncounterComboIfNeeded(gameState.combo, timestamp);
     if (comboExpiry.changed) {
       applyComboChange(comboExpiry);

@@ -285,3 +285,68 @@ Commit / push:
 Next:
 
 - Round 4: add UI hazard marker foundation without actual movement/interference behavior.
+
+## Round 4 UI Hazard Marker Foundation
+
+Implemented:
+
+- Added a bottom command-panel hazard presentation foundation:
+  - `hazard-status-text` for telegraph/active status,
+  - `hazard-layer` for non-interactive marker overlays,
+  - low-fi CRT marker styles using scanline/vector fragments.
+- Added `renderer.updateHazardPresentation(...)`:
+  - writes hazard phase/type/target-count facts into command-panel and grid data attributes,
+  - renders active/telegraph button-target markers from current button `getBoundingClientRect()` values,
+  - renders a board marker for board-target hazards,
+  - clears markers when hazards are inactive, disabled, expired, or absent.
+- Wired app orchestration so hazard presentation syncs on run reset, round start, upgrade pending, and each game-loop tick.
+- Added validation markers for the new structure and renderer behavior.
+- Added a fake-geometry renderer smoke that checks marker placement relative to the command panel for two button targets and one board target.
+
+No actual hazard behavior was added in this round:
+
+- Buttons do not move yet.
+- Click targets are unchanged.
+- Interference does not distort or cover the board yet.
+- Hazard markers are pointer-events-free and only consume existing hazard facts.
+
+Debug self-check:
+
+- The UI change is explained by a fixed fake-geometry smoke and existing fixed-seed hazard facts.
+- Failures localize to HTML marker structure, renderer presentation, app orchestration sync, or validation guards.
+- First enemy / first upgrade path remains hazard-free because hazard facts still report `onboarding_safe` through existing app/host smokes.
+- Disabled, inactive, active, and telegraph presentation paths are covered by structure markers and the fake-geometry smoke; cooldown/expired currently clear markers.
+- UI geometry changed only by adding an absolute, non-interactive overlay inside the bottom command panel.
+
+Architecture self-check:
+
+- Hazard schedules and unlocks remain owned by config/core.
+- UI only renders hazard facts and measures DOM geometry for presentation.
+- App orchestration only synchronizes current hazard facts into the renderer.
+- Host payload code was not changed in this round.
+- Rule, fatal-button, combat, combo, upgrade, and difficulty semantics were not duplicated.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, framework work, and Phase 1 retuning remain out of scope.
+- Validation now guards the marker DOM placement and current-rect marker geometry.
+
+Round 4 validation:
+
+- `node --check src\ui\render.js`: PASS
+- `node --check src\app\create-app.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Round 5: add gentle moving-button behavior using the current marker foundation.

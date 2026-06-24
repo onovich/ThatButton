@@ -56,6 +56,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     bestLevelDisplay: document.getElementById('best-level-display'),
     bestScoreDisplay: document.getElementById('best-score-display'),
     bestStatusNote: document.getElementById('best-status-note'),
+    commandPanel: document.getElementById('command-panel'),
     battleStage: document.getElementById('battle-stage'),
     combatStatus: document.getElementById('combat-status'),
     bossAvatarShell: document.getElementById('boss-avatar-shell'),
@@ -71,6 +72,8 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     comboStatusText: document.getElementById('combo-status-text'),
     comboRewardText: document.getElementById('combo-reward-text'),
     comboParticleLayer: document.getElementById('combo-particle-layer'),
+    hazardLayer: document.getElementById('hazard-layer'),
+    hazardStatusText: document.getElementById('hazard-status-text'),
     failureRecapEl: document.getElementById('failure-recap'),
     startScreen: document.getElementById('start-screen'),
     gameOverScreen: document.getElementById('game-over-screen'),
@@ -282,6 +285,105 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       width: rect.width,
       height: rect.height
     };
+  }
+
+  function toDatasetToken(value, fallback = 'none') {
+    const token = String(value || fallback)
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return token || fallback;
+  }
+
+  function getElementRect(element) {
+    if (!element || typeof element.getBoundingClientRect !== 'function') return null;
+    const rect = element.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+    return rect;
+  }
+
+  function createHazardMarker({ hazard, phase, targetElement, targetButtonId = '', boardMarker = false }) {
+    if (!refs.hazardLayer || typeof refs.hazardLayer.appendChild !== 'function') return false;
+    const panelRect = getElementRect(refs.commandPanel);
+    const targetRect = getElementRect(targetElement);
+    if (!panelRect || !targetRect) return false;
+    const marker = document.createElement('span');
+    const typeToken = toDatasetToken(hazard?.type);
+    const phaseToken = toDatasetToken(phase, 'inactive');
+    marker.className = [
+      'hazard-marker',
+      `hazard-marker-${phaseToken}`,
+      boardMarker ? 'hazard-board-marker' : '',
+      'retro-crt-tracer',
+      boardMarker ? 'scanline-streak' : 'terminal-glyph-fragment'
+    ].filter(Boolean).join(' ');
+    marker.dataset.hazardType = typeToken;
+    marker.dataset.hazardPhase = phaseToken;
+    marker.dataset.targetButtonId = targetButtonId;
+    marker.dataset.hazardGlyph = boardMarker ? '##' : '>>';
+    marker.setAttribute('aria-hidden', 'true');
+    marker.style.left = `${targetRect.left - panelRect.left}px`;
+    marker.style.top = `${targetRect.top - panelRect.top}px`;
+    marker.style.width = `${targetRect.width}px`;
+    marker.style.height = `${targetRect.height}px`;
+    refs.hazardLayer.appendChild(marker);
+    return true;
+  }
+
+  function updateHazardPresentation(hazards = null) {
+    const phase = toDatasetToken(hazards?.phase, 'inactive');
+    const activeHazards = Array.isArray(hazards?.hazards)
+      ? hazards.hazards.filter((hazard) => ['telegraph', 'active'].includes(hazard.phase))
+      : [];
+    const typeTokens = activeHazards.map((hazard) => toDatasetToken(hazard.type));
+    const targetButtonIds = activeHazards.flatMap((hazard) => Array.isArray(hazard.targetButtonIds)
+      ? hazard.targetButtonIds
+      : []);
+    const hasBoardHazard = activeHazards.some((hazard) => hazard.target === 'board');
+
+    if (refs.commandPanel?.dataset) {
+      refs.commandPanel.dataset.hazardPhase = phase;
+      refs.commandPanel.dataset.hazardTypes = typeTokens.length ? typeTokens.join(' ') : 'none';
+      refs.commandPanel.dataset.hazardUnlocked = hazards?.unlocked ? 'true' : 'false';
+      refs.commandPanel.dataset.hazardTargetCount = String(targetButtonIds.length);
+      refs.commandPanel.dataset.hazardBoard = hasBoardHazard ? phase : 'none';
+    }
+    if (refs.gridEl?.dataset) {
+      refs.gridEl.dataset.hazardPhase = phase;
+      refs.gridEl.dataset.hazardTargetCount = String(targetButtonIds.length);
+    }
+    if (refs.hazardStatusText) {
+      refs.hazardStatusText.innerText = phase === 'active'
+        ? 'HAZARD ACTIVE'
+        : (phase === 'telegraph' ? 'HAZARD WARN' : 'HAZARD --');
+    }
+    if (refs.hazardLayer) {
+      refs.hazardLayer.innerHTML = '';
+    }
+    if (!activeHazards.length) return;
+
+    activeHazards.forEach((hazard) => {
+      const hazardPhase = toDatasetToken(hazard.phase, phase);
+      if (Array.isArray(hazard.targetButtonIds)) {
+        hazard.targetButtonIds.forEach((buttonId) => {
+          createHazardMarker({
+            hazard,
+            phase: hazardPhase,
+            targetElement: getButtonElement(buttonId),
+            targetButtonId: buttonId
+          });
+        });
+      }
+      if (hazard.target === 'board') {
+        createHazardMarker({
+          hazard,
+          phase: hazardPhase,
+          targetElement: refs.gridEl,
+          boardMarker: true
+        });
+      }
+    });
   }
 
   function spawnBossProjectile({ sourceElement, strong }) {
@@ -705,6 +807,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     renderFailureRecap,
     updateBestRecordUi,
     updateCombatStatus,
+    updateHazardPresentation,
     showBossHit,
     showPlayerHit,
     showSafePressFeedback,

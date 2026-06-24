@@ -1,0 +1,579 @@
+{
+  "status": "PASS",
+  "smoke": "phase-7a-browser-hazard-smoke",
+  "browserExecutable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "servedPath": "/?seed=phase3a-baseline&debug=1",
+  "seed": "phase3a-baseline",
+  "viewports": [
+    {
+      "viewport": {
+        "name": "desktop-1280x720",
+        "width": 1280,
+        "height": 720,
+        "isMobile": false
+      },
+      "ok": true,
+      "checks": [
+        {
+          "ok": true,
+          "message": "clue fits viewport"
+        },
+        {
+          "ok": true,
+          "message": "grid fits viewport"
+        },
+        {
+          "ok": true,
+          "message": "command panel fits viewport"
+        },
+        {
+          "ok": true,
+          "message": "clue and grid do not overlap"
+        },
+        {
+          "ok": true,
+          "message": "grid and player HUD do not overlap"
+        },
+        {
+          "ok": true,
+          "message": "player HUD is inside command panel"
+        },
+        {
+          "ok": true,
+          "message": "player HUD is not inside battle stage"
+        },
+        {
+          "ok": true,
+          "message": "synthetic moving hazard is active"
+        },
+        {
+          "ok": true,
+          "message": "two moved buttons rendered"
+        },
+        {
+          "ok": true,
+          "message": "moved buttons have non-zero offsets"
+        },
+        {
+          "ok": true,
+          "message": "moved buttons stay inside grid and viewport"
+        },
+        {
+          "ok": true,
+          "message": "moved button visual rect follows hazard offsets"
+        },
+        {
+          "ok": true,
+          "message": "moving hazard markers match moved buttons"
+        },
+        {
+          "ok": true,
+          "message": "synthetic interference hazard is active"
+        },
+        {
+          "ok": true,
+          "message": "interference is scoped to board dataset"
+        },
+        {
+          "ok": true,
+          "message": "interference opacity cap is honored"
+        },
+        {
+          "ok": true,
+          "message": "one board interference marker rendered"
+        },
+        {
+          "ok": true,
+          "message": "interference leaves clue and player HUD clear of grid"
+        },
+        {
+          "ok": true,
+          "message": "upgrade overlay renders three cards"
+        },
+        {
+          "ok": true,
+          "message": "upgrade overlay fits viewport"
+        },
+        {
+          "ok": true,
+          "message": "upgrade overlay has hazards disabled/harmless"
+        }
+      ],
+      "layout": {
+        "clue": {
+          "left": 394,
+          "top": 285.06,
+          "right": 886,
+          "bottom": 307.45,
+          "width": 492,
+          "height": 22.39,
+          "centerX": 640,
+          "centerY": 296.26
+        },
+        "grid": {
+          "left": 508,
+          "top": 443.31,
+          "right": 772,
+          "bottom": 707.31,
+          "width": 264,
+          "height": 264,
+          "centerX": 640,
+          "centerY": 575.31
+        },
+        "commandPanel": {
+          "left": 376,
+          "top": 364.31,
+          "right": 904,
+          "bottom": 716.5,
+          "width": 528,
+          "height": 352.19,
+          "centerX": 640,
+          "centerY": 540.41
+        },
+        "playerHud": {
+          "left": 385.19,
+          "top": 393.09,
+          "right": 894.81,
+          "bottom": 435.31,
+          "width": 509.63,
+          "height": 42.22,
+          "centerX": 640,
+          "centerY": 414.2
+        }
+      },
+      "moving": {
+        "phase": "active",
+        "targetCount": 2,
+        "movedButtons": [
+          {
+            "id": "btn-1",
+            "offsetX": 2,
+            "offsetY": 3,
+            "cssOffsetX": "2px",
+            "cssOffsetY": "3px",
+            "beforeCenter": {
+              "x": 639.99,
+              "y": 484.65
+            },
+            "afterCenter": {
+              "x": 641.99,
+              "y": 487.65
+            },
+            "deltaX": 2,
+            "deltaY": 3
+          },
+          {
+            "id": "btn-4",
+            "offsetX": 2,
+            "offsetY": 3,
+            "cssOffsetX": "2px",
+            "cssOffsetY": "3px",
+            "beforeCenter": {
+              "x": 639.99,
+              "y": 575.32
+            },
+            "afterCenter": {
+              "x": 641.99,
+              "y": 578.32
+            },
+            "deltaX": 2,
+            "deltaY": 3
+          }
+        ]
+      },
+      "interference": {
+        "phase": "active",
+        "boardDataset": "active",
+        "opacityVar": "0.141",
+        "pseudoOpacity": "0.141",
+        "markerCount": 1
+      },
+      "upgrade": {
+        "cardCount": 3,
+        "hidden": false,
+        "boardDataset": "none",
+        "opacityVar": "0.000"
+      }
+    },
+    {
+      "viewport": {
+        "name": "mobile-390x844",
+        "width": 390,
+        "height": 844,
+        "isMobile": true
+      },
+      "ok": true,
+      "checks": [
+        {
+          "ok": true,
+          "message": "clue fits viewport"
+        },
+        {
+          "ok": true,
+          "message": "grid fits viewport"
+        },
+        {
+          "ok": true,
+          "message": "command panel fits viewport"
+        },
+        {
+          "ok": true,
+          "message": "clue and grid do not overlap"
+        },
+        {
+          "ok": true,
+          "message": "grid and player HUD do not overlap"
+        },
+        {
+          "ok": true,
+          "message": "player HUD is inside command panel"
+        },
+        {
+          "ok": true,
+          "message": "player HUD is not inside battle stage"
+        },
+        {
+          "ok": true,
+          "message": "synthetic moving hazard is active"
+        },
+        {
+          "ok": true,
+          "message": "two moved buttons rendered"
+        },
+        {
+          "ok": true,
+          "message": "moved buttons have non-zero offsets"
+        },
+        {
+          "ok": true,
+          "message": "moved buttons stay inside grid and viewport"
+        },
+        {
+          "ok": true,
+          "message": "moved button visual rect follows hazard offsets"
+        },
+        {
+          "ok": true,
+          "message": "moving hazard markers match moved buttons"
+        },
+        {
+          "ok": true,
+          "message": "synthetic interference hazard is active"
+        },
+        {
+          "ok": true,
+          "message": "interference is scoped to board dataset"
+        },
+        {
+          "ok": true,
+          "message": "interference opacity cap is honored"
+        },
+        {
+          "ok": true,
+          "message": "one board interference marker rendered"
+        },
+        {
+          "ok": true,
+          "message": "interference leaves clue and player HUD clear of grid"
+        },
+        {
+          "ok": true,
+          "message": "upgrade overlay renders three cards"
+        },
+        {
+          "ok": true,
+          "message": "upgrade overlay fits viewport"
+        },
+        {
+          "ok": true,
+          "message": "upgrade overlay has hazards disabled/harmless"
+        }
+      ],
+      "layout": {
+        "clue": {
+          "left": 26,
+          "top": 316.69,
+          "right": 364,
+          "bottom": 340.69,
+          "width": 338,
+          "height": 24,
+          "centerX": 195,
+          "centerY": 328.69
+        },
+        "grid": {
+          "left": 25,
+          "top": 479.38,
+          "right": 365,
+          "bottom": 819.38,
+          "width": 340,
+          "height": 340,
+          "centerX": 195,
+          "centerY": 649.38
+        },
+        "commandPanel": {
+          "left": 12,
+          "top": 410.75,
+          "right": 378,
+          "bottom": 828.56,
+          "width": 366,
+          "height": 417.81,
+          "centerX": 195,
+          "centerY": 619.66
+        },
+        "playerHud": {
+          "left": 21.19,
+          "top": 436.53,
+          "right": 368.81,
+          "bottom": 472.19,
+          "width": 347.63,
+          "height": 35.66,
+          "centerX": 195,
+          "centerY": 454.36
+        }
+      },
+      "moving": {
+        "phase": "active",
+        "targetCount": 2,
+        "movedButtons": [
+          {
+            "id": "btn-1",
+            "offsetX": 2,
+            "offsetY": 3,
+            "cssOffsetX": "2px",
+            "cssOffsetY": "3px",
+            "beforeCenter": {
+              "x": 195,
+              "y": 534.31
+            },
+            "afterCenter": {
+              "x": 197,
+              "y": 537.31
+            },
+            "deltaX": 2,
+            "deltaY": 3
+          },
+          {
+            "id": "btn-4",
+            "offsetX": 2,
+            "offsetY": 3,
+            "cssOffsetX": "2px",
+            "cssOffsetY": "3px",
+            "beforeCenter": {
+              "x": 195,
+              "y": 653.19
+            },
+            "afterCenter": {
+              "x": 197,
+              "y": 656.19
+            },
+            "deltaX": 2,
+            "deltaY": 3
+          }
+        ]
+      },
+      "interference": {
+        "phase": "active",
+        "boardDataset": "active",
+        "opacityVar": "0.141",
+        "pseudoOpacity": "0.141",
+        "markerCount": 1
+      },
+      "upgrade": {
+        "cardCount": 3,
+        "hidden": false,
+        "boardDataset": "none",
+        "opacityVar": "0.000"
+      }
+    },
+    {
+      "viewport": {
+        "name": "short-mobile-360x740",
+        "width": 360,
+        "height": 740,
+        "isMobile": true
+      },
+      "ok": true,
+      "checks": [
+        {
+          "ok": true,
+          "message": "clue fits viewport"
+        },
+        {
+          "ok": true,
+          "message": "grid fits viewport"
+        },
+        {
+          "ok": true,
+          "message": "command panel fits viewport"
+        },
+        {
+          "ok": true,
+          "message": "clue and grid do not overlap"
+        },
+        {
+          "ok": true,
+          "message": "grid and player HUD do not overlap"
+        },
+        {
+          "ok": true,
+          "message": "player HUD is inside command panel"
+        },
+        {
+          "ok": true,
+          "message": "player HUD is not inside battle stage"
+        },
+        {
+          "ok": true,
+          "message": "synthetic moving hazard is active"
+        },
+        {
+          "ok": true,
+          "message": "two moved buttons rendered"
+        },
+        {
+          "ok": true,
+          "message": "moved buttons have non-zero offsets"
+        },
+        {
+          "ok": true,
+          "message": "moved buttons stay inside grid and viewport"
+        },
+        {
+          "ok": true,
+          "message": "moved button visual rect follows hazard offsets"
+        },
+        {
+          "ok": true,
+          "message": "moving hazard markers match moved buttons"
+        },
+        {
+          "ok": true,
+          "message": "synthetic interference hazard is active"
+        },
+        {
+          "ok": true,
+          "message": "interference is scoped to board dataset"
+        },
+        {
+          "ok": true,
+          "message": "interference opacity cap is honored"
+        },
+        {
+          "ok": true,
+          "message": "one board interference marker rendered"
+        },
+        {
+          "ok": true,
+          "message": "interference leaves clue and player HUD clear of grid"
+        },
+        {
+          "ok": true,
+          "message": "upgrade overlay renders three cards"
+        },
+        {
+          "ok": true,
+          "message": "upgrade overlay fits viewport"
+        },
+        {
+          "ok": true,
+          "message": "upgrade overlay has hazards disabled/harmless"
+        }
+      ],
+      "layout": {
+        "clue": {
+          "left": 26,
+          "top": 288.64,
+          "right": 334,
+          "bottom": 311.03,
+          "width": 308,
+          "height": 22.39,
+          "centerX": 180,
+          "centerY": 299.84
+        },
+        "grid": {
+          "left": 48,
+          "top": 433.31,
+          "right": 312,
+          "bottom": 697.31,
+          "width": 264,
+          "height": 264,
+          "centerX": 180,
+          "centerY": 565.31
+        },
+        "commandPanel": {
+          "left": 12,
+          "top": 364.69,
+          "right": 348,
+          "bottom": 706.5,
+          "width": 336,
+          "height": 341.81,
+          "centerX": 180,
+          "centerY": 535.59
+        },
+        "playerHud": {
+          "left": 21.19,
+          "top": 390.47,
+          "right": 338.81,
+          "bottom": 426.13,
+          "width": 317.63,
+          "height": 35.66,
+          "centerX": 180,
+          "centerY": 408.3
+        }
+      },
+      "moving": {
+        "phase": "active",
+        "targetCount": 2,
+        "movedButtons": [
+          {
+            "id": "btn-1",
+            "offsetX": 2,
+            "offsetY": 3,
+            "cssOffsetX": "2px",
+            "cssOffsetY": "3px",
+            "beforeCenter": {
+              "x": 179.99,
+              "y": 474.65
+            },
+            "afterCenter": {
+              "x": 181.99,
+              "y": 477.65
+            },
+            "deltaX": 2,
+            "deltaY": 3
+          },
+          {
+            "id": "btn-4",
+            "offsetX": 2,
+            "offsetY": 3,
+            "cssOffsetX": "2px",
+            "cssOffsetY": "3px",
+            "beforeCenter": {
+              "x": 179.99,
+              "y": 565.32
+            },
+            "afterCenter": {
+              "x": 181.99,
+              "y": 568.32
+            },
+            "deltaX": 2,
+            "deltaY": 3
+          }
+        ]
+      },
+      "interference": {
+        "phase": "active",
+        "boardDataset": "active",
+        "opacityVar": "0.141",
+        "pseudoOpacity": "0.141",
+        "markerCount": 1
+      },
+      "upgrade": {
+        "cardCount": 3,
+        "hidden": false,
+        "boardDataset": "none",
+        "opacityVar": "0.000"
+      }
+    }
+  ]
+}

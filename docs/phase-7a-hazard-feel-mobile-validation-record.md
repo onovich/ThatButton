@@ -116,3 +116,53 @@ Commit/push:
 
 - round commit: `b93dca8`
 - push: `origin/main` PASS
+
+## Round 2 - Repeatable Browser/Mobile Hazard Smoke
+
+Changes:
+
+- Added `scripts/smoke-hazards-browser.mjs`.
+- Added `npm run smoke:hazards`.
+- Added lightweight JSON evidence at `docs/phase-7a-browser-smoke-results.json`.
+- The smoke launches a local static server and headless Chrome through CDP with no new dependencies.
+
+Coverage:
+
+- desktop `1280x720`: PASS
+- mobile `390x844`: PASS
+- short mobile `360x740`: PASS
+- initial playing layout: clue/grid/HUD viewport fit and no overlap PASS
+- player HUD placement: inside command panel and not inside battle stage PASS
+- active moving-button presentation on a deterministic later-level `3x3` board: PASS
+- active interference presentation on the same later-level board: PASS
+- upgrade overlay with hazards disabled/harmless: PASS
+
+Key browser evidence:
+
+- active moving targets: `btn-1` and `btn-4`
+- movement offset: `2px` X and `3px` Y in all three viewports
+- measured visual rect movement: `dx=2`, `dy=3` in all three viewports
+- interference opacity var: `0.141`, below the active cap of `0.160`
+- upgrade cards: 3 visible cards in all three viewports
+
+Limitations:
+
+- Active hazard browser smoke uses the real browser DOM, real CSS, real UI renderer, and real hazard core with deterministic synthetic later-level state. It does not claim a full human browser playthrough to level 24.
+- This avoids adding a private debug backdoor or exposing forbidden button IDs through the Host Bridge. Existing structure validation still covers the host-driven active L24 interference press path.
+- Real iOS Safari, Android Chrome, and human playtest evidence remain pending.
+
+Validation:
+
+- `node --check scripts\smoke-hazards-browser.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- pending

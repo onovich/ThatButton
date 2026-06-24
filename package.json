@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "node scripts/serve-static.mjs --host 127.0.0.1 --port 5173 --root .",
     "validate": "node scripts/validate-static-site.mjs && node scripts/validate-structure.mjs",
-    "build": "node scripts/build-static-site.mjs"
+    "build": "node scripts/build-static-site.mjs",
+    "smoke:hazards": "node scripts/smoke-hazards-browser.mjs"
   },
   "engines": {
     "node": ">=20"

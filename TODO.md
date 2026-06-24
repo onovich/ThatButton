@@ -116,7 +116,7 @@ Status: Accepted by CheckAndGoal; see [docs/phase-6-rpg-combat-loop-record.md](d
 
 Estimated conversation rounds: 8
 Goal guide: [docs/phase-6a-combat-feel-balance-goal-guide.md](docs/phase-6a-combat-feel-balance-goal-guide.md)
-Status: Ready for CheckAndGoal after implementation; see [docs/phase-6a-combat-feel-balance-record.md](docs/phase-6a-combat-feel-balance-record.md) and [docs/phase-6a-final-report.md](docs/phase-6a-final-report.md).
+Status: Accepted by CheckAndGoal; see [docs/phase-6a-combat-feel-balance-record.md](docs/phase-6a-combat-feel-balance-record.md) and [docs/phase-6a-final-report.md](docs/phase-6a-final-report.md).
 
 - Record fixed-seed baseline metrics for first enemy defeat timing, first upgrade timing, wrong-press survivability, combo-window forgiveness, and upgrade cadence.
 - Tune only existing Phase 6 numbers when evidence supports it: player HP, enemy HP/attack progression, base attack, combo window, combo reward, upgrade values, and decision-time modifiers.
@@ -128,12 +128,16 @@ Status: Ready for CheckAndGoal after implementation; see [docs/phase-6a-combat-f
 
 ## Phase 7 - Advanced Hazards And Spatial Interaction
 
-Estimated conversation rounds: 2-5
+Estimated conversation rounds: 16
+Goal guide: [docs/phase-7-advanced-hazards-spatial-interaction-goal-guide.md](docs/phase-7-advanced-hazards-spatial-interaction-goal-guide.md)
+Status: Planned after Phase 6A PASS; ready for executor implementation as an HTML-first Hazard Director V1 before any engine embedding work.
 
-- Prototype moving buttons, temporary occlusion, spatial grouping, or camera/observation constraints only after Phase 1 proves the baseline difficulty curve.
-- If moving objects are introduced, tune movement as a separate difficulty axis instead of combining it immediately with short timers and complex clues.
-- For a future 3D version, explore whether the player should inspect panels in space, physically move between controls, or read clues from diegetic displays.
+- Prototype moving buttons and temporary visual interference as separate difficulty axes after the first learnable RPG loop, not in the opening onboarding sequence.
+- Keep the first enemy / first upgrade cadence from Phase 6A readable; do not stack motion, interference, short timers, and complex clues too early.
+- Add deterministic hazard schedules, debug previews, host/debug facts, and validation smokes before treating hazards as a permanent design direction.
+- Preserve Phase 6A combat feel: bottom player HUD, button-to-enemy attack/combo tracers, readable combo/wrong-press feedback, and mobile layout fit.
+- Prepare only lightweight 2D spatial grouping facts for future engine consumption; do not add Unity/WebView/native integration or real 3D rendering in this phase.
 
 ## Current Recommendation
 
-After Phase 6A acceptance, use its balance and feedback evidence to decide whether Phase 7 hazards/spatial interaction should come before any engine embedding. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge and Phase 6 host/debug contracts only after the HTML gameplay loop proves itself.
+Proceed with Phase 7 hazards/spatial interaction before engine embedding. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7 hazard facts only after the HTML gameplay loop proves the hazards are fun and readable.

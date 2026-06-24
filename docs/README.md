@@ -30,3 +30,4 @@
 - [Phase 6A Combat Feel And Balance Calibration Goal Guide](phase-6a-combat-feel-balance-goal-guide.md) - goal-mode execution guide for tuning the existing RPG loop, polishing feedback, recording playtest evidence, and validating layout/balance before new hazards.
 - [Phase 6A Combat Feel And Balance Calibration Record](phase-6a-combat-feel-balance-record.md) - fixed-seed balance metrics, tuning evidence, feedback/layout smoke results, and Phase 6A self-checks.
 - [Phase 6A Final Report](phase-6a-final-report.md) - completed Phase 6A summary, validation evidence, architecture checks, non-scope, and readiness for CheckAndGoal acceptance.
+- [Phase 7 Advanced Hazards And Spatial Interaction Goal Guide](phase-7-advanced-hazards-spatial-interaction-goal-guide.md) - goal-mode execution guide for adding an HTML-first hazard director with moving-button, interference, spatial-grouping, host/debug, and validation guardrails before any engine embedding.

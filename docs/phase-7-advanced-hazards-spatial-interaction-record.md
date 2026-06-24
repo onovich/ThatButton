@@ -476,8 +476,8 @@ Round 6 validation:
 
 Commit / push:
 
-- commit: pending
-- push: pending
+- commit: `aa8dfd2` (`test: harden moving button hazard geometry`)
+- push: PASS
 - buffer round consumed: no
 
 Next:

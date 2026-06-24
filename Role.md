@@ -25,10 +25,10 @@ executor:
 idempotency:
   active_goal_guide: docs/phase-6-rpg-combat-loop-goal-guide.md
   active_goal_phase: Phase 6 - RPG Combat Loop V1
-  last_planner_dispatch: 2026-06-24T14:57:18.1169524+08:00
+  last_planner_dispatch: 2026-06-24T15:36:58.1097053+08:00
   last_planner_dispatch_status: sent
   last_planner_dispatch_guide: docs/phase-6-rpg-combat-loop-goal-guide.md
-  last_planner_dispatch_commit: cd119798142188ca46280f297e8661523f45955b
+  last_planner_dispatch_commit: 5aa3164
   last_executor_report_commit: bed80bff15d3796d27031d056e84eed0106968fb
   last_executor_report_status: ready_for_check
   last_executor_report_at: 2026-06-23T17:03:25.0872228+08:00

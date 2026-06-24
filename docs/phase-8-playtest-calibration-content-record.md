@@ -413,8 +413,73 @@ Validation:
 
 Commit/push:
 
-- pending.
+- round commit: `fdce297`
+- push: `origin/main` PASS
 
 Next round goal:
 
 - Review hazard schedule readability with tuned progression and existing browser smoke. Tune only if evidence supports changing timing/intensity.
+
+## Round 6 - Hazard Schedule Readability Review
+
+Round goal:
+
+- Review existing moving-button/interference timing after Round 4 enemy cadence tuning.
+- Tune hazard timing/intensity only if deterministic/browser evidence supports it.
+
+Hazard preview evidence:
+
+| Level | Enemy | Unlocked | Hazard types | Active types | Reason |
+| --- | --- | --- | --- | --- | --- |
+| 18 | E1 | no | none | none | `onboarding_safe` |
+| 19 | E2 | yes | moving | moving | `scheduled` |
+| 22 | E2 | yes | moving | moving | `scheduled` |
+| 24 | E2 | yes | moving + interference | moving + interference | `scheduled` |
+| 39 | E2 | yes | moving + interference | moving + interference | `scheduled` |
+| 40 | E3 | yes | moving + interference | moving + interference | `scheduled` |
+| 42 | E3 | yes | moving + interference | moving + interference | `scheduled` |
+
+Browser evidence:
+
+- `cmd /c npm.cmd run smoke:hazards`: PASS.
+- Phase 7A smoke continues to cover desktop, mobile, short-mobile, active moving-button, active interference, VFX marker, button-origin tracer, and later-stage encounter label geometry.
+
+Decision:
+
+- No hazard tuning applied in Round 6.
+- The first enemy and first upgrade remain hazard-free.
+- Movement begins at the second enemy's opening level after the first upgrade.
+- Interference remains delayed until Level 24, after several movement-only rounds.
+- Tuned enemy HP still leaves enough E2 runway for movement-only exposure before interference.
+
+Debug self-check:
+
+- Smallest fixture: `previewHazardSchedule({ levels: [18, 19, 22, 24, 39, 40, 42] })`.
+- Browser fixture: `npm run smoke:hazards`.
+- No hazard failure was observed; no timing/intensity change is justified.
+
+Architecture self-check:
+
+- No code changed in this round.
+- Hazard config/core remains the source of truth.
+- UI/browser smoke renders hazard facts only.
+- No non-scope systems were added.
+
+Validation:
+
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- pending.
+
+Next round goal:
+
+- Review UI/progression feedback for longer sessions and decide whether a compact run-progress summary is needed before final reporting.

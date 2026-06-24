@@ -350,8 +350,71 @@ Validation:
 
 Commit/push:
 
-- pending.
+- round commit: `eb99105`
+- push: `origin/main` PASS
 
 Next round goal:
 
 - Review upgrade and combo cadence with the tuned session previews. Tune only if evidence shows choices are too weak, too obvious, or too late.
+
+## Round 5 - Upgrade And Combo Cadence Review
+
+Round goal:
+
+- Review upgrade and combo cadence after Round 4 enemy HP tuning.
+- Tune existing upgrade/combo values only if evidence shows choices are weak, too obvious, or too late.
+
+Evidence command:
+
+```powershell
+cmd /c node -e "import('./src/core/debug.js').then(m=>{ /* compare previewSessionProgression upgradeStrategy values */ })"
+```
+
+Strategy comparison at `seed=phase8-validate`, `maxLevels=60`:
+
+| Strategy | Defeated enemies | Selected upgrades | Final state |
+| --- | --- | --- | --- |
+| `balanced` | E1 L18, E2 L39 | L18 `SLOW CLOCK`, L39 `SLOW CLOCK` | E3 at 54/660 HP |
+| `first` | E1 L18, E2 L39, E3 L60 | L18 `WIDER CHAIN`, L39 `HOTTER STRIKE`, L60 `ARMOR PATCH` | E4 spawned |
+| `damage` | E1 L18, E2 L39, E3 L60 | L18 `WIDER CHAIN`, L39 `HOTTER STRIKE`, L60 `CHAIN AMP` | E4 spawned |
+| `survival` | E1 L18, E2 L39, E3 L60 | L18 `ARMOR PATCH`, L39 `HOTTER STRIKE`, L60 `ARMOR PATCH` | E4 spawned |
+
+Decision:
+
+- No upgrade/combo tuning applied in Round 5.
+- Evidence shows upgrade choices are meaningfully differentiated:
+  - damage/first/survival paths reach E4 by Level 60,
+  - conservative `SLOW CLOCK` paths trade damage cadence for survivability/time comfort,
+  - first upgrade still arrives at Level 18 after enough `3x3` runway.
+- Combo semantics remain unchanged: first chained safe press can show chain readiness, visible `COMBO x2` begins on the second chained safe press, and capped combo behavior remains guarded by validation.
+
+Debug self-check:
+
+- Smallest fixture: `previewSessionProgression({ seed: 'phase8-validate', maxLevels: 60, upgradeStrategy })`.
+- Existing `previewCombatBalance(...)` still guards combo boundary at `2400ms`/`2500ms`.
+- No code changed in this round; docs record the no-tune decision.
+
+Architecture self-check:
+
+- No formula ownership moved.
+- No UI/host/gameplay changes were made.
+- No non-scope systems were added.
+
+Validation:
+
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- pending.
+
+Next round goal:
+
+- Review hazard schedule readability with tuned progression and existing browser smoke. Tune only if evidence supports changing timing/intensity.

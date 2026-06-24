@@ -659,8 +659,8 @@ Round 9 validation:
 
 Commit / push:
 
-- commit: pending
-- push: pending
+- commit: `ce0b2f1` (`feat: expand spatial hazard facts`)
+- push: PASS
 - buffer round consumed: no
 
 Next:

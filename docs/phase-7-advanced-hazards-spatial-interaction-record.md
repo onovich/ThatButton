@@ -278,8 +278,8 @@ Round 3 validation:
 
 Commit / push:
 
-- commit: pending
-- push: pending
+- commit: `3fbc28f` (`feat: expose phase 7 hazard facts`)
+- push: PASS
 - buffer round consumed: no
 
 Next:

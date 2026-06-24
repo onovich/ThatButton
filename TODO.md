@@ -184,15 +184,15 @@ Status: Accepted by CheckAndGoal; see [docs/phase-8-playtest-calibration-content
 
 Estimated conversation rounds: 8
 Goal guide: [docs/phase-9-playtest-evidence-decision-gate-goal-guide.md](docs/phase-9-playtest-evidence-decision-gate-goal-guide.md)
-Status: Planned after Phase 8 PASS; dispatched to executor for implementation.
+Status: Implemented and ready for CheckAndGoal; see [docs/phase-9-playtest-evidence-decision-gate-record.md](docs/phase-9-playtest-evidence-decision-gate-record.md), [docs/phase-9-playtest-script-and-template.md](docs/phase-9-playtest-script-and-template.md), [docs/phase-9-browser-smoke-results.json](docs/phase-9-browser-smoke-results.json), and [docs/phase-9-final-report.md](docs/phase-9-final-report.md).
 
-- Create a local-only playtest report schema and export path so real runs can be compared.
-- Capture useful non-personal run facts: seed/build facts, viewport class, levels, enemies, upgrades, combo peak, wrong presses, hazard exposure, and failure/victory reason.
-- Add manual playtest templates for desktop, iOS Safari, Android Chrome, and human observations.
-- Guard privacy: no analytics, tracking, network submission, user identifiers, or external reporting service.
-- Preserve Phase 8 progression labels, Phase 7A VFX style, bottom player HUD, button-origin tracers, host bridge compatibility, and mobile layout.
-- Use the final report as a decision gate for whether to continue HTML gameplay calibration or start a separate engine-embedding preparation phase.
+- Created a local-only playtest report schema and export path so real runs can be compared. Done.
+- Captured useful non-personal run facts: seed/build facts, viewport class, levels, enemies, upgrades, combo peak, wrong presses, hazard exposure, and failure/timeout reason. Done.
+- Added manual playtest templates for desktop, iOS Safari, Android Chrome, and human observations. Done.
+- Guarded privacy: no analytics, tracking, network submission, user identifiers, exact user agent strings, geolocation, or external reporting service. Done through schema guards, scans, and validation.
+- Preserved Phase 8 progression labels, Phase 7A VFX style, bottom player HUD, button-origin tracers, host bridge compatibility, and mobile layout. Guarded by structure validation and browser smoke.
+- Use the final report as a decision gate before the next phase. Pending planner CheckAndGoal and real-device/human evidence collection.
 
 ## Current Recommendation
 
-Run Phase 9 before another gameplay or engine phase. The next product decision should be based on comparable local/human/device reports rather than more simulated tuning alone: either continue HTML gameplay calibration around longer-run retention and hazard readability, or start a separate engine-embedding preparation phase that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7/7A/8 deterministic facts without adding new gameplay formulas to the host layer.
+Run CheckAndGoal for Phase 9. If accepted, collect at least a small real iOS Safari, Android Chrome, and human-observed evidence set using the Phase 9 template before choosing the next major direction. Use that evidence to decide between continued HTML gameplay calibration around retention/hazard readability or a separate engine-embedding preparation phase that consumes the Host Bridge without moving gameplay formulas into host/native code.

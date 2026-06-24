@@ -44,3 +44,4 @@
 - [Phase 9 Playtest Evidence And Decision Gate Record](phase-9-playtest-evidence-decision-gate-record.md) - Phase 9 round log, report schema, runtime/export evidence, validation notes, and privacy guardrails.
 - [Phase 9 Playtest Script And Evidence Template](phase-9-playtest-script-and-template.md) - local-only desktop, iOS Safari, Android Chrome, and human observation playtest templates.
 - [Phase 9 Browser Smoke Results](phase-9-browser-smoke-results.json) - Chrome/CDP desktop, mobile, and short-mobile evidence for report export UI, fallback behavior, hazards, VFX, and layout preservation.
+- [Phase 9 Final Report](phase-9-final-report.md) - completed Phase 9 report schema, runtime export flow, evidence kit, validation, pending real-device evidence, and decision-gate recommendation.

@@ -524,9 +524,69 @@ Validation:
 
 Commit/push:
 
-- round commit: pending
-- push: pending
+- round commit: `cada666 docs: record phase 9 final validation preflight`
+- push: PASS
 
 Next round goal:
 
 - Final validation, final report, TODO/docs/Role updates, final commit/push, and READY_FOR_CHECK planner routing.
+
+## Round 8 - Final Validation And Report
+
+Round goal:
+
+- Create the final report.
+- Update TODO, docs index, Role.md, and this phase record.
+- Run the full final validation matrix.
+- Commit, push, and route READY_FOR_CHECK to the planner.
+
+Final artifacts:
+
+- `docs/phase-9-final-report.md`
+- `docs/phase-9-playtest-evidence-decision-gate-record.md`
+- `docs/phase-9-playtest-script-and-template.md`
+- `docs/phase-9-browser-smoke-results.json`
+- `src/core/playtest-report.js`
+- post-run `LOCAL REPORT` export panel in `index.html` / `src/ui/render.js`
+- Host/debug report access in `src/host/app-host-api.js` and `src/core/debug.js`
+
+Debug self-check:
+
+- Smallest final proof is a deterministic report fixture, a runtime run-end report smoke, a clipboard-denied fallback smoke, and a browser smoke result across three viewport classes.
+- Failure layers covered: report core, app collection, UI export, browser permissions/fallback, host/debug payloads, static delivery, launcher scripts, and docs evidence.
+- Real iOS Safari, Android Chrome, and human playtest evidence remain pending and are explicitly listed in the final report/template.
+
+Architecture self-check:
+
+- Core/report schema, app collection, UI export, host/debug exposure, docs, and smoke validation remain separated.
+- UI does not duplicate gameplay formulas or report metrics.
+- App orchestration records facts but does not own combat/combo/hazard/upgrade semantics.
+- No non-scope systems were added: analytics, tracking, network submission, Unity/WebView/native/3D, roguelite meta, new hazards, new dependencies, framework work, CDN resources, PWA/service worker, or tuning.
+
+Validation:
+
+- `node --check src\core\playtest-report.js`: PASS
+- `node --check src\core\debug.js`: PASS
+- `node --check src\app\create-app.js`: PASS
+- `node --check src\host\app-host-api.js`: PASS
+- `node --check src\ui\render.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `node --check scripts\smoke-hazards-browser.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- `powershell -NoProfile -ExecutionPolicy Bypass -File .\StartLocalTest.ps1 -DryRun`: PASS
+- `powershell -NoProfile -ExecutionPolicy Bypass -File .\OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- Active network/privacy API scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- final commit: pending
+- push: pending
+
+Planner routing:
+
+- READY_FOR_CHECK notification pending after final push.

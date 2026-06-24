@@ -19,6 +19,7 @@ function readProjectFile(relativePath) {
 const html = readProjectFile('index.html');
 const docsIndex = readProjectFile('docs/README.md');
 const phase9Record = readProjectFile('docs/phase-9-playtest-evidence-decision-gate-record.md');
+const phase9FinalReport = readProjectFile('docs/phase-9-final-report.md');
 const phase9Template = readProjectFile('docs/phase-9-playtest-script-and-template.md');
 const phase9BrowserSmokeText = readProjectFile('docs/phase-9-browser-smoke-results.json');
 const moduleFiles = [
@@ -101,7 +102,8 @@ for (const marker of [
 for (const marker of [
   'Phase 9 Playtest Evidence And Decision Gate Record',
   'Phase 9 Playtest Script And Evidence Template',
-  'Phase 9 Browser Smoke Results'
+  'Phase 9 Browser Smoke Results',
+  'Phase 9 Final Report'
 ]) {
   if (!docsIndex.includes(marker)) {
     failures.push(`docs/README.md missing Phase 9 evidence link: ${marker}`);
@@ -129,6 +131,19 @@ for (const marker of [
 ]) {
   if (!phase9Record.includes(marker)) {
     failures.push(`Phase 9 record missing evidence marker: ${marker}`);
+  }
+}
+
+for (const marker of [
+  'Runtime Export Flow',
+  'Privacy And No-Network Guardrails',
+  'Pending Real-Device And Human Evidence',
+  'Decision Gate Recommendation',
+  'READY_FOR_CHECK Payload',
+  'local-only/no-personal-data/no-network-submission PASS'
+]) {
+  if (!phase9FinalReport.includes(marker)) {
+    failures.push(`Phase 9 final report missing marker: ${marker}`);
   }
 }
 

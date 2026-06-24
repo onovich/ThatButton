@@ -11,6 +11,7 @@ export const HOST_EVENT_TYPES = Object.freeze({
   ROUND_CLEARED: 'round_cleared',
   COMBAT_STARTED: 'combat_started',
   COMBO_CHANGED: 'combo_changed',
+  PLAYER_DAMAGED: 'player_damaged',
   BOSS_DAMAGED: 'boss_damaged',
   BOSS_DEFEATED: 'boss_defeated',
   RUN_FINISHED: 'run_finished',
@@ -193,6 +194,15 @@ export function createComboPayload(combo = null) {
 
 export function createPlayerPayload(player = null) {
   return cloneJsonSafeValue(player, 'player payload');
+}
+
+export function createPlayerDamagePayload({ damage, player, combo, round = null }) {
+  return cloneJsonSafeValue({
+    damage,
+    player,
+    combo,
+    round
+  }, 'player damage payload');
 }
 
 export function createBossDamagePayload({ damage, combat, combo, round = null }) {

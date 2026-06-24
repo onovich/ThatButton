@@ -1,5 +1,6 @@
 import { getDifficultyForLevel } from '../config/difficulty.js';
 import { createInitialState } from '../core/app-state.js';
+import { resolveWrongPressDamage } from '../core/battle.js';
 import { createDebugApi } from '../core/debug.js';
 import {
   applySafePressCombo,
@@ -224,6 +225,30 @@ export function createApp({
     }, 800);
   }
 
+  function applyWrongPressDamage(id) {
+    const playerDamageResult = resolveWrongPressDamage({
+      player: gameState.player,
+      enemyAttack: gameState.combat.attack,
+      level: gameState.level,
+      buttonId: id
+    });
+    gameState.player = playerDamageResult.player;
+    gameState.lastPlayerDamage = playerDamageResult.damage;
+    applyComboChange(resetEncounterCombo(gameState.combo, 'wrong_press'));
+    const encounterFacts = getEncounterFacts(gameState);
+    recordDebugEvent('player_damaged', {
+      playerDamage: playerDamageResult.damage,
+      player: encounterFacts.player,
+      combo: encounterFacts.combo
+    });
+    hostController.emitPlayerDamaged({
+      damage: playerDamageResult.damage,
+      player: encounterFacts.player,
+      combo: encounterFacts.combo
+    });
+    return playerDamageResult;
+  }
+
   function levelComplete({ sourceElement = null } = {}) {
     gameState.isPlaying = false;
     const combatResult = resolveRoundClearCombat({
@@ -324,13 +349,23 @@ export function createApp({
     button.isClicked = true;
 
     if (gameState.forbiddenIds.includes(id)) {
-      const result = { accepted: true, result: 'fatal', buttonId: id, source };
       hostController.emitButtonPressed({
         buttonId: id,
-        result: result.result,
+        result: 'fatal',
         button
       });
-      triggerGameOver(id, element);
+      const playerDamageResult = applyWrongPressDamage(id);
+      const result = {
+        accepted: true,
+        result: 'fatal',
+        buttonId: id,
+        source,
+        playerDamage: playerDamageResult.damage,
+        playerDefeated: playerDamageResult.defeated
+      };
+      if (playerDamageResult.defeated) {
+        triggerGameOver(id, element);
+      }
       return result;
     } else {
       const previousScore = gameState.score;

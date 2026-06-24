@@ -9,6 +9,7 @@ import {
   createComboPayload,
   createFailurePayload,
   createHostEvent,
+  createPlayerDamagePayload,
   createPlayerPayload,
   createRoundPayload,
   createRunPayload,
@@ -119,6 +120,12 @@ export function createAppHostApi({ hostBridge, getState, performance }) {
       combo: createComboPayload(combo),
       reason
     }),
+    emitPlayerDamaged: ({ damage, player, combo }) => emit(HOST_EVENT_TYPES.PLAYER_DAMAGED, createPlayerDamagePayload({
+      damage,
+      player,
+      combo,
+      round: getRoundPayload()
+    })),
     emitBossDamaged: ({ damage, combat, combo }) => emit(HOST_EVENT_TYPES.BOSS_DAMAGED, createBossDamagePayload({
       damage,
       combat,

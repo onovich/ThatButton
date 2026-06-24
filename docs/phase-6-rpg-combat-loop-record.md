@@ -238,3 +238,47 @@ Architecture self-check:
 - Host payloads only clone JSON-safe facts.
 - `create-app.js` was not changed in this round; DOM and host input remain on the existing shared path.
 - Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.
+
+## Round 5 Wrong-Press Damage Flow Evidence
+
+Implemented:
+
+- Added `player_damaged` to the centralized host event vocabulary.
+- Added `createPlayerDamagePayload(...)` in `src/core/host-events.js`.
+- Added `emitPlayerDamaged(...)` in `src/host/app-host-api.js`.
+- Updated `src/app/create-app.js` so forbidden-button presses:
+  - keep the compatible `button_pressed` result value `fatal`,
+  - apply pure wrong-press player damage,
+  - break combo,
+  - emit `player_damaged`,
+  - continue the run when player HP remains above zero,
+  - call the existing failure path only when player HP reaches zero.
+- Updated failure recap rendering to include player HP and player damage facts.
+- Extended validation for survivor wrong-press flow and lethal wrong-press flow.
+
+Validation run:
+
+- `node --check src\app\create-app.js`: PASS
+- `node --check src\core\host-events.js`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `OpenOnlineTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Debug self-check:
+
+- Fixed host smoke proves a wrong press at full HP applies 18 damage, breaks combo, emits `player_damaged`, and remains `playing`.
+- Fixed host smoke proves a wrong press at low HP reaches `0`, finishes the run, and includes player damage facts in the failure recap.
+- Failures now localize to pure battle/player helpers, app orchestration, host payloads, or recap rendering.
+- No enemy scaling, combo-window expiry, or upgrade nondeterminism was introduced in this round.
+
+Architecture self-check:
+
+- Damage amount comes from pure battle/player helpers.
+- UI renders recap facts only and does not calculate damage or death.
+- Host event vocabulary and payload builders remain centralized in `src/core/host-events.js`.
+- DOM clicks and host presses still share `pressButton(...)`.
+- Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.

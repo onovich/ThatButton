@@ -21,9 +21,15 @@ function getFailureResultText(recap) {
 }
 
 function getCombatRecapRows(recap) {
-  if (!recap.combat && !recap.combo && !recap.lastDamage) {
+  if (!recap.player && !recap.combat && !recap.combo && !recap.lastPlayerDamage && !recap.lastDamage) {
     return '';
   }
+  const playerLine = recap.player
+    ? `<div class="failure-recap-row">PLAYER: ${recap.player.hp}/${recap.player.maxHp}</div>`
+    : '';
+  const playerDamageLine = recap.lastPlayerDamage
+    ? `<div class="failure-recap-row">PLAYER DAMAGE: -${recap.lastPlayerDamage.appliedDamage}</div>`
+    : '';
   const combatLine = recap.combat
     ? `<div class="failure-recap-row">BOSS: ${escapeHtml(recap.combat.bossName)} ${recap.combat.hp}/${recap.combat.maxHp}</div>`
     : '';
@@ -33,7 +39,7 @@ function getCombatRecapRows(recap) {
   const comboLine = recap.combo
     ? `<div class="failure-recap-row">COMBO: ${escapeHtml(recap.combo.comboText || recap.combo.statusText || 'CHAIN --')} / +${recap.combo.damageBonus}</div>`
     : '';
-  return `${combatLine}${damageLine}${comboLine}`;
+  return `${playerLine}${playerDamageLine}${combatLine}${damageLine}${comboLine}`;
 }
 
 export function createRenderer({ document, timers = {}, random = Math.random, audio }) {

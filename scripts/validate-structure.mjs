@@ -309,6 +309,7 @@ const {
   createButtonPayload,
   createCombatPayload,
   createComboPayload,
+  createPlayerDamagePayload,
   createPlayerPayload,
   createRoundPayload,
   createRunResultPayload,
@@ -551,6 +552,15 @@ if (playerAttackDamage.baseDamage !== 18 || playerAttackDamage.comboBonus !== 2 
 const playerPayload = createPlayerPayload(getPlayerSummary(playerDamageResult.player));
 if (!isJsonSafeValue(playerPayload) || playerPayload.hp !== 82 || playerPayload.hpPercent !== 82) {
   failures.push(`Player payload smoke failed: ${JSON.stringify(playerPayload)}`);
+}
+const playerDamagePayload = createPlayerDamagePayload({
+  damage: playerDamageResult.damage,
+  player: playerPayload,
+  combo: createComboState(),
+  round: null
+});
+if (!isJsonSafeValue(playerDamagePayload) || playerDamagePayload.damage.appliedDamage !== 18 || playerDamagePayload.player.hp !== 82) {
+  failures.push(`Player damage payload smoke failed: ${JSON.stringify(playerDamagePayload)}`);
 }
 
 const initialCombo = createComboState();
@@ -1031,8 +1041,16 @@ if (
   failures.push(`Second host safe press should expose COMBO x2: ${JSON.stringify({ secondSafePress, combo: hostSmokeApp.getSnapshot().combo })}`);
 }
 const fatalPress = hostSmokeApp.press('btn-1');
-if (!fatalPress.accepted || fatalPress.result !== 'fatal' || hostSmokeApp.getSnapshot().status !== 'finished') {
-  failures.push(`Host fatal press did not finish the run: ${JSON.stringify(fatalPress)}`);
+if (
+  !fatalPress.accepted ||
+  fatalPress.result !== 'fatal' ||
+  fatalPress.playerDamage.appliedDamage !== 18 ||
+  fatalPress.playerDefeated ||
+  hostSmokeApp.getSnapshot().status !== 'playing' ||
+  hostSmokeApp.getSnapshot().player.hp !== 82 ||
+  hostSmokeApp.getSnapshot().combo.streak !== 0
+) {
+  failures.push(`Host wrong press should damage player, break combo, and continue while HP remains: ${JSON.stringify({ fatalPress, snapshot: hostSmokeApp.getSnapshot() })}`);
 }
 const hostEventTypes = hostSmokeBridge.getEvents().map((event) => event.type);
 for (const requiredType of [
@@ -1044,19 +1062,64 @@ for (const requiredType of [
   HOST_EVENT_TYPES.SAFE_BUTTON_CLEARED,
   HOST_EVENT_TYPES.SCORE_CHANGED,
   HOST_EVENT_TYPES.COMBO_CHANGED,
-  HOST_EVENT_TYPES.RUN_FINISHED,
-  HOST_EVENT_TYPES.BEST_RECORD_CHANGED
+  HOST_EVENT_TYPES.PLAYER_DAMAGED
 ]) {
   if (!hostEventTypes.includes(requiredType)) {
     failures.push(`Host event capture smoke missed ${requiredType}: ${JSON.stringify(hostEventTypes)}`);
   }
 }
-const runFinishedEvent = hostSmokeBridge.getEvents().find((event) => event.type === HOST_EVENT_TYPES.RUN_FINISHED);
-if (runFinishedEvent?.payload?.recap?.pressedButton?.id !== 'btn-1') {
-  failures.push(`Host run_finished event lost fatal recap facts: ${JSON.stringify(runFinishedEvent)}`);
-}
 if (!isJsonSafeValue(hostSmokeBridge.getEvents())) {
   failures.push('Captured host event sequence is not JSON-safe.');
+}
+
+const lethalBridge = createCaptureHostBridge();
+const lethalWindow = {
+  location: { search: '?seed=phase3a-baseline' },
+  AudioContext: FakeAudioContext,
+  webkitAudioContext: FakeAudioContext,
+  localStorage: fakeStorage()
+};
+const lethalApp = mainModule.createApp({
+  window: lethalWindow,
+  document: fakeDocument,
+  performance: { now: () => 2500 },
+  requestAnimationFrame: () => 0,
+  setTimeout: (callback) => {
+    if (typeof callback === 'function') callback();
+    return 0;
+  },
+  clearTimeout: () => {},
+  random: () => 0.5,
+  hostBridge: lethalBridge
+});
+lethalApp.init();
+lethalApp.start();
+lethalApp.getState().player.hp = 10;
+const lethalPress = lethalApp.press('btn-1');
+const lethalSnapshot = lethalApp.getSnapshot();
+if (
+  !lethalPress.accepted ||
+  lethalPress.result !== 'fatal' ||
+  !lethalPress.playerDefeated ||
+  lethalSnapshot.status !== 'finished' ||
+  lethalSnapshot.player.hp !== 0 ||
+  lethalSnapshot.lastFailureRecap?.pressedButton?.id !== 'btn-1' ||
+  lethalSnapshot.lastFailureRecap?.lastPlayerDamage?.appliedDamage !== 10
+) {
+  failures.push(`Lethal wrong press should finish the run with player damage recap facts: ${JSON.stringify({ lethalPress, lethalSnapshot })}`);
+}
+const lethalEventTypes = lethalBridge.getEvents().map((event) => event.type);
+for (const requiredType of [
+  HOST_EVENT_TYPES.PLAYER_DAMAGED,
+  HOST_EVENT_TYPES.RUN_FINISHED
+]) {
+  if (!lethalEventTypes.includes(requiredType)) {
+    failures.push(`Lethal wrong-press smoke missed ${requiredType}: ${JSON.stringify(lethalEventTypes)}`);
+  }
+}
+const runFinishedEvent = lethalBridge.getEvents().find((event) => event.type === HOST_EVENT_TYPES.RUN_FINISHED);
+if (runFinishedEvent?.payload?.recap?.pressedButton?.id !== 'btn-1') {
+  failures.push(`Host run_finished event lost fatal recap facts: ${JSON.stringify(runFinishedEvent)}`);
 }
 
 const victoryBridge = createCaptureHostBridge();

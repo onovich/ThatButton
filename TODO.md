@@ -167,6 +167,19 @@ Phase 7A pending real-world evidence:
 - Android Chrome real-device touch/layout/vibration review.
 - Human playtest for VFX satisfaction, wrong-press feel, upgrade reward feel, moving-button fairness, and interference readability.
 
+## Phase 8 - Playtest Calibration And Content Expansion
+
+Estimated conversation rounds: 12
+Goal guide: [docs/phase-8-playtest-calibration-content-goal-guide.md](docs/phase-8-playtest-calibration-content-goal-guide.md)
+Status: Planned after Phase 7A PASS; dispatched to executor for implementation.
+
+- Establish deterministic progression/session evidence before changing more gameplay.
+- Extend the playable arc so reaching `3x3` is not the practical end of interesting play.
+- Tune existing difficulty, combat, combo, upgrade, and hazard timing knobs with before/after evidence.
+- Add lightweight content variety such as data-driven enemy/stage identity only if it improves readability and motivation.
+- Preserve Phase 7A VFX language, bottom player HUD, button-to-enemy tracer origins, host bridge compatibility, and mobile layout.
+- Keep Unity/WebView/native/3D, roguelite meta-progression, new hazards, new dependencies, framework rewrites, CDN resources, and PWA work out of scope.
+
 ## Current Recommendation
 
-Phase 7A is accepted. Choose the next product direction before writing another execution phase: run real-device and human playtests, expand playable content/progression, or start a narrow Unity/WebView embedding spike. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7/7A hazard facts only after the HTML gameplay loop proves the hazards are fun and readable.
+Run Phase 8 before engine embedding or another major mechanic. The game now needs a longer, evidence-backed session arc: more playable runway after `3x3`, clearer enemy/progression cadence, and safer tuning data for difficulty, combo, upgrades, and hazards. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7/7A hazard facts only after the HTML gameplay loop proves the hazards are fun and readable.

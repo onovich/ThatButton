@@ -37,3 +37,4 @@
 - [Phase 7A VFX Feel And Hazard Validation Record](phase-7a-hazard-feel-mobile-validation-record.md) - Phase 7A round log, VFX audit/implementation evidence, browser smoke results, tuning gate, and manual playtest checklist.
 - [Phase 7A Browser Smoke Results](phase-7a-browser-smoke-results.json) - lightweight Chrome/CDP geometry and VFX marker evidence for desktop, mobile, short-mobile, active hazards, and upgrade overlay states.
 - [Phase 7A Final Report](phase-7a-final-report.md) - completed Phase 7A VFX/hazard validation summary, evidence, architecture checks, pending real-device playtests, and readiness payload.
+- [Phase 8 Playtest Calibration And Content Expansion Goal Guide](phase-8-playtest-calibration-content-goal-guide.md) - goal-mode execution guide for extending the playable session, calibrating progression from evidence, and preserving Phase 7A feel without adding major new systems.

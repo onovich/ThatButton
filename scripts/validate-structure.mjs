@@ -150,9 +150,12 @@ const hazardPresentationMarkers = [
   'refs.commandPanel.dataset.hazardTargetCount',
   'refs.gridEl.dataset.hazardPhase',
   'refs.hazardLayer.innerHTML =',
+  'clampHazardOffset',
   'applyHazardMotion',
   "buttonElement.style.setProperty('--hazard-x'",
   "buttonElement.style.setProperty('--hazard-y'",
+  'dataset.hazardOffsetX',
+  'dataset.hazardOffsetY',
   'getButtonElement(buttonId)',
   'getBoundingClientRect',
   'targetRect.left - panelRect.left',
@@ -1355,6 +1358,7 @@ function fakeElement() {
 function fakeGeometryElement(rect = {}) {
   const element = fakeElement();
   const children = [];
+  let innerHtml = '';
   const normalizedRect = {
     left: Number(rect.left) || 0,
     top: Number(rect.top) || 0,
@@ -1372,6 +1376,17 @@ function fakeGeometryElement(rect = {}) {
   element.setAttribute = (name, value) => {
     attributes[name] = String(value);
   };
+  Object.defineProperty(element, 'innerHTML', {
+    get() {
+      return innerHtml;
+    },
+    set(value) {
+      innerHtml = String(value);
+      if (innerHtml === '') {
+        children.length = 0;
+      }
+    }
+  });
   element.getBoundingClientRect = () => ({
     ...normalizedRect,
     right: normalizedRect.left + normalizedRect.width,
@@ -1439,7 +1454,9 @@ if (
   hazardUiElements.get('hazard-status-text').innerText !== 'HAZARD ACTIVE' ||
   hazardLayerChildren.length !== 3 ||
   hazardUiElements.get('btn-0').style['--hazard-x'] !== '4px' ||
-  hazardUiElements.get('btn-0').style['--hazard-y'] !== '-2px' ||
+  hazardUiElements.get('btn-0').style['--hazard-y'] !== '0px' ||
+  hazardUiElements.get('btn-4').style['--hazard-x'] !== '4px' ||
+  hazardUiElements.get('btn-4').style['--hazard-y'] !== '-2px' ||
   hazardUiElements.get('btn-4').dataset.hazardMotion !== 'active' ||
   firstHazardMarker?.style.left !== '10px' ||
   firstHazardMarker?.style.top !== '110px' ||
@@ -1462,6 +1479,39 @@ if (
     second: secondHazardMarker?.style,
     board: boardHazardMarker?.style,
     boardDataset: boardHazardMarker?.dataset
+  })}`);
+}
+hazardRenderer.updateHazardPresentation({
+  enabled: true,
+  unlocked: false,
+  phase: HAZARD_PHASES.INACTIVE,
+  hazards: []
+});
+hazardRenderer.updateHazardPresentation({
+  enabled: true,
+  unlocked: true,
+  phase: HAZARD_PHASES.ACTIVE,
+  hazards: [
+    {
+      type: HAZARD_TYPES.MOVING_BUTTON,
+      phase: HAZARD_PHASES.ACTIVE,
+      targetButtonIds: ['btn-0'],
+      motion: {
+        offsetXPx: -14,
+        offsetYPx: -9
+      }
+    }
+  ]
+});
+if (
+  hazardUiElements.get('btn-0').style['--hazard-x'] !== '0px' ||
+  hazardUiElements.get('btn-0').style['--hazard-y'] !== '0px' ||
+  hazardUiElements.get('btn-0').dataset.hazardOffsetX !== '0' ||
+  hazardUiElements.get('btn-0').dataset.hazardOffsetY !== '0'
+) {
+  failures.push(`Moving-button edge clamp smoke failed: ${JSON.stringify({
+    btn0Style: hazardUiElements.get('btn-0').style,
+    btn0Dataset: hazardUiElements.get('btn-0').dataset
   })}`);
 }
 
@@ -1989,13 +2039,20 @@ if (debugApi) {
     movementHazard?.targetButtonIds.length !== BASE_HAZARD_CONFIG.movingButton.targetCount ||
     movementHazard.targetButtonIds.includes('btn-0') ||
     movementHazard.motion.amplitudeXPx !== BASE_HAZARD_CONFIG.movingButton.amplitudeXPx ||
-    movementHazard.motion.offsetXPx !== 3 ||
+    movementHazard.motion.offsetXPx !== 2 ||
     movementHazard.motion.offsetYPx !== 3 ||
     movementTelegraphHazard?.motion?.offsetXPx !== 0 ||
     movementTelegraphHazard?.motion?.offsetYPx !== 0 ||
     movementActive.sampledAtMs !== 2000
   ) {
     failures.push(`Moving-button hazard schedule changed: ${JSON.stringify({ movementTelegraph, movementActive, movementCooldown, movementExpired })}`);
+  }
+  const tightestBoardGapPx = 8;
+  if (
+    BASE_HAZARD_CONFIG.movingButton.amplitudeXPx > tightestBoardGapPx - 1 ||
+    BASE_HAZARD_CONFIG.movingButton.amplitudeYPx > tightestBoardGapPx - 1
+  ) {
+    failures.push(`Moving-button amplitude should preserve visible gap in tight layouts: ${JSON.stringify(BASE_HAZARD_CONFIG.movingButton)}`);
   }
   const interferenceActive = createHazardDirectorState({
     seed: 'phase7-validate',

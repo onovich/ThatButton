@@ -24,7 +24,7 @@ export const BASE_HAZARD_CONFIG = Object.freeze({
     telegraphDurationMs: 700,
     durationMs: 2600,
     cooldownMs: 4200,
-    amplitudeXPx: 10,
+    amplitudeXPx: 6,
     amplitudeYPx: 6,
     cycleMs: 2400
   }),

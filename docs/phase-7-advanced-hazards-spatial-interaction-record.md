@@ -421,3 +421,65 @@ Commit / push:
 Next:
 
 - Round 6: moving-button validation and tuning with stronger geometry/overlap guards.
+
+## Round 6 Moving-Button Validation And Tuning
+
+Implemented:
+
+- Added renderer-side edge clamping for moving-button offsets:
+  - clamps against the current button rect and grid rect,
+  - subtracts the previous hazard offset so transformed rects can still produce stable base geometry,
+  - stores `hazardOffsetX` and `hazardOffsetY` on button data attributes for the next frame.
+- Tuned moving-button X amplitude from `10px` to `6px`.
+- Kept Y amplitude at `6px`.
+- Extended validation:
+  - fake-geometry smoke now verifies an edge button clamps out-of-board negative motion to `0px`,
+  - a centered button still receives the requested motion offset,
+  - a tight-layout gap guard fails if configured amplitude exceeds the smallest known grid gap safety margin.
+
+Tuning evidence:
+
+- The tightest current layout gap marker is `8px` in short-height CSS.
+- A `10px` X drift could visually intrude past that gap on edge/adjacent cases.
+- `6px` keeps the first active fixed-seed sample gentle: Level 19 / enemy 2 / `2000ms` now produces `2px, 3px`.
+- No timer, rule, combat, combo, upgrade, board-size, or unlock timing value changed.
+
+Debug self-check:
+
+- The change is explained by fixed fake geometry, existing fixed-seed hazard samples, and a documented layout-gap constraint.
+- Failures localize to renderer clamp geometry, hazard tuning config, or structure validation.
+- First enemy / first upgrade path remains hazard-free because unlock thresholds were not changed.
+- Moving buttons still use transforms on the button element itself; click target and visual target remain unified.
+- Current attack/combo tracer sourcing still uses the moved button rect through `getBoundingClientRect()`.
+
+Architecture self-check:
+
+- Core still owns schedule timing and deterministic offsets.
+- UI owns viewport/grid clamping because it is presentation geometry.
+- App and host code were not changed in this round.
+- Rule, fatal-button, combat, combo, upgrade, and difficulty semantics were not duplicated.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, framework work, and Phase 1 retuning remain out of scope.
+- Validation now guards edge clamping and conservative amplitude bounds.
+
+Round 6 validation:
+
+- `node --check src\config\hazards.js`: PASS
+- `node --check src\ui\render.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Round 7: add temporary CRT/signal interference hazard V1.

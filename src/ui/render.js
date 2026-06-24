@@ -332,6 +332,24 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     return true;
   }
 
+  function clampHazardOffset(buttonElement, offsetX, offsetY) {
+    const gridRect = getElementRect(refs.gridEl);
+    const buttonRect = getElementRect(buttonElement);
+    if (!gridRect || !buttonRect) {
+      return { offsetX, offsetY };
+    }
+    const previousX = Math.round(Number(buttonElement.dataset?.hazardOffsetX) || 0);
+    const previousY = Math.round(Number(buttonElement.dataset?.hazardOffsetY) || 0);
+    const baseLeft = buttonRect.left - previousX;
+    const baseRight = buttonRect.right - previousX;
+    const baseTop = buttonRect.top - previousY;
+    const baseBottom = buttonRect.bottom - previousY;
+    return {
+      offsetX: Math.max(gridRect.left - baseLeft, Math.min(gridRect.right - baseRight, offsetX)),
+      offsetY: Math.max(gridRect.top - baseTop, Math.min(gridRect.bottom - baseBottom, offsetY))
+    };
+  }
+
   function resetHazardMotion(buttonId) {
     const buttonElement = getButtonElement(buttonId);
     if (!buttonElement?.style) return;
@@ -339,18 +357,23 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     buttonElement.style.setProperty('--hazard-y', '0px');
     if (buttonElement.dataset) {
       buttonElement.dataset.hazardMotion = 'none';
+      buttonElement.dataset.hazardOffsetX = '0';
+      buttonElement.dataset.hazardOffsetY = '0';
     }
   }
 
   function applyHazardMotion({ buttonId, hazard, phase }) {
     const buttonElement = getButtonElement(buttonId);
     if (!buttonElement?.style) return false;
-    const offsetX = Math.round(Number(hazard?.motion?.offsetXPx) || 0);
-    const offsetY = Math.round(Number(hazard?.motion?.offsetYPx) || 0);
+    const rawOffsetX = Math.round(Number(hazard?.motion?.offsetXPx) || 0);
+    const rawOffsetY = Math.round(Number(hazard?.motion?.offsetYPx) || 0);
+    const { offsetX, offsetY } = clampHazardOffset(buttonElement, rawOffsetX, rawOffsetY);
     buttonElement.style.setProperty('--hazard-x', `${offsetX}px`);
     buttonElement.style.setProperty('--hazard-y', `${offsetY}px`);
     if (buttonElement.dataset) {
       buttonElement.dataset.hazardMotion = phase === 'active' ? 'active' : 'telegraph';
+      buttonElement.dataset.hazardOffsetX = String(offsetX);
+      buttonElement.dataset.hazardOffsetY = String(offsetY);
     }
     return true;
   }

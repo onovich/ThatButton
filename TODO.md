@@ -100,7 +100,7 @@ Status: Implemented in Phase 5 as distribution hardening; see [docs/phase-5-demo
 
 Estimated conversation rounds: 16
 Goal guide: [docs/phase-6-rpg-combat-loop-goal-guide.md](docs/phase-6-rpg-combat-loop-goal-guide.md)
-Status: Implemented in Phase 6 as RPG Combat Loop V1; see [docs/phase-6-rpg-combat-loop-record.md](docs/phase-6-rpg-combat-loop-record.md) and [docs/phase-6-final-report.md](docs/phase-6-final-report.md).
+Status: Accepted by CheckAndGoal; see [docs/phase-6-rpg-combat-loop-record.md](docs/phase-6-rpg-combat-loop-record.md) and [docs/phase-6-final-report.md](docs/phase-6-final-report.md).
 
 - Fix combo semantics first: the first safe press starts a chain silently, `COMBO x2` appears only on the second chained safe press, and later chained presses increment the visible count by one. Done.
 - Add player HP so a wrong press damages the player and breaks combo instead of ending the run immediately; HP reaching zero ends the run. Done.
@@ -112,6 +112,20 @@ Status: Implemented in Phase 6 as RPG Combat Loop V1; see [docs/phase-6-rpg-comb
 - Expand debug previews, host events, and validation smokes for player HP, enemy state, combo expiry, upgrades, and JSON-safe payloads. Done.
 - Keep Unity/WebView/native engine integration deferred; Phase 6 remains an HTML-first gameplay expansion with host-contract preparation. Preserved.
 
+## Phase 6A - Combat Feel And Balance Calibration
+
+Estimated conversation rounds: 8
+Goal guide: [docs/phase-6a-combat-feel-balance-goal-guide.md](docs/phase-6a-combat-feel-balance-goal-guide.md)
+Status: Planned after Phase 6 PASS to polish and calibrate the existing RPG combat loop before adding new hazards or engine scope.
+
+- Record fixed-seed baseline metrics for first enemy defeat timing, first upgrade timing, wrong-press survivability, combo-window forgiveness, and upgrade cadence.
+- Tune only existing Phase 6 numbers when evidence supports it: player HP, enemy HP/attack progression, base attack, combo window, combo reward, upgrade values, and decision-time modifiers.
+- Polish existing feedback tiers for no-combo success, chain start, `COMBO x2`, higher combos, wrong press, enemy damage, and upgrade selection.
+- Keep player HUD separate from enemy identity and preserve mobile/short-desktop layout fit.
+- Add or refine validation smokes for balance previews, feedback markers, upgrade determinism, wrong-press survival/death, combo expiry, and desktop/mobile geometry.
+- Record real-device and human playtest items explicitly as passed or pending; do not claim evidence that was not gathered.
+- Do not add moving buttons, spatial hazards, Unity/WebView integration, roguelite meta-progression, new dependencies, or framework work.
+
 ## Phase 7 - Advanced Hazards And Spatial Interaction
 
 Estimated conversation rounds: 2-5
@@ -122,4 +136,4 @@ Estimated conversation rounds: 2-5
 
 ## Current Recommendation
 
-Phase 6 is now ready for planner/checker review. After acceptance, use real-device and human playtest evidence to decide whether Phase 7 hazards/spatial interaction should come before any engine embedding. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge and Phase 6 host/debug contracts only after the HTML gameplay loop proves itself.
+After Phase 6 acceptance, run Phase 6A to polish combat feel and collect balance/playtest evidence. Use Phase 6A evidence to decide whether Phase 7 hazards/spatial interaction should come before any engine embedding. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge and Phase 6 host/debug contracts only after the HTML gameplay loop proves itself.

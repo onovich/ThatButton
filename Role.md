@@ -23,14 +23,14 @@ executor:
   evidence: same-workspace programmer thread owns implementation work for this project.
 
 idempotency:
-  active_goal_guide: docs/phase-6-rpg-combat-loop-goal-guide.md
-  active_goal_phase: Phase 6 - RPG Combat Loop V1
-  last_planner_dispatch: 2026-06-24T15:41:34.9725552+08:00
-  last_planner_dispatch_status: sent
-  last_planner_dispatch_guide: docs/phase-6-rpg-combat-loop-goal-guide.md
-  last_planner_dispatch_commit: 6ff7e41
+  active_goal_guide: docs/phase-6a-combat-feel-balance-goal-guide.md
+  active_goal_phase: Phase 6A - Combat Feel And Balance Calibration
+  last_planner_dispatch: 2026-06-24T17:06:43.6145885+08:00
+  last_planner_dispatch_status: pending
+  last_planner_dispatch_guide: docs/phase-6a-combat-feel-balance-goal-guide.md
+  last_planner_dispatch_commit: pending
   last_executor_report_commit: 843e7b31aacbac5205289d308b62be8d4821a799
   last_executor_report_status: ready_for_check
   last_executor_report_at: 2026-06-24T16:54:58.2265879+08:00
   last_executor_report_guide: docs/phase-6-rpg-combat-loop-goal-guide.md
-  last_check_status: dispatched
+  last_check_status: pass

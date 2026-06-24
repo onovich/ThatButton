@@ -27,3 +27,4 @@
 - [Phase 6 RPG Combat Loop V1 Goal Guide](phase-6-rpg-combat-loop-goal-guide.md) - goal-mode execution guide for correcting combo semantics, adding player HP, enemy scaling, combo windows, upgrade choices, stronger feedback, and host/debug validation.
 - [Phase 6 RPG Combat Loop V1 Record](phase-6-rpg-combat-loop-record.md) - implementation evidence, validation smokes, host/debug payload coverage, and viewport smoke notes for Phase 6.
 - [Phase 6 Final Report](phase-6-final-report.md) - completed Phase 6 summary, architecture checks, validation evidence, non-scope, and pending playtest evidence.
+- [Phase 6A Combat Feel And Balance Calibration Goal Guide](phase-6a-combat-feel-balance-goal-guide.md) - goal-mode execution guide for tuning the existing RPG loop, polishing feedback, recording playtest evidence, and validating layout/balance before new hazards.

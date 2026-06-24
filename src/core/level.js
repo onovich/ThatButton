@@ -50,6 +50,7 @@ export function getRoundSnapshot({
   ruleId,
   timeLimit,
   safeKeysRemaining,
+  player = null,
   combat = null,
   combo = null
 }) {
@@ -71,6 +72,7 @@ export function getRoundSnapshot({
     readability: difficulty.readability,
     feedbackIntensity: difficulty.feedbackIntensity,
     safeKeysRemaining,
+    player,
     combat,
     combo
   };

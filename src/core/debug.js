@@ -1,7 +1,9 @@
 import { getDifficultyForLevel } from '../config/difficulty.js';
+import { resolveWrongPressDamage } from './battle.js';
 import { applyRoundClearDamage, createCombatState, getCombatSummary } from './combat.js';
 import { createComboState, getComboSummary } from './combo.js';
 import { generateLevelData } from './level.js';
+import { createPlayerState, getPlayerSummary } from './player.js';
 import { createSeededRng } from './rng.js';
 import {
   BEST_RECORD_KEY,
@@ -103,6 +105,20 @@ export function previewCombatRoundClear({ level = 1, timeLeftMs = 18000, streak 
   };
 }
 
+export function previewPlayerDamage({ hp = 100, maxHp = 100, enemyAttack = 18, level = 1, buttonId = 'btn-test' } = {}) {
+  const playerResult = resolveWrongPressDamage({
+    player: createPlayerState({ hp, maxHp }),
+    enemyAttack,
+    level,
+    buttonId
+  });
+  return {
+    player: getPlayerSummary(playerResult.player),
+    damage: playerResult.damage,
+    defeated: playerResult.defeated
+  };
+}
+
 export function createDebugApi({
   getState,
   loadBestRecord,
@@ -123,6 +139,7 @@ export function createDebugApi({
       });
     },
     previewCombatRoundClear,
+    previewPlayerDamage,
     getDifficultyForLevel,
     getLastFailureRecap: () => cloneFailureRecap(getState().lastFailureRecap),
     getLastVictoryRecap: () => cloneFailureRecap(getState().lastVictoryRecap),

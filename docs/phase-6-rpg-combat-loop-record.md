@@ -197,3 +197,44 @@ Architecture self-check:
 - Host snapshots/events receive JSON-safe combo facts from the app/core path.
 - DOM clicks and host presses still share `pressButton(...)`.
 - Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.
+
+## Round 4 Player State Core Evidence
+
+Implemented:
+
+- Added `src/config/battle.js` for Phase 6 battle tunables:
+  - player max HP,
+  - wrong-press damage default,
+  - base attack damage,
+  - combo window and future upgrade amounts.
+- Added `src/core/player.js` for player HP state, damage application, max-HP changes, and summaries.
+- Added `src/core/battle.js` for wrong-press damage calculation and player attack damage calculation.
+- Added player state to `src/core/app-state.js` and `src/core/encounter.js`.
+- Extended round, recap, host event, and host snapshot payloads so they can carry JSON-safe player facts.
+- Added `previewPlayerDamage(...)` to the debug API.
+- Extended `scripts/validate-structure.mjs` to import and guard the new modules, player damage fixtures, debug helper, and host snapshot player facts.
+
+Validation run:
+
+- `node --check src\core\player.js`: PASS
+- `node --check src\core\battle.js`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `OpenOnlineTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Debug self-check:
+
+- Minimal fixtures cover initial player HP, non-lethal wrong-press damage, lethal wrong-press damage, max-HP increase, player attack damage, debug preview, and JSON-safe host payload.
+- Runtime forbidden-press behavior is intentionally unchanged until Round 5, so failures still localize to app orchestration if old instant-failure behavior appears.
+- No combo expiry, enemy scaling, or upgrade nondeterminism was introduced in this round.
+
+Architecture self-check:
+
+- Player and battle formulas live in pure config/core modules.
+- UI does not calculate HP, damage, or player status.
+- Host payloads only clone JSON-safe facts.
+- `create-app.js` was not changed in this round; DOM and host input remain on the existing shared path.
+- Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.

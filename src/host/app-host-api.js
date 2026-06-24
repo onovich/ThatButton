@@ -9,6 +9,7 @@ import {
   createComboPayload,
   createFailurePayload,
   createHostEvent,
+  createPlayerPayload,
   createRoundPayload,
   createRunPayload,
   createRunResultPayload
@@ -31,6 +32,7 @@ export function createAppHostApi({ hostBridge, getState, performance }) {
       safeKeysRemaining: state.safeKeysRemaining,
       timeLimit: state.timeLimit,
       timeLeft: state.timeLeft,
+      player: state.player,
       combat: state.combat,
       combo: state.combo
     });
@@ -53,6 +55,7 @@ export function createAppHostApi({ hostBridge, getState, performance }) {
       status: state.isPlaying ? 'playing' : (state.lastRunResultRecap ? 'finished' : 'idle'),
       run: getRunPayload(),
       round: getRoundPayload(),
+      player: createPlayerPayload(state.player),
       combat: createCombatPayload(state.combat),
       combo: createComboPayload(state.combo),
       lastFailureRecap: state.lastFailureRecap,

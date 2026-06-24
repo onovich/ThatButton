@@ -126,6 +126,7 @@ export function createRoundPayload({
   safeKeysRemaining,
   timeLimit,
   timeLeft,
+  player = null,
   combat = null,
   combo = null
 }) {
@@ -148,6 +149,7 @@ export function createRoundPayload({
     timeLeftMs: Math.max(0, Math.round(Number(timeLeft) || 0)),
     timeRewardMs: difficulty.timeRewardMs,
     safeKeysRemaining,
+    player,
     combat,
     combo,
     buttons: buttons.map(createButtonPayload)
@@ -189,6 +191,10 @@ export function createComboPayload(combo = null) {
   return cloneJsonSafeValue(combo, 'combo payload');
 }
 
+export function createPlayerPayload(player = null) {
+  return cloneJsonSafeValue(player, 'player payload');
+}
+
 export function createBossDamagePayload({ damage, combat, combo, round = null }) {
   return cloneJsonSafeValue({
     damage,
@@ -203,6 +209,7 @@ export function createRunResultPayload({
   reason = null,
   recap,
   round = null,
+  player = null,
   combat = null,
   combo = null
 }) {
@@ -211,6 +218,7 @@ export function createRunResultPayload({
     reason,
     recap,
     round,
+    player,
     combat,
     combo
   }, 'run result payload');

@@ -19,11 +19,14 @@ function readProjectFile(relativePath) {
 const html = readProjectFile('index.html');
 const moduleFiles = [
   'src/config/difficulty.js',
+  'src/config/battle.js',
   'src/config/combat.js',
   'src/core/app-state.js',
+  'src/core/battle.js',
   'src/core/combat.js',
   'src/core/combo.js',
   'src/core/encounter.js',
+  'src/core/player.js',
   'src/core/rng.js',
   'src/core/rules.js',
   'src/core/level.js',
@@ -123,11 +126,14 @@ for (const [relativePath, source] of [['index.html', html], ...sources]) {
 
 const coreBoundaryFiles = [
   'src/config/difficulty.js',
+  'src/config/battle.js',
   'src/config/combat.js',
   'src/core/app-state.js',
+  'src/core/battle.js',
   'src/core/combat.js',
   'src/core/combo.js',
   'src/core/encounter.js',
+  'src/core/player.js',
   'src/core/rng.js',
   'src/core/rules.js',
   'src/core/level.js',
@@ -218,10 +224,13 @@ if (mainLineCount > 420) {
 
 const [
   difficultyModule,
+  battleConfigModule,
+  battleModule,
   combatConfigModule,
   combatModule,
   comboModule,
   debugModule,
+  playerModule,
   storageModule,
   recapModule,
   hostEventsModule,
@@ -229,10 +238,13 @@ const [
   mainModule
 ] = await Promise.all([
   import(moduleUrl('src/config/difficulty.js')),
+  import(moduleUrl('src/config/battle.js')),
+  import(moduleUrl('src/core/battle.js')),
   import(moduleUrl('src/config/combat.js')),
   import(moduleUrl('src/core/combat.js')),
   import(moduleUrl('src/core/combo.js')),
   import(moduleUrl('src/core/debug.js')),
+  import(moduleUrl('src/core/player.js')),
   import(moduleUrl('src/core/storage.js')),
   import(moduleUrl('src/core/recap.js')),
   import(moduleUrl('src/core/host-events.js')),
@@ -243,6 +255,14 @@ const [
 const {
   getDifficultyForLevel
 } = difficultyModule;
+const {
+  BASE_BATTLE_CONFIG
+} = battleConfigModule;
+const {
+  calculatePlayerAttackDamage,
+  calculateWrongPressDamage,
+  resolveWrongPressDamage
+} = battleModule;
 const {
   COMBO_DAMAGE_PER_CHAIN,
   COMBO_MAX_DAMAGE_BONUS,
@@ -262,8 +282,15 @@ const {
   resetCombo
 } = comboModule;
 const {
+  applyMaxHpChange,
+  applyPlayerDamage,
+  createPlayerState,
+  getPlayerSummary
+} = playerModule;
+const {
   previewSeededLevel,
-  previewFailureRecap
+  previewFailureRecap,
+  previewPlayerDamage
 } = debugModule;
 const {
   BEST_RECORD_KEY,
@@ -282,6 +309,7 @@ const {
   createButtonPayload,
   createCombatPayload,
   createComboPayload,
+  createPlayerPayload,
   createRoundPayload,
   createRunResultPayload,
   isJsonSafeValue
@@ -466,6 +494,63 @@ if (level1.buttonCount >= 9) {
 }
 if (level10.timeLimitMs < 13000) {
   failures.push('Level 10 should remain readable instead of relying on a harsh timer.');
+}
+
+const initialPlayer = createPlayerState();
+if (
+  BASE_BATTLE_CONFIG.playerMaxHp !== 100 ||
+  BASE_BATTLE_CONFIG.wrongPressDamage !== 18 ||
+  initialPlayer.hp !== 100 ||
+  initialPlayer.maxHp !== 100 ||
+  initialPlayer.status !== 'active'
+) {
+  failures.push(`Initial player state changed: ${JSON.stringify({ config: BASE_BATTLE_CONFIG, initialPlayer })}`);
+}
+const playerDamageResult = applyPlayerDamage(initialPlayer, {
+  amount: 18,
+  enemyAttack: 18,
+  source: 'wrong_press',
+  level: 3,
+  buttonId: 'btn-1'
+});
+if (
+  playerDamageResult.damage.appliedDamage !== 18 ||
+  playerDamageResult.damage.hpBefore !== 100 ||
+  playerDamageResult.damage.hpAfter !== 82 ||
+  playerDamageResult.player.hp !== 82 ||
+  playerDamageResult.player.status !== 'active' ||
+  playerDamageResult.defeated
+) {
+  failures.push(`Player damage smoke failed: ${JSON.stringify(playerDamageResult)}`);
+}
+const lethalPlayerDamage = resolveWrongPressDamage({
+  player: createPlayerState({ hp: 12, maxHp: 100 }),
+  enemyAttack: 18,
+  level: 4,
+  buttonId: 'btn-1'
+});
+if (
+  calculateWrongPressDamage({ enemyAttack: 18 }) !== 18 ||
+  lethalPlayerDamage.player.hp !== 0 ||
+  lethalPlayerDamage.player.status !== 'defeated' ||
+  !lethalPlayerDamage.defeated
+) {
+  failures.push(`Lethal wrong-press damage smoke failed: ${JSON.stringify(lethalPlayerDamage)}`);
+}
+const maxHpUpgradeSmoke = applyMaxHpChange(playerDamageResult.player, { amount: 24 }).player;
+if (maxHpUpgradeSmoke.maxHp !== 124 || maxHpUpgradeSmoke.hp !== 106 || maxHpUpgradeSmoke.status !== 'active') {
+  failures.push(`Player max-HP change smoke failed: ${JSON.stringify(maxHpUpgradeSmoke)}`);
+}
+const playerAttackDamage = calculatePlayerAttackDamage({
+  baseAttack: 18,
+  combo: createComboState({ streak: 3 })
+});
+if (playerAttackDamage.baseDamage !== 18 || playerAttackDamage.comboBonus !== 2 || playerAttackDamage.totalDamage !== 20) {
+  failures.push(`Player attack damage smoke failed: ${JSON.stringify(playerAttackDamage)}`);
+}
+const playerPayload = createPlayerPayload(getPlayerSummary(playerDamageResult.player));
+if (!isJsonSafeValue(playerPayload) || playerPayload.hp !== 82 || playerPayload.hpPercent !== 82) {
+  failures.push(`Player payload smoke failed: ${JSON.stringify(playerPayload)}`);
 }
 
 const initialCombo = createComboState();
@@ -871,6 +956,7 @@ const requiredDebugHelpers = [
   'getLastVictoryRecap',
   'getLastRunResultRecap',
   'previewCombatRoundClear',
+  'previewPlayerDamage',
   'getCombatState',
   'getComboState',
   'getBestRecord',
@@ -910,6 +996,13 @@ hostSmokeApp.start();
 const firstSnapshot = hostSmokeApp.getSnapshot();
 if (firstSnapshot.status !== 'playing' || firstSnapshot.round.forbiddenIds || firstSnapshot.round.buttons.length !== 4) {
   failures.push(`Host snapshot shape changed: ${JSON.stringify(firstSnapshot)}`);
+}
+if (
+  firstSnapshot.player?.hp !== 100 ||
+  firstSnapshot.player?.maxHp !== 100 ||
+  firstSnapshot.round.player?.hp !== 100
+) {
+  failures.push(`Host snapshot missing player facts: ${JSON.stringify(firstSnapshot.player)}`);
 }
 const safePress = hostSmokeApp.press('btn-0');
 if (!safePress.accepted || safePress.result !== 'safe' || hostSmokeApp.getSnapshot().run.score !== 10) {
@@ -1036,6 +1129,15 @@ if (debugApi) {
     debugCombatPreview.combo.rewardText !== 'DMG +2'
   ) {
     failures.push(`Debug API combat preview changed: ${JSON.stringify(debugCombatPreview)}`);
+  }
+  const debugPlayerDamage = debugApi.previewPlayerDamage({ hp: 20, maxHp: 100, enemyAttack: 18, level: 4, buttonId: 'btn-1' });
+  if (
+    debugPlayerDamage.damage.appliedDamage !== 18 ||
+    debugPlayerDamage.player.hp !== 2 ||
+    debugPlayerDamage.player.status !== 'active' ||
+    debugPlayerDamage.defeated
+  ) {
+    failures.push(`Debug API player-damage preview changed: ${JSON.stringify(debugPlayerDamage)}`);
   }
 
   const debugInitial = debugApi.getBestRecord();

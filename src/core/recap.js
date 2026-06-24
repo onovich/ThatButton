@@ -35,8 +35,10 @@ export function buildFailureRecap({
   buttons,
   safeKeysRemaining,
   bestRecord,
+  player = null,
   combat = null,
   combo = null,
+  lastPlayerDamage = null,
   lastDamage = null
 }) {
   const forbiddenButtons = getForbiddenButtonRecaps(buttons, forbiddenIds);
@@ -62,8 +64,10 @@ export function buildFailureRecap({
     bestAfter: cloneBestRecord(bestRecord),
     bestComparison: comparison,
     bestSaveStatus: 'not_saved',
+    player,
     combat,
     combo,
+    lastPlayerDamage,
     lastDamage
   };
 }
@@ -73,8 +77,10 @@ export function buildVictoryRecap({
   score,
   difficulty,
   bestRecord,
+  player,
   combat,
   combo,
+  lastPlayerDamage,
   lastDamage
 }) {
   const comparison = compareRunToBest(level, score, bestRecord);
@@ -89,8 +95,10 @@ export function buildVictoryRecap({
     bestAfter: cloneBestRecord(bestRecord),
     bestComparison: comparison,
     bestSaveStatus: 'not_saved',
+    player,
     combat,
     combo,
+    lastPlayerDamage,
     lastDamage
   };
 }

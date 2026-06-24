@@ -732,3 +732,64 @@ Commit / push:
 Next:
 
 - Round 11: Host Bridge and debug contract pass for hazard snapshots/events.
+
+## Round 11 Host Bridge And Debug Contract Pass
+
+Implemented:
+
+- Kept hazard facts in existing host snapshot and round payload contracts instead of adding high-frequency hazard events.
+- Added a real app/host validation smoke:
+  - starts a fixed-seed run through the host-facing app API,
+  - uses the live core state only inside validation to choose safe buttons,
+  - reaches Level 24,
+  - advances the frame clock to `6000ms` so interference is active,
+  - performs a host-driven `press(buttonId)`,
+  - verifies the emitted `button_pressed` event contains active, JSON-safe hazard facts in `payload.round.hazards`.
+- Confirmed the debug hazard preview still covers:
+  - hazard-free early levels,
+  - movement exposure,
+  - delayed Level 24 active interference.
+
+Contract decision:
+
+- No `hazard_updated` or per-frame hazard host event was added.
+- Reason: hazard state changes every frame during movement, and high-frequency events would make host consumers handle noisy presentation ticks.
+- Hosts should consume hazard facts from `getSnapshot()` and event `round` payloads.
+
+Debug self-check:
+
+- The change is explained by a deterministic host-driven run smoke and existing fixed-seed debug previews.
+- Failures localize to app orchestration, host payload construction, hazard state timing, or validation.
+- First enemy / first upgrade path remains hazard-free.
+- Host-driven DOM-independent input still converges through the same `press(buttonId)` gameplay path while hazards are active.
+
+Architecture self-check:
+
+- Host code transports JSON-safe hazard facts only.
+- App gameplay decisions remain unchanged.
+- UI code was not changed in this round.
+- Rule, fatal-button, combat, combo, upgrade, and Phase 1 difficulty semantics were not duplicated or retuned.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, and framework work remain out of scope.
+- Validation now guards active-hazard host press compatibility.
+
+Round 11 validation:
+
+- `node --check scripts\validate-structure.mjs`: PASS
+- `node --check src\core\debug.js`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Round 12: docs and entry-point sync.

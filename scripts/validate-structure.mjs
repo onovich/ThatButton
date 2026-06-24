@@ -1785,6 +1785,102 @@ if (
   failures.push(`Hazard disable query should disable app hazard facts: ${JSON.stringify(hazardDisabledSnapshot.hazards)}`);
 }
 
+let hazardActiveNow = 3000;
+let hazardActiveFrame = null;
+const hazardActiveSeed = 'phase3a-baseline';
+const hazardActiveBridge = createCaptureHostBridge();
+const hazardActiveWindow = {
+  location: { search: `?seed=${hazardActiveSeed}` },
+  AudioContext: FakeAudioContext,
+  webkitAudioContext: FakeAudioContext,
+  localStorage: fakeStorage()
+};
+const hazardActiveApp = mainModule.createApp({
+  window: hazardActiveWindow,
+  document: fakeDocument,
+  performance: { now: () => hazardActiveNow },
+  requestAnimationFrame: (callback) => {
+    hazardActiveFrame = callback;
+    return 1;
+  },
+  setTimeout: (callback) => {
+    if (typeof callback === 'function') callback();
+    return 0;
+  },
+  clearTimeout: () => {},
+  random: () => 0.5,
+  hostBridge: hazardActiveBridge
+});
+hazardActiveApp.init();
+hazardActiveApp.start();
+let hazardAdvanceGuard = 0;
+while (hazardActiveApp.getSnapshot().round.level < 24 && hazardAdvanceGuard < 160) {
+  hazardAdvanceGuard++;
+  const snapshot = hazardActiveApp.getSnapshot();
+  if (snapshot.status === 'upgrade_pending') {
+    const upgradeId = snapshot.upgrades?.choices?.[0]?.id;
+    if (!upgradeId) {
+      failures.push(`Hazard active host smoke reached upgrade state without choices: ${JSON.stringify(snapshot.upgrades)}`);
+      break;
+    }
+    hazardActiveApp.selectUpgrade(upgradeId);
+    continue;
+  }
+  const forbiddenIds = hazardActiveApp.getState().forbiddenIds;
+  const safeIds = snapshot.round.buttons
+    .map((button) => button.id)
+    .filter((buttonId) => !forbiddenIds.includes(buttonId));
+  if (!safeIds.length) {
+    failures.push(`Hazard active host smoke found no safe ids for Level ${snapshot.round.level}: ${JSON.stringify({ forbiddenIds, buttons: snapshot.round.buttons })}`);
+    break;
+  }
+  for (const buttonId of safeIds) {
+    const beforePressLevel = hazardActiveApp.getSnapshot().round.level;
+    const result = hazardActiveApp.press(buttonId);
+    if (!result.accepted && result.reason !== 'already_pressed') {
+      failures.push(`Hazard active host smoke safe press failed: ${JSON.stringify({ buttonId, result, snapshot: hazardActiveApp.getSnapshot() })}`);
+      break;
+    }
+    const afterPressSnapshot = hazardActiveApp.getSnapshot();
+    if (afterPressSnapshot.status === 'upgrade_pending' || afterPressSnapshot.round.level !== beforePressLevel) {
+      break;
+    }
+  }
+}
+const hazardReadySnapshot = hazardActiveApp.getSnapshot();
+if (hazardReadySnapshot.round.level < 24 || hazardAdvanceGuard >= 160) {
+  failures.push(`Hazard active host smoke did not reach Level 24: ${JSON.stringify({ hazardAdvanceGuard, snapshot: hazardReadySnapshot })}`);
+}
+hazardActiveNow = hazardActiveNow + 6000;
+if (typeof hazardActiveFrame === 'function') {
+  hazardActiveFrame(hazardActiveNow);
+}
+const hazardHostActiveSnapshot = hazardActiveApp.getSnapshot();
+const hazardHostForbiddenIds = hazardActiveApp.getState().forbiddenIds;
+const hazardHostSafeId = hazardHostActiveSnapshot.round.buttons
+  .map((button) => button.id)
+  .find((buttonId) => !hazardHostForbiddenIds.includes(buttonId));
+const hazardHostPress = hazardHostSafeId ? hazardActiveApp.press(hazardHostSafeId) : null;
+const hazardHostPressEvent = [...hazardActiveBridge.getEvents()].reverse().find((event) =>
+  event.type === HOST_EVENT_TYPES.BUTTON_PRESSED && event.payload.buttonId === hazardHostSafeId
+);
+if (
+  hazardHostActiveSnapshot.hazards?.phase !== HAZARD_PHASES.ACTIVE ||
+  !hazardHostActiveSnapshot.hazards.hazards.some((hazard) => hazard.type === HAZARD_TYPES.INTERFERENCE && hazard.phase === HAZARD_PHASES.ACTIVE) ||
+  !hazardHostPress?.accepted ||
+  hazardHostPress.result !== 'safe' ||
+  hazardHostPressEvent?.payload?.round?.hazards?.phase !== HAZARD_PHASES.ACTIVE ||
+  !hazardHostPressEvent.payload.round.hazards.hazards.some((hazard) => hazard.type === HAZARD_TYPES.INTERFERENCE && hazard.phase === HAZARD_PHASES.ACTIVE) ||
+  !isJsonSafeValue(hazardHostPressEvent)
+) {
+  failures.push(`Host-driven press while hazards are active failed: ${JSON.stringify({
+    hazardHostActiveSnapshot,
+    hazardHostSafeId,
+    hazardHostPress,
+    hazardHostPressEvent
+  })}`);
+}
+
 const lethalBridge = createCaptureHostBridge();
 const lethalWindow = {
   location: { search: '?seed=phase3a-baseline' },

@@ -17,6 +17,10 @@ function readProjectFile(relativePath) {
 }
 
 const html = readProjectFile('index.html');
+const docsIndex = readProjectFile('docs/README.md');
+const phase9Record = readProjectFile('docs/phase-9-playtest-evidence-decision-gate-record.md');
+const phase9Template = readProjectFile('docs/phase-9-playtest-script-and-template.md');
+const phase9BrowserSmokeText = readProjectFile('docs/phase-9-browser-smoke-results.json');
 const moduleFiles = [
   'src/config/difficulty.js',
   'src/config/battle.js',
@@ -92,6 +96,65 @@ for (const marker of [
   if (!html.includes(marker)) {
     failures.push(`Missing required structure/copy marker in index.html: ${marker}`);
   }
+}
+
+for (const marker of [
+  'Phase 9 Playtest Evidence And Decision Gate Record',
+  'Phase 9 Playtest Script And Evidence Template',
+  'Phase 9 Browser Smoke Results'
+]) {
+  if (!docsIndex.includes(marker)) {
+    failures.push(`docs/README.md missing Phase 9 evidence link: ${marker}`);
+  }
+}
+
+for (const marker of [
+  'Desktop Browser Pass',
+  'iOS Safari Pass',
+  'Android Chrome Pass',
+  'Human Observation Notes',
+  'Decision Gate Rollup',
+  'Do not add names',
+  'PASTE LOCAL REPORT HERE'
+]) {
+  if (!phase9Template.includes(marker)) {
+    failures.push(`Phase 9 playtest template missing marker: ${marker}`);
+  }
+}
+
+for (const marker of [
+  'Round 5 - Playtest Templates And Browser Smoke',
+  'Clipboard-denied fallback smoke: PASS',
+  'docs/phase-9-browser-smoke-results.json'
+]) {
+  if (!phase9Record.includes(marker)) {
+    failures.push(`Phase 9 record missing evidence marker: ${marker}`);
+  }
+}
+
+try {
+  const phase9BrowserSmoke = JSON.parse(phase9BrowserSmokeText);
+  const reportExportResults = Array.isArray(phase9BrowserSmoke.viewports)
+    ? phase9BrowserSmoke.viewports.map((entry) => entry.reportExport)
+    : [];
+  if (
+    phase9BrowserSmoke.status !== 'PASS' ||
+    phase9BrowserSmoke.smoke !== 'phase-9-browser-hazard-report-smoke' ||
+    reportExportResults.length !== 3 ||
+    !reportExportResults.every((entry) =>
+      entry?.status === 'checked' &&
+      entry.copyState === 'fallback' &&
+      entry.statusText === 'SELECTABLE' &&
+      entry.panelHidden === false &&
+      entry.textHidden === false &&
+      entry.exportIncludesKind === true &&
+      entry.summaryIncludesPrivacy === true
+    )
+  ) {
+    failures.push(`Phase 9 browser smoke results should prove report export/fallback across three viewports: ${phase9BrowserSmokeText.slice(0, 600)}`);
+  }
+} catch (error) {
+  failures.push(`Phase 9 browser smoke results are not valid JSON: ${error.message}`);
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');

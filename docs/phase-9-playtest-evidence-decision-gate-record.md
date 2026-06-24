@@ -433,9 +433,55 @@ Validation:
 
 Commit/push:
 
+- round commit: `4ec7353 test: add playtest export smoke evidence`
+- push: PASS
+
+Next round goal:
+
+- Use buffer time for evidence cleanup, privacy guardrails, final docs preparation, and any validation gaps before the final report.
+
+## Round 6 - Buffer Evidence Guardrails
+
+Round goal:
+
+- Use buffer time for report/privacy validation cleanup.
+- Make Phase 9 evidence docs and browser smoke results part of normal structure validation.
+
+Changes:
+
+- Extended `scripts/validate-structure.mjs` to validate Phase 9 docs index links.
+- Added validation markers for desktop, iOS Safari, Android Chrome, human observation, decision-gate, no-personal-data, and local report paste fields in the manual template.
+- Added validation markers for Round 5 evidence and browser smoke result paths in the Phase 9 record.
+- Added JSON validation for `docs/phase-9-browser-smoke-results.json`, including PASS status, Phase 9 smoke id, exactly three viewport results, report export visibility, fallback copy state, `SELECTABLE` status, JSON kind evidence, and local-only summary evidence.
+
+Debug self-check:
+
+- Smallest fixture is the committed Phase 9 browser smoke JSON plus the manual template.
+- Failure layers are localized to docs index, evidence template content, phase record evidence, and smoke JSON shape.
+- Empty/corrupt/stale smoke JSON now fails `npm run validate`.
+- Real-device/human evidence remains honestly pending until manually gathered.
+
+Architecture self-check:
+
+- Validation checks evidence artifacts only; no gameplay, UI, report schema, or host semantics changed.
+- No remote analytics, tracking, network submission, new dependencies, framework work, PWA, Unity/WebView/native/3D, roguelite meta, new hazards, or tuning was added.
+- This round protects Phase 9 acceptance artifacts without changing the playable experience.
+
+Validation:
+
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- Active network/privacy API scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warning only
+
+Commit/push:
+
 - round commit: pending
 - push: pending
 
 Next round goal:
 
-- Use buffer time for evidence cleanup, privacy guardrails, final docs preparation, and any validation gaps before the final report.
+- Use the remaining buffer for final validation/report prep, launcher dry-runs, and README/TODO/Role updates before READY_FOR_CHECK.

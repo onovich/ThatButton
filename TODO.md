@@ -149,7 +149,7 @@ Phase 7 playtest questions still pending:
 
 Estimated conversation rounds: 8
 Goal guide: [docs/phase-7a-hazard-feel-mobile-validation-goal-guide.md](docs/phase-7a-hazard-feel-mobile-validation-goal-guide.md)
-Status: READY_FOR_CHECK after executor implementation; see [docs/phase-7a-hazard-feel-mobile-validation-record.md](docs/phase-7a-hazard-feel-mobile-validation-record.md), [docs/phase-7a-browser-smoke-results.json](docs/phase-7a-browser-smoke-results.json), and [docs/phase-7a-final-report.md](docs/phase-7a-final-report.md).
+Status: Accepted by CheckAndGoal; see [docs/phase-7a-hazard-feel-mobile-validation-record.md](docs/phase-7a-hazard-feel-mobile-validation-record.md), [docs/phase-7a-browser-smoke-results.json](docs/phase-7a-browser-smoke-results.json), and [docs/phase-7a-final-report.md](docs/phase-7a-final-report.md).
 
 - Overhaul current particle/VFX feedback because attack, combo, wrong-press, enemy-hit, and reward effects are visually weak, aesthetically mismatched, and not satisfying enough for the RPG combat loop.
 - Define a coherent retro-futurist terminal VFX language: CRT/vector tracers, pixel sparks, scanline streaks, phosphor afterimages, data projectiles, and chunky neon fragments.
@@ -169,4 +169,4 @@ Phase 7A pending real-world evidence:
 
 ## Current Recommendation
 
-Run Phase 7A before engine embedding or new mechanics. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7/7A hazard facts only after the HTML gameplay loop proves the hazards are fun and readable.
+Phase 7A is accepted. Choose the next product direction before writing another execution phase: run real-device and human playtests, expand playable content/progression, or start a narrow Unity/WebView embedding spike. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7/7A hazard facts only after the HTML gameplay loop proves the hazards are fun and readable.

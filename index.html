@@ -252,7 +252,7 @@
         }
 
         .combat-status {
-            min-height: 112px;
+            min-height: 104px;
             border: 0;
             background: transparent;
             border-radius: 3px;
@@ -262,9 +262,7 @@
             grid-template-columns: 104px minmax(0, 1fr) auto;
             grid-template-areas:
                 "avatar label combo"
-                "avatar hp hp"
-                "avatar player attack"
-                "avatar playerbar playerbar";
+                "avatar hp attack";
             gap: 0.45rem 0.75rem;
             align-items: center;
             color: var(--crt-yellow);
@@ -331,14 +329,14 @@
         }
 
         .player-hp-text {
-            grid-area: player;
             color: var(--crt-green);
             font-size: 0.78rem;
             white-space: nowrap;
         }
 
         .player-hp-track {
-            grid-area: playerbar;
+            flex: 1 1 auto;
+            min-width: 84px;
             height: 8px;
             border: 1px solid rgba(74, 246, 38, 0.5);
             background: rgba(0, 0, 0, 0.62);
@@ -355,6 +353,33 @@
             transition: width 0.2s ease;
         }
 
+        .player-hud {
+            position: relative;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            margin: -0.2rem 0 0.55rem;
+            padding: 0.32rem 0.55rem;
+            border: 1px solid rgba(74, 246, 38, 0.42);
+            border-radius: 4px;
+            background: rgba(0, 18, 0, 0.72);
+            color: var(--crt-green);
+            box-shadow: inset 0 0 14px rgba(74, 246, 38, 0.12);
+        }
+
+        .player-hud-label {
+            color: rgba(74, 246, 38, 0.72);
+            font-size: 0.68rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .player-hud.player-hit {
+            border-color: rgba(255, 42, 42, 0.75);
+            box-shadow: 0 0 16px rgba(255, 42, 42, 0.26), inset 0 0 14px rgba(255, 42, 42, 0.18);
+        }
+
         .enemy-attack-text {
             grid-area: attack;
             color: var(--crt-red);
@@ -366,8 +391,8 @@
 
         .player-damage-text {
             position: absolute;
-            right: 0.8rem;
-            bottom: 0.24rem;
+            right: 0.55rem;
+            top: -0.78rem;
             color: var(--crt-red);
             font-size: 1.05rem;
             font-weight: 900;
@@ -454,6 +479,20 @@
             box-shadow: 0 0 18px rgba(255, 204, 0, 0.48), inset 0 0 12px rgba(255, 204, 0, 0.18);
         }
 
+        .combo-reward-text.combo-stage-two {
+            border-color: rgba(255, 204, 0, 0.76);
+            color: var(--crt-yellow);
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+            box-shadow: 0 0 18px rgba(255, 204, 0, 0.48), inset 0 0 12px rgba(255, 204, 0, 0.18);
+        }
+
+        .combo-reward-text.combo-stage-high {
+            border-color: rgba(255, 255, 255, 0.82);
+            color: #fff;
+            text-shadow: 0 0 10px var(--crt-green), 0 0 14px rgba(255, 204, 0, 0.55);
+            box-shadow: 0 0 22px rgba(74, 246, 38, 0.52), inset 0 0 12px rgba(255, 204, 0, 0.18);
+        }
+
         .combo-reward-text.max-combo {
             border-color: rgba(74, 246, 38, 0.85);
             color: #fff;
@@ -507,6 +546,24 @@
         .button-float-text.damage-bonus {
             color: var(--crt-yellow);
             text-shadow: 0 0 10px rgba(255, 204, 0, 0.8), 0 2px 0 rgba(0, 0, 0, 0.7);
+        }
+
+        .button-float-text.chain-start {
+            color: #b7ff8a;
+            font-size: 0.9rem;
+            text-shadow: 0 0 11px rgba(183, 255, 138, 0.82), 0 2px 0 rgba(0, 0, 0, 0.72);
+        }
+
+        .button-float-text.combo-stage-two {
+            color: var(--crt-yellow);
+            font-size: 1rem;
+            text-shadow: 0 0 13px rgba(255, 204, 0, 0.85), 0 2px 0 rgba(0, 0, 0, 0.72);
+        }
+
+        .button-float-text.combo-stage-high {
+            color: #fff;
+            font-size: 1.08rem;
+            text-shadow: 0 0 12px var(--crt-green), 0 0 16px rgba(255, 204, 0, 0.62), 0 2px 0 rgba(0, 0, 0, 0.72);
         }
 
         .button-float-text.max-combo {
@@ -848,6 +905,24 @@
             z-index: 20;
         }
 
+        .game-btn.wrong-press {
+            border-color: #fff;
+            box-shadow: 0 0 22px var(--crt-red), inset 0 0 16px rgba(255, 42, 42, 0.45) !important;
+            filter: saturate(1.25) brightness(1.15);
+        }
+
+        .button-float-text.safe-success {
+            color: var(--crt-green);
+            font-size: 0.82rem;
+            text-shadow: 0 0 8px rgba(74, 246, 38, 0.72), 0 2px 0 rgba(0, 0, 0, 0.72);
+        }
+
+        .button-float-text.wrong-press {
+            color: var(--crt-red);
+            font-size: 0.98rem;
+            text-shadow: 0 0 12px rgba(255, 42, 42, 0.86), 0 2px 0 rgba(0, 0, 0, 0.78);
+        }
+
         /* Timer Bar */
         .timer-container {
             width: 100%;
@@ -882,8 +957,41 @@
             transform-origin: left;
             transition: background-color 0.3s;
         }
+
+        .combo-window-bar {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            z-index: 3;
+            width: 0%;
+            height: 3px;
+            background: var(--crt-yellow);
+            box-shadow: 0 0 9px rgba(255, 204, 0, 0.88);
+            opacity: 0;
+            pointer-events: none;
+            transition: width 0.08s linear, opacity 0.12s ease, background-color 0.12s ease;
+        }
+
+        .combo-window-bar.active {
+            opacity: 1;
+        }
+
+        .combo-window-bar.expiring {
+            background: var(--crt-red);
+            box-shadow: 0 0 10px rgba(255, 42, 42, 0.92);
+        }
         
         .timer-danger { background-color: var(--crt-red) !important; box-shadow: 0 0 10px var(--crt-red) !important; }
+
+        .wrong-press-flash {
+            animation: wrong-press-flash 0.24s ease-out both;
+        }
+
+        @keyframes wrong-press-flash {
+            0% { background-color: var(--bg-color); }
+            24% { background-color: #300000; }
+            100% { background-color: var(--bg-color); }
+        }
 
         /* Overlays */
         .overlay {
@@ -996,7 +1104,7 @@
             .battle-stage {
                 min-height: 128px;
                 padding: 0.45rem 0.55rem 0.55rem;
-                margin-bottom: 0.5rem;
+                margin-bottom: 0.35rem;
             }
 
             .enemy-tag {
@@ -1028,9 +1136,21 @@
                 height: 10px;
             }
 
+            .player-hud,
             .player-hp-text,
             .enemy-attack-text {
                 font-size: 0.62rem;
+            }
+
+            .player-hud {
+                min-height: 26px;
+                gap: 0.38rem;
+                margin-bottom: 0.45rem;
+                padding: 0.24rem 0.42rem;
+            }
+
+            .player-hud-label {
+                font-size: 0.58rem;
             }
 
             .player-hp-track {
@@ -1039,7 +1159,8 @@
 
             .player-damage-text {
                 font-size: 0.88rem;
-                right: 0.55rem;
+                right: 0.42rem;
+                top: -0.64rem;
             }
 
             .boss-damage-text {
@@ -1368,15 +1489,19 @@
                 <span id="boss-hp-text" class="combat-label">BOSS: --</span>
                 <span class="combat-hp-track"><span id="boss-hp-bar" class="combat-hp-bar"></span></span>
                 <span id="combo-status-text" class="combo-status-text">CHAIN --</span>
-                <span id="player-hp-text" class="player-hp-text">HP: --</span>
-                <span class="player-hp-track"><span id="player-hp-bar" class="player-hp-bar"></span></span>
                 <span id="enemy-attack-text" class="enemy-attack-text">ATK --</span>
                 <span id="combo-reward-text" class="combo-reward-text" aria-hidden="true">CHAIN BONUS</span>
                 <span id="combo-particle-layer" class="combo-particle-layer" aria-hidden="true"></span>
-                <span id="player-damage-text" class="player-damage-text" aria-hidden="true">-18</span>
             </div>
             <span id="boss-damage-text" class="boss-damage-text" aria-hidden="true">-24</span>
             <span id="boss-attack-layer" class="boss-attack-layer" aria-hidden="true"></span>
+        </div>
+
+        <div id="player-hud" class="player-hud crt-font" aria-live="polite">
+            <span class="player-hud-label">PLAYER</span>
+            <span id="player-hp-text" class="player-hp-text">HP: --</span>
+            <span class="player-hp-track"><span id="player-hp-bar" class="player-hp-bar"></span></span>
+            <span id="player-damage-text" class="player-damage-text" aria-hidden="true">HIT -18</span>
         </div>
 
         <!-- Terminal Clue Display -->
@@ -1390,6 +1515,7 @@
         <div class="timer-container">
             <span class="timer-label crt-font">PRESSURE</span>
             <div id="timer-bar"></div>
+            <div id="combo-window-bar" class="combo-window-bar"></div>
         </div>
 
         <!-- Button Grid -->

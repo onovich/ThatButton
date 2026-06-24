@@ -409,3 +409,71 @@ Architecture self-check:
 - App orchestration only supplies the current input timestamp.
 - UI and host consumers receive JSON-safe combo facts and do not calculate expiry or chain semantics.
 - Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.
+
+## Round 9 Combo Timer Overlay And Feedback HUD Evidence
+
+Implemented:
+
+- Added `getComboWindowFacts(...)` in `src/core/combo.js` for JSON-safe window presentation facts:
+  - remaining milliseconds,
+  - remaining percent,
+  - active state,
+  - expiring state.
+- Added encounter-level combo-window helpers so app orchestration can consume core facts without duplicating formula logic.
+- Updated `src/app/create-app.js` so the animation loop:
+  - expires combo windows on frame time,
+  - emits combo changes when expiry occurs,
+  - passes combo-window facts to the timer renderer.
+- Added a compact `#combo-window-bar` overlay inside the existing pressure timer.
+- Moved player HP and player damage feedback out of the enemy avatar/identity grid into a separate `#player-hud`.
+- Added wrong-press multimodal feedback:
+  - distinct error audio cue,
+  - supported-device vibration path,
+  - brief screen/background flash,
+  - wrong-press class on the pressed button,
+  - `HIT -N` floating feedback.
+- Added tiered safe/combo feedback:
+  - `CHAIN READY` first-link feedback without persistent `COMBO x1`,
+  - `COMBO x2 DMG +1` stage feedback,
+  - stronger `COMBO x3+` feedback class,
+  - capped combo peak feedback,
+  - separate audio cue paths for chain-ready and combo stages.
+- Extended structure validation to protect:
+  - separated player HUD placement,
+  - no player-owned DOM markers inside the enemy identity cluster,
+  - combo-window overlay markers,
+  - wrong-press feedback markers,
+  - tiered combo feedback and audio markers,
+  - dynamic combo-window fact calculations.
+
+Validation run:
+
+- `node --check scripts\validate-structure.mjs`: PASS
+- `node --check src\core\combo.js`: PASS
+- `node --check src\core\encounter.js`: PASS
+- `node --check src\app\create-app.js`: PASS
+- `node --check src\ui\render.js`: PASS
+- `node --check src\ui\audio.js`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `OpenOnlineTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- Local HTTP marker smoke on `http://127.0.0.1:5183/`: PASS; player HUD separated from enemy combat-status, combo-window and feedback markers present
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Debug self-check:
+
+- Minimal timed combo fixture proves combo-window facts report 50% remaining at `3000ms` and expiring state near timeout.
+- Fixed-seed host smoke still proves first safe press is silent with respect to combo text and second safe press exposes `COMBO x2`.
+- HTTP marker smoke proves player-owned HUD markers are not inside the enemy identity cluster.
+- Feedback failures now localize to audio cue routing, renderer markers, app orchestration, or combo-window facts.
+
+Architecture self-check:
+
+- Combo expiry math and presentation facts stay in core combo/encounter helpers.
+- App orchestration supplies time, chooses audio cue paths from combo facts, and does not duplicate damage or expiry formulas.
+- UI renders player HUD, enemy stage, timer overlay, and feedback classes without owning gameplay outcomes.
+- Host input compatibility is preserved because DOM clicks and host `press(buttonId)` still share `pressButton(...)`.
+- Deferred Unity/WebView/native, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.

@@ -55,6 +55,22 @@ export function getComboWindowRemaining(combo = createComboState(), nowMs = comb
   return Math.max(0, expiresAtMs - currentTime);
 }
 
+export function getComboWindowFacts(combo = createComboState(), nowMs = combo.lastEventAtMs) {
+  const summary = cloneComboState(combo);
+  const remainingMs = summary.streak > 0 ? getComboWindowRemaining(summary, nowMs) : 0;
+  const remainingPercent = summary.comboWindowMs > 0
+    ? Math.max(0, Math.min(100, Math.round((remainingMs / summary.comboWindowMs) * 100)))
+    : 0;
+  return {
+    comboWindowMs: summary.comboWindowMs,
+    expiresAtMs: summary.expiresAtMs,
+    remainingMs,
+    remainingPercent,
+    isWindowActive: summary.isWindowActive && remainingMs > 0,
+    isExpiring: remainingPercent > 0 && remainingPercent <= 28
+  };
+}
+
 export function createComboState({
   streak = 0,
   chainCount = streak,

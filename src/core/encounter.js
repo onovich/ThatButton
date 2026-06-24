@@ -1,5 +1,12 @@
 import { applyRoundClearDamage, createCombatState, getCombatSummary } from './combat.js';
-import { createComboState, getComboSummary, incrementCombo, resetCombo } from './combo.js';
+import {
+  createComboState,
+  expireComboIfNeeded,
+  getComboSummary,
+  getComboWindowFacts,
+  incrementCombo,
+  resetCombo
+} from './combo.js';
 import { createPlayerState, getPlayerSummary } from './player.js';
 
 export function createEncounterState() {
@@ -26,6 +33,14 @@ export function getEncounterFacts({ player, combat, combo, lastPlayerDamage, las
 
 export function applySafePressCombo(combo, options = {}) {
   return incrementCombo(combo, 'safe_press', options);
+}
+
+export function expireEncounterComboIfNeeded(combo, nowMs) {
+  return expireComboIfNeeded(combo, nowMs);
+}
+
+export function getEncounterComboWindow(combo, nowMs) {
+  return getComboWindowFacts(combo, nowMs);
 }
 
 export function resetEncounterCombo(combo, reason) {

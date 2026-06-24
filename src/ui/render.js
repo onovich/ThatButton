@@ -49,6 +49,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     gridEl: document.getElementById('btn-grid'),
     clueEl: document.getElementById('clue-text'),
     timerBarEl: document.getElementById('timer-bar'),
+    comboWindowBar: document.getElementById('combo-window-bar'),
     levelDisplay: document.getElementById('level-display'),
     scoreDisplay: document.getElementById('score-display'),
     warningText: document.getElementById('warning-text'),
@@ -62,6 +63,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     bossHpBar: document.getElementById('boss-hp-bar'),
     bossDamageText: document.getElementById('boss-damage-text'),
     bossAttackLayer: document.getElementById('boss-attack-layer'),
+    playerHud: document.getElementById('player-hud'),
     playerHpText: document.getElementById('player-hp-text'),
     playerHpBar: document.getElementById('player-hp-bar'),
     enemyAttackText: document.getElementById('enemy-attack-text'),
@@ -81,6 +83,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
   let comboRewardTimeout = null;
   let comboImpactTimeout = null;
   let comboShakeTimeout = null;
+  let wrongPressFlashTimeout = null;
 
   function removeNode(node) {
     if (node && typeof node.remove === 'function') {
@@ -91,8 +94,24 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
   function getComboRewardKind({ previous, combo, capped }) {
     if (capped) {
       return {
-        label: 'MAX COMBO',
+        label: `MAX COMBO x${combo.streak}`,
         className: 'max-combo',
+        color: '#ffffff',
+        strong: true
+      };
+    }
+    if (combo.streak === 2) {
+      return {
+        label: `${combo.comboText} ${combo.rewardText}`.trim(),
+        className: 'combo-stage-two',
+        color: 'var(--crt-yellow)',
+        strong: true
+      };
+    }
+    if (combo.streak >= 3) {
+      return {
+        label: `${combo.comboText} ${combo.rewardText}`.trim(),
+        className: 'combo-stage-high',
         color: '#ffffff',
         strong: true
       };
@@ -167,6 +186,26 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       document.body.appendChild(spark);
       schedule(() => removeNode(spark), 780);
     }
+  }
+
+  function triggerVibration(pattern) {
+    const vibrate = document.defaultView?.navigator?.vibrate;
+    if (typeof vibrate === 'function') {
+      vibrate.call(document.defaultView.navigator, pattern);
+    }
+  }
+
+  function flashWrongPress() {
+    if (wrongPressFlashTimeout !== null) {
+      cancelSchedule(wrongPressFlashTimeout);
+    }
+    document.body.classList.remove('wrong-press-flash');
+    void document.body.offsetWidth;
+    document.body.classList.add('wrong-press-flash');
+    wrongPressFlashTimeout = schedule(() => {
+      document.body.classList.remove('wrong-press-flash');
+      wrongPressFlashTimeout = null;
+    }, 260);
   }
 
   function getElementCenter(element) {
@@ -384,26 +423,55 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
   function showPlayerHit({ damage, defeated = false }) {
     const appliedDamage = Math.max(0, Math.floor(Number(damage?.appliedDamage) || 0));
     if (appliedDamage <= 0) return;
-    refs.playerDamageText.innerText = `-${appliedDamage}`;
+    refs.playerDamageText.innerText = `HIT -${appliedDamage}`;
     refs.playerDamageText.classList.remove('player-damage-pop');
-    refs.combatStatus.classList.remove('player-hit');
+    refs.playerHud.classList.remove('player-hit');
     void refs.playerDamageText.offsetWidth;
     refs.playerDamageText.classList.add('player-damage-pop');
     if (defeated) {
-      refs.combatStatus.classList.add('player-hit');
+      refs.playerHud.classList.add('player-hit');
     }
     schedule(() => {
       refs.playerDamageText.classList.remove('player-damage-pop');
-      refs.combatStatus.classList.remove('player-hit');
+      refs.playerHud.classList.remove('player-hit');
     }, 880);
+  }
+
+  function showSafePressFeedback({ sourceElement = null, combo = null, previous = null, expired = false } = {}) {
+    const chainStarted = combo?.streak === 1 && (expired || (previous?.streak || 0) === 0);
+    spawnButtonReward({
+      sourceElement,
+      label: chainStarted ? 'CHAIN READY' : 'SUCCESS',
+      className: chainStarted ? 'chain-start' : 'safe-success',
+      color: chainStarted ? '#b7ff8a' : 'var(--crt-green)',
+      strong: false
+    });
+  }
+
+  function showWrongPressFeedback({ sourceElement = null, damage, defeated = false } = {}) {
+    const appliedDamage = Math.max(0, Math.floor(Number(damage?.appliedDamage) || 0));
+    if (sourceElement?.classList) {
+      sourceElement.classList.add('wrong-press');
+    }
+    flashWrongPress();
+    triggerVibration(defeated ? [35, 25, 70] : [25, 15, 35]);
+    showPlayerHit({ damage, defeated });
+    spawnButtonReward({
+      sourceElement,
+      label: appliedDamage > 0 ? `HIT -${appliedDamage}` : 'WRONG',
+      className: 'wrong-press',
+      color: 'var(--crt-red)',
+      strong: true
+    });
   }
 
   function showComboReward({ previous, combo, sourceElement = null, capped = false }) {
     if (!previous || !combo) return;
     const reward = getComboRewardKind({ previous, combo, capped });
     refs.comboRewardText.innerText = reward.label;
-    refs.comboRewardText.classList.remove('damage-bonus');
-    refs.comboRewardText.classList.remove('max-combo');
+    ['damage-bonus', 'combo-stage-two', 'combo-stage-high', 'max-combo'].forEach((className) => {
+      refs.comboRewardText.classList.remove(className);
+    });
     if (reward.className) refs.comboRewardText.classList.add(reward.className);
     refs.comboRewardText.classList.remove('combo-reward-pop');
     refs.comboStatusText.classList.remove('combo-pulse');
@@ -440,9 +508,26 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     }, reward.strong ? 720 : 560);
   }
 
-  function updateTimer(timeLeft, timeLimit) {
+  function updateComboWindow(comboWindow = null) {
+    if (!refs.comboWindowBar) return;
+    const percent = Math.max(0, Math.min(100, Math.round(Number(comboWindow?.remainingPercent) || 0)));
+    refs.comboWindowBar.style.width = `${percent}%`;
+    if (comboWindow?.isWindowActive) {
+      refs.comboWindowBar.classList.add('active');
+    } else {
+      refs.comboWindowBar.classList.remove('active');
+    }
+    if (comboWindow?.isExpiring) {
+      refs.comboWindowBar.classList.add('expiring');
+    } else {
+      refs.comboWindowBar.classList.remove('expiring');
+    }
+  }
+
+  function updateTimer(timeLeft, timeLimit, comboWindow = null) {
     const timePercent = Math.max(0, (timeLeft / timeLimit) * 100);
     refs.timerBarEl.style.width = `${timePercent}%`;
+    updateComboWindow(comboWindow);
 
     if (timePercent < 30) {
       refs.timerBarEl.classList.add('timer-danger');
@@ -523,7 +608,10 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     updateCombatStatus,
     showBossHit,
     showPlayerHit,
+    showSafePressFeedback,
+    showWrongPressFeedback,
     showComboReward,
+    updateComboWindow,
     updateTimer,
     updateScore,
     hideStartScreen,

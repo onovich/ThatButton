@@ -5,6 +5,8 @@ import { createDebugApi } from '../core/debug.js';
 import {
   applySafePressCombo,
   createEncounterState,
+  expireEncounterComboIfNeeded,
+  getEncounterComboWindow,
   getEncounterFacts,
   resetEncounterCombo,
   resolveRoundClearCombat
@@ -104,6 +106,10 @@ export function createApp({
     });
   }
 
+  function getCurrentComboWindow(nowMs = performance.now()) {
+    return getEncounterComboWindow(gameState.combo, nowMs);
+  }
+
   function recordDebugEvent(type, details = {}) {
     const entry = {
       type,
@@ -167,6 +173,9 @@ export function createApp({
   function applyComboChange(comboChange, { sourceElement = null, showReward = false } = {}) {
     gameState.combo = comboChange.combo;
     renderer.updateCombatStatus(getEncounterFacts(gameState));
+    renderer.updateTimer(gameState.timeLeft, gameState.timeLimit, getCurrentComboWindow(
+      comboChange.combo.lastEventAtMs ?? performance.now()
+    ));
     const comboIncreased = comboChange.combo.streak > comboChange.previous.streak;
     const cappedReward = showReward && !comboIncreased && comboChange.combo.isCapped && comboChange.combo.hasVisibleCombo;
     if (showReward && comboChange.combo.hasVisibleCombo && (comboIncreased || cappedReward)) {
@@ -185,6 +194,21 @@ export function createApp({
       });
     }
     return comboChange;
+  }
+
+  function playSafePressCue(comboChange) {
+    if (comboChange.combo.hasVisibleCombo) {
+      audio.playComboCue({
+        streak: comboChange.combo.streak,
+        capped: comboChange.combo.isCapped
+      });
+      return;
+    }
+    if (comboChange.combo.streak === 1) {
+      audio.playChainReady();
+      return;
+    }
+    audio.playSafeClick();
   }
 
   function triggerGameOver(id, element) {
@@ -225,7 +249,7 @@ export function createApp({
     }, 800);
   }
 
-  function applyWrongPressDamage(id) {
+  function applyWrongPressDamage(id, sourceElement = null) {
     const playerDamageResult = resolveWrongPressDamage({
       player: gameState.player,
       enemyAttack: gameState.combat.attack,
@@ -246,7 +270,9 @@ export function createApp({
       player: encounterFacts.player,
       combo: encounterFacts.combo
     });
-    renderer.showPlayerHit({
+    audio.playError();
+    renderer.showWrongPressFeedback({
+      sourceElement,
       damage: playerDamageResult.damage,
       defeated: playerDamageResult.defeated
     });
@@ -358,7 +384,7 @@ export function createApp({
         result: 'fatal',
         button
       });
-      const playerDamageResult = applyWrongPressDamage(id);
+      const playerDamageResult = applyWrongPressDamage(id, element);
       const result = {
         accepted: true,
         result: 'fatal',
@@ -373,14 +399,23 @@ export function createApp({
       return result;
     } else {
       const previousScore = gameState.score;
-      audio.playSafeClick();
       gameState.safeKeysRemaining--;
       gameState.score += 10;
       renderer.updateScore(gameState.score);
-      applyComboChange(applySafePressCombo(gameState.combo, { atMs: performance.now() }), {
+      const comboChange = applySafePressCombo(gameState.combo, { atMs: performance.now() });
+      playSafePressCue(comboChange);
+      applyComboChange(comboChange, {
         sourceElement: element,
         showReward: true
       });
+      if (!comboChange.combo.hasVisibleCombo) {
+        renderer.showSafePressFeedback({
+          sourceElement: element,
+          previous: comboChange.previous,
+          combo: comboChange.combo,
+          expired: comboChange.expired
+        });
+      }
       gameState.timeLeft = Math.min(
         gameState.timeLimit,
         gameState.timeLeft + gameState.currentDifficulty.timeRewardMs
@@ -456,6 +491,7 @@ export function createApp({
     gameState.lastRunComparison = null;
     resetEncounterState();
     renderer.updateCombatStatus(getEncounterFacts(gameState));
+    renderer.updateTimer(gameState.timeLeft, gameState.timeLimit, getCurrentComboWindow());
     renderer.setWarningVisible(false);
     hostController.emitRunStarted();
     hostController.emitCombatStarted();
@@ -479,7 +515,11 @@ export function createApp({
     const deltaTime = timestamp - gameState.lastTime;
     gameState.lastTime = timestamp;
     gameState.timeLeft -= deltaTime;
-    renderer.updateTimer(gameState.timeLeft, gameState.timeLimit);
+    const comboExpiry = expireEncounterComboIfNeeded(gameState.combo, timestamp);
+    if (comboExpiry.changed) {
+      applyComboChange(comboExpiry);
+    }
+    renderer.updateTimer(gameState.timeLeft, gameState.timeLimit, getCurrentComboWindow(timestamp));
 
     if (gameState.timeLeft <= 0) {
       triggerGameOver('timeout', null);

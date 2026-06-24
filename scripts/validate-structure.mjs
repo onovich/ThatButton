@@ -56,11 +56,13 @@ for (const marker of [
   'id="boss-hp-bar"',
   'id="boss-damage-text"',
   'id="boss-attack-layer"',
+  'id="player-hud"',
   'id="player-hp-text"',
   'id="player-hp-bar"',
   'id="enemy-attack-text"',
   'id="player-damage-text"',
   'id="combo-status-text"',
+  'id="combo-window-bar"',
   'id="combo-reward-text"',
   'id="combo-particle-layer"',
   'id="command-panel"',
@@ -76,15 +78,27 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'updateCombatStatus', 'showComboReward', 'spawnComboParticles', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'updateComboWindow', 'spawnComboParticles', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
 }
 
-for (const marker of ['id="boss-avatar"', '.battle-stage', '.command-panel', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '"avatar player attack"', '.combat-hp-bar', '.player-hp-bar', '.enemy-attack-text', '.player-damage-text', '@keyframes player-damage-pop', 'display: block;', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-particle', '.button-float-text', '.combo-shake-strong', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
+for (const marker of ['id="boss-avatar"', '.battle-stage', '.player-hud', '.command-panel', '.boss-avatar-shell', '.boss-damage-text', '.boss-projectile', 'grid-template-areas:', '"avatar label combo"', '"avatar hp attack"', '.combat-hp-bar', '.player-hp-bar', '.enemy-attack-text', '.player-damage-text', '@keyframes player-damage-pop', 'display: block;', 'id="combo-window-bar"', '.combo-window-bar', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-stage-two', '.combo-stage-high', '.combo-particle', '.button-float-text', '.safe-success', '.chain-start', '.wrong-press-flash', '.combo-shake-strong', '@keyframes boss-projectile-flight', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
   if (!html.includes(marker)) {
     failures.push(`Missing combat mobile layout marker in index.html: ${marker}`);
+  }
+}
+
+const combatStatusIndex = html.indexOf('id="combat-status"');
+const playerHudIndex = html.indexOf('id="player-hud"');
+if (combatStatusIndex < 0 || playerHudIndex < 0 || playerHudIndex <= combatStatusIndex) {
+  failures.push('Player HUD should appear after the enemy combat-status area.');
+}
+const enemyIdentitySnippet = html.slice(combatStatusIndex, playerHudIndex);
+for (const playerOwnedMarker of ['id="player-hp-text"', 'id="player-hp-bar"', 'id="player-damage-text"']) {
+  if (enemyIdentitySnippet.includes(playerOwnedMarker)) {
+    failures.push(`Player-owned marker is still inside the enemy combat-status area: ${playerOwnedMarker}`);
   }
 }
 
@@ -286,6 +300,7 @@ const {
 const {
   createComboState,
   expireComboIfNeeded,
+  getComboWindowFacts,
   getComboWindowRemaining,
   getComboSummary,
   incrementCombo,
@@ -708,15 +723,24 @@ if (
   failures.push(`Timed first safe press should arm a silent combo window: ${JSON.stringify(timedFirstCombo)}`);
 }
 const timedSecondCombo = incrementCombo(timedFirstCombo, 'safe_press', { atMs: 1800 }).combo;
+const timedSecondWindowFacts = getComboWindowFacts(timedSecondCombo, 3000);
 if (
   timedSecondCombo.streak !== 2 ||
   timedSecondCombo.comboText !== 'COMBO x2' ||
   timedSecondCombo.rewardText !== 'DMG +1' ||
   timedSecondCombo.expiresAtMs !== 4200 ||
   timedSecondCombo.remainingMs !== 2400 ||
-  getComboWindowRemaining(timedSecondCombo, 3000) !== 1200
+  getComboWindowRemaining(timedSecondCombo, 3000) !== 1200 ||
+  timedSecondWindowFacts.remainingMs !== 1200 ||
+  timedSecondWindowFacts.remainingPercent !== 50 ||
+  !timedSecondWindowFacts.isWindowActive ||
+  timedSecondWindowFacts.isExpiring
 ) {
-  failures.push(`Timed second safe press should refresh a visible combo window: ${JSON.stringify(timedSecondCombo)}`);
+  failures.push(`Timed second safe press should refresh a visible combo window: ${JSON.stringify({ timedSecondCombo, timedSecondWindowFacts })}`);
+}
+const expiringWindowFacts = getComboWindowFacts(timedSecondCombo, 3900);
+if (expiringWindowFacts.remainingPercent !== 13 || !expiringWindowFacts.isExpiring) {
+  failures.push(`Combo-window facts should flag expiring state: ${JSON.stringify(expiringWindowFacts)}`);
 }
 const activeComboWindow = expireComboIfNeeded(timedSecondCombo, 4200);
 if (activeComboWindow.expired || activeComboWindow.combo.streak !== 2) {

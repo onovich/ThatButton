@@ -288,3 +288,76 @@ Commit/push:
 
 - round commit: `5548646`
 - push: `origin/main` PASS
+
+## Round 5 - VFX/Hazard Tuning Gate And Manual Playtest Prep
+
+Evidence reviewed:
+
+- `npm run smoke:hazards` browser evidence after the VFX pass:
+  - desktop `1280x720`: PASS
+  - mobile `390x844`: PASS
+  - short mobile `360x740`: PASS
+  - safe/chain/combo/wrong/enemy/upgrade VFX markers present in every viewport
+  - button-to-enemy tracer origin delta remains `0,0`
+  - combat VFX remains above active board interference with z-index `80`
+- `npm run validate` structure evidence:
+  - VFX tier markers present
+  - retro terminal/vector/pixel/data-signal markers present
+  - forbidden VFX language markers absent
+  - Phase 6A combat feedback markers preserved
+- Hazard evidence from Round 2/Round 3:
+  - moved button visual rect follows `2px`/`3px` sampled offsets
+  - interference opacity measured `0.141`, below `0.160` cap
+  - upgrade overlay remains hazard-disabled/harmless
+
+Tuning decision:
+
+- No hazard parameter changes.
+- No combat, combo, enemy, player, upgrade, or Phase 1 difficulty formula changes.
+- No VFX formula changes beyond presentation counts/classes already made in Round 4.
+- Current evidence supports keeping:
+  - moving-button unlock at level 19 / enemy 2
+  - interference unlock at level 24 / enemy 2
+  - movement amplitude at `6px` X / `6px` Y
+  - active interference opacity cap at `0.160`
+  - board-only interference scope
+
+Manual playtest checklist:
+
+- iOS Safari:
+  - moving buttons feel touch-aligned with the visible button
+  - safe/chain/combo VFX are visible under finger without hiding labels
+  - wrong press produces clear audio/vibration/screen feedback when supported
+  - interference stays board-scoped and does not hide rule text or player HUD
+- Android Chrome:
+  - moving buttons remain tap-aligned
+  - vibration path is noticeable for wrong press on supported devices
+  - combo and enemy-hit projectiles remain readable over active interference
+  - short viewport keeps rule, player HUD, grid, and upgrade overlay separated
+- Human playtest:
+  - SUCCESS, CHAIN READY, COMBO x2, high combo, and MAX COMBO feel distinct
+  - enemy hit/defeat has enough impact without blocking the rule or buttons
+  - wrong press feels damaging and recoverable when HP remains
+  - upgrade selection feels rewarding without noisy fireworks/confetti language
+  - moving/interference hazards feel fair and worth keeping after the first RPG loop
+
+Pending evidence:
+
+- Real iOS Safari device evidence remains pending.
+- Real Android Chrome device evidence remains pending.
+- Human playtest evidence remains pending.
+
+Validation:
+
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- pending

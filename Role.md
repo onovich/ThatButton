@@ -25,10 +25,10 @@ executor:
 idempotency:
   active_goal_guide: docs/phase-6a-combat-feel-balance-goal-guide.md
   active_goal_phase: Phase 6A - Combat Feel And Balance Calibration
-  last_planner_dispatch: 2026-06-24T17:06:43.6145885+08:00
-  last_planner_dispatch_status: pending
+  last_planner_dispatch: 2026-06-24T17:07:48.1174717+08:00
+  last_planner_dispatch_status: sent
   last_planner_dispatch_guide: docs/phase-6a-combat-feel-balance-goal-guide.md
-  last_planner_dispatch_commit: pending
+  last_planner_dispatch_commit: 38c039523840482881d5bf35fcf822ac74e59501
   last_executor_report_commit: 843e7b31aacbac5205289d308b62be8d4821a799
   last_executor_report_status: ready_for_check
   last_executor_report_at: 2026-06-24T16:54:58.2265879+08:00

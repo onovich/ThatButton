@@ -160,3 +160,77 @@ Commit/push:
 Next round goal:
 
 - Add a pure report builder with deterministic fixtures, JSON-safe output, missing-field handling, compact export text, and privacy-safe shape validation.
+
+## Round 2 - Pure Report Builder
+
+Round goal:
+
+- Add a pure report builder for synthetic or real run facts.
+- Include schema versioning, JSON-safe payloads, compact summary/export text, missing-field handling, and privacy-safe shape validation.
+- Add deterministic validation coverage.
+
+Changes:
+
+- Added `src/core/playtest-report.js`.
+- Added `previewPlaytestReport(...)` and `previewPlaytestReportExport(...)` to `src/core/debug.js`.
+- Extended `scripts/validate-structure.mjs` so the new core file is scanned for architecture boundaries and the deterministic report fixture/export path is validated.
+
+Report builder facts:
+
+- Report kind: `thatbutton.playtestReport`
+- Report version: `1`
+- Privacy flags: `localOnly: true`, `personalData: false`, `networkSubmission: false`
+- Build facts: app, app version, phase, schema version
+- Run facts: seed, result, reason, level, score, elapsed time, viewport class, input mode
+- Progression facts: first `3x3`, enemies reached/defeated, highest enemy index, final enemy identity/HP
+- Combat facts: max combo, visible combo peak, wrong presses, player damage taken, safe presses
+- Upgrade facts: offered count, selected count, selected upgrade summaries
+- Hazard facts: first moving/interference levels and round exposure counts
+- Round facts: compact per-round level/enemy/grid/fatal/safe/rule/timing/hazard facts
+
+Fixture evidence:
+
+```text
+THATBUTTON PLAYTEST REPORT
+schema: v1
+privacy: local-only / no personal data / no network submission
+run: failure / wrong_click / seed phase9-fixture
+progress: L24 / 1420 pts / enemies 1/2
+combat: max combo 8 / wrong 1 / safe 126
+hazards: moving L19 / interference L24
+```
+
+Debug self-check:
+
+- Smallest fixture: `createPlaytestReportFixture()` and `debugApi.previewPlaytestReportExport()`.
+- Failure layers are isolated to pure report assembly and validation; no UI/export permissions or runtime collection changed yet.
+- Empty/missing fields normalize to safe defaults without adding personal data.
+- Clipboard denied, storage-disabled, runtime run-end collection, and UI fallback remain for later rounds.
+
+Architecture self-check:
+
+- Report assembly lives in `src/core/playtest-report.js`.
+- The new core module does not touch DOM, `window`, `document`, localStorage, clipboard, downloads, CSS classes, audio, vibration, URL query parsing, or global game state.
+- UI does not own report schema or gameplay formulas.
+- Debug API exposes cloneable facts only.
+- No non-scope systems were added.
+
+Validation:
+
+- `node --check src\core\playtest-report.js`: PASS
+- `node --check src\core\debug.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS after fixing the new test fixture to include hazard-active levels
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- Privacy/no-network initial scan: PASS for network APIs; expected matches were existing CSS `tracking-*` utility class names and the new forbidden-key deny-list in `playtest-report.js`
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- Pending.
+
+Next round goal:
+
+- Collect real runtime run facts through the app flow without changing gameplay decisions, then build and retain a final run report at run-end states.

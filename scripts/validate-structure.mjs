@@ -41,6 +41,7 @@ const moduleFiles = [
   'src/core/run-recaps.js',
   'src/core/debug.js',
   'src/core/session-preview.js',
+  'src/core/playtest-report.js',
   'src/core/host-events.js',
   'src/host/app-host-api.js',
   'src/host/browser-host-bridge.js',
@@ -90,7 +91,7 @@ for (const marker of [
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
 const renderSource = sources.get('src/ui/render.js') || '';
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewSessionProgression', 'previewHostEventPayloads', 'stageLabel', 'tierLabel', 'commandLevelTag', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewSessionProgression', 'previewHostEventPayloads', 'previewPlaytestReport', 'thatbutton.playtestReport', 'isPrivacySafePlaytestReport', 'stageLabel', 'tierLabel', 'commandLevelTag', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
@@ -280,6 +281,7 @@ const coreBoundaryFiles = [
   'src/core/run-recaps.js',
   'src/core/debug.js',
   'src/core/session-preview.js',
+  'src/core/playtest-report.js',
   'src/core/host-events.js'
 ];
 const forbiddenCorePatterns = [
@@ -380,6 +382,7 @@ const [
   storageModule,
   recapModule,
   hostEventsModule,
+  playtestReportModule,
   hostBridgeModule,
   renderModule,
   mainModule
@@ -402,6 +405,7 @@ const [
   import(moduleUrl('src/core/storage.js')),
   import(moduleUrl('src/core/recap.js')),
   import(moduleUrl('src/core/host-events.js')),
+  import(moduleUrl('src/core/playtest-report.js')),
   import(moduleUrl('src/host/browser-host-bridge.js')),
   import(moduleUrl('src/ui/render.js')),
   import(moduleUrl('src/main.js'))
@@ -530,6 +534,17 @@ const {
   createRunResultPayload,
   isJsonSafeValue
 } = hostEventsModule;
+const {
+  PLAYTEST_REPORT_KIND,
+  PLAYTEST_REPORT_VERSION,
+  buildPlaytestReport,
+  buildPlaytestReportExport,
+  classifyViewport,
+  createPlaytestReportFixture,
+  formatPlaytestReportSummary,
+  isPrivacySafePlaytestReport,
+  serializePlaytestReport
+} = playtestReportModule;
 const {
   createBrowserHostBridge,
   createCaptureHostBridge,
@@ -2171,6 +2186,80 @@ if (debugApi) {
       summary: debugSessionPreview.summary,
       upgrades: debugSessionPreview.upgradeLog
     })}`);
+  }
+  const playtestReportA = createPlaytestReportFixture();
+  const playtestReportB = createPlaytestReportFixture();
+  const debugPlaytestReport = debugApi.previewPlaytestReport();
+  const playtestExport = debugApi.previewPlaytestReportExport();
+  const rebuiltReport = buildPlaytestReport({
+    createdAt: '2026-06-24T00:00:00.000Z',
+    seed: 'phase9-rebuild',
+    run: {
+      result: 'failure',
+      reason: 'timeout',
+      level: 24,
+      score: 1400,
+      elapsedMs: 180000,
+      viewport: { width: 390, height: 844 },
+      inputMode: 'touch'
+    },
+    progression: {
+      firstThreeByThreeLevel: 6,
+      enemiesReached: 2,
+      enemiesDefeated: 1,
+      finalEnemy: getCombatSummary(createCombatState({ enemyIndex: 2 }))
+    },
+    combatReport: {
+      maxCombo: 7,
+      visibleComboPeak: 7,
+      wrongPresses: 0,
+      playerDamageTaken: 0,
+      safePresses: 100
+    },
+    rounds: [6, 19, 24]
+      .map((level) => debugSessionPreview.rounds.find((round) => round.level === level))
+      .filter(Boolean)
+  });
+  if (
+    JSON.stringify(playtestReportA) !== JSON.stringify(playtestReportB) ||
+    JSON.stringify(playtestReportA) !== JSON.stringify(debugPlaytestReport) ||
+    !isJsonSafeValue(playtestReportA) ||
+    !isPrivacySafePlaytestReport(playtestReportA) ||
+    !playtestExport.privacySafe ||
+    playtestReportA.kind !== PLAYTEST_REPORT_KIND ||
+    playtestReportA.version !== PLAYTEST_REPORT_VERSION ||
+    playtestReportA.privacy.localOnly !== true ||
+    playtestReportA.privacy.personalData !== false ||
+    playtestReportA.privacy.networkSubmission !== false ||
+    playtestReportA.run.seed !== 'phase9-fixture' ||
+    playtestReportA.run.viewportClass !== 'mobile' ||
+    playtestReportA.progression.firstThreeByThreeLevel !== 6 ||
+    playtestReportA.progression.enemiesReached !== 2 ||
+    playtestReportA.progression.finalEnemy.enemyName !== 'SIGNAL WARDEN' ||
+    playtestReportA.combat.maxCombo !== 8 ||
+    playtestReportA.combat.wrongPresses !== 1 ||
+    playtestReportA.upgrades.selectedCount !== 1 ||
+    playtestReportA.hazards.firstMovingLevel !== 19 ||
+    playtestReportA.hazards.firstInterferenceLevel !== 24 ||
+    !formatPlaytestReportSummary(playtestReportA).includes('local-only') ||
+    !serializePlaytestReport(playtestReportA).includes('"kind": "thatbutton.playtestReport"') ||
+    !buildPlaytestReportExport(playtestReportA).includes('THATBUTTON PLAYTEST REPORT') ||
+    classifyViewport({ width: 360, height: 740 }) !== 'short-mobile' ||
+    classifyViewport({ width: 1280, height: 720 }) !== 'desktop' ||
+    rebuiltReport.run.viewportClass !== 'mobile' ||
+    rebuiltReport.hazards.firstMovingLevel !== 19 ||
+    rebuiltReport.hazards.firstInterferenceLevel !== 24
+  ) {
+    failures.push(`Playtest report fixture/export changed: ${JSON.stringify({
+      report: playtestReportA,
+      export: playtestExport,
+      rebuilt: rebuiltReport
+    })}`);
+  }
+  for (const forbiddenReportText of ['userAgent', 'deviceId', 'ipAddress', 'email', 'geolocation', 'trackingId']) {
+    if (JSON.stringify(playtestReportA).includes(forbiddenReportText)) {
+      failures.push(`Playtest report contains forbidden privacy marker: ${forbiddenReportText}`);
+    }
   }
   const hazardZones = createBoardZoneFacts({ rows: 3, cols: 3 });
   if (

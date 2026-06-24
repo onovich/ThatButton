@@ -25,6 +25,14 @@ import {
   createUpgradeSelectionPayload
 } from './host-events.js';
 import { previewHazardSchedule as previewCoreHazardSchedule } from './hazards.js';
+import {
+  buildPlaytestReport,
+  buildPlaytestReportExport,
+  createPlaytestReportFixture,
+  formatPlaytestReportSummary,
+  isPrivacySafePlaytestReport,
+  serializePlaytestReport
+} from './playtest-report.js';
 import { previewSessionProgression as previewCoreSessionProgression } from './session-preview.js';
 import {
   BEST_RECORD_KEY,
@@ -420,6 +428,21 @@ export function previewHostEventPayloads() {
   };
 }
 
+export function previewPlaytestReport(options = {}) {
+  return createPlaytestReportFixture(options);
+}
+
+export function previewPlaytestReportExport(options = {}) {
+  const report = previewPlaytestReport(options);
+  return {
+    report,
+    summaryText: formatPlaytestReportSummary(report),
+    jsonText: serializePlaytestReport(report),
+    exportText: buildPlaytestReportExport(report),
+    privacySafe: isPrivacySafePlaytestReport(report)
+  };
+}
+
 export function createDebugApi({
   getState,
   loadBestRecord,
@@ -449,6 +472,10 @@ export function createDebugApi({
     previewHazardSchedule,
     previewSessionProgression,
     previewHostEventPayloads,
+    previewPlaytestReport,
+    previewPlaytestReportExport,
+    buildPlaytestReport,
+    isPrivacySafePlaytestReport,
     getDifficultyForLevel,
     getLastFailureRecap: () => cloneFailureRecap(getState().lastFailureRecap),
     getLastVictoryRecap: () => cloneFailureRecap(getState().lastVictoryRecap),

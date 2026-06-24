@@ -786,8 +786,8 @@ Round 11 validation:
 
 Commit / push:
 
-- commit: pending
-- push: pending
+- commit: c3fcf4c52d9f597af048f5d11ccba9ad5cf62cde (`test: verify active hazard host contract`)
+- push: PASS
 - buffer round consumed: no
 
 Next:

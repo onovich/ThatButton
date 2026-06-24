@@ -145,15 +145,18 @@ Phase 7 playtest questions still pending:
 - Do moving-button click targets feel aligned with the visible button position on iOS Safari and Android Chrome?
 - Does hazard stacking after the first learnable RPG loop make later runs more interesting, or should motion/interference unlock even later?
 
-## Phase 7A - Hazard Feel And Mobile Validation
+## Phase 7A - VFX Feel And Hazard Validation
 
 Estimated conversation rounds: 8
 Goal guide: [docs/phase-7a-hazard-feel-mobile-validation-goal-guide.md](docs/phase-7a-hazard-feel-mobile-validation-goal-guide.md)
-Status: Planned after Phase 7 PASS; ready for executor implementation as a validation and tuning pass before new mechanics or engine embedding.
+Status: Planned after Phase 7 PASS; ready for executor implementation as a particle/VFX overhaul plus validation and tuning pass before new mechanics or engine embedding.
 
+- Overhaul current particle/VFX feedback because attack, combo, wrong-press, enemy-hit, and reward effects are visually weak, aesthetically mismatched, and not satisfying enough for the RPG combat loop.
+- Define a coherent retro-futurist terminal VFX language: CRT/vector tracers, pixel sparks, scanline streaks, phosphor afterimages, data projectiles, and chunky neon fragments.
+- Avoid glossy modern magic particles, generic confetti/fireworks, high-blur blobs, tiny low-contrast specks, and effects detached from button-to-enemy motion.
 - Close the Phase 7 evidence gap around real-browser/mobile layout and active hazard readability.
 - Add or document a repeatable zero-dependency browser smoke path for desktop, mobile, short-mobile, active moving-button, active interference, and upgrade-overlay states when feasible.
-- Tune only existing hazard parameters when evidence supports it: movement amplitude/duration/cooldown, interference unlock/timing/opacity, and compact hazard status copy.
+- Tune only existing VFX presentation and hazard parameters when evidence supports it: particle visibility/style/tier escalation, movement amplitude/duration/cooldown, interference unlock/timing/opacity, and compact hazard status copy.
 - Preserve first enemy / first upgrade hazard-free onboarding and Phase 6A combat feel.
 - Keep iOS Safari, Android Chrome, and human fairness/readability playtest evidence explicitly marked as passed or pending.
 - Do not add new hazards, Unity/WebView/native/3D work, roguelite meta-progression, new dependencies, framework work, CDN resources, or Phase 1 difficulty retuning.

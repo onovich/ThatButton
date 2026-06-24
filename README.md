@@ -64,7 +64,7 @@ Phase 6A calibrates that loop before new hazards: first-enemy pacing is shorter,
 
 Phase 7 implements an HTML-first Hazard Director V1: gentle moving-button drift unlocks after early RPG onboarding, brief CRT/signal interference unlocks later, and 2D board-zone facts prepare future host/engine consumers without adding Unity/WebView/3D scope. Implementation evidence lives in [`docs/phase-7-advanced-hazards-spatial-interaction-record.md`](docs/phase-7-advanced-hazards-spatial-interaction-record.md) and [`docs/phase-7-final-report.md`](docs/phase-7-final-report.md).
 
-Phase 7A is planned as a hazard feel and mobile validation pass before new mechanics or engine embedding. It focuses on browser/mobile smoke evidence, active-hazard readability, and conservative tuning of the existing movement/interference parameters.
+Phase 7A is planned as a particle/VFX feel pass before new mechanics or engine embedding. It first reworks weak, mismatched attack/combo/wrong-press effects into a clearer retro-futurist terminal VFX language, then validates active-hazard readability and conservatively tunes the existing movement/interference parameters.
 
 ## Deployment
 

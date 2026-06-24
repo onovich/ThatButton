@@ -1,20 +1,20 @@
-# Phase 7A - Hazard Feel And Mobile Validation Goal Guide
+# Phase 7A - VFX Feel And Hazard Validation Goal Guide
 
 Date: 2026-06-24
 Status: execution guide for the implementation executor
-Round budget: 8 total rounds, with rounds 1-5 for main validation and tuning work, rounds 6-7 for buffer fixes, and round 8 for final validation.
+Round budget: 8 total rounds, with rounds 1-5 for main validation, VFX, and tuning work, rounds 6-7 for buffer fixes, and round 8 for final validation.
 
 ## 0. Direct Goal Prompt For The Executor
 
-Execute Phase 7A for `D:\WebProjects\ThatButton`: validate and tune the Phase 7 Hazard Director V1 before any new mechanics, engine embedding, or 3D work.
+Execute Phase 7A for `D:\WebProjects\ThatButton`: first overhaul the current particle/VFX feel, then validate and tune the Phase 7 Hazard Director V1 before any new mechanics, engine embedding, or 3D work.
 
-This phase exists because Phase 7 intentionally shipped moving-button and interference hazards with strong structured validation, but true browser/mobile screenshot evidence and human readability evidence remain pending. Phase 7A should close that loop as much as the available environment allows.
+This phase exists because the current attack/combo/wrong-press particle effects are not acceptable: they are visually weak, aesthetically mismatched with the retro-futurist UI, and not satisfying enough for the RPG combat loop. Phase 7 also shipped moving-button and interference hazards with strong structured validation, but true browser/mobile screenshot evidence and human readability evidence remain pending. Phase 7A should fix the VFX foundation first, then close the hazard evidence loop as much as the available environment allows.
 
 The product question is:
 
-Do moving buttons and board-scoped interference feel fair, readable, and worth keeping after the first RPG loop, especially on mobile?
+Do attacks, combo rewards, wrong presses, enemy hits, and upgrade moments feel clear, stylish, and rewarding in the game's retro terminal language? After that, do moving buttons and board-scoped interference feel fair, readable, and worth keeping after the first RPG loop, especially on mobile?
 
-Do not add new hazard types. Do not add Unity, WebView, native bridge, real 3D, roguelite meta-progression, new dependencies, framework migration, or Phase 1 difficulty retuning. Tune only the existing Phase 7 hazard parameters and presentation when evidence supports it.
+Do not add new hazard types. Do not add Unity, WebView, native bridge, real 3D, roguelite meta-progression, new dependencies, framework migration, or Phase 1 difficulty retuning. Tune only the existing particle/VFX presentation and existing Phase 7 hazard parameters when evidence supports it.
 
 ## 1. Required Reading
 
@@ -31,6 +31,7 @@ Do not add new hazard types. Do not add Unity, WebView, native bridge, real 3D, 
 - `src/core/debug.js`
 - `src/app/create-app.js`
 - `src/ui/render.js`
+- `src/ui/audio.js`
 - `src/core/host-events.js`
 - `src/host/app-host-api.js`
 - `scripts/validate-structure.mjs`
@@ -39,6 +40,29 @@ Do not add new hazard types. Do not add Unity, WebView, native bridge, real 3D, 
 ## 2. What This Phase Must Complete
 
 - Create `docs/phase-7a-hazard-feel-mobile-validation-record.md` before implementation.
+- Audit the current particle/VFX state before changing it.
+  - safe press / no-combo success
+  - chain start
+  - `COMBO x2`
+  - high combo and capped combo
+  - button-to-enemy attack tracers
+  - enemy hit / enemy defeat
+  - wrong press / player damage
+  - upgrade selection or reward moment
+  - interaction with moving-button and interference hazards
+- Define and implement a coherent particle/VFX art direction that fits the current UI.
+  - Use retro-futurist terminal, CRT vector, pixel spark, scanline streak, data projectile, phosphor afterimage, and chunky neon fragment language.
+  - Effects should look like an old machine firing readable electric/data signals, not like glossy modern fantasy particles or generic confetti.
+  - Strong effects must be clearly visible and satisfying, especially combo and enemy-hit rewards.
+  - Weak effects must still register; no correct action should feel invisible.
+  - Avoid tiny low-contrast specks, high-blur glow blobs, smooth radial-gradient magic, random fireworks, and particles that feel detached from button-to-enemy motion.
+- Rework existing particles/VFX without moving gameplay formulas into UI.
+  - Attack and combo effects must originate from the current pressed button rect and travel toward the enemy hit point.
+  - Combo tiers must visibly escalate: no-combo success, chain start, `COMBO x2`, high combo, capped combo.
+  - Wrong press must feel damaging: brief screen/body flash, button-local feedback, visible player-damage float, and distinct audio/vibration path when supported.
+  - Enemy hit and enemy defeat should give a concise, readable impact without blocking rule text or buttons.
+  - Upgrade selection should feel rewarding but not visually noisy.
+  - Hazards must not drown out combat VFX; combat reward feedback should remain readable above interference.
 - Record the Phase 7 acceptance baseline.
   - Current hazard unlock levels.
   - Current movement amplitude and timing.
@@ -53,6 +77,12 @@ Do not add new hazard types. Do not add Unity, WebView, native bridge, real 3D, 
   - Upgrade overlay while hazards are inactive, paused, or harmless.
   - Record screenshots or JSON geometry output under `docs/` only if useful and lightweight.
 - If local browser automation is unavailable or flaky, document the exact limitation and preserve structured validation. Do not claim unrun browser evidence as passed.
+- Add repeatable VFX evidence.
+  - before/after notes or screenshots when feasible
+  - smoke proving particle origins use the moved/current button rect
+  - smoke proving combo tiers have distinct class/style markers
+  - smoke proving interference does not cover or visually erase combat particles
+  - marker scan rejecting known-bad high-polish or low-visibility particle patterns
 - Tune existing hazard parameters only if evidence supports it.
   - movement amplitude
   - movement active duration
@@ -93,6 +123,8 @@ Do not add new hazard types. Do not add Unity, WebView, native bridge, real 3D, 
 - `src/core/debug.js` must reuse hazard core helpers for previews.
 - `src/app/create-app.js` owns orchestration only.
 - `src/ui/render.js` may measure live DOM geometry and render facts, but must not decide hazard schedules or gameplay outcomes.
+- Particle/VFX presentation belongs in `src/ui/render.js` and CSS only; gameplay reward, damage, combo, and upgrade formulas must stay in core/config.
+- Audio cue changes may stay in `src/ui/audio.js`, but audio code must not decide combo tiers, damage, or hazard state.
 - `src/core/host-events.js` and `src/host/` transport JSON-safe facts only.
 - Browser smoke scripts may live inside `scripts/` only if they are useful and zero-dependency; otherwise keep the smoke command documented in the phase record.
 - `scripts/validate-structure.mjs` must guard any new invariant introduced by this phase.
@@ -132,7 +164,10 @@ Every round must answer:
 
 - Can the change be explained by a fixed seed, a minimal input sequence, or measured viewport geometry?
 - Can failures be localized to hazard config, hazard core, app orchestration, UI render, host payloads, browser smoke tooling, or validation?
+- If VFX changed, can failures be localized to CSS, renderer geometry, render timing, audio cue path, or validation markers?
 - Did first enemy / first upgrade onboarding remain hazard-free?
+- Are safe press, combo, enemy hit, wrong press, and upgrade VFX each visible and stylistically coherent?
+- Do combo VFX tiers escalate clearly without turning into noise?
 - If a browser smoke was skipped or failed due to tooling, is that limitation recorded honestly?
 - If hazards were tuned, is there before/after evidence?
 - If UI changed, was desktop/mobile layout checked?
@@ -144,6 +179,7 @@ Every round must answer:
 - Did tunable values stay in `src/config/hazards.js`?
 - Did deterministic schedule and motion logic stay in `src/core/hazards.js`?
 - Did UI avoid deciding which hazard happens or which button is forbidden?
+- Did UI avoid deciding combo rewards, damage, upgrade effects, or enemy outcomes while improving VFX?
 - Did host code avoid duplicating gameplay decisions?
 - Did the round avoid new mechanics, Unity/WebView/native/3D, roguelite scope, dependencies, CDN resources, and Phase 1 retuning?
 - Are unrelated files, generated outputs, screenshots, and user changes left alone?
@@ -151,28 +187,33 @@ Every round must answer:
 
 ## 8. Round Plan
 
-1. Baseline and test plan.
+1. Baseline, VFX audit, and test plan.
    - Create `docs/phase-7a-hazard-feel-mobile-validation-record.md`.
-   - Record Phase 7 accepted behavior, pending evidence, and the exact browser/mobile smoke target list.
-2. Browser smoke harness.
+   - Record Phase 7 accepted behavior, pending evidence, current VFX problems, and the exact browser/mobile smoke target list.
+2. Particle/VFX art direction and implementation.
+   - Define the low-fi retro-futurist particle language.
+   - Rework safe, combo, attack, enemy-hit, wrong-press, and upgrade VFX so they are visible, stylish, and coherent.
+   - Keep gameplay formulas untouched.
+3. Browser smoke harness.
    - Add or document a zero-dependency Chrome/CDP smoke path if feasible.
-   - Capture desktop, mobile, and short-mobile playing geometry.
-3. Active hazard visual smoke.
+   - Capture desktop, mobile, and short-mobile playing geometry plus VFX marker evidence.
+4. Active hazard visual smoke.
    - Exercise active moving-button and active interference states with fixed seeds or debug helpers.
-   - Verify moved button rects, tracer origins, overlap, opacity, and feedback layering.
-4. Tuning pass.
+   - Verify moved button rects, tracer origins, overlap, opacity, VFX visibility, and feedback layering.
+5. Tuning pass.
    - Tune only existing hazard parameters if evidence says motion/interference is too strong, too early, too weak, or visually noisy.
+   - Tune only existing VFX presentation if evidence says particles remain mismatched, ugly, weak, or noisy.
    - Record before/after metrics.
-5. Mobile and manual playtest preparation.
+6. Mobile and manual playtest preparation.
    - Add a compact checklist for iOS Safari, Android Chrome, and human readability.
    - If real devices are unavailable, keep evidence pending and list exact follow-up questions.
-6. Buffer round 1.
+7. Buffer round 1.
    - Fix browser smoke, layout, validation, or tuning regressions.
-7. Buffer round 2.
-   - Fix remaining hazard readability or documentation issues.
 8. Final validation and report.
    - Create `docs/phase-7a-final-report.md`.
    - Run full validation, push, check GitHub Pages, and report `READY_FOR_CHECK`.
+
+If Round 7 is not needed as a buffer, use it for one extra VFX readability pass. Do not exceed the eight-round budget without planner approval.
 
 ## 9. Validation Matrix
 
@@ -190,6 +231,11 @@ git diff --check
 Required checks:
 
 - Runtime external URL scan across `index.html`, `src`, and `dist`.
+- Particle/VFX style marker scan for retro terminal/vector/pixel/data-signal language.
+- Anti-pattern scan rejecting glossy, high-blur, generic magic/confetti, or low-visibility particle markers.
+- Combo tier VFX marker smoke for no-combo success, chain start, `COMBO x2`, high combo, and capped combo.
+- Wrong-press VFX marker smoke for button-local feedback, screen/body feedback, player damage float, and audio/vibration path.
+- Enemy hit/defeat VFX marker smoke.
 - Fixed-seed hazard schedule preview.
 - First enemy / first upgrade hazard-free preview.
 - Active moving-button geometry smoke.
@@ -201,16 +247,22 @@ Required checks:
 - Host snapshot/event JSON-safety smoke for hazard facts.
 - Host-driven `press(buttonId)` smoke while hazards are active.
 - Phase 6A combat feedback marker preservation.
+- Button-to-enemy tracer smoke proving VFX uses the current pressed button rect, including moved-button states when feasible.
 
 ## 10. PASS Criteria
 
 Phase 7A is ready for planner check only when all are true:
 
 - Phase 7 hazards remain deterministic, data-driven, and delayed until after the first learnable RPG loop.
+- Particle/VFX pass improves style fit, visibility, and satisfaction for safe press, combo, attack, enemy hit, wrong press, and upgrade feedback.
+- VFX art direction matches the retro-futurist terminal UI and avoids glossy, generic, high-blur, or low-visibility effects.
+- Combo and reward feedback are immediately readable and visibly escalate by tier.
+- Attack/combo VFX originate from the current pressed button rect and travel toward the enemy.
 - Browser or structured mobile/desktop evidence is recorded honestly, with limitations explicitly stated.
 - Any tuning change is backed by before/after evidence.
 - Moving-button hazards remain bounded and do not break click target alignment, button text readability, particle origins, or board bounds.
 - Interference remains low-fi, brief, board-scoped, and does not obscure rule text, player HUD, combo feedback, wrong-press feedback, or upgrade choices.
+- Hazards do not drown out combat particles or make successful feedback feel invisible.
 - Phase 6A combat feel remains intact.
 - Host Bridge compatibility and JSON-safe hazard facts remain intact.
 - No new mechanics or deferred engine/3D/roguelite/dependency scope was added.
@@ -224,9 +276,9 @@ Phase 7A is ready for planner check only when all are true:
 Create `docs/phase-7a-final-report.md` with:
 
 ```markdown
-# Phase 7A Final Report - Hazard Feel And Mobile Validation
+# Phase 7A Final Report - VFX Feel And Hazard Validation
 
-Phase: Phase 7A - Hazard Feel And Mobile Validation
+Phase: Phase 7A - VFX Feel And Hazard Validation
 Guide: `docs/phase-7a-hazard-feel-mobile-validation-goal-guide.md`
 Final commit:
 Push:
@@ -235,6 +287,10 @@ GitHub Pages workflow:
 ## Summary
 
 ## Baseline
+
+## Particle/VFX Art Direction
+
+## VFX Changes
 
 ## Browser And Mobile Evidence
 
@@ -263,7 +319,7 @@ The READY_FOR_CHECK payload must include:
 - phase record path
 - validation command results
 - browser/mobile smoke evidence or exact limitation
+- VFX before/after evidence
 - GitHub Pages workflow result
 - pending real-device or human-playtest evidence
 - explicit non-scope preserved list
-

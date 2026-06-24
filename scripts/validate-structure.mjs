@@ -39,6 +39,7 @@ const moduleFiles = [
   'src/core/recap.js',
   'src/core/run-recaps.js',
   'src/core/debug.js',
+  'src/core/session-preview.js',
   'src/core/host-events.js',
   'src/host/app-host-api.js',
   'src/host/browser-host-bridge.js',
@@ -87,7 +88,7 @@ for (const marker of [
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
 const renderSource = sources.get('src/ui/render.js') || '';
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewHostEventPayloads', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewSessionProgression', 'previewHostEventPayloads', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateHazardPresentation', 'createHazardMarker', 'dataset.hazardPhase', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'showUpgradeReward', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
@@ -275,6 +276,7 @@ const coreBoundaryFiles = [
   'src/core/recap.js',
   'src/core/run-recaps.js',
   'src/core/debug.js',
+  'src/core/session-preview.js',
   'src/core/host-events.js'
 ];
 const forbiddenCorePatterns = [
@@ -486,6 +488,7 @@ const {
   previewPlayerDamage,
   previewCombatBalance,
   previewHazardSchedule,
+  previewSessionProgression,
   previewHostEventPayloads
 } = debugModule;
 const {
@@ -1629,6 +1632,7 @@ const requiredDebugHelpers = [
   'previewUpgradeApplication',
   'previewCombatBalance',
   'previewHazardSchedule',
+  'previewSessionProgression',
   'previewHostEventPayloads',
   'getCombatState',
   'getComboState',
@@ -2108,6 +2112,42 @@ if (debugApi) {
     !debugCombatBalance.comboWindowReadability.find((entry) => entry.cadenceMs === 2500 && entry.expiredBeforeSecond && entry.secondStatus === 'CHAIN READY')
   ) {
     failures.push(`Debug API combat balance preview changed: ${JSON.stringify(debugCombatBalance)}`);
+  }
+  const directSessionPreviewA = previewSessionProgression({
+    seed: 'phase8-validate',
+    maxLevels: 42,
+    maxEnemies: 4
+  });
+  const directSessionPreviewB = previewSessionProgression({
+    seed: 'phase8-validate',
+    maxLevels: 42,
+    maxEnemies: 4
+  });
+  const debugSessionPreview = debugApi.previewSessionProgression({
+    seed: 'phase8-validate',
+    maxLevels: 42,
+    maxEnemies: 4
+  });
+  if (
+    JSON.stringify(directSessionPreviewA) !== JSON.stringify(directSessionPreviewB) ||
+    JSON.stringify(directSessionPreviewA) !== JSON.stringify(debugSessionPreview) ||
+    !isJsonSafeValue(debugSessionPreview) ||
+    debugSessionPreview.kind !== 'phase8-session-preview' ||
+    debugSessionPreview.summary.firstThreeByThreeLevel !== 6 ||
+    debugSessionPreview.summary.levelsCleared < 34 ||
+    debugSessionPreview.summary.enemiesDefeated < 1 ||
+    debugSessionPreview.summary.firstUpgradeLevel < 16 ||
+    debugSessionPreview.summary.hazardExposure.firstMovingLevel < BASE_HAZARD_CONFIG.movingButton.unlockLevel ||
+    debugSessionPreview.summary.hazardExposure.firstInterferenceLevel < BASE_HAZARD_CONFIG.interference.unlockLevel ||
+    debugSessionPreview.upgradeLog.length < 1 ||
+    !debugSessionPreview.rounds.some((round) => round.hazards.activeTypes.includes(HAZARD_TYPES.INTERFERENCE)) ||
+    !['max_levels_reached', 'max_enemies_reached', 'timeout'].includes(debugSessionPreview.result.reason)
+  ) {
+    failures.push(`Debug API session progression preview changed: ${JSON.stringify({
+      result: debugSessionPreview.result,
+      summary: debugSessionPreview.summary,
+      upgrades: debugSessionPreview.upgradeLog
+    })}`);
   }
   const hazardZones = createBoardZoneFacts({ rows: 3, cols: 3 });
   if (

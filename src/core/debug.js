@@ -25,6 +25,7 @@ import {
   createUpgradeSelectionPayload
 } from './host-events.js';
 import { previewHazardSchedule as previewCoreHazardSchedule } from './hazards.js';
+import { previewSessionProgression as previewCoreSessionProgression } from './session-preview.js';
 import {
   BEST_RECORD_KEY,
   BEST_RECORD_VERSION,
@@ -344,6 +345,10 @@ export function previewHazardSchedule(options = {}) {
   return previewCoreHazardSchedule(options);
 }
 
+export function previewSessionProgression(options = {}) {
+  return previewCoreSessionProgression(options);
+}
+
 export function previewHostEventPayloads() {
   const player = getPlayerSummary(createPlayerState());
   const combo = getComboSummary(createComboState({ streak: 3 }));
@@ -442,6 +447,7 @@ export function createDebugApi({
     previewUpgradeApplication,
     previewCombatBalance,
     previewHazardSchedule,
+    previewSessionProgression,
     previewHostEventPayloads,
     getDifficultyForLevel,
     getLastFailureRecap: () => cloneFailureRecap(getState().lastFailureRecap),

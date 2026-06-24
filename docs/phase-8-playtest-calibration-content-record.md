@@ -104,8 +104,95 @@ Validation:
 
 Commit/push:
 
-- pending.
+- round commit: `138d670`
+- push: `origin/main` PASS
 
 Next round goal:
 
 - Add a pure deterministic session/progression preview path that summarizes multi-enemy progression, upgrades, hazard exposure, failure/victory reason, and pressure for representative seeds.
+
+## Round 2 - Deterministic Session Preview Tooling
+
+Round goal:
+
+- Add a pure debug/session preview path for representative seeds.
+- Summarize levels reached, enemies defeated, upgrades offered/selected, hazard exposure, result reason, and approximate pressure.
+- Add validation for determinism and JSON-safe output.
+
+Changes:
+
+- Added `src/core/session-preview.js`.
+- Exposed `previewSessionProgression(...)` from `src/core/debug.js` and the browser debug API.
+- Extended `scripts/validate-structure.mjs` so the new core file is included in architecture boundary scans.
+- Added structure validation that direct preview calls and Debug API preview calls are deterministic, JSON-safe, and cover `3x3`, upgrade cadence, and active interference evidence.
+
+Representative session preview command:
+
+```powershell
+cmd /c node -e "import('./src/core/debug.js').then(m=>{ /* summarize previewSessionProgression cases */ })"
+```
+
+Representative preview evidence after adding the tool, before gameplay tuning:
+
+| Case | Seed | Cadence | Levels cleared | Enemies defeated | Defeat levels | First upgrade | Hazard exposure | Result |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| early-mid | `phase8-validate` | 850ms | 42 | 2 | E1 L18, E2 L41 | L18 | moving L19, interference L24, 19 active-hazard rounds | `max_levels_reached` |
+| longer | `phase8-validate` | 850ms | 72 | 3 | E1 L18, E2 L41, E3 L67 | L18 | moving L19, interference L24, 49 active-hazard rounds | `max_levels_reached` |
+| alt-a | `phase8-alt-a` | 850ms | 42 | 2 | E1 L18, E2 L41 | L18 | moving L19, interference L24, 19 active-hazard rounds | `max_levels_reached` |
+| slower | `phase8-slower` | 1100ms | 42 | 2 | E1 L18, E2 L41 | L18 | moving L19, interference L24, 19 active-hazard rounds | `max_levels_reached` |
+
+Selected upgrade evidence:
+
+- `phase8-validate`, 42 levels: L18 `SLOW CLOCK`, L41 `CHAIN AMP`.
+- `phase8-alt-a`, 42 levels: L18 `SLOW CLOCK`, L41 `HOTTER STRIKE`.
+- `phase8-slower`, 42 levels: L18 `SLOW CLOCK`, L41 `HOTTER STRIKE`.
+
+Pressure evidence:
+
+- `phase8-validate`, 42 levels: max pressure score `27`, average `22`, high/critical rounds `0`.
+- `phase8-validate`, 72 levels: max pressure score `27`, average `24`, high/critical rounds `0`.
+- `phase8-slower`, 42 levels: max pressure score `42`, average `29`, high/critical rounds `0`.
+
+Round 2 diagnosis:
+
+- The current run is objectively longer than the first `3x3`; Level 6 is the first `3x3`, and a 42-level preview reaches enemy 3.
+- The pacing gap is not raw length. Enemy 2 takes from Level 19 to Level 41 to defeat in representative previews, which can make the middle of the run feel flat or under-signposted.
+- Pressure remains low under the current preview model, even when hazards are active. That supports tuning around session structure, enemy cadence, and content motivation before adding more hazards.
+- The result reason is currently a preview limit, not an in-game victory milestone. A later round should decide whether to add a conservative run milestone or improve recap/progression messaging without claiming a new real ending prematurely.
+
+Debug self-check:
+
+- Smallest fixture for longer-session evidence is now `previewSessionProgression({ seed, maxLevels, maxEnemies })`.
+- Failures can be localized to config/core session preview, combat/upgrades/hazards, or Debug API exposure because UI/host do not own the simulation.
+- The new preview covers success progression, upgrade pending cadence, active hazards, combo-safe ideal cadence, timeout result shape, and JSON-safe output. Wrong-press survivability remains covered by existing `previewCombatBalance(...)`.
+- No gameplay tuning was made in Round 2.
+
+Architecture self-check:
+
+- New session preview logic lives in `src/core/session-preview.js`.
+- `src/ui/render.js`, host adapters, and app orchestration did not gain gameplay formulas.
+- Debug API exposes facts only and does not own UI decisions.
+- Validation now guards the new pure module and JSON-safe deterministic output.
+- No non-scope systems were added.
+
+Validation:
+
+- `node --check src\core\session-preview.js`: PASS
+- `node --check src\core\debug.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `cmd /c npm.cmd run smoke:hazards`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit/push:
+
+- pending.
+
+Next round goal:
+
+- Use the new session preview evidence to add data-driven progression/content structure so the long middle game reads as an intentional arc, not only numeric `REACTOR WARDEN N` repetition.

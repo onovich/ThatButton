@@ -130,7 +130,7 @@ Status: Accepted by CheckAndGoal; see [docs/phase-6a-combat-feel-balance-record.
 
 Estimated conversation rounds: 16
 Goal guide: [docs/phase-7-advanced-hazards-spatial-interaction-goal-guide.md](docs/phase-7-advanced-hazards-spatial-interaction-goal-guide.md)
-Status: Implemented and ready for planner check after final validation; see [docs/phase-7-advanced-hazards-spatial-interaction-record.md](docs/phase-7-advanced-hazards-spatial-interaction-record.md) and [docs/phase-7-final-report.md](docs/phase-7-final-report.md).
+Status: Accepted by CheckAndGoal; see [docs/phase-7-advanced-hazards-spatial-interaction-record.md](docs/phase-7-advanced-hazards-spatial-interaction-record.md) and [docs/phase-7-final-report.md](docs/phase-7-final-report.md).
 
 - Prototype moving buttons and temporary visual interference as separate difficulty axes after the first learnable RPG loop, not in the opening onboarding sequence. V1 implemented; pending human readability playtest.
 - Keep the first enemy / first upgrade cadence from Phase 6A readable; do not stack motion, interference, short timers, and complex clues too early. Current schedule keeps early levels hazard-free and delays interference beyond first movement exposure.
@@ -145,6 +145,19 @@ Phase 7 playtest questions still pending:
 - Do moving-button click targets feel aligned with the visible button position on iOS Safari and Android Chrome?
 - Does hazard stacking after the first learnable RPG loop make later runs more interesting, or should motion/interference unlock even later?
 
+## Phase 7A - Hazard Feel And Mobile Validation
+
+Estimated conversation rounds: 8
+Goal guide: [docs/phase-7a-hazard-feel-mobile-validation-goal-guide.md](docs/phase-7a-hazard-feel-mobile-validation-goal-guide.md)
+Status: Planned after Phase 7 PASS; ready for executor implementation as a validation and tuning pass before new mechanics or engine embedding.
+
+- Close the Phase 7 evidence gap around real-browser/mobile layout and active hazard readability.
+- Add or document a repeatable zero-dependency browser smoke path for desktop, mobile, short-mobile, active moving-button, active interference, and upgrade-overlay states when feasible.
+- Tune only existing hazard parameters when evidence supports it: movement amplitude/duration/cooldown, interference unlock/timing/opacity, and compact hazard status copy.
+- Preserve first enemy / first upgrade hazard-free onboarding and Phase 6A combat feel.
+- Keep iOS Safari, Android Chrome, and human fairness/readability playtest evidence explicitly marked as passed or pending.
+- Do not add new hazards, Unity/WebView/native/3D work, roguelite meta-progression, new dependencies, framework work, CDN resources, or Phase 1 difficulty retuning.
+
 ## Current Recommendation
 
-Finish Phase 7 final validation and planner acceptance before engine embedding. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7 hazard facts only after the HTML gameplay loop proves the hazards are fun and readable.
+Run Phase 7A before engine embedding or new mechanics. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7/7A hazard facts only after the HTML gameplay loop proves the hazards are fun and readable.

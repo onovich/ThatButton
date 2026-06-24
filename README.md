@@ -64,6 +64,8 @@ Phase 6A calibrates that loop before new hazards: first-enemy pacing is shorter,
 
 Phase 7 implements an HTML-first Hazard Director V1: gentle moving-button drift unlocks after early RPG onboarding, brief CRT/signal interference unlocks later, and 2D board-zone facts prepare future host/engine consumers without adding Unity/WebView/3D scope. Implementation evidence lives in [`docs/phase-7-advanced-hazards-spatial-interaction-record.md`](docs/phase-7-advanced-hazards-spatial-interaction-record.md) and [`docs/phase-7-final-report.md`](docs/phase-7-final-report.md).
 
+Phase 7A is planned as a hazard feel and mobile validation pass before new mechanics or engine embedding. It focuses on browser/mobile smoke evidence, active-hazard readability, and conservative tuning of the existing movement/interference parameters.
+
 ## Deployment
 
 GitHub Pages deployment is configured with `.github/workflows/deploy.yml` and publishes the generated `dist/` folder from the `main` branch.<br/>**项目已通过 `.github/workflows/deploy.yml` 配置 GitHub Pages 部署，从 `main` 分支生成并发布 `dist/` 目录。**

@@ -1,0 +1,146 @@
+# Phase 7 Advanced Hazards And Spatial Interaction Record
+
+Phase: Phase 7 - Advanced Hazards And Spatial Interaction  
+Guide: `docs/phase-7-advanced-hazards-spatial-interaction-goal-guide.md`  
+Baseline head: `c62043cf9f34335e858182c46d9c54b0c97ebcaf`  
+Executor thread: `019ef06d-eb89-75c2-beb2-c695f9bcbedd`  
+Planner thread: `019eefc3-8126-7271-b4b4-7dd9742c8545`
+
+## Scope Lock
+
+- Add an HTML-first Hazard Director V1 for deterministic movement, temporary CRT interference, and 2D spatial grouping facts.
+- Preserve the base puzzle/combat loop: read rule, avoid forbidden buttons, press safe buttons, build combo, damage enemy, survive mistakes, choose one upgrade, continue.
+- Keep first enemy and first upgrade cadence readable. Hazards should not appear before the first learnable RPG loop has had room to land.
+- Keep hazard schedules and tuning in config/core modules.
+- Keep UI as a renderer of hazard facts, transforms, classes, and overlays only.
+- Keep host bridge payloads JSON-safe and plugin-neutral.
+- Preserve Phase 6A combat feel: bottom player HUD, button-to-enemy tracers, combo/wrong-press feedback, upgrade overlay, and static GitHub Pages delivery.
+- Do not add Unity/WebView/native integration, real 3D rendering, roguelite meta-progression, new dependencies, framework migration, CDN resources, or Phase 1 difficulty retuning.
+
+## Round 1 Baseline
+
+Current Phase 6A facts:
+
+- First enemy HP tuning is `500 HP / 18 ATK`.
+- Fixed-seed fast-cadence first upgrade appears at Level 18.
+- Slower `1100ms` cadence first upgrade appears at Level 19.
+- Wrong-press survivability remains enemy 1/2/3 survived wrong presses: `5 / 4 / 3`.
+- Combo window remains `2400ms`, with `2500ms` breaking the chain and restarting as `CHAIN READY`.
+- Player HUD lives in the bottom `#command-panel` before `#btn-grid`, not in `#battle-stage`.
+- Safe and combo tracers originate from the pressed button's current DOM rect when a source element is available.
+- Upgrade overlay reaches `upgrade_pending` with exactly three deterministic choices at first enemy defeat.
+
+Current architecture shape:
+
+- `src/config/difficulty.js` owns Phase 1 bands and must not be retuned in Phase 7.
+- `src/config/battle.js` owns combat tuning and should not be used to smuggle hazard pacing into combat formulas.
+- `src/core/debug.js` already provides fixed-seed previews for levels, combat balance, combo windows, upgrade choices, and host event payloads.
+- `src/app/create-app.js` owns orchestration and currently routes DOM and host `press(buttonId)` through one `pressButton(...)` path.
+- `src/ui/render.js` owns DOM rendering, current button rect use, button-to-enemy tracers, player HUD, upgrade overlay, and visual feedback.
+- `src/core/host-events.js` centralizes versioned JSON-safe payload builders.
+- `scripts/validate-structure.mjs` already guards core purity, host JSON safety, Phase 6A combat feedback markers, bottom player HUD placement, and combat balance previews.
+
+Host snapshot baseline:
+
+- Existing snapshots expose `version`, `status`, `run`, `round`, `player`, `combat`, `combo`, `upgrades`, and recap facts.
+- Existing host input methods include `start`, `reset`, `press(buttonId)`, `selectUpgrade(upgradeId)`, `getSnapshot()`, and `getDebugApi()`.
+- Phase 7 hazard facts should be added as JSON-safe state/payload fields without removing existing fields.
+
+## Hazard Unlock Assumptions
+
+The first enemy should stay hazard-free.
+
+Initial unlock assumptions:
+
+| Exposure | Suggested threshold | Reason |
+| --- | ---: | --- |
+| Hazard-free onboarding | Levels 1-18, enemy 1 | Preserve Phase 6A first upgrade cadence and RPG reward introduction. |
+| Movement telegraph only | Level 19 or enemy 2 start | Player has already defeated enemy 1 and seen upgrades. |
+| Gentle moving-button active state | Level 20+ or enemy 2 | Movement becomes a separate difficulty axis after the first reward loop. |
+| Temporary interference | Level 22+ or enemy 2 after motion exposure | Avoid stacking movement and signal noise immediately. |
+| Combined movement plus interference | Later enemy 2 or enemy 3 | Use only after isolated hazards remain readable. |
+
+Design stance:
+
+- Hazard unlocks should depend on level/enemy facts, not on Phase 1 timer shortening.
+- Hazards should remain disabled or inactive in early debug previews unless a preview explicitly asks for later levels.
+- Movement and interference should have independent cooldowns, durations, intensity, and unlock thresholds.
+- Hazards should never change forbidden-button semantics.
+
+## Planned Module Map
+
+- `src/config/hazards.js`
+  - unlock thresholds
+  - duration, cooldown, amplitude, speed, intensity
+  - debug disabled defaults
+  - hazard type ids
+- `src/core/hazards.js`
+  - deterministic schedule generation
+  - disabled/inactive/telegraph/active/cooldown/expired state helpers
+  - board zone/lane/sector facts
+  - no DOM, browser globals, URL query, CSS classes, AudioContext, or app state
+- `src/core/debug.js`
+  - fixed-seed hazard previews that call `src/core/hazards.js`
+  - hazard-free early-run preview
+- `src/core/host-events.js`
+  - JSON-safe hazard payload builders and optional event types if runtime events are added
+- `src/app/create-app.js`
+  - orchestration only: hold hazard state, tick pure helpers, pass facts to renderer, emit host events
+- `src/ui/render.js`
+  - apply hazard facts as transforms, attributes, overlays, and marker classes
+  - measure browser geometry only for presentation and smoke evidence
+- `scripts/validate-structure.mjs`
+  - import hazard modules directly
+  - enforce core purity
+  - guard deterministic previews, early hazard-free path, geometry/style markers, host JSON safety, and shared input behavior
+
+## Risk Points
+
+- Moving buttons can break readability if the visual target and click target diverge. Phase 7 should move the actual `.game-btn` element so current rect, focus rect, and pointer target stay unified.
+- Button motion can break Phase 6A attack/combo tracers if projectiles use stale positions. Current renderer reads `getBoundingClientRect()` at feedback time, so validation should prove moved-button projectiles still originate from the moved rect.
+- Motion can cause overlap, board escape, or rule-text collision on mobile and short viewports. Desktop/mobile geometry smoke must measure this.
+- Interference can fight rule readability, bottom player HUD readability, or combo/wrong-press particles. The overlay should be brief, low opacity, pointer-safe, and scoped away from rule text/player HUD when possible.
+- Upgrade selection should pause, clear, or make hazards harmless so upgrade cards remain readable and selectable.
+- Host snapshots/events should expose facts, not DOM rects, nodes, functions, timers, or CSS class decisions.
+
+## Playtest Checklist
+
+- iOS Safari real device: pending. Check touch target accuracy while buttons move, first-tap audio unlock, vibration behavior, rule text readability, and bottom HUD readability during interference.
+- Android Chrome real device: pending. Check moving-button touch accuracy, layout fit, supported vibration behavior, and low-end animation smoothness.
+- Human playtest: pending. Ask whether movement feels readable rather than unfair, whether interference is understandable, whether the first enemy stays learnable, and whether hazards make retry more interesting.
+
+## Round 1 Debug Self-Check
+
+- Baseline can be explained by fixed seeds, Phase 6A combat balance previews, and measured Phase 6A layout smokes.
+- Failures localize to future hazard config/core, app orchestration, UI render, host payloads, or validation.
+- First enemy and first upgrade path remain explicitly planned as hazard-free.
+- Disabled, inactive, telegraph, active, cooldown, and expired hazard states are identified for Round 2.
+- Real-device and human playtest evidence remains pending and is not claimed.
+
+## Round 1 Architecture Self-Check
+
+- No runtime code changed in Round 1.
+- Planned ownership keeps hazard schedules and tuning in config/core.
+- UI remains a fact renderer and should not decide hazard scheduling or forbidden-button semantics.
+- Host remains JSON-safe and plugin-neutral.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, framework work, and Phase 1 retuning remain out of scope.
+
+## Round 1 Validation
+
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Round 2: add hazard config/core model with deterministic disabled/inactive/active/expired helpers and fixed-seed previews.

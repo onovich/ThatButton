@@ -1,6 +1,6 @@
 # Phase 8 Playtest Calibration And Content Expansion Record
 
-Status: in progress
+Status: ready for planner check
 Guide: `docs/phase-8-playtest-calibration-content-goal-guide.md`
 Planner thread: `019eefc3-8126-7271-b4b4-7dd9742c8545`
 Executor thread: `019ef06d-eb89-75c2-beb2-c695f9bcbedd`
@@ -626,8 +626,42 @@ Validation:
 
 Commit/push:
 
-- pending.
+- round commit: `b8746ea`
+- push: `origin/main` PASS
 
 Next round goal:
 
 - Use remaining buffer for final evidence pass and documentation updates, then prepare the final report.
+
+## Buffer Rounds 9-11
+
+No buffer implementation rounds were consumed. Round 8 found no additional code, hazard, VFX, host/debug, or mobile-layout coverage gaps that required a fix before final reporting.
+
+## Round 12 - Final Validation And Report
+
+Round goal:
+
+- Create the final Phase 8 report.
+- Update TODO, docs index, and Role routing metadata.
+- Run the full validation matrix.
+- Push the final report and route READY_FOR_CHECK back to the planner.
+
+Debug self-check:
+
+- Smallest deterministic fixtures are recorded for early, mid, later, and hazard-active progression through `previewSessionProgression(...)`, `previewHazardSchedule(...)`, and `previewCombatBalance(...)`.
+- Balance changes have before/after evidence: only `enemyHpPerIndex` changed, moving E2 defeat from Level 41 to Level 39 and E3 defeat from Level 67 to Level 62 in representative previews.
+- Browser evidence still covers desktop, mobile, short-mobile, VFX markers, button-origin tracers, active movement, active interference, encounter labels, and command run-depth labels.
+- Real iOS Safari, Android Chrome, and human playtest evidence remain pending and are not claimed as complete.
+
+Architecture self-check:
+
+- Tunable numbers remain in config modules.
+- New encounter identity data remains in `src/config/encounters.js`.
+- Session preview, enemy identity derivation, combat facts, and debug summaries remain in core/debug modules.
+- UI renders already-computed facts and measured VFX geometry only; it does not own combat, combo, upgrade, difficulty, hazard, or rule formulas.
+- Host/debug contracts remain JSON-safe and no high-frequency VFX event stream was added.
+- No Unity/WebView/native/3D, roguelite meta-progression, new hazards, new dependencies, CDN resources, PWA/service worker, or broad redesign scope was added.
+
+Final validation:
+
+- Recorded in `docs/phase-8-final-report.md` and the READY_FOR_CHECK payload after the final round validation and push.

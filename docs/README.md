@@ -38,3 +38,5 @@
 - [Phase 7A Browser Smoke Results](phase-7a-browser-smoke-results.json) - lightweight Chrome/CDP geometry and VFX marker evidence for desktop, mobile, short-mobile, active hazards, and upgrade overlay states.
 - [Phase 7A Final Report](phase-7a-final-report.md) - completed Phase 7A VFX/hazard validation summary, evidence, architecture checks, pending real-device playtests, and readiness payload.
 - [Phase 8 Playtest Calibration And Content Expansion Goal Guide](phase-8-playtest-calibration-content-goal-guide.md) - goal-mode execution guide for extending the playable session, calibrating progression from evidence, and preserving Phase 7A feel without adding major new systems.
+- [Phase 8 Playtest Calibration And Content Expansion Record](phase-8-playtest-calibration-content-record.md) - Phase 8 round log, deterministic baseline/session preview evidence, tuning decisions, browser smoke notes, and architecture self-checks.
+- [Phase 8 Final Report](phase-8-final-report.md) - completed Phase 8 summary, progression/content evidence, conservative balance tuning, validation matrix, pending playtests, and readiness payload.

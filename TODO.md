@@ -171,15 +171,15 @@ Phase 7A pending real-world evidence:
 
 Estimated conversation rounds: 12
 Goal guide: [docs/phase-8-playtest-calibration-content-goal-guide.md](docs/phase-8-playtest-calibration-content-goal-guide.md)
-Status: Planned after Phase 7A PASS; dispatched to executor for implementation.
+Status: Implemented by executor; ready for CheckAndGoal. See [docs/phase-8-playtest-calibration-content-record.md](docs/phase-8-playtest-calibration-content-record.md) and [docs/phase-8-final-report.md](docs/phase-8-final-report.md).
 
-- Establish deterministic progression/session evidence before changing more gameplay.
-- Extend the playable arc so reaching `3x3` is not the practical end of interesting play.
-- Tune existing difficulty, combat, combo, upgrade, and hazard timing knobs with before/after evidence.
-- Add lightweight content variety such as data-driven enemy/stage identity only if it improves readability and motivation.
-- Preserve Phase 7A VFX language, bottom player HUD, button-to-enemy tracer origins, host bridge compatibility, and mobile layout.
-- Keep Unity/WebView/native/3D, roguelite meta-progression, new hazards, new dependencies, framework rewrites, CDN resources, and PWA work out of scope.
+- Establish deterministic progression/session evidence before changing more gameplay. Done through `previewSessionProgression(...)` and recorded fixed-seed session summaries.
+- Extend the playable arc so reaching `3x3` is not the practical end of interesting play. Done through longer-session evidence and data-driven encounter/stage identity.
+- Tune existing difficulty, combat, combo, upgrade, and hazard timing knobs with before/after evidence. Done conservatively; only later enemy HP cadence changed, while upgrade/combo/hazard values were kept after evidence review.
+- Add lightweight content variety such as data-driven enemy/stage identity only if it improves readability and motivation. Done with encounter identity data and compact HUD/run-depth labels.
+- Preserve Phase 7A VFX language, bottom player HUD, button-to-enemy tracer origins, host bridge compatibility, and mobile layout. Guarded by browser smoke and structure validation.
+- Keep Unity/WebView/native/3D, roguelite meta-progression, new hazards, new dependencies, framework rewrites, CDN resources, and PWA work out of scope. Preserved.
 
 ## Current Recommendation
 
-Run Phase 8 before engine embedding or another major mechanic. The game now needs a longer, evidence-backed session arc: more playable runway after `3x3`, clearer enemy/progression cadence, and safer tuning data for difficulty, combo, upgrades, and hazards. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7/7A hazard facts only after the HTML gameplay loop proves the hazards are fun and readable.
+Run CheckAndGoal on Phase 8. If accepted, choose the next phase from real playtest evidence: either continue HTML gameplay calibration around longer-run retention and hazard readability, or start a separate engine-embedding preparation phase that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7/7A/8 deterministic facts without adding new gameplay formulas to the host layer.

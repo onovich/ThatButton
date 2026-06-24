@@ -49,10 +49,12 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     bestLevelDisplay: document.getElementById('best-level-display'),
     bestScoreDisplay: document.getElementById('best-score-display'),
     bestStatusNote: document.getElementById('best-status-note'),
+    combatStatus: document.getElementById('combat-status'),
     bossHpText: document.getElementById('boss-hp-text'),
     bossHpBar: document.getElementById('boss-hp-bar'),
     comboStatusText: document.getElementById('combo-status-text'),
     comboRewardText: document.getElementById('combo-reward-text'),
+    comboParticleLayer: document.getElementById('combo-particle-layer'),
     failureRecapEl: document.getElementById('failure-recap'),
     startScreen: document.getElementById('start-screen'),
     gameOverScreen: document.getElementById('game-over-screen'),
@@ -63,6 +65,110 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
   };
   let typewriterTimeout = null;
   let comboRewardTimeout = null;
+  let comboImpactTimeout = null;
+  let comboShakeTimeout = null;
+
+  function removeNode(node) {
+    if (node && typeof node.remove === 'function') {
+      node.remove();
+    }
+  }
+
+  function getComboRewardKind({ previous, combo, capped }) {
+    if (capped) {
+      return {
+        label: 'MAX COMBO',
+        className: 'max-combo',
+        color: '#ffffff',
+        strong: true
+      };
+    }
+    if (combo.damageBonus > previous.damageBonus) {
+      return {
+        label: `DMG +${combo.damageBonus}`,
+        className: 'damage-bonus',
+        color: 'var(--crt-yellow)',
+        strong: true
+      };
+    }
+    return {
+      label: 'COMBO +1',
+      className: '',
+      color: 'var(--crt-green)',
+      strong: false
+    };
+  }
+
+  function spawnComboParticles({ strong, color }) {
+    if (!refs.comboParticleLayer || typeof refs.comboParticleLayer.appendChild !== 'function') return;
+    const width = refs.combatStatus?.clientWidth || 280;
+    const height = refs.combatStatus?.clientHeight || 44;
+    const originX = Math.max(42, width - 36);
+    const originY = Math.max(12, height * 0.42);
+    const count = strong ? 16 : 9;
+
+    for (let index = 0; index < count; index++) {
+      const particle = document.createElement('span');
+      const angle = (200 + random() * 140) * (Math.PI / 180);
+      const distance = (strong ? 34 : 24) + random() * (strong ? 32 : 22);
+      particle.className = 'combo-particle';
+      particle.style.left = `${originX}px`;
+      particle.style.top = `${originY}px`;
+      particle.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+      particle.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
+      particle.style.setProperty('--particle-color', color);
+      particle.style.setProperty('--particle-size', `${strong ? 7 : 5}px`);
+      refs.comboParticleLayer.appendChild(particle);
+      schedule(() => removeNode(particle), 900);
+    }
+  }
+
+  function spawnButtonReward({ sourceElement, label, className, color, strong }) {
+    if (!sourceElement || typeof sourceElement.getBoundingClientRect !== 'function') return;
+    if (!document.body || typeof document.body.appendChild !== 'function') return;
+    const rect = sourceElement.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const originX = rect.left + rect.width / 2;
+    const originY = rect.top + rect.height * 0.46;
+    const floatText = document.createElement('span');
+    floatText.className = `button-float-text ${className}`.trim();
+    floatText.innerText = label;
+    floatText.style.left = `${originX}px`;
+    floatText.style.top = `${originY}px`;
+    document.body.appendChild(floatText);
+    schedule(() => removeNode(floatText), 900);
+
+    const sparkCount = strong ? 14 : 8;
+    for (let index = 0; index < sparkCount; index++) {
+      const spark = document.createElement('span');
+      const angle = random() * Math.PI * 2;
+      const distance = rect.width * (0.22 + random() * (strong ? 0.48 : 0.32));
+      spark.className = 'button-combo-spark';
+      spark.style.left = `${originX}px`;
+      spark.style.top = `${originY}px`;
+      spark.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+      spark.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
+      spark.style.setProperty('--particle-color', color);
+      spark.style.setProperty('--particle-size', `${strong ? 7 : 5}px`);
+      document.body.appendChild(spark);
+      schedule(() => removeNode(spark), 780);
+    }
+  }
+
+  function playComboShake(strong) {
+    if (comboShakeTimeout !== null) {
+      cancelSchedule(comboShakeTimeout);
+    }
+    document.body.classList.remove('combo-shake');
+    document.body.classList.remove('combo-shake-strong');
+    void document.body.offsetWidth;
+    document.body.classList.add(strong ? 'combo-shake-strong' : 'combo-shake');
+    comboShakeTimeout = schedule(() => {
+      document.body.classList.remove('combo-shake');
+      document.body.classList.remove('combo-shake-strong');
+      comboShakeTimeout = null;
+    }, strong ? 280 : 200);
+  }
 
   function renderFailureRecap(recap) {
     if (!recap) {
@@ -167,28 +273,46 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
     refs.comboStatusText.innerText = `COMBO ${combo.multiplierLabel} / ${combo.streak}`;
   }
 
-  function showComboReward({ previous, combo }) {
+  function showComboReward({ previous, combo, sourceElement = null, capped = false }) {
     if (!previous || !combo) return;
-    const bonusChanged = combo.damageBonus > previous.damageBonus;
-    refs.comboRewardText.innerText = bonusChanged ? `DMG +${combo.damageBonus}` : 'STREAK +1';
-    if (bonusChanged) {
-      refs.comboRewardText.classList.add('damage-bonus');
-    } else {
-      refs.comboRewardText.classList.remove('damage-bonus');
-    }
+    const reward = getComboRewardKind({ previous, combo, capped });
+    refs.comboRewardText.innerText = reward.label;
+    refs.comboRewardText.classList.remove('damage-bonus');
+    refs.comboRewardText.classList.remove('max-combo');
+    if (reward.className) refs.comboRewardText.classList.add(reward.className);
     refs.comboRewardText.classList.remove('combo-reward-pop');
     refs.comboStatusText.classList.remove('combo-pulse');
+    refs.combatStatus.classList.remove('combo-impact');
+    refs.combatStatus.classList.remove('combo-tier-impact');
     void refs.comboRewardText.offsetWidth;
     refs.comboRewardText.classList.add('combo-reward-pop');
     refs.comboStatusText.classList.add('combo-pulse');
+    refs.combatStatus.classList.add(reward.strong ? 'combo-tier-impact' : 'combo-impact');
+    spawnComboParticles(reward);
+    spawnButtonReward({
+      sourceElement,
+      label: reward.label,
+      className: reward.className,
+      color: reward.color,
+      strong: reward.strong
+    });
+    playComboShake(reward.strong);
     if (comboRewardTimeout !== null) {
       cancelSchedule(comboRewardTimeout);
+    }
+    if (comboImpactTimeout !== null) {
+      cancelSchedule(comboImpactTimeout);
     }
     comboRewardTimeout = schedule(() => {
       refs.comboRewardText.classList.remove('combo-reward-pop');
       refs.comboStatusText.classList.remove('combo-pulse');
       comboRewardTimeout = null;
-    }, 760);
+    }, 940);
+    comboImpactTimeout = schedule(() => {
+      refs.combatStatus.classList.remove('combo-impact');
+      refs.combatStatus.classList.remove('combo-tier-impact');
+      comboImpactTimeout = null;
+    }, reward.strong ? 720 : 560);
   }
 
   function updateTimer(timeLeft, timeLimit) {

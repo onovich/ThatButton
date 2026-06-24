@@ -227,61 +227,255 @@
             color: var(--crt-green);
             text-align: right;
             white-space: nowrap;
+            justify-self: end;
+            transform-origin: right center;
         }
 
         .combo-status-text.combo-pulse {
-            animation: combo-pulse 0.36s ease-out;
+            animation: combo-pulse 0.52s cubic-bezier(.18,.89,.32,1.28);
+        }
+
+        .combat-status.combo-impact {
+            animation: combo-status-impact 0.28s ease-out;
+        }
+
+        .combat-status.combo-tier-impact {
+            animation: combo-status-tier-impact 0.36s ease-out;
+        }
+
+        .combat-status::after {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: 4px;
+            border: 1px solid rgba(74, 246, 38, 0);
+            box-shadow: none;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .combat-status.combo-impact::after {
+            animation: combo-status-flash 0.52s ease-out;
+        }
+
+        .combat-status.combo-tier-impact::after {
+            animation: combo-status-tier-flash 0.68s ease-out;
         }
 
         .combo-reward-text {
             position: absolute;
             right: 0.45rem;
-            top: -0.72rem;
-            padding: 0.08rem 0.32rem;
-            border: 1px solid rgba(74, 246, 38, 0.55);
-            background: rgba(0, 18, 0, 0.88);
+            top: -1.05rem;
+            padding: 0.12rem 0.45rem;
+            border: 2px solid rgba(74, 246, 38, 0.72);
+            background: rgba(0, 22, 0, 0.94);
             color: var(--crt-green);
             border-radius: 3px;
+            font-size: 0.86rem;
+            font-weight: 900;
             opacity: 0;
-            transform: translateY(4px) scale(0.96);
+            transform: translateY(6px) scale(0.9);
             pointer-events: none;
             letter-spacing: 0;
-            box-shadow: 0 0 8px rgba(74, 246, 38, 0.28);
+            text-shadow: 0 0 8px rgba(74, 246, 38, 0.7);
+            box-shadow: 0 0 14px rgba(74, 246, 38, 0.42), inset 0 0 10px rgba(74, 246, 38, 0.16);
+            z-index: 4;
         }
 
         .combo-reward-text.combo-reward-pop {
-            animation: combo-reward-pop 0.72s ease-out;
+            animation: combo-reward-pop 0.9s cubic-bezier(.18,.89,.32,1.28);
         }
 
         .combo-reward-text.damage-bonus {
             border-color: rgba(255, 204, 0, 0.7);
             color: var(--crt-yellow);
-            box-shadow: 0 0 10px rgba(255, 204, 0, 0.32);
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+            box-shadow: 0 0 18px rgba(255, 204, 0, 0.48), inset 0 0 12px rgba(255, 204, 0, 0.18);
+        }
+
+        .combo-reward-text.max-combo {
+            border-color: rgba(74, 246, 38, 0.85);
+            color: #fff;
+            text-shadow: 0 0 10px var(--crt-green), 0 0 14px rgba(255, 255, 255, 0.45);
+        }
+
+        .combo-particle-layer {
+            position: absolute;
+            inset: 0;
+            overflow: visible;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .combo-particle,
+        .button-combo-spark {
+            position: absolute;
+            width: var(--particle-size, 6px);
+            height: var(--particle-size, 6px);
+            border-radius: 999px;
+            background: var(--particle-color, var(--crt-green));
+            box-shadow: 0 0 10px var(--particle-color, var(--crt-green));
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .combo-particle {
+            animation: combo-particle-burst 0.82s ease-out forwards;
+        }
+
+        .button-combo-spark {
+            position: fixed;
+            z-index: 80;
+            animation: button-combo-spark 0.72s ease-out forwards;
+        }
+
+        .button-float-text {
+            position: fixed;
+            z-index: 81;
+            color: var(--crt-green);
+            font-size: 0.95rem;
+            font-weight: 900;
+            letter-spacing: 0;
+            text-shadow: 0 0 10px rgba(74, 246, 38, 0.8), 0 2px 0 rgba(0, 0, 0, 0.7);
+            transform: translate(-50%, -50%) scale(0.9);
+            pointer-events: none;
+            white-space: nowrap;
+            animation: button-float-pop 0.82s cubic-bezier(.18,.89,.32,1.28) forwards;
+        }
+
+        .button-float-text.damage-bonus {
+            color: var(--crt-yellow);
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.8), 0 2px 0 rgba(0, 0, 0, 0.7);
+        }
+
+        .button-float-text.max-combo {
+            color: #fff;
+            text-shadow: 0 0 10px var(--crt-green), 0 2px 0 rgba(0, 0, 0, 0.7);
         }
 
         @keyframes combo-pulse {
             0% { transform: scale(1); text-shadow: none; }
-            35% { transform: scale(1.08); text-shadow: 0 0 10px rgba(74, 246, 38, 0.65); }
+            28% { transform: scale(1.22); text-shadow: 0 0 14px rgba(74, 246, 38, 0.8); }
+            62% { transform: scale(1.04); text-shadow: 0 0 8px rgba(74, 246, 38, 0.55); }
             100% { transform: scale(1); text-shadow: none; }
         }
 
         @keyframes combo-reward-pop {
             0% {
                 opacity: 0;
-                transform: translateY(4px) scale(0.96);
+                transform: translateY(8px) scale(0.88);
             }
-            18% {
+            16% {
                 opacity: 1;
-                transform: translateY(-2px) scale(1);
+                transform: translateY(-3px) scale(1.08);
             }
-            78% {
+            70% {
                 opacity: 1;
-                transform: translateY(-8px) scale(1);
+                transform: translateY(-13px) scale(1);
             }
             100% {
                 opacity: 0;
-                transform: translateY(-14px) scale(0.98);
+                transform: translateY(-24px) scale(0.96);
             }
+        }
+
+        @keyframes combo-status-impact {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(2px); }
+            50% { transform: translateX(-2px); }
+            75% { transform: translateX(1px); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes combo-status-tier-impact {
+            0% { transform: translateX(0) scale(1); }
+            25% { transform: translateX(3px) scale(1.01); }
+            50% { transform: translateX(-3px) scale(1.01); }
+            75% { transform: translateX(2px) scale(1); }
+            100% { transform: translateX(0) scale(1); }
+        }
+
+        @keyframes combo-status-flash {
+            0% { opacity: 0; border-color: rgba(74, 246, 38, 0); box-shadow: none; }
+            22% { opacity: 1; border-color: rgba(74, 246, 38, 0.85); box-shadow: 0 0 18px rgba(74, 246, 38, 0.45); }
+            100% { opacity: 0; border-color: rgba(74, 246, 38, 0); box-shadow: none; }
+        }
+
+        @keyframes combo-status-tier-flash {
+            0% { opacity: 0; border-color: rgba(255, 204, 0, 0); box-shadow: none; }
+            18% { opacity: 1; border-color: rgba(255, 204, 0, 0.95); box-shadow: 0 0 24px rgba(255, 204, 0, 0.55); }
+            100% { opacity: 0; border-color: rgba(255, 204, 0, 0); box-shadow: none; }
+        }
+
+        @keyframes combo-particle-burst {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.45);
+            }
+            18% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.15);
+            }
+        }
+
+        @keyframes button-combo-spark {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            18% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.12);
+            }
+        }
+
+        @keyframes button-float-pop {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -35%) scale(0.82);
+            }
+            18% {
+                opacity: 1;
+                transform: translate(-50%, -62%) scale(1.12);
+            }
+            72% {
+                opacity: 1;
+                transform: translate(-50%, -98%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -135%) scale(0.94);
+            }
+        }
+
+        .combo-shake {
+            animation: combo-body-shake 0.16s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        .combo-shake-strong {
+            animation: combo-body-shake-strong 0.24s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes combo-body-shake {
+            0%, 100% { transform: translateX(0); }
+            30% { transform: translateX(1px); }
+            65% { transform: translateX(-1px); }
+        }
+
+        @keyframes combo-body-shake-strong {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(2px); }
+            45% { transform: translateX(-2px); }
+            70% { transform: translateX(1px); }
         }
 
         .terminal-box {
@@ -537,9 +731,14 @@
             }
 
             .combo-reward-text {
-                top: -0.62rem;
+                top: -0.86rem;
                 right: 0.35rem;
-                font-size: 0.62rem;
+                font-size: 0.72rem;
+                padding: 0.08rem 0.34rem;
+            }
+
+            .button-float-text {
+                font-size: 0.78rem;
             }
 
             #warning-text {
@@ -729,6 +928,7 @@
             <span class="combat-hp-track"><span id="boss-hp-bar" class="combat-hp-bar"></span></span>
             <span id="combo-status-text" class="combo-status-text">COMBO x1.0</span>
             <span id="combo-reward-text" class="combo-reward-text" aria-hidden="true">STREAK +1</span>
+            <span id="combo-particle-layer" class="combo-particle-layer" aria-hidden="true"></span>
         </div>
 
         <div class="timer-container">

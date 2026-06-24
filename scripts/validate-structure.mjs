@@ -50,6 +50,7 @@ for (const marker of [
   'id="boss-hp-bar"',
   'id="combo-status-text"',
   'id="combo-reward-text"',
+  'id="combo-particle-layer"',
   'id="clue-title"',
   '别按那个按钮！',
   'id="failure-recap"',
@@ -62,13 +63,13 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'updateCombatStatus', 'showComboReward']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'updateCombatStatus', 'showComboReward', 'spawnComboParticles', 'MAX COMBO']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
 }
 
-for (const marker of ['id="boss-avatar"', '.boss-avatar-shell', 'grid-template-areas:', '"avatar label combo"', '.combat-hp-bar', 'display: block;', 'id="combo-reward-text"', '.combo-reward-text', '@keyframes combo-reward-pop', '@media (max-width: 520px)']) {
+for (const marker of ['id="boss-avatar"', '.boss-avatar-shell', 'grid-template-areas:', '"avatar label combo"', '.combat-hp-bar', 'display: block;', 'id="combo-reward-text"', 'id="combo-particle-layer"', '.combo-reward-text', '.combo-particle', '.button-float-text', '.combo-shake-strong', '@keyframes combo-reward-pop', '@keyframes combo-particle-burst', '@media (max-width: 520px)']) {
   if (!html.includes(marker)) {
     failures.push(`Missing combat mobile layout marker in index.html: ${marker}`);
   }

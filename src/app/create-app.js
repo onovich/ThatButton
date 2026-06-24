@@ -163,14 +163,20 @@ export function createApp({
     Object.assign(gameState, createEncounterState());
   }
 
-  function applyComboChange(comboChange) {
+  function applyComboChange(comboChange, { sourceElement = null, showReward = false } = {}) {
     gameState.combo = comboChange.combo;
     renderer.updateCombatStatus(getEncounterFacts(gameState));
-    if (comboChange.changed) {
+    const comboIncreased = comboChange.combo.streak > comboChange.previous.streak;
+    const cappedReward = showReward && !comboIncreased && comboChange.combo.isCapped;
+    if (showReward && (comboIncreased || cappedReward)) {
       renderer.showComboReward({
         previous: comboChange.previous,
-        combo: comboChange.combo
+        combo: comboChange.combo,
+        sourceElement,
+        capped: cappedReward
       });
+    }
+    if (comboChange.changed) {
       hostController.emitComboChanged({
         previous: comboChange.previous,
         combo: comboChange.combo,
@@ -326,7 +332,10 @@ export function createApp({
       audio.playSafeClick();
       gameState.safeKeysRemaining--;
       gameState.score += 10;
-      applyComboChange(applySafePressCombo(gameState.combo));
+      applyComboChange(applySafePressCombo(gameState.combo), {
+        sourceElement: element,
+        showReward: true
+      });
       gameState.timeLeft = Math.min(
         gameState.timeLimit,
         gameState.timeLeft + gameState.currentDifficulty.timeRewardMs

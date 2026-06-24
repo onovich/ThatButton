@@ -1,6 +1,7 @@
 import { getDifficultyForLevel } from '../config/difficulty.js';
 import { createCombatState } from './combat.js';
 import { createComboState } from './combo.js';
+import { createDisabledHazardState } from './hazards.js';
 import { createPlayerState } from './player.js';
 import { createUpgradeState } from './upgrades.js';
 
@@ -22,6 +23,7 @@ export function createInitialState({ bestRecord, bestRecordStatus, rng }) {
     timeLimit: 12000,
     timeLeft: 12000,
     lastTime: 0,
+    roundStartedAtMs: 0,
     animationFrame: null,
     currentRuleText: '',
     bestRecord,
@@ -30,6 +32,9 @@ export function createInitialState({ bestRecord, bestRecordStatus, rng }) {
     player: createPlayerState(),
     combat: createCombatState(),
     combo: createComboState(),
+    hazards: createDisabledHazardState({
+      reason: 'not_started'
+    }),
     upgrades: createUpgradeState(),
     lastCombatResult: null,
     lastFailureRecap: null,

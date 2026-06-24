@@ -135,6 +135,7 @@ export function createRoundPayload({
   player = null,
   combat = null,
   combo = null,
+  hazards = null,
   upgrades = null
 }) {
   return cloneJsonSafeValue({
@@ -159,6 +160,7 @@ export function createRoundPayload({
     player,
     combat,
     combo,
+    hazards,
     upgrades,
     buttons: buttons.map(createButtonPayload)
   }, 'round payload');
@@ -197,6 +199,10 @@ export function createCombatPayload(combat = null) {
 
 export function createComboPayload(combo = null) {
   return cloneJsonSafeValue(combo, 'combo payload');
+}
+
+export function createHazardPayload(hazards = null) {
+  return cloneJsonSafeValue(hazards, 'hazard payload');
 }
 
 export function createPlayerPayload(player = null) {

@@ -11,6 +11,7 @@ import {
   createEnemyDefeatPayload,
   createEnemySpawnPayload,
   createFailurePayload,
+  createHazardPayload,
   createHostEvent,
   createPlayerDamagePayload,
   createPlayerPayload,
@@ -42,6 +43,7 @@ export function createAppHostApi({ hostBridge, getState, performance }) {
       player: state.player,
       combat: state.combat,
       combo: state.combo,
+      hazards: state.hazards,
       upgrades: state.upgrades
     });
   }
@@ -68,6 +70,7 @@ export function createAppHostApi({ hostBridge, getState, performance }) {
       player: createPlayerPayload(state.player),
       combat: createCombatPayload(state.combat),
       combo: createComboPayload(state.combo),
+      hazards: createHazardPayload(state.hazards),
       upgrades: createUpgradePayload(state.upgrades),
       lastFailureRecap: state.lastFailureRecap,
       lastVictoryRecap: state.lastVictoryRecap,

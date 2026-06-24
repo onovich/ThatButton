@@ -219,3 +219,69 @@ Commit / push:
 Next:
 
 - Round 3: wire hazard facts through app/debug/host snapshots without visible runtime hazards.
+
+## Round 3 App/Debug/Host Fact Integration
+
+Implemented:
+
+- Added `hazards` to initial app state.
+- Added `hazards` to round snapshots and host round payloads.
+- Added `createHazardPayload(...)` to `src/core/host-events.js`.
+- Added `hazards` to host snapshots.
+- Added app orchestration helper `updateHazardState(...)`:
+  - uses current level, enemy index, grid size, button ids, forbidden ids, and round elapsed time,
+  - supports `?hazards=0`, `?hazards=false`, and `?hazards=off`,
+  - disables hazards during upgrade selection.
+- Updated `startRound(...)` and the game loop so hazard facts advance deterministically by round elapsed time.
+- Extended validation so host snapshots carry hazard facts and the URL disable path works.
+
+No visible hazard behavior was added in this round:
+
+- Renderer does not consume hazard facts yet.
+- Buttons do not move yet.
+- Interference overlay is not rendered yet.
+- No hazard host events were added yet.
+
+Debug self-check:
+
+- The change is explained by fixed-seed app smokes and host snapshot facts.
+- Failures localize to app orchestration, round snapshot construction, host payload construction, or structure validation.
+- First enemy / first upgrade path remains hazard-free in app snapshots because Round 2 validation still guards the core schedule.
+- Disabled and inactive states are covered in app/host integration; active visual states remain future work.
+- No UI geometry changed in this round.
+
+Architecture self-check:
+
+- Hazard scheduling still lives in config/core.
+- App orchestration only passes current facts into pure hazard helpers.
+- UI code was not changed and does not decide hazard scheduling.
+- Host code transports cloned JSON-safe hazard facts only.
+- Rule, fatal-button, combat, combo, and upgrade semantics were not duplicated.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, framework work, and Phase 1 retuning remain out of scope.
+- Validation now guards host snapshot hazard facts and the debug disable path.
+
+Round 3 validation:
+
+- `node --check src\app\create-app.js`: PASS
+- `node --check src\core\app-state.js`: PASS
+- `node --check src\core\level.js`: PASS
+- `node --check src\core\host-events.js`: PASS
+- `node --check src\host\app-host-api.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS after rerun, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Round 4: add UI hazard marker foundation without actual movement/interference behavior.

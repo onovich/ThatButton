@@ -52,7 +52,8 @@ export function getRoundSnapshot({
   safeKeysRemaining,
   player = null,
   combat = null,
-  combo = null
+  combo = null,
+  hazards = null
 }) {
   return {
     level,
@@ -74,6 +75,7 @@ export function getRoundSnapshot({
     safeKeysRemaining,
     player,
     combat,
-    combo
+    combo,
+    hazards
   };
 }

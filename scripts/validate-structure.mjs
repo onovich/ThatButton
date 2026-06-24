@@ -84,7 +84,7 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewHostEventPayloads', 'createHazardDirectorState', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewHostEventPayloads', 'createHazardDirectorState', 'createHazardPayload', 'updateHazardState', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
@@ -425,6 +425,7 @@ const {
   createEnemyDamagePayload,
   createEnemyDefeatPayload,
   createEnemySpawnPayload,
+  createHazardPayload,
   createPlayerDamagePayload,
   createPlayerPayload,
   createUpgradePayload,
@@ -1419,6 +1420,15 @@ if (
 ) {
   failures.push(`Host snapshot missing initial upgrade facts: ${JSON.stringify(firstSnapshot.upgrades)}`);
 }
+if (
+  firstSnapshot.hazards?.reason !== 'onboarding_safe' ||
+  firstSnapshot.hazards?.phase !== HAZARD_PHASES.INACTIVE ||
+  firstSnapshot.hazards?.hazards?.length !== 0 ||
+  firstSnapshot.round.hazards?.reason !== 'onboarding_safe' ||
+  !isJsonSafeValue(createHazardPayload(firstSnapshot.hazards))
+) {
+  failures.push(`Host snapshot missing initial hazard facts: ${JSON.stringify(firstSnapshot.hazards)}`);
+}
 const safePress = hostSmokeApp.press('btn-0');
 if (!safePress.accepted || safePress.result !== 'safe' || hostSmokeApp.getSnapshot().run.score !== 10) {
   failures.push(`Host safe press did not reuse gameplay scoring: ${JSON.stringify(safePress)}`);
@@ -1478,6 +1488,34 @@ for (const requiredType of [
 }
 if (!isJsonSafeValue(hostSmokeBridge.getEvents())) {
   failures.push('Captured host event sequence is not JSON-safe.');
+}
+
+const hazardDisabledBridge = createCaptureHostBridge();
+const hazardDisabledWindow = {
+  location: { search: '?seed=phase3a-baseline&hazards=0' },
+  AudioContext: FakeAudioContext,
+  webkitAudioContext: FakeAudioContext,
+  localStorage: fakeStorage()
+};
+const hazardDisabledApp = mainModule.createApp({
+  window: hazardDisabledWindow,
+  document: fakeDocument,
+  performance: { now: () => 2100 },
+  requestAnimationFrame: () => 0,
+  setTimeout: () => 0,
+  clearTimeout: () => {},
+  random: () => 0.5,
+  hostBridge: hazardDisabledBridge
+});
+hazardDisabledApp.init();
+hazardDisabledApp.start();
+const hazardDisabledSnapshot = hazardDisabledApp.getSnapshot();
+if (
+  hazardDisabledSnapshot.hazards?.phase !== HAZARD_PHASES.DISABLED ||
+  hazardDisabledSnapshot.hazards?.reason !== 'query_disabled' ||
+  hazardDisabledSnapshot.round.hazards?.phase !== HAZARD_PHASES.DISABLED
+) {
+  failures.push(`Hazard disable query should disable app hazard facts: ${JSON.stringify(hazardDisabledSnapshot.hazards)}`);
 }
 
 const lethalBridge = createCaptureHostBridge();

@@ -28,6 +28,7 @@ import {
   saveBestRecord as saveBestRecordToStorage,
   resetBestRecord as resetBestRecordInStorage
 } from '../core/storage.js';
+import { createDisabledHazardState, createHazardDirectorState } from '../core/hazards.js';
 import { createAppHostApi } from '../host/app-host-api.js';
 import { createBrowserHostBridge } from '../host/browser-host-bridge.js';
 import { getStorageAdapter } from '../host/browser-storage.js';
@@ -75,6 +76,11 @@ export function createApp({
     return value === '1' || value === 'true';
   }
 
+  function getHazardsDisabledFromUrl() {
+    const value = new URLSearchParams(browserWindow.location.search).get('hazards');
+    return value === '0' || value === 'false' || value === 'off';
+  }
+
   function resetRandomSource() {
     gameState.seed = getSeedFromUrl();
     gameState.rng = gameState.seed ? createSeededRng(gameState.seed) : random;
@@ -107,6 +113,7 @@ export function createApp({
       ruleId: gameState.currentRuleId,
       timeLimit: gameState.timeLimit,
       safeKeysRemaining: gameState.safeKeysRemaining,
+      hazards: gameState.hazards,
       ...getEncounterFacts(gameState)
     });
   }
@@ -149,6 +156,29 @@ export function createApp({
       difficulty,
       rng: gameState.rng
     }));
+  }
+
+  function updateHazardState(roundElapsedMs = 0, { disabled = false, reason = null } = {}) {
+    const hazardDisabled = disabled || getHazardsDisabledFromUrl();
+    if (hazardDisabled) {
+      gameState.hazards = createDisabledHazardState({
+        level: gameState.level,
+        enemyIndex: gameState.combat?.enemyIndex || 1,
+        reason: reason || (getHazardsDisabledFromUrl() ? 'query_disabled' : 'disabled')
+      });
+      return gameState.hazards;
+    }
+    gameState.hazards = createHazardDirectorState({
+      seed: gameState.seed || 'unseeded',
+      level: gameState.level,
+      enemyIndex: gameState.combat?.enemyIndex || 1,
+      rows: gameState.currentDifficulty?.rows || 3,
+      cols: gameState.currentDifficulty?.cols || 3,
+      buttonIds: gameState.buttons.map((button) => button.id),
+      forbiddenIds: gameState.forbiddenIds,
+      nowMs: roundElapsedMs
+    });
+    return gameState.hazards;
   }
 
   function finalizeBestRecordForRun(recap) {
@@ -289,6 +319,10 @@ export function createApp({
   }
 
   function showUpgradeChoices() {
+    updateHazardState(0, {
+      disabled: true,
+      reason: 'upgrade_pending'
+    });
     const offer = offerEncounterUpgradeChoices(gameState.upgrades, {
       rng: gameState.rng,
       enemyIndex: gameState.combat.enemyIndex
@@ -556,6 +590,8 @@ export function createApp({
       gameState.timeLeft = gameState.timeLimit;
     }
     generateCurrentLevelData(difficulty);
+    gameState.roundStartedAtMs = performance.now();
+    updateHazardState(0);
     recordDebugEvent('round_start');
     renderer.renderBoard({
       buttons: gameState.buttons,
@@ -589,6 +625,11 @@ export function createApp({
     gameState.timeLeft = gameState.timeLimit;
     gameState.lastFailureRecap = null;
     gameState.lastRunComparison = null;
+    gameState.hazards = createDisabledHazardState({
+      level: 1,
+      enemyIndex: 1,
+      reason: 'run_reset'
+    });
     renderer.updateCombatStatus(getEncounterFacts(gameState));
     renderer.updateTimer(gameState.timeLeft, gameState.timeLimit, getCurrentComboWindow());
     renderer.setWarningVisible(false);
@@ -618,6 +659,7 @@ export function createApp({
     const deltaTime = timestamp - gameState.lastTime;
     gameState.lastTime = timestamp;
     gameState.timeLeft -= deltaTime;
+    updateHazardState(timestamp - gameState.roundStartedAtMs);
     const comboExpiry = expireEncounterComboIfNeeded(gameState.combo, timestamp);
     if (comboExpiry.changed) {
       applyComboChange(comboExpiry);

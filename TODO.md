@@ -184,7 +184,7 @@ Status: Accepted by CheckAndGoal; see [docs/phase-8-playtest-calibration-content
 
 Estimated conversation rounds: 8
 Goal guide: [docs/phase-9-playtest-evidence-decision-gate-goal-guide.md](docs/phase-9-playtest-evidence-decision-gate-goal-guide.md)
-Status: Implemented and ready for CheckAndGoal; see [docs/phase-9-playtest-evidence-decision-gate-record.md](docs/phase-9-playtest-evidence-decision-gate-record.md), [docs/phase-9-playtest-script-and-template.md](docs/phase-9-playtest-script-and-template.md), [docs/phase-9-browser-smoke-results.json](docs/phase-9-browser-smoke-results.json), and [docs/phase-9-final-report.md](docs/phase-9-final-report.md).
+Status: Accepted by CheckAndGoal; see [docs/phase-9-playtest-evidence-decision-gate-record.md](docs/phase-9-playtest-evidence-decision-gate-record.md), [docs/phase-9-playtest-script-and-template.md](docs/phase-9-playtest-script-and-template.md), [docs/phase-9-browser-smoke-results.json](docs/phase-9-browser-smoke-results.json), and [docs/phase-9-final-report.md](docs/phase-9-final-report.md).
 
 - Created a local-only playtest report schema and export path so real runs can be compared. Done.
 - Captured useful non-personal run facts: seed/build facts, viewport class, levels, enemies, upgrades, combo peak, wrong presses, hazard exposure, and failure/timeout reason. Done.
@@ -195,4 +195,4 @@ Status: Implemented and ready for CheckAndGoal; see [docs/phase-9-playtest-evide
 
 ## Current Recommendation
 
-Run CheckAndGoal for Phase 9. If accepted, collect at least a small real iOS Safari, Android Chrome, and human-observed evidence set using the Phase 9 template before choosing the next major direction. Use that evidence to decide between continued HTML gameplay calibration around retention/hazard readability or a separate engine-embedding preparation phase that consumes the Host Bridge without moving gameplay formulas into host/native code.
+Collect at least a small real iOS Safari, Android Chrome, and human-observed evidence set using the Phase 9 template before choosing the next major direction. Use that evidence to decide between continued HTML gameplay calibration around retention/hazard readability or a separate engine-embedding preparation phase that consumes the Host Bridge without moving gameplay formulas into host/native code.

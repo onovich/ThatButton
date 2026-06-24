@@ -1,8 +1,10 @@
+import { BASE_BATTLE_CONFIG } from './battle.js';
+
 export const PROTOTYPE_BOSS_CONFIG = Object.freeze({
   id: 'reactor-warden',
   name: 'REACTOR WARDEN',
-  maxHp: 540,
-  baseRoundDamage: 18,
+  maxHp: BASE_BATTLE_CONFIG.enemyBaseHp,
+  baseRoundDamage: BASE_BATTLE_CONFIG.baseAttackDamage,
   timeBonusDivisorMs: 3500,
   maxTimeBonus: 4
 });

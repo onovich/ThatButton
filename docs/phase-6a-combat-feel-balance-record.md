@@ -119,6 +119,70 @@ Architecture self-check:
 - Host payload compatibility is unchanged.
 - Deferred hazards, engine work, roguelite meta systems, dependencies, framework work, and Phase 1 difficulty retuning remain out of scope.
 
+## Round 3 Numeric Tuning Pass
+
+Changed only the first enemy HP pacing:
+
+- `BASE_BATTLE_CONFIG.enemyBaseHp`: `540 -> 500`.
+- `PROTOTYPE_BOSS_CONFIG.maxHp` now reads from `BASE_BATTLE_CONFIG.enemyBaseHp` instead of hard-coding its own value.
+- `PROTOTYPE_BOSS_CONFIG.baseRoundDamage` now reads from `BASE_BATTLE_CONFIG.baseAttackDamage` to keep base attack tuning in one config source.
+
+Unchanged:
+
+- Player HP remains `100`.
+- Enemy attack progression remains `18 / 24 / 30`.
+- Wrong-press damage remains current enemy attack.
+- Combo window remains `2400ms`.
+- Combo reward and upgrade values remain unchanged.
+- Phase 1 board sizes, rules, fatal ranges, and timers remain unchanged.
+
+Before/after fixed-seed preview:
+
+| Preview | Before | After |
+| --- | ---: | ---: |
+| `phase6a-baseline` fast first upgrade | Level 20 | Level 18 |
+| `phase6a-alt-a` fast first upgrade | Level 20 | Level 18 |
+| `phase6a-alt-b` fast first upgrade | Level 20 | Level 18 |
+| `phase6a-baseline` slower `1100ms` first upgrade | Level 20 | Level 19 |
+| Enemy 2 HP | 660 | 620 |
+| Enemy 3 HP | 780 | 740 |
+| Enemy 1 survived wrong presses | 5 | 5 |
+| Enemy 2 survived wrong presses | 4 | 4 |
+| Enemy 3 survived wrong presses | 3 | 3 |
+
+Designer judgment:
+
+- The first reward moment was too late at Level 20 for an RPG loop demonstration.
+- Moving the fast fixed-seed path to Level 18 preserves the requirement that the first encounter has time to develop into the 3x3/extended rule bands.
+- Keeping the slower path at Level 19 avoids making the first enemy feel disposable.
+- HP tuning is preferable to player damage or combo-window tuning because wrong-press survivability and combo readability were already acceptable in Round 1.
+
+Round 3 validation:
+
+- `node --check src\config\battle.js`: PASS
+- `node --check src\config\combat.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Debug self-check:
+
+- Fixed-seed preview proves the fast path now reaches the first upgrade at Level 18 while the slower comparison reaches it at Level 19.
+- Wrong-press survivability and combo-window expiry checkpoints remain unchanged.
+- Failure localization remains config/core/validation; no UI, audio, host payload, or app orchestration behavior changed.
+
+Architecture self-check:
+
+- Tuning stayed in config.
+- The older boss config now references battle config for HP/base attack instead of duplicating tuning constants.
+- UI, host, and app orchestration still consume facts and do not own formulas.
+- Deferred hazards, engine work, roguelite meta systems, dependencies, framework work, and Phase 1 difficulty retuning remain out of scope.
+
 ## Round 1 Self-Checks
 
 Debug self-check:

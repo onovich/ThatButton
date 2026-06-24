@@ -711,13 +711,13 @@ if (!isJsonSafeValue(upgradePayload) || upgradePayload.modifiers.comboWindowBonu
 const firstEnemy = createEnemyState({ enemyIndex: 1 });
 const secondEnemy = createEnemyState({ enemyIndex: 2 });
 if (
-  calculateEnemyMaxHp(1) !== 540 ||
-  calculateEnemyMaxHp(2) !== 660 ||
+  calculateEnemyMaxHp(1) !== 500 ||
+  calculateEnemyMaxHp(2) !== 620 ||
   calculateEnemyAttack(1) !== 18 ||
   calculateEnemyAttack(2) !== 24 ||
-  firstEnemy.hp !== 540 ||
+  firstEnemy.hp !== 500 ||
   firstEnemy.attack !== 18 ||
-  secondEnemy.hp !== 660 ||
+  secondEnemy.hp !== 620 ||
   secondEnemy.attack !== 24
 ) {
   failures.push(`Enemy scaling smoke failed: ${JSON.stringify({ firstEnemy, secondEnemy })}`);
@@ -725,7 +725,7 @@ if (
 const secondEnemyHit = applyEnemyDamage(secondEnemy, { amount: 30, level: 2 });
 if (
   secondEnemyHit.enemy.enemyIndex !== 2 ||
-  secondEnemyHit.enemy.hp !== 630 ||
+  secondEnemyHit.enemy.hp !== 590 ||
   secondEnemyHit.enemy.attack !== 24 ||
   secondEnemyHit.damage.appliedDamage !== 30 ||
   secondEnemyHit.defeated
@@ -733,7 +733,7 @@ if (
   failures.push(`Enemy damage should preserve stable attack while alive: ${JSON.stringify(secondEnemyHit)}`);
 }
 const thirdEnemy = createNextEnemyState(secondEnemyHit.enemy);
-if (thirdEnemy.enemyIndex !== 3 || thirdEnemy.maxHp !== 780 || thirdEnemy.attack !== 30) {
+if (thirdEnemy.enemyIndex !== 3 || thirdEnemy.maxHp !== 740 || thirdEnemy.attack !== 30) {
   failures.push(`Next enemy scaling smoke failed: ${JSON.stringify(thirdEnemy)}`);
 }
 const enemySummary = getEnemySummary(secondEnemyHit.enemy);
@@ -881,13 +881,14 @@ if (
 
 const initialCombat = createCombatState();
 if (
-  PROTOTYPE_BOSS_CONFIG.maxHp !== 540 ||
+  PROTOTYPE_BOSS_CONFIG.maxHp !== 500 ||
+  PROTOTYPE_BOSS_CONFIG.baseRoundDamage !== 18 ||
   initialCombat.enemyIndex !== 1 ||
   initialCombat.enemyId !== 'reactor-warden-1' ||
   initialCombat.enemyName !== 'REACTOR WARDEN' ||
   initialCombat.attack !== 18 ||
   initialCombat.bossId !== 'reactor-warden' ||
-  initialCombat.hp !== 540 ||
+  initialCombat.hp !== 500 ||
   initialCombat.status !== 'active'
 ) {
   failures.push(`Initial combat state changed: ${JSON.stringify(initialCombat)}`);
@@ -895,7 +896,7 @@ if (
 const nextCombat = createNextCombatState(initialCombat);
 if (
   nextCombat.enemyIndex !== 2 ||
-  nextCombat.maxHp !== 660 ||
+  nextCombat.maxHp !== 620 ||
   nextCombat.attack !== 24 ||
   nextCombat.status !== 'active'
 ) {
@@ -913,19 +914,24 @@ const firstCombatHit = applyRoundClearDamage(initialCombat, {
   timeLeftMs: 18000,
   comboState: createComboState({ streak: 3 })
 });
-if (firstCombatHit.damage.appliedDamage !== 24 || firstCombatHit.damage.enemyAttack !== 18 || firstCombatHit.combat.hp !== 516 || firstCombatHit.combat.attack !== 18 || firstCombatHit.defeated) {
+if (firstCombatHit.damage.appliedDamage !== 24 || firstCombatHit.damage.enemyAttack !== 18 || firstCombatHit.combat.hp !== 476 || firstCombatHit.combat.attack !== 18 || firstCombatHit.defeated) {
   failures.push(`Combat damage application smoke failed: ${JSON.stringify(firstCombatHit)}`);
 }
 let defeatCombat = createCombatState();
-for (let level = 1; level <= 18; level++) {
-  defeatCombat = applyRoundClearDamage(defeatCombat, {
+let defeatLevel = null;
+for (let level = 1; level <= 18 && defeatCombat.status !== 'defeated'; level++) {
+  const defeatResult = applyRoundClearDamage(defeatCombat, {
     level,
     timeLeftMs: 18000,
     comboState: createComboState({ streak: 12 })
-  }).combat;
+  });
+  defeatCombat = defeatResult.combat;
+  if (defeatResult.defeated) {
+    defeatLevel = level;
+  }
 }
 const defeatSummary = getCombatSummary(defeatCombat);
-if (defeatSummary.status !== 'defeated' || defeatSummary.hp !== 0 || defeatSummary.defeatedAtLevel !== 18 || defeatSummary.roundsCleared !== 18) {
+if (defeatSummary.status !== 'defeated' || defeatSummary.hp !== 0 || defeatLevel !== 17 || defeatSummary.roundsCleared !== 17) {
   failures.push(`Boss defeat smoke failed: ${JSON.stringify(defeatSummary)}`);
 }
 
@@ -1530,7 +1536,7 @@ if (
   afterUpgradeSnapshot.upgrades.applied.length !== 1 ||
   afterUpgradeSnapshot.upgrades.applied[0].id !== selectedUpgrade.id ||
   afterUpgradeSnapshot.combat.enemyIndex !== 2 ||
-  afterUpgradeSnapshot.combat.maxHp !== 660 ||
+  afterUpgradeSnapshot.combat.maxHp !== 620 ||
   afterUpgradeSnapshot.combat.attack !== 24 ||
   afterUpgradeSnapshot.round.level <= victorySnapshot.round.level
 ) {
@@ -1607,7 +1613,7 @@ if (debugApi) {
     failures.push(`Debug API player-damage preview changed: ${JSON.stringify(debugPlayerDamage)}`);
   }
   const debugSecondEnemy = debugApi.previewEnemyScaling(2);
-  if (debugSecondEnemy.enemyIndex !== 2 || debugSecondEnemy.maxHp !== 660 || debugSecondEnemy.attack !== 24) {
+  if (debugSecondEnemy.enemyIndex !== 2 || debugSecondEnemy.maxHp !== 620 || debugSecondEnemy.attack !== 24) {
     failures.push(`Debug API enemy-scaling preview changed: ${JSON.stringify(debugSecondEnemy)}`);
   }
   const debugComboWindow = debugApi.previewComboWindow();
@@ -1638,8 +1644,8 @@ if (debugApi) {
   const debugCombatBalance = debugApi.previewCombatBalance();
   if (
     debugCombatBalance.firstEnemyRuns.length !== 3 ||
-    debugCombatBalance.firstEnemyRuns.some((run) => run.enemyDefeatedAtLevel !== 20 || run.choices.length !== 3) ||
-    debugCombatBalance.slowerComparison.enemyDefeatedAtLevel !== 20 ||
+    debugCombatBalance.firstEnemyRuns.some((run) => run.enemyDefeatedAtLevel !== 18 || run.choices.length !== 3) ||
+    debugCombatBalance.slowerComparison.enemyDefeatedAtLevel !== 19 ||
     debugCombatBalance.wrongPressSurvivability[0].survivedWrongPresses !== 5 ||
     debugCombatBalance.wrongPressSurvivability[1].survivedWrongPresses !== 4 ||
     debugCombatBalance.wrongPressSurvivability[2].survivedWrongPresses !== 3 ||

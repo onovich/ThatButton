@@ -1,6 +1,6 @@
 export const BASE_BATTLE_CONFIG = Object.freeze({
   playerMaxHp: 100,
-  enemyBaseHp: 540,
+  enemyBaseHp: 500,
   enemyHpPerIndex: 120,
   enemyBaseAttack: 18,
   enemyAttackPerIndex: 6,

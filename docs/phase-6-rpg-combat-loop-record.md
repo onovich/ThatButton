@@ -658,3 +658,69 @@ Architecture self-check:
 - UI code was not changed in this round.
 - App orchestration emits events at existing state transition points without duplicating damage, upgrade, enemy scaling, or combo formulas.
 - Deferred native bridge integration, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.
+
+## Round 13 Buffer: Viewport Layout Smoke And Height Fit Evidence
+
+Implemented:
+
+- Used the first buffer round for real Chromium viewport smoke after the Phase 6 UI additions.
+- Found that the 1280x720 playing layout had no overlap, but the command panel bottom was clipped by a few pixels.
+- Tightened only the height-constrained board sizing rules:
+  - `max-height: 780px` board cap from `306px` to `264px`,
+  - `max-height: 700px` board cap from `360px` to `244px`,
+  - matching grid gap tightened to `8px`.
+- Left the normal desktop width layout and 390x844 mobile sizing intact.
+
+Visual/headless smoke evidence:
+
+- Local static server: `http://127.0.0.1:5186/?seed=phase6-cdp-...&debug=1`
+- Browser: Chrome headless through local DevTools Protocol.
+- Desktop playing viewport `1280x720`: PASS.
+  - `combatPlayerOverlap=false`
+  - `clueGridOverlap=false`
+  - `allWithinViewport=true`
+  - `playerSeparatedFromEnemy=true`
+  - screenshot: `C:\Users\Administrator\AppData\Local\Temp\thatbutton-phase6-smoke\cdp-desktop-1280x720-final-playing.png`
+- Desktop upgrade overlay `1280x720`: PASS.
+  - status `upgrade_pending`
+  - enemy status `defeated`
+  - choices `3`
+  - card overlaps `[]`
+  - `allWithinViewport=true`
+  - screenshot: `C:\Users\Administrator\AppData\Local\Temp\thatbutton-phase6-smoke\cdp-desktop-1280x720-final-upgrade.png`
+- Mobile playing viewport `390x844`: PASS.
+  - `combatPlayerOverlap=false`
+  - `clueGridOverlap=false`
+  - `allWithinViewport=true`
+  - `playerSeparatedFromEnemy=true`
+  - screenshot: `C:\Users\Administrator\AppData\Local\Temp\thatbutton-phase6-smoke\cdp-mobile-390x844-final-playing.png`
+- Mobile upgrade overlay `390x844`: PASS.
+  - status `upgrade_pending`
+  - enemy status `defeated`
+  - choices `3`
+  - card overlaps `[]`
+  - `allWithinViewport=true`
+  - screenshot: `C:\Users\Administrator\AppData\Local\Temp\thatbutton-phase6-smoke\cdp-mobile-390x844-final-upgrade.png`
+
+Validation run:
+
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- `OpenOnlineTest.ps1 -DryRun`: PASS with one-time execution-policy bypass
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Debug self-check:
+
+- The issue was localized to CSS height breakpoints, not gameplay state or UI rendering facts.
+- The fixed seed CDP smoke drives the real browser page through start, round clears, enemy defeat, and upgrade offer.
+- Failure detection now has concrete geometry facts for player HUD separation, clue/grid overlap, card overlap, and viewport bounds.
+
+Architecture self-check:
+
+- Only presentation CSS changed.
+- No gameplay formulas, host events, debug helpers, or app orchestration changed in this buffer round.
+- UI still renders facts from core/app state and does not own combat, combo, upgrade, or difficulty formulas.
+- Deferred native bridge integration, 3D, roguelite meta-progression, moving-button, dependency, and framework scope stayed out.

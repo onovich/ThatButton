@@ -22,12 +22,14 @@ const moduleFiles = [
   'src/config/battle.js',
   'src/config/combat.js',
   'src/config/upgrades.js',
+  'src/config/hazards.js',
   'src/core/app-state.js',
   'src/core/battle.js',
   'src/core/combat.js',
   'src/core/combo.js',
   'src/core/encounter.js',
   'src/core/enemy.js',
+  'src/core/hazards.js',
   'src/core/player.js',
   'src/core/upgrades.js',
   'src/core/rng.js',
@@ -82,7 +84,7 @@ for (const marker of [
 }
 
 const combinedRuntimeSource = [...sources.values()].join('\n');
-for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHostEventPayloads', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
+for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBestRecord', 'previewCombatBalance', 'previewHazardSchedule', 'previewHostEventPayloads', 'createHazardDirectorState', 'updateCombatStatus', 'showComboReward', 'showSafePressFeedback', 'showWrongPressFeedback', 'showUpgradeScreen', 'hideUpgradeScreen', 'selectUpgrade', 'emitEnemySpawned', 'emitUpgradesOffered', 'emitUpgradeSelected', 'updateComboWindow', 'spawnComboParticles', 'spawnButtonToEnemyTracers', 'button-to-enemy-tracer', 'combo-directional-tracer', 'retro-crt-tracer', 'MAX COMBO', 'showBossHit', 'showPlayerHit', 'spawnBossProjectile', 'playError', 'playChainReady', 'playComboCue']) {
   if (!combinedRuntimeSource.includes(marker)) {
     failures.push(`Missing required runtime marker in modules: ${marker}`);
   }
@@ -175,12 +177,14 @@ const coreBoundaryFiles = [
   'src/config/battle.js',
   'src/config/combat.js',
   'src/config/upgrades.js',
+  'src/config/hazards.js',
   'src/core/app-state.js',
   'src/core/battle.js',
   'src/core/combat.js',
   'src/core/combo.js',
   'src/core/encounter.js',
   'src/core/enemy.js',
+  'src/core/hazards.js',
   'src/core/player.js',
   'src/core/upgrades.js',
   'src/core/rng.js',
@@ -280,6 +284,8 @@ const [
   comboModule,
   debugModule,
   enemyModule,
+  hazardConfigModule,
+  hazardModule,
   playerModule,
   rngModule,
   upgradeConfigModule,
@@ -298,6 +304,8 @@ const [
   import(moduleUrl('src/core/combo.js')),
   import(moduleUrl('src/core/debug.js')),
   import(moduleUrl('src/core/enemy.js')),
+  import(moduleUrl('src/config/hazards.js')),
+  import(moduleUrl('src/core/hazards.js')),
   import(moduleUrl('src/core/player.js')),
   import(moduleUrl('src/core/rng.js')),
   import(moduleUrl('src/config/upgrades.js')),
@@ -351,6 +359,18 @@ const {
   getEnemySummary
 } = enemyModule;
 const {
+  BASE_HAZARD_CONFIG,
+  HAZARD_PHASES,
+  HAZARD_TYPES
+} = hazardConfigModule;
+const {
+  createBoardZoneFacts,
+  createDisabledHazardState,
+  createHazardDirectorState,
+  getHazardSummary,
+  previewHazardSchedule: previewCoreHazardSchedule
+} = hazardModule;
+const {
   applyMaxHpChange,
   applyPlayerDamage,
   createPlayerState,
@@ -382,6 +402,7 @@ const {
   previewEnemyScaling,
   previewPlayerDamage,
   previewCombatBalance,
+  previewHazardSchedule,
   previewHostEventPayloads
 } = debugModule;
 const {
@@ -1329,6 +1350,7 @@ const requiredDebugHelpers = [
   'previewUpgradeChoices',
   'previewUpgradeApplication',
   'previewCombatBalance',
+  'previewHazardSchedule',
   'previewHostEventPayloads',
   'getCombatState',
   'getComboState',
@@ -1675,6 +1697,143 @@ if (debugApi) {
     !debugCombatBalance.comboWindowReadability.find((entry) => entry.cadenceMs === 2500 && entry.expiredBeforeSecond && entry.secondStatus === 'CHAIN READY')
   ) {
     failures.push(`Debug API combat balance preview changed: ${JSON.stringify(debugCombatBalance)}`);
+  }
+  const hazardZones = createBoardZoneFacts({ rows: 3, cols: 3 });
+  if (
+    hazardZones.gridSize !== '3x3' ||
+    hazardZones.cells.length !== 9 ||
+    hazardZones.cells[4].buttonId !== 'btn-4' ||
+    hazardZones.cells[4].sector !== 'middle-center'
+  ) {
+    failures.push(`Hazard board zone facts changed: ${JSON.stringify(hazardZones)}`);
+  }
+  const disabledHazards = createDisabledHazardState({ level: 22, enemyIndex: 2 });
+  if (
+    disabledHazards.phase !== HAZARD_PHASES.DISABLED ||
+    disabledHazards.enabled ||
+    disabledHazards.hazards.length !== 0 ||
+    !isJsonSafeValue(disabledHazards)
+  ) {
+    failures.push(`Disabled hazard state changed: ${JSON.stringify(disabledHazards)}`);
+  }
+  const earlyHazards = createHazardDirectorState({
+    seed: 'phase7-validate',
+    level: 18,
+    enemyIndex: 1,
+    buttonIds: Array.from({ length: 9 }, (_, index) => `btn-${index}`),
+    forbiddenIds: ['btn-0'],
+    nowMs: 2500
+  });
+  if (
+    earlyHazards.unlocked ||
+    earlyHazards.reason !== 'onboarding_safe' ||
+    earlyHazards.hazards.length !== 0 ||
+    earlyHazards.phase !== HAZARD_PHASES.INACTIVE
+  ) {
+    failures.push(`First enemy hazard-free preview changed: ${JSON.stringify(earlyHazards)}`);
+  }
+  const level19FirstEnemyHazards = createHazardDirectorState({
+    seed: 'phase7-validate',
+    level: 19,
+    enemyIndex: 1,
+    buttonIds: Array.from({ length: 9 }, (_, index) => `btn-${index}`),
+    forbiddenIds: ['btn-0'],
+    nowMs: 2500
+  });
+  if (level19FirstEnemyHazards.hazards.length !== 0 || level19FirstEnemyHazards.unlocked) {
+    failures.push(`First enemy should stay hazard-free even at Level 19: ${JSON.stringify(level19FirstEnemyHazards)}`);
+  }
+  const movementTelegraph = createHazardDirectorState({
+    seed: 'phase7-validate',
+    level: 19,
+    enemyIndex: 2,
+    buttonIds: Array.from({ length: 9 }, (_, index) => `btn-${index}`),
+    forbiddenIds: ['btn-0'],
+    nowMs: 1300
+  });
+  const movementActive = createHazardDirectorState({
+    seed: 'phase7-validate',
+    level: 19,
+    enemyIndex: 2,
+    buttonIds: Array.from({ length: 9 }, (_, index) => `btn-${index}`),
+    forbiddenIds: ['btn-0'],
+    nowMs: 2000
+  });
+  const movementCooldown = createHazardDirectorState({
+    seed: 'phase7-validate',
+    level: 19,
+    enemyIndex: 2,
+    buttonIds: Array.from({ length: 9 }, (_, index) => `btn-${index}`),
+    forbiddenIds: ['btn-0'],
+    nowMs: 4700
+  });
+  const movementExpired = createHazardDirectorState({
+    seed: 'phase7-validate',
+    level: 19,
+    enemyIndex: 2,
+    buttonIds: Array.from({ length: 9 }, (_, index) => `btn-${index}`),
+    forbiddenIds: ['btn-0'],
+    nowMs: 9100
+  });
+  const movementHazard = movementActive.hazards.find((hazard) => hazard.type === HAZARD_TYPES.MOVING_BUTTON);
+  if (
+    !movementTelegraph.unlocked ||
+    movementTelegraph.phase !== HAZARD_PHASES.TELEGRAPH ||
+    movementActive.phase !== HAZARD_PHASES.ACTIVE ||
+    movementCooldown.hazards[0]?.phase !== HAZARD_PHASES.COOLDOWN ||
+    movementExpired.hazards[0]?.phase !== HAZARD_PHASES.EXPIRED ||
+    movementHazard?.targetButtonIds.length !== BASE_HAZARD_CONFIG.movingButton.targetCount ||
+    movementHazard.targetButtonIds.includes('btn-0') ||
+    movementHazard.motion.amplitudeXPx !== BASE_HAZARD_CONFIG.movingButton.amplitudeXPx
+  ) {
+    failures.push(`Moving-button hazard schedule changed: ${JSON.stringify({ movementTelegraph, movementActive, movementCooldown, movementExpired })}`);
+  }
+  const interferenceActive = createHazardDirectorState({
+    seed: 'phase7-validate',
+    level: 22,
+    enemyIndex: 2,
+    buttonIds: Array.from({ length: 9 }, (_, index) => `btn-${index}`),
+    forbiddenIds: ['btn-0'],
+    nowMs: 4700
+  });
+  const interferenceHazard = interferenceActive.hazards.find((hazard) => hazard.type === HAZARD_TYPES.INTERFERENCE);
+  if (
+    interferenceActive.hazards.length !== 2 ||
+    interferenceHazard?.phase !== HAZARD_PHASES.ACTIVE ||
+    interferenceHazard.interference.intensity !== BASE_HAZARD_CONFIG.interference.intensity ||
+    !isJsonSafeValue(getHazardSummary(interferenceActive))
+  ) {
+    failures.push(`Interference hazard schedule changed: ${JSON.stringify(interferenceActive)}`);
+  }
+  const coreHazardPreviewA = previewCoreHazardSchedule({
+    seed: 'phase7-validate',
+    levels: [1, 8, 18, 19, 22]
+  });
+  const coreHazardPreviewB = previewCoreHazardSchedule({
+    seed: 'phase7-validate',
+    levels: [1, 8, 18, 19, 22]
+  });
+  if (JSON.stringify(coreHazardPreviewA) !== JSON.stringify(coreHazardPreviewB)) {
+    failures.push('Core hazard schedule preview is not deterministic.');
+  }
+  const debugHazardPreview = debugApi.previewHazardSchedule({
+    seed: 'phase7-validate',
+    levels: [1, 18, 19, 22]
+  });
+  const debugEarlyLevels = debugHazardPreview.levels.filter((entry) => entry.level <= 18);
+  const debugLevel19 = debugHazardPreview.levels.find((entry) => entry.level === 19);
+  const debugLevel22Active = debugHazardPreview.levels
+    .find((entry) => entry.level === 22)
+    ?.samples.find((sample) => sample.hazards.some((hazard) =>
+      hazard.type === HAZARD_TYPES.INTERFERENCE && hazard.phase === HAZARD_PHASES.ACTIVE
+    ));
+  if (
+    debugEarlyLevels.some((entry) => entry.samples.some((sample) => sample.hazards.length > 0 || sample.unlocked)) ||
+    !debugLevel19?.samples.some((sample) => sample.hazards.some((hazard) => hazard.type === HAZARD_TYPES.MOVING_BUTTON)) ||
+    !debugLevel22Active ||
+    !isJsonSafeValue(debugHazardPreview)
+  ) {
+    failures.push(`Debug API hazard preview changed: ${JSON.stringify(debugHazardPreview)}`);
   }
   const debugHostEvents = debugApi.previewHostEventPayloads();
   const debugHostEventTypes = Object.values(debugHostEvents).map((event) => event.type).sort();

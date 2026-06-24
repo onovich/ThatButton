@@ -144,3 +144,78 @@ Commit / push:
 Next:
 
 - Round 2: add hazard config/core model with deterministic disabled/inactive/active/expired helpers and fixed-seed previews.
+
+## Round 2 Hazard Config/Core Model
+
+Implemented:
+
+- Added `src/config/hazards.js` for Phase 7 hazard type ids, phases, unlock thresholds, movement tuning, interference tuning, and debug/config disable switches.
+- Added `src/core/hazards.js` for pure deterministic hazard state:
+  - disabled state,
+  - onboarding-safe inactive state,
+  - telegraph state,
+  - active state,
+  - cooldown state,
+  - expired state,
+  - JSON-safe hazard summaries,
+  - deterministic fixed-seed previews,
+  - 2D board zone facts.
+- Added `previewHazardSchedule(...)` to `src/core/debug.js`.
+- Extended `scripts/validate-structure.mjs` so hazard config/core are part of module graph and core purity checks.
+- Added validation fixtures for:
+  - first enemy / Level 18 hazard-free onboarding,
+  - Level 19 enemy 1 still hazard-free,
+  - Level 19 enemy 2 moving-button telegraph/active/cooldown/expired states,
+  - Level 22 enemy 2 interference active state,
+  - deterministic preview repeatability,
+  - disabled hazard state,
+  - JSON-safe hazard summaries,
+  - debug API hazard preview availability.
+
+Key schedule assumptions now protected by validation:
+
+- Movement unlocks at Level 19 and enemy 2.
+- Interference unlocks at Level 22 and enemy 2.
+- First enemy remains hazard-free even if it reaches Level 19 on a slower run.
+- Movement targets are selected from provided button ids while avoiding the provided forbidden ids when safe candidates exist.
+
+Debug self-check:
+
+- This change is explained by fixed seed `phase7-validate`, sampled levels `[1, 8, 18, 19, 22]`, and sampled times `[0, 1300, 2000, 4700, 9100]`.
+- Failures localize to `src/config/hazards.js`, `src/core/hazards.js`, debug preview wiring, or structure validation.
+- First enemy and first upgrade path remain hazard-free by explicit preview and validation.
+- Disabled, inactive, telegraph, active, cooldown, and expired states are covered.
+- No UI geometry changed in this round.
+
+Architecture self-check:
+
+- Hazard schedules and tuning live in config/core.
+- `src/core/hazards.js` does not access DOM, browser globals, URL query, CSS classes, AudioContext, or app state.
+- UI and host code were not changed in this round.
+- Hazard logic does not decide forbidden-button semantics; it consumes existing button/forbidden facts only for target selection.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, framework work, and Phase 1 retuning remain out of scope.
+- Validation now guards the new hazard purity and schedule invariants.
+
+Round 2 validation:
+
+- `node --check src\config\hazards.js`: PASS
+- `node --check src\core\hazards.js`: PASS
+- `node --check src\core\debug.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `npm run validate`: PASS
+- `npm run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Round 3: wire hazard facts through app/debug/host snapshots without visible runtime hazards.

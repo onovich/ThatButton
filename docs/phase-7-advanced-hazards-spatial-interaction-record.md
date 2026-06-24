@@ -594,8 +594,8 @@ Round 8 validation:
 
 Commit / push:
 
-- commit: pending
-- push: pending
+- commit: `3c2834d` (`test: harden interference readability`)
+- push: PASS
 - buffer round consumed: no
 
 Next:

@@ -2008,7 +2008,15 @@ if (debugApi) {
     hazardZones.gridSize !== '3x3' ||
     hazardZones.cells.length !== 9 ||
     hazardZones.cells[4].buttonId !== 'btn-4' ||
-    hazardZones.cells[4].sector !== 'middle-center'
+    hazardZones.cells[4].sector !== 'middle-center' ||
+    hazardZones.cells[4].center.x !== 0.5 ||
+    hazardZones.cells[4].center.y !== 0.5 ||
+    JSON.stringify(hazardZones.cells[4].neighbors.map((neighbor) => neighbor.buttonId).sort()) !== JSON.stringify(['btn-1', 'btn-3', 'btn-5', 'btn-7']) ||
+    hazardZones.laneGroups.length !== 6 ||
+    hazardZones.laneGroups.find((group) => group.id === 'row-2')?.buttonIds.join(',') !== 'btn-3,btn-4,btn-5' ||
+    hazardZones.laneGroups.find((group) => group.id === 'col-2')?.buttonIds.join(',') !== 'btn-1,btn-4,btn-7' ||
+    hazardZones.sectorGroups.find((group) => group.id === 'middle-center')?.buttonIds.join(',') !== 'btn-4' ||
+    !isJsonSafeValue(hazardZones)
   ) {
     failures.push(`Hazard board zone facts changed: ${JSON.stringify(hazardZones)}`);
   }

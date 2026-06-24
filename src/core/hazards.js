@@ -27,6 +27,10 @@ function normalizeButtonIds(buttonIds = []) {
     .filter(Boolean))];
 }
 
+function normalizeUnit(value) {
+  return Number(Math.max(0, Math.min(1, value)).toFixed(3));
+}
+
 function isUnlocked({ level, enemyIndex, unlockLevel, unlockEnemyIndex }) {
   return normalizeLevel(level) >= normalizeLevel(unlockLevel) &&
     normalizeEnemyIndex(enemyIndex) >= normalizeEnemyIndex(unlockEnemyIndex);
@@ -85,6 +89,7 @@ function calculateMotionOffset({ phase, timing, nowMs, amplitudeXPx, amplitudeYP
 export function createBoardZoneFacts({ rows = 3, cols = 3 } = {}) {
   const normalizedRows = normalizeRows(rows);
   const normalizedCols = normalizeCols(cols);
+  const getButtonIdAt = (row, col) => `btn-${row * normalizedCols + col}`;
   const cells = [];
   for (let row = 0; row < normalizedRows; row++) {
     for (let col = 0; col < normalizedCols; col++) {
@@ -99,15 +104,61 @@ export function createBoardZoneFacts({ rows = 3, cols = 3 } = {}) {
         row,
         col,
         lane: normalizedRows <= 2 ? `row-${row + 1}` : vertical,
-        sector: `${vertical}-${horizontal}`
+        sector: `${vertical}-${horizontal}`,
+        center: {
+          x: normalizeUnit((col + 0.5) / normalizedCols),
+          y: normalizeUnit((row + 0.5) / normalizedRows)
+        },
+        neighbors: [
+          { direction: 'up', row: row - 1, col },
+          { direction: 'right', row, col: col + 1 },
+          { direction: 'down', row: row + 1, col },
+          { direction: 'left', row, col: col - 1 }
+        ]
+          .filter((neighbor) =>
+            neighbor.row >= 0 &&
+            neighbor.row < normalizedRows &&
+            neighbor.col >= 0 &&
+            neighbor.col < normalizedCols
+          )
+          .map((neighbor) => ({
+            direction: neighbor.direction,
+            buttonId: getButtonIdAt(neighbor.row, neighbor.col)
+          }))
       });
     }
   }
+  const laneGroups = [
+    ...Array.from({ length: normalizedRows }, (_, row) => ({
+      id: `row-${row + 1}`,
+      axis: 'row',
+      index: row,
+      buttonIds: Array.from({ length: normalizedCols }, (_, col) => getButtonIdAt(row, col))
+    })),
+    ...Array.from({ length: normalizedCols }, (_, col) => ({
+      id: `col-${col + 1}`,
+      axis: 'col',
+      index: col,
+      buttonIds: Array.from({ length: normalizedRows }, (_, row) => getButtonIdAt(row, col))
+    }))
+  ];
+  const sectorMap = new Map();
+  cells.forEach((cell) => {
+    if (!sectorMap.has(cell.sector)) {
+      sectorMap.set(cell.sector, []);
+    }
+    sectorMap.get(cell.sector).push(cell.buttonId);
+  });
   return {
     rows: normalizedRows,
     cols: normalizedCols,
     gridSize: `${normalizedRows}x${normalizedCols}`,
-    cells
+    cells,
+    laneGroups,
+    sectorGroups: [...sectorMap.entries()].map(([id, buttonIds]) => ({
+      id,
+      buttonIds
+    }))
   };
 }
 

@@ -601,3 +601,68 @@ Commit / push:
 Next:
 
 - Round 9: spatial grouping facts pass and future-engine 2D data validation.
+
+## Round 9 Spatial Grouping Facts
+
+Implemented:
+
+- Expanded pure 2D board zone facts in `src/core/hazards.js`.
+- Each board cell now includes:
+  - `buttonId`,
+  - row/column,
+  - lane and sector labels,
+  - normalized 2D center coordinates,
+  - four-direction neighbor facts when present.
+- Board-level facts now include:
+  - row lane groups,
+  - column lane groups,
+  - sector groups.
+- Extended validation to guard:
+  - 3x3 center cell normalized position,
+  - center cell neighbors,
+  - row and column lane membership,
+  - center sector group membership,
+  - JSON safety for the full board-zone payload.
+
+Usage:
+
+- These facts remain 2D data preparation only.
+- No camera, 3D scene, renderer, Unity, WebView, native bridge, or engine object was added.
+- The data is available through existing hazard state and host snapshot payloads.
+
+Debug self-check:
+
+- The change is explained by deterministic board-zone facts and structure validation.
+- Failures localize to pure hazard core or validation.
+- First enemy / first upgrade path remains hazard-free because schedule/unlock thresholds were not changed.
+- Moving-button and interference presentation behavior was not changed in this round.
+
+Architecture self-check:
+
+- Spatial grouping facts live in pure core code.
+- UI, app, and host code were not changed in this round.
+- Rule, fatal-button, combat, combo, upgrade, and difficulty semantics were not duplicated.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, framework work, and Phase 1 retuning remain out of scope.
+- Validation now guards the future-engine 2D data shape.
+
+Round 9 validation:
+
+- `node --check src\core\hazards.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Round 10: difficulty and encounter pacing pass for hazard unlock/stacking readability.

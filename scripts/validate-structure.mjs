@@ -66,7 +66,7 @@ for (const marker of ['NEW BEST', 'MATCHED BEST', 'previewFailureRecap', 'getBes
   }
 }
 
-for (const marker of ['.combat-status', 'grid-template-columns: auto minmax(80px, 1fr) auto', '.combat-hp-bar', 'display: block;', '@media (max-width: 520px)']) {
+for (const marker of ['id="boss-avatar"', '.boss-avatar-shell', 'grid-template-areas:', '"avatar label combo"', '.combat-hp-bar', 'display: block;', '@media (max-width: 520px)']) {
   if (!html.includes(marker)) {
     failures.push(`Missing combat mobile layout marker in index.html: ${marker}`);
   }

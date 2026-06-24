@@ -137,8 +137,8 @@ Design stance:
 
 Commit / push:
 
-- commit: pending
-- push: pending
+- initial round record commit: `101e98d`
+- push: PASS to `origin/main`
 - buffer round consumed: no
 
 Next:

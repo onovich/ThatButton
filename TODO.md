@@ -180,6 +180,19 @@ Status: Accepted by CheckAndGoal; see [docs/phase-8-playtest-calibration-content
 - Preserve Phase 7A VFX language, bottom player HUD, button-to-enemy tracer origins, host bridge compatibility, and mobile layout. Guarded by browser smoke and structure validation.
 - Keep Unity/WebView/native/3D, roguelite meta-progression, new hazards, new dependencies, framework rewrites, CDN resources, and PWA work out of scope. Preserved.
 
+## Phase 9 - Playtest Evidence And Decision Gate
+
+Estimated conversation rounds: 8
+Goal guide: [docs/phase-9-playtest-evidence-decision-gate-goal-guide.md](docs/phase-9-playtest-evidence-decision-gate-goal-guide.md)
+Status: Planned after Phase 8 PASS; dispatched to executor for implementation.
+
+- Create a local-only playtest report schema and export path so real runs can be compared.
+- Capture useful non-personal run facts: seed/build facts, viewport class, levels, enemies, upgrades, combo peak, wrong presses, hazard exposure, and failure/victory reason.
+- Add manual playtest templates for desktop, iOS Safari, Android Chrome, and human observations.
+- Guard privacy: no analytics, tracking, network submission, user identifiers, or external reporting service.
+- Preserve Phase 8 progression labels, Phase 7A VFX style, bottom player HUD, button-origin tracers, host bridge compatibility, and mobile layout.
+- Use the final report as a decision gate for whether to continue HTML gameplay calibration or start a separate engine-embedding preparation phase.
+
 ## Current Recommendation
 
-Run Phase 9 as a narrow playtest evidence and decision-gate phase before another gameplay or engine phase. The next product decision should be based on comparable local/human/device reports rather than more simulated tuning alone: either continue HTML gameplay calibration around longer-run retention and hazard readability, or start a separate engine-embedding preparation phase that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7/7A/8 deterministic facts without adding new gameplay formulas to the host layer.
+Run Phase 9 before another gameplay or engine phase. The next product decision should be based on comparable local/human/device reports rather than more simulated tuning alone: either continue HTML gameplay calibration around longer-run retention and hazard readability, or start a separate engine-embedding preparation phase that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7/7A/8 deterministic facts without adding new gameplay formulas to the host layer.

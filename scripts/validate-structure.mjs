@@ -2114,49 +2114,61 @@ if (debugApi) {
   ) {
     failures.push(`Moving-button amplitude should preserve visible gap in tight layouts: ${JSON.stringify(BASE_HAZARD_CONFIG.movingButton)}`);
   }
-  const interferenceActive = createHazardDirectorState({
+  const level22InterferenceGuard = createHazardDirectorState({
     seed: 'phase7-validate',
     level: 22,
     enemyIndex: 2,
     buttonIds: Array.from({ length: 9 }, (_, index) => `btn-${index}`),
     forbiddenIds: ['btn-0'],
-    nowMs: 4700
+    nowMs: 6000
+  });
+  const interferenceActive = createHazardDirectorState({
+    seed: 'phase7-validate',
+    level: 24,
+    enemyIndex: 2,
+    buttonIds: Array.from({ length: 9 }, (_, index) => `btn-${index}`),
+    forbiddenIds: ['btn-0'],
+    nowMs: 6000
   });
   const interferenceHazard = interferenceActive.hazards.find((hazard) => hazard.type === HAZARD_TYPES.INTERFERENCE);
   if (
+    level22InterferenceGuard.hazards.some((hazard) => hazard.type === HAZARD_TYPES.INTERFERENCE) ||
     interferenceActive.hazards.length !== 2 ||
     interferenceHazard?.phase !== HAZARD_PHASES.ACTIVE ||
+    interferenceHazard.timing.startsAtMs !== 5700 ||
     interferenceHazard.interference.intensity !== BASE_HAZARD_CONFIG.interference.intensity ||
     !isJsonSafeValue(getHazardSummary(interferenceActive))
   ) {
-    failures.push(`Interference hazard schedule changed: ${JSON.stringify(interferenceActive)}`);
+    failures.push(`Interference hazard schedule changed: ${JSON.stringify({ level22InterferenceGuard, interferenceActive })}`);
   }
   const coreHazardPreviewA = previewCoreHazardSchedule({
     seed: 'phase7-validate',
-    levels: [1, 8, 18, 19, 22]
+    levels: [1, 8, 18, 19, 22, 24]
   });
   const coreHazardPreviewB = previewCoreHazardSchedule({
     seed: 'phase7-validate',
-    levels: [1, 8, 18, 19, 22]
+    levels: [1, 8, 18, 19, 22, 24]
   });
   if (JSON.stringify(coreHazardPreviewA) !== JSON.stringify(coreHazardPreviewB)) {
     failures.push('Core hazard schedule preview is not deterministic.');
   }
   const debugHazardPreview = debugApi.previewHazardSchedule({
     seed: 'phase7-validate',
-    levels: [1, 18, 19, 22]
+    levels: [1, 18, 19, 22, 24]
   });
   const debugEarlyLevels = debugHazardPreview.levels.filter((entry) => entry.level <= 18);
   const debugLevel19 = debugHazardPreview.levels.find((entry) => entry.level === 19);
-  const debugLevel22Active = debugHazardPreview.levels
-    .find((entry) => entry.level === 22)
+  const debugLevel22 = debugHazardPreview.levels.find((entry) => entry.level === 22);
+  const debugLevel24Active = debugHazardPreview.levels
+    .find((entry) => entry.level === 24)
     ?.samples.find((sample) => sample.hazards.some((hazard) =>
       hazard.type === HAZARD_TYPES.INTERFERENCE && hazard.phase === HAZARD_PHASES.ACTIVE
     ));
   if (
     debugEarlyLevels.some((entry) => entry.samples.some((sample) => sample.hazards.length > 0 || sample.unlocked)) ||
     !debugLevel19?.samples.some((sample) => sample.hazards.some((hazard) => hazard.type === HAZARD_TYPES.MOVING_BUTTON)) ||
-    !debugLevel22Active ||
+    debugLevel22?.samples.some((sample) => sample.hazards.some((hazard) => hazard.type === HAZARD_TYPES.INTERFERENCE)) ||
+    !debugLevel24Active ||
     !isJsonSafeValue(debugHazardPreview)
   ) {
     failures.push(`Debug API hazard preview changed: ${JSON.stringify(debugHazardPreview)}`);

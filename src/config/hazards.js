@@ -29,9 +29,9 @@ export const BASE_HAZARD_CONFIG = Object.freeze({
     cycleMs: 2400
   }),
   interference: Object.freeze({
-    unlockLevel: 22,
+    unlockLevel: 24,
     unlockEnemyIndex: 2,
-    telegraphDelayMs: 3600,
+    telegraphDelayMs: 5200,
     telegraphDurationMs: 500,
     durationMs: 1200,
     cooldownMs: 5200,

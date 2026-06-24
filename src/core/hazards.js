@@ -335,18 +335,19 @@ export function getHazardSummary(state = createHazardDirectorState()) {
 
 export function previewHazardSchedule({
   seed = 'phase7-hazards',
-  levels = [1, 8, 18, 19, 22],
+  levels = [1, 8, 18, 19, 22, 24],
   enemyIndexByLevel = {
     19: 2,
     20: 2,
     21: 2,
-    22: 2
+    22: 2,
+    24: 2
   },
   rows = 3,
   cols = 3,
   buttonIds = Array.from({ length: 9 }, (_, index) => `btn-${index}`),
   forbiddenIds = ['btn-0'],
-  sampleTimesMs = [0, 1300, 2000, 4700, 9100],
+  sampleTimesMs = [0, 1300, 2000, 4700, 6000, 9100],
   disabled = false
 } = {}) {
   return {

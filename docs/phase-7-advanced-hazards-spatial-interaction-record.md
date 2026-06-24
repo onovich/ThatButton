@@ -666,3 +666,69 @@ Commit / push:
 Next:
 
 - Round 10: difficulty and encounter pacing pass for hazard unlock/stacking readability.
+
+## Round 10 Difficulty And Encounter Pacing Pass
+
+Implemented:
+
+- Tuned hazard-only pacing without changing Phase 1 difficulty, timers, rule tiers, board sizes, fatal counts, combat formulas, combo formulas, or upgrade formulas.
+- Delayed interference unlock:
+  - from Level 22 / enemy 2,
+  - to Level 24 / enemy 2.
+- Delayed interference timing inside the round:
+  - telegraph starts at `5200ms`,
+  - active starts at `5700ms`,
+  - this moves the active interference window after the moving-button active window.
+- Updated fixed-seed hazard preview defaults to include:
+  - Level 24,
+  - `6000ms` sample time.
+- Extended validation:
+  - Level 22 / enemy 2 does not include interference,
+  - Level 24 / enemy 2 / `6000ms` includes active interference,
+  - debug preview catches Level 24 active interference while keeping Level 22 interference-free.
+
+Pacing evidence:
+
+- First enemy remains hazard-free.
+- First upgrade cadence remains untouched.
+- Movement still introduces the new spatial stress first at Level 19 / enemy 2.
+- Interference now arrives after additional movement exposure.
+- Movement and interference no longer begin active at the same early time window.
+
+Debug self-check:
+
+- The change is explained by fixed-seed hazard previews and explicit Level 22 vs Level 24 checks.
+- Failures localize to hazard config, core preview defaults, debug preview, or validation.
+- Disabled, inactive, telegraph, active, cooldown, and expired movement/interference states remain covered by validation.
+- Moving-button geometry and interference readability guards remain unchanged.
+
+Architecture self-check:
+
+- Hazard pacing remains in config/core.
+- UI/app/host code was not changed in this round.
+- Rule, fatal-button, combat, combo, upgrade, and Phase 1 difficulty semantics were not duplicated or retuned.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, and framework work remain out of scope.
+- Validation now guards the intended unlock and stacking cadence.
+
+Round 10 validation:
+
+- `node --check src\config\hazards.js`: PASS
+- `node --check src\core\hazards.js`: PASS
+- `node --check scripts\validate-structure.mjs`: PASS
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS, no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Round 11: Host Bridge and debug contract pass for hazard snapshots/events.

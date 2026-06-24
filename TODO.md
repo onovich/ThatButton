@@ -100,17 +100,17 @@ Status: Implemented in Phase 5 as distribution hardening; see [docs/phase-5-demo
 
 Estimated conversation rounds: 16
 Goal guide: [docs/phase-6-rpg-combat-loop-goal-guide.md](docs/phase-6-rpg-combat-loop-goal-guide.md)
-Status: Planned after the Phase 5 demo hardening and RPG battle layout prototype; this phase turns the boss/combo prototype into a first playable RPG combat loop.
+Status: Implemented in Phase 6 as RPG Combat Loop V1; see [docs/phase-6-rpg-combat-loop-record.md](docs/phase-6-rpg-combat-loop-record.md) and [docs/phase-6-final-report.md](docs/phase-6-final-report.md).
 
-- Fix combo semantics first: the first safe press starts a chain silently, `COMBO x2` appears only on the second chained safe press, and later chained presses increment the visible count by one.
-- Add player HP so a wrong press damages the player and breaks combo instead of ending the run immediately; HP reaching zero ends the run.
-- Add enemy scaling: each enemy has stable attack while alive, and the next enemy has higher HP and attack.
-- Add a combo time window and show it as a small contrasting segment on the existing timer/pressure bar.
-- Defeating an enemy presents three deterministic upgrade choices before the next enemy starts.
-- Include upgrades for longer combo window, more max/player HP, longer decision time, higher base attack, and higher combo reward.
-- Strengthen combo particles, floating text, vibration/body impact, and damage feedback while keeping mobile layout readable.
-- Expand debug previews, host events, and validation smokes for player HP, enemy state, combo expiry, upgrades, and JSON-safe payloads.
-- Keep Unity/WebView/native engine integration deferred; Phase 6 remains an HTML-first gameplay expansion with host-contract preparation.
+- Fix combo semantics first: the first safe press starts a chain silently, `COMBO x2` appears only on the second chained safe press, and later chained presses increment the visible count by one. Done.
+- Add player HP so a wrong press damages the player and breaks combo instead of ending the run immediately; HP reaching zero ends the run. Done.
+- Add enemy scaling: each enemy has stable attack while alive, and the next enemy has higher HP and attack. Done.
+- Add a combo time window and show it as a small contrasting segment on the existing timer/pressure bar. Done.
+- Defeating an enemy presents three deterministic upgrade choices before the next enemy starts. Done.
+- Include upgrades for longer combo window, more max/player HP, longer decision time, higher base attack, and higher combo reward. Done.
+- Strengthen combo particles, floating text, vibration/body impact, and damage feedback while keeping mobile layout readable. Done.
+- Expand debug previews, host events, and validation smokes for player HP, enemy state, combo expiry, upgrades, and JSON-safe payloads. Done.
+- Keep Unity/WebView/native engine integration deferred; Phase 6 remains an HTML-first gameplay expansion with host-contract preparation. Preserved.
 
 ## Phase 7 - Advanced Hazards And Spatial Interaction
 
@@ -122,4 +122,4 @@ Estimated conversation rounds: 2-5
 
 ## Current Recommendation
 
-Build phases in this order: Phase 0, Phase 1, Phase 2, Phase 3, Phase 3A, Phase 3B, Phase 4, Phase 5, then Phase 6 for RPG Combat Loop V1. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge and Phase 6 host/debug contracts only after the HTML gameplay loop proves itself.
+Phase 6 is now ready for planner/checker review. After acceptance, use real-device and human playtest evidence to decide whether Phase 7 hazards/spatial interaction should come before any engine embedding. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge and Phase 6 host/debug contracts only after the HTML gameplay loop proves itself.

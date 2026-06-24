@@ -52,6 +52,10 @@ Phase 4 adds one focused `REACTOR WARDEN` boss objective and a capped combo/stre
 
 Phase 5 removes runtime third-party resources from the playable demo. The page now uses project-owned CSS utilities and system font stacks instead of Tailwind CDN or Google Fonts, and validation scans both source runtime files and built `dist/` output for external runtime URL regressions.
 
+## RPG Combat Loop
+
+Phase 6 adds the first RPG combat loop: safe-button round clears damage a scaling enemy, wrong presses damage player HP instead of ending the run immediately, combo chains expire on a short window, and enemy defeat offers three deterministic upgrade choices before the next stronger enemy starts.<br/>**Phase 6 加入第一版 RPG 战斗循环：清空安全键会伤害逐步变强的敌人，错按会扣除玩家 HP 而不是立刻结束，连击会在短时间窗口内维持，击败敌人后会出现三个确定性的升级选项，然后进入下一个更强敌人。**
+
 ## Deployment
 
 GitHub Pages deployment is configured with `.github/workflows/deploy.yml` and publishes the generated `dist/` folder from the `main` branch.<br/>**项目已通过 `.github/workflows/deploy.yml` 配置 GitHub Pages 部署，从 `main` 分支生成并发布 `dist/` 目录。**

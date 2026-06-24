@@ -60,9 +60,9 @@ Phase 6 adds the first RPG combat loop: safe-button round clears damage a scalin
 
 Phase 6A calibrates that loop before new hazards: first-enemy pacing is shorter, player HUD facts live in the bottom command area, and safe/combo attack tracers launch from pressed buttons toward the enemy using low-fi CRT/vector styling. Fixed-seed previews and viewport smokes cover balance, upgrade timing, combo expiry, wrong-press survivability, projectile direction, and mobile layout fit.
 
-## Next Planned Phase
+## Advanced Hazards
 
-Phase 7 is planned as an HTML-first Hazard Director V1: moving-button and temporary interference hazards will be tested as separate difficulty axes after the first learnable RPG loop, with deterministic debug previews, host/debug facts, and geometry/readability guardrails before any Unity/WebView/3D embedding work.
+Phase 7 is implementing an HTML-first Hazard Director V1: gentle moving-button drift unlocks after early RPG onboarding, brief CRT/signal interference unlocks later, and 2D board-zone facts prepare future host/engine consumers without adding Unity/WebView/3D scope. Current implementation evidence lives in [`docs/phase-7-advanced-hazards-spatial-interaction-record.md`](docs/phase-7-advanced-hazards-spatial-interaction-record.md); the final report will be added after the final validation pass.
 
 ## Deployment
 

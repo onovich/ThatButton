@@ -31,3 +31,4 @@
 - [Phase 6A Combat Feel And Balance Calibration Record](phase-6a-combat-feel-balance-record.md) - fixed-seed balance metrics, tuning evidence, feedback/layout smoke results, and Phase 6A self-checks.
 - [Phase 6A Final Report](phase-6a-final-report.md) - completed Phase 6A summary, validation evidence, architecture checks, non-scope, and readiness for CheckAndGoal acceptance.
 - [Phase 7 Advanced Hazards And Spatial Interaction Goal Guide](phase-7-advanced-hazards-spatial-interaction-goal-guide.md) - goal-mode execution guide for adding an HTML-first hazard director with moving-button, interference, spatial-grouping, host/debug, and validation guardrails before any engine embedding.
+- [Phase 7 Advanced Hazards And Spatial Interaction Record](phase-7-advanced-hazards-spatial-interaction-record.md) - implementation rounds, hazard scheduling decisions, validation evidence, host/debug contract notes, and pending playtest questions for Phase 7.

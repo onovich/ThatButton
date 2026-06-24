@@ -793,3 +793,51 @@ Commit / push:
 Next:
 
 - Round 12: docs and entry-point sync.
+
+## Round 12 Docs And Entry-Point Sync
+
+Implemented:
+
+- Updated `TODO.md` so Phase 7 points to the implementation record and final report target.
+- Recorded explicit pending playtest questions for:
+  - Level 18+ moving-button touch readability,
+  - Level 24+ interference readability,
+  - moved click-target alignment on iOS Safari and Android Chrome,
+  - whether later hazard stacking is interesting or should unlock later.
+- Added the Phase 7 implementation record to `docs/README.md`.
+- Updated `README.md` from a planned Phase 7 note to a current advanced-hazards implementation note without changing the historical bilingual/encoding content.
+
+Debug self-check:
+
+- The change is explained by documentation entry points and playtest-question inventory rather than gameplay behavior.
+- Failure risk localizes to stale links, missing final report follow-up, or overclaiming manual evidence.
+- First enemy / first upgrade path remains unchanged and hazard-free.
+- Real-device and human-playtest evidence remains explicitly pending.
+
+Architecture self-check:
+
+- No runtime code changed in this round.
+- Config/core remain the source of truth for hazard schedules and tuning.
+- UI, host, combat, combo, upgrade, rule, and difficulty semantics were not changed or duplicated.
+- Unity/WebView/native, real 3D, roguelite meta, dependencies, CDN resources, and redesign work remain out of scope.
+- Documentation now points planner/checker review toward the Phase 7 record and pending evidence.
+
+Round 12 validation:
+
+- `cmd /c npm.cmd run validate`: PASS
+- `cmd /c npm.cmd run build`: PASS
+- `node scripts\validate-static-site.mjs --include-dist`: PASS
+- `StartLocalTest.ps1 -DryRun`: PASS
+- `OpenOnlineTest.ps1 -DryRun`: PASS
+- Runtime external URL scan across `index.html`, `src`, and `dist`: PASS / no matches
+- `git diff --check`: PASS with expected Windows line-ending warnings only
+
+Commit / push:
+
+- commit: pending
+- push: pending
+- buffer round consumed: no
+
+Next:
+
+- Round 13: buffer only if integration, geometry, input, documentation, or validation regressions appear.

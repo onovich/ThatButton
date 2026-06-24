@@ -130,14 +130,21 @@ Status: Accepted by CheckAndGoal; see [docs/phase-6a-combat-feel-balance-record.
 
 Estimated conversation rounds: 16
 Goal guide: [docs/phase-7-advanced-hazards-spatial-interaction-goal-guide.md](docs/phase-7-advanced-hazards-spatial-interaction-goal-guide.md)
-Status: Planned after Phase 6A PASS; ready for executor implementation as an HTML-first Hazard Director V1 before any engine embedding work.
+Status: Implementation in progress; see [docs/phase-7-advanced-hazards-spatial-interaction-record.md](docs/phase-7-advanced-hazards-spatial-interaction-record.md). Final report target: [docs/phase-7-final-report.md](docs/phase-7-final-report.md).
 
-- Prototype moving buttons and temporary visual interference as separate difficulty axes after the first learnable RPG loop, not in the opening onboarding sequence.
-- Keep the first enemy / first upgrade cadence from Phase 6A readable; do not stack motion, interference, short timers, and complex clues too early.
-- Add deterministic hazard schedules, debug previews, host/debug facts, and validation smokes before treating hazards as a permanent design direction.
-- Preserve Phase 6A combat feel: bottom player HUD, button-to-enemy attack/combo tracers, readable combo/wrong-press feedback, and mobile layout fit.
-- Prepare only lightweight 2D spatial grouping facts for future engine consumption; do not add Unity/WebView/native integration or real 3D rendering in this phase.
+- Prototype moving buttons and temporary visual interference as separate difficulty axes after the first learnable RPG loop, not in the opening onboarding sequence. V1 implemented; pending human readability playtest.
+- Keep the first enemy / first upgrade cadence from Phase 6A readable; do not stack motion, interference, short timers, and complex clues too early. Current schedule keeps early levels hazard-free and delays interference beyond first movement exposure.
+- Add deterministic hazard schedules, debug previews, host/debug facts, and validation smokes before treating hazards as a permanent design direction. Implemented through core hazard helpers, debug previews, structure validation, and host JSON-safety smoke.
+- Preserve Phase 6A combat feel: bottom player HUD, button-to-enemy attack/combo tracers, readable combo/wrong-press feedback, and mobile layout fit. Guarded by validation smokes; manual device pass remains pending.
+- Prepare only lightweight 2D spatial grouping facts for future engine consumption; do not add Unity/WebView/native integration or real 3D rendering in this phase. Implemented as board zone/lane/sector data only.
+
+Phase 7 playtest questions still pending:
+
+- Does the Level 18+ moving-button drift feel readable and fair on touch devices?
+- Does Level 24+ interference add tension without obscuring rule text, player HUD, combo feedback, or pressed-button tracers?
+- Do moving-button click targets feel aligned with the visible button position on iOS Safari and Android Chrome?
+- Does hazard stacking after the first learnable RPG loop make later runs more interesting, or should motion/interference unlock even later?
 
 ## Current Recommendation
 
-Proceed with Phase 7 hazards/spatial interaction before engine embedding. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7 hazard facts only after the HTML gameplay loop proves the hazards are fun and readable.
+Finish Phase 7 final validation and planner acceptance before engine embedding. Keep engine embedding as a later milestone that consumes the Phase 3B Host Bridge, Phase 6 host/debug contracts, and Phase 7 hazard facts only after the HTML gameplay loop proves the hazards are fun and readable.

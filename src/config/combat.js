@@ -1,7 +1,7 @@
 export const PROTOTYPE_BOSS_CONFIG = Object.freeze({
   id: 'reactor-warden',
   name: 'REACTOR WARDEN',
-  maxHp: 160,
+  maxHp: 540,
   baseRoundDamage: 18,
   timeBonusDivisorMs: 3500,
   maxTimeBonus: 4

@@ -481,9 +481,9 @@ if (JSON.stringify(getComboSummary(comboState)) !== JSON.stringify(comboState)) 
 
 const initialCombat = createCombatState();
 if (
-  PROTOTYPE_BOSS_CONFIG.maxHp !== 160 ||
+  PROTOTYPE_BOSS_CONFIG.maxHp !== 540 ||
   initialCombat.bossId !== 'reactor-warden' ||
-  initialCombat.hp !== 160 ||
+  initialCombat.hp !== 540 ||
   initialCombat.status !== 'active'
 ) {
   failures.push(`Initial combat state changed: ${JSON.stringify(initialCombat)}`);
@@ -500,11 +500,11 @@ const firstCombatHit = applyRoundClearDamage(initialCombat, {
   timeLeftMs: 18000,
   comboState: createComboState({ streak: 3 })
 });
-if (firstCombatHit.damage.appliedDamage !== 24 || firstCombatHit.combat.hp !== 136 || firstCombatHit.defeated) {
+if (firstCombatHit.damage.appliedDamage !== 24 || firstCombatHit.combat.hp !== 516 || firstCombatHit.defeated) {
   failures.push(`Combat damage application smoke failed: ${JSON.stringify(firstCombatHit)}`);
 }
 let defeatCombat = createCombatState();
-for (let level = 1; level <= 6; level++) {
+for (let level = 1; level <= 20; level++) {
   defeatCombat = applyRoundClearDamage(defeatCombat, {
     level,
     timeLeftMs: 18000,
@@ -512,7 +512,7 @@ for (let level = 1; level <= 6; level++) {
   }).combat;
 }
 const defeatSummary = getCombatSummary(defeatCombat);
-if (defeatSummary.status !== 'defeated' || defeatSummary.hp !== 0 || defeatSummary.defeatedAtLevel !== 6 || defeatSummary.roundsCleared !== 6) {
+if (defeatSummary.status !== 'defeated' || defeatSummary.hp !== 0 || defeatSummary.defeatedAtLevel !== 20 || defeatSummary.roundsCleared !== 20) {
   failures.push(`Boss defeat smoke failed: ${JSON.stringify(defeatSummary)}`);
 }
 
@@ -902,7 +902,7 @@ const victoryApp = mainModule.createApp({
 });
 victoryApp.init();
 victoryApp.start();
-for (let guard = 0; guard < 12 && victoryApp.getSnapshot().status === 'playing'; guard++) {
+for (let guard = 0; guard < 26 && victoryApp.getSnapshot().status === 'playing'; guard++) {
   const state = victoryApp.getState();
   const safeIds = state.buttons
     .filter((button) => !state.forbiddenIds.includes(button.id) && !button.isClicked)
@@ -912,6 +912,9 @@ for (let guard = 0; guard < 12 && victoryApp.getSnapshot().status === 'playing';
 const victorySnapshot = victoryApp.getSnapshot();
 if (victorySnapshot.status !== 'finished' || victorySnapshot.lastVictoryRecap?.result !== 'victory' || victorySnapshot.combat.status !== 'defeated') {
   failures.push(`Fixed-seed boss defeat path failed: ${JSON.stringify(victorySnapshot)}`);
+}
+if (victorySnapshot.combat.defeatedAtLevel < 18 || victorySnapshot.combat.roundsCleared < 18) {
+  failures.push(`Boss encounter ends before 3x3 has room to develop: ${JSON.stringify(victorySnapshot.combat)}`);
 }
 const victoryEventTypes = victoryBridge.getEvents().map((event) => event.type);
 for (const requiredType of [

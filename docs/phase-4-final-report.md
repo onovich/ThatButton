@@ -8,7 +8,7 @@ Phase 4 adds one focused boss-style objective and one conservative combo/streak 
 
 ## Gameplay Result
 
-- Boss: `REACTOR WARDEN`, one encounter with `160` HP.
+- Boss: `REACTOR WARDEN`, one encounter currently tuned to `540` HP so 3x3 play becomes the midgame instead of the finish line.
 - Safe presses build combo but do not directly damage the boss.
 - Clearing a round deals boss damage.
 - Defeating the boss ends the current run with an encounter-clear/victory recap.

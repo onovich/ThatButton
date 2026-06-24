@@ -24,7 +24,7 @@ The prototype boss config is owned by config/core code, not UI or `main.js`.
 | --- | --- | --- |
 | id | `reactor-warden` | Stable host/debug id. |
 | name | `REACTOR WARDEN` | Short UI label. |
-| max HP | `160` | Defeatable after several clean clears without extending the run into a campaign. |
+| max HP | `540` | Keeps 2x2/2x3 as onboarding and lets the 3x3 board become the midgame before victory. |
 | base round damage | `18` | Round clear is the primary attack. |
 | max time bonus | `4` | Remaining time adds small reward without retuning timers. |
 | max combo bonus | `6` | Clean streak matters but cannot dominate rule reading. |
@@ -151,9 +151,9 @@ Validation fixtures added to `scripts/validate-structure.mjs`:
 - initial combo state is `0 / x1.0 / +0`;
 - 13 safe-press increments cap at streak `12`, tier `3`, `x1.3`, `+6`;
 - fatal reset returns combo to zero and records `fatal_press`;
-- initial boss state is `reactor-warden`, `160 / 160`, `active`;
+- initial boss state is `reactor-warden`, `540 / 540`, `active`;
 - `18000 ms` remaining with streak `3` deals `18 + 4 + 2 = 24`;
-- six max-bonus round clears defeat the boss at level `6`.
+- twenty max-bonus round clears defeat the boss at level `20`.
 
 Round 2 debug self-check:
 

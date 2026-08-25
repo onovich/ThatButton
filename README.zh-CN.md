@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-[在线试玩](https://blog.onovich.com/ThatButton/)
+[在线试玩](https://game.onovich.com/ThatButton/)
 
 ThatButton 是一款单屏逻辑街机游戏。玩家需要读懂终端线索，找出致命按钮，并在系统崩溃前按下所有安全按钮。
 

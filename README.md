@@ -2,7 +2,7 @@
 
 [简体中文](README.zh-CN.md)
 
-[Play online](https://blog.onovich.com/ThatButton/)
+[Play online](https://game.onovich.com/ThatButton/)
 
 ThatButton is a single-screen puzzle arcade game about reading a terminal clue, identifying the fatal button, and pressing every safe button before the system breaks down.
 

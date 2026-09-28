@@ -52,6 +52,7 @@ const moduleFiles = [
   'src/host/browser-host-bridge.js',
   'src/host/browser-storage.js',
   'src/app/create-app.js',
+  'src/app/game-session.js',
   'src/ui/audio.js',
   'src/ui/render.js',
   'src/main.js'

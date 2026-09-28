@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+  <title>ThatButton 微信小游戏画面预览</title>
+  <style>
+    html, body { margin: 0; background: #161c18; min-height: 100%; width: 100%; overflow-x: hidden; }
+    body { display: flex; justify-content: center; }
+    canvas { display: block; width: 390px; max-width: 100vw; height: min(100dvh, 844px); touch-action: none; }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <script type="module">
+    const canvas = document.getElementById('game');
+    const listeners = {};
+    const params = new URLSearchParams(location.search);
+    const width = Math.max(320, Number(params.get('w')) || 390);
+    const height = Math.max(568, Number(params.get('h')) || 844);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    const scaleX = () => width / canvas.getBoundingClientRect().width;
+    const scaleY = () => height / canvas.getBoundingClientRect().height;
+    canvas.addEventListener('pointerdown', (event) => {
+      const rect = canvas.getBoundingClientRect();
+      listeners.touch?.({ touches: [{
+        clientX: (event.clientX - rect.left) * scaleX(),
+        clientY: (event.clientY - rect.top) * scaleY()
+      }] });
+    });
+    const wxApi = {
+      createCanvas: () => canvas,
+      getWindowInfo: () => ({ windowWidth: width, windowHeight: height, pixelRatio: 2,
+        safeArea: { top: height < 700 ? 24 : 47, bottom: height - 34 } }),
+      getStorageSync: (key) => localStorage.getItem(key),
+      setStorageSync: (key, value) => localStorage.setItem(key, value),
+      removeStorageSync: (key) => localStorage.removeItem(key),
+      getLaunchOptionsSync: () => ({ query: { seed: 'wechat-preview' } }),
+      createInnerAudioContext: () => ({ stop() {}, play() {}, destroy() {} }),
+      onTouchStart: (callback) => { listeners.touch = callback; },
+      onHide: (callback) => { listeners.hide = callback; },
+      onShow: (callback) => { listeners.show = callback; }
+    };
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) listeners.hide?.();
+      else listeners.show?.();
+    });
+    const { createWechatGame } = await import('./src/game.js');
+    window.previewGame = createWechatGame(wxApi);
+    if (params.has('autostart')) window.previewGame.app.start();
+    if (params.get('layout') === '3x3') {
+      const { getDifficultyForLevel } = await import('../../src/config/difficulty.js');
+      const { generateLevelData } = await import('../../src/core/level.js');
+      const { createSeededRng } = await import('../../src/core/rng.js');
+      const difficulty = getDifficultyForLevel(6);
+      const board = generateLevelData({ level: 6, difficulty, rng: createSeededRng('wechat-layout') });
+      window.previewGame.view.renderer.renderBoard({ ...board, level: 6, score: 70 });
+      window.previewGame.view.renderer.updateTimer(10000, 15000);
+    }
+  </script>
+</body>
+</html>

@@ -1,5 +1,8 @@
 # Project Docs
 
+- [微信小游戏开发与准备计划](WECHAT_MINIGAME_PLAN.md) - 双端架构、实施阶段、验收条件及账号与发布准备清单。
+- [阅星曈版本准备](XTEINK_PREPARATION.md) - RoyalTapestry 经验、设备设计、交互概念稿与研发验收路线；尚未实现 Lua 版本。
+
 - [Phase 0 Baseline And Playtest Goal Guide](phase-0-baseline-playtest-goal-guide.md) - goal-mode execution guide for establishing test criteria, reproducible rounds, and playtest evidence before changing the difficulty curve.
 - [Phase 0 Playtest Record](phase-0-playtest-record.md) - baseline test matrix, feedback fields, and first 10-level playtest evidence log.
 - [Phase 0 Final Report](phase-0-final-report.md) - completed Phase 0 validation summary, remaining risks, and commits.

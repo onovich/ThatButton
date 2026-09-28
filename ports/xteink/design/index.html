@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ThatButton · 阅星曈交互概念稿</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#fff;color:#000;font-family:'Microsoft YaHei',sans-serif}main{display:flex;gap:64px;align-items:flex-start;justify-content:center;padding:40px 24px}aside{max-width:330px;padding-top:40px}h1{font-size:32px;line-height:1.2}p{line-height:1.8}small{font:13px Consolas,monospace}a{color:inherit}button{font:inherit;background:#fff;color:#000;border:2px solid #000;cursor:pointer}button:focus-visible{outline:3px solid #000;outline-offset:4px}button:disabled{cursor:default}aside button{padding:12px;margin:0 8px 12px 0}#frame{width:482px;flex-shrink:0;border:1px solid #000}.screen{width:480px;height:800px;padding:20px;position:relative;overflow:hidden;background:#fff}.head{height:54px;display:flex;justify-content:space-between;align-items:start;border-bottom:3px solid}.brand{font:900 26px Consolas,monospace;letter-spacing:-1px}.head small{display:block;letter-spacing:2px;font-size:11px}.head button{height:44px;padding:0 16px}.meters{height:66px;display:flex;align-items:center;justify-content:space-between;font-size:17px}.meters b{font:700 24px Consolas,monospace}.rule{background:#000;color:#fff;height:114px;padding:12px 16px}.rule small{letter-spacing:4px}.rule strong{display:block;font-size:25px;margin:7px 0 2px}.rule span{font-size:15px}.board{margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,112px);gap:12px}.key{position:relative;padding:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-width:2px}.key svg{width:80px;height:75px}.key .group{font:700 16px Consolas,monospace}.key.done{border-style:dashed}.key.done strong{font-size:19px}.key.done span{font-size:14px;margin-top:6px}.key.mistake{border:4px solid}.key:focus-visible{outline-offset:2px}.feedback{height:72px;padding-top:15px;font-size:18px;line-height:1.6}.feedback small{font-size:14px}.footer{height:52px;display:flex;gap:12px}.footer button{flex:1}.panel{position:absolute;inset:0;background:#fff;padding:36px 28px;display:flex;flex-direction:column;z-index:2}.panel[hidden]{display:none}.panel h2{font-size:34px;margin:20px 0}.panel .emblem{font:900 86px Consolas,monospace;line-height:1.1;border-block:6px solid;padding:20px 0;margin:30px 0}.panel p{font-size:20px}.panel button{min-height:56px;margin-top:14px;padding:10px}.panel .primary{background:#000;color:#fff}.panel .actions{margin-top:auto;display:flex;flex-direction:column}.caption{padding:10px 16px;border-top:1px solid;font-size:12px}.tag{border:1px solid;display:inline-block;padding:5px 8px;font:13px Consolas,monospace}#guide{font-size:16px;margin-top:18px} @media(max-width:900px){main{flex-direction:column;align-items:center;gap:20px}aside{padding-top:0;max-width:480px}}@media(max-width:520px){main{padding:16px 0}aside{padding:0 20px}#frame{transform-origin:top center;width:482px;zoom:.72}}
+</style>
+<main>
+<aside>
+ <span class="tag">DESIGN STUDY / 2026.09</span>
+ <h1>不要按下<br>那个按钮。</h1>
+ <p><strong><a href="math-study.html">当前方案：数学条件试玩 →</a></strong><br>倍数、尾数、包含、奇偶、质数与合数。下方 A–D 组别仅为废弃的第一稿记录。</p>
+ <p>阅星曈版，把判断留给你。<br>思考不限时，每次操作给出明确结果。</p>
+ <p>黑白工业面板 · 电路组 A–D<br>形状与数字 · 静态反馈</p>
+ <button id="restart">重置样例</button><button id="tutorial">体验短教学</button>
+ <p id="guide">可以直接点击面板。方向键移动焦点，Enter 按下，Esc 打开菜单。</p>
+ <hr>
+ <p><strong>这是交互概念稿。</strong><br>单个固定谜题；没有接入 Lua、Studio、设备刷新或持久化。桌面设备画布为 480×800；窄屏缩小展示，不能据此评价真机像素质感。</p>
+ <p><a href="../docs/DESIGN.md">设计规格</a> · <a href="../docs/DEVELOPMENT.md">研发路线</a></p>
+</aside>
+<div id="frame"><section class="screen" aria-label="480×800 设备概念画面">
+ <div id="surface">
+ <header class="head"><div><div class="brand">THAT BUTTON</div><small>CORE MAINTENANCE / 01</small></div><button id="menu">菜单</button></header>
+ <div class="meters"><span>核心 <b>待解除</b></span><span>护盾 <b id="hp">3/3</b></span><span>连击 <b id="chain">0</b></span></div>
+ <div class="rule"><small>禁止按下</small><strong>组 A 且形状为三角</strong><span>按完所有不符合条件的按钮。</span></div>
+ <div class="board" id="board" aria-label="按钮面板"></div>
+ <div class="feedback" aria-live="polite"><div id="notice">先读条件，再解除安全按钮。</div><small id="remaining">剩余 7 个安全按钮</small></div>
+ <footer class="footer"><button id="learn">教学</button><button id="rules">规则</button><button id="refresh">清屏</button></footer>
+ </div>
+ <div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" hidden></div>
+ </section><div class="caption">HTML 概念稿 / 单局交互 / 非设备模拟器</div></div>
+</main>
+<script>
+const cells=[['A','triangle',1],['B','circle',2],['C','square',3],['D','star',4],['A','circle',5],['B','triangle',6],['C','star',7],['D','square',8],['A','triangle',9]];
+const names={triangle:'三角',circle:'圆形',square:'方形',star:'星形'};
+const shapes={triangle:'<path d="M40 4 L76 67 H4 Z"/>',circle:'<circle cx="40" cy="37" r="31"/>',square:'<rect x="9" y="6" width="62" height="62"/>',star:'<path d="M40 2 L50 24 L76 25 L57 43 L63 69 L40 56 L17 69 L23 43 L4 25 L30 24 Z"/>'};
+const $=id=>document.getElementById(id);
+let state,practice=false,saved=null,focusIndex=0,returnFocus=null;
+function fresh(){return {processed:[],hp:3,chain:0,notice:'先读条件，再解除安全按钮。',result:false};}
+function unsafe(i){return cells[i][0]==='A'&&cells[i][1]==='triangle';}
+function remaining(){return cells.filter((_,i)=>!unsafe(i)&&!state.processed.includes(i)).length;}
+function render(){
+ $('hp').textContent=state.hp+'/3';$('chain').textContent=state.chain;$('notice').textContent=state.notice;
+ $('remaining').textContent=(practice?'练习 · ':'')+'剩余 '+remaining()+' 个安全按钮';
+ $('learn').textContent=practice?'退出练习':'教学';
+ $('board').innerHTML=cells.map(([group,shape,num],i)=>{const done=state.processed.includes(i);return `<button class="key ${done?(unsafe(i)?'done mistake':'done'):''}" data-cell="${i}" ${done?'disabled':''} aria-label="数字 ${num}，组 ${group}，${names[shape]}">${done?`<strong>${unsafe(i)?'已锁定':'已解除'}</strong><span>${num} · ${unsafe(i)?'误按':'安全'}</span>`:`<svg viewBox="0 0 80 75" aria-hidden="true"><g fill="white" stroke="black" stroke-width="3">${shapes[shape]}</g><text x="40" y="47" text-anchor="middle" font-family="Consolas,monospace" font-weight="bold" font-size="28">${num}</text></svg><span class="group">组 ${group}</span>`}</button>`;}).join('');
+}
+function openPanel(title,body,actions){
+ returnFocus=document.activeElement;$('surface').inert=true;
+ $('panel').innerHTML=`<small>THAT BUTTON / ${practice?'练习':'检修终端'}</small><h2 id="panel-title">${title}</h2>${body}<div class="actions"></div>`;
+ for(const [label,fn,primary] of actions){const b=document.createElement('button');b.textContent=label;if(primary)b.className='primary';b.onclick=fn;$('panel').querySelector('.actions').append(b);}
+ $('panel').hidden=false;$('panel').querySelector('button').focus();
+}
+function closePanel(){ $('panel').hidden=true;$('surface').inert=false;if(returnFocus?.isConnected&&!returnFocus.disabled)returnFocus.focus();else $('menu').focus(); }
+function finish(){state.result=true;openPanel(practice?'你已经学会了':'面板已解除',`<div class="emblem">ALL SAFE</div><p>安全按钮全部解除。<br>危险按钮无需按下。</p><p>护盾剩余 ${state.hp}/3 · 当前连击 ${state.chain}</p>`,practice?[['返回正式局',exitPractice,true],['重练',()=>{state=fresh();closePanel();render();}]]:[['重新开始',reset,true],['查看规则',showRules]]);}
+function press(i){
+ if(!$('panel').hidden||state.result||state.processed.includes(i))return;
+ focusIndex=i;state.processed.push(i);
+ if(unsafe(i)){state.hp--;state.chain=0;state.notice=`${cells[i][2]} 同时属于组 A、三角：护盾 −1。`;}
+ else{state.chain++;state.notice=practice?'正确。自己判断，把其余安全键按完。':`已解除 ${cells[i][2]} · 连续正确 ${state.chain} 次`;}
+ render();if(state.hp<=0){state.result=true;openPanel('检修中断','<p>护盾已耗尽。先看禁止条件，再辨认组别与形状。</p>',[['重新开始',reset,true]]);}else if(!remaining())finish();
+}
+function reset(){practice=false;saved=null;state=fresh();closePanel();render();}
+function startPractice(){if(practice)return;saved=structuredClone(state);practice=true;state=fresh();closePanel();render();openPanel('边玩边学','<p>“禁止”描述的是不能按的键。</p><p>先找一个不同时满足<br>“组 A、三角”的按钮。</p><p>按对后，自己找出其余安全键。</p>',[['开始练习',closePanel,true],['返回正式局',exitPractice]]);}
+function exitPractice(){state=saved||fresh();saved=null;practice=false;closePanel();render();}
+function showRules(){openPanel('读懂禁止条件','<p><b>且</b>：两个条件同时成立，才危险。</p><p><b>或</b>：任意一个成立，就危险。</p><p><b>非</b>：不属于指定的属性。</p><p>本局禁止“组 A 且三角”。<br>只满足其中一个条件的键仍安全。</p><p>没有倒计时，可以慢慢判断。</p>',[[state.result?'回到结果':'返回面板',()=>{closePanel();if(state.result)finish();},true]]);}
+function showMenu(){if(state.result){finish();return;}openPanel('检修菜单','<p>读规则和浏览菜单不会消耗护盾。</p>',[['继续',closePanel,true],[practice?'退出练习':'边玩边学',practice?exitPractice:startPractice],['重新开始',()=>openPanel('重新开始？','<p>当前样例进度将清空。</p>',[['取消',closePanel,true],['确认重开',reset]])]]);}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-cell]');if(b)press(Number(b.dataset.cell));});
+$('restart').onclick=reset;$('tutorial').onclick=()=>{if(practice){state=fresh();closePanel();render();}else startPractice();};$('menu').onclick=showMenu;$('learn').onclick=()=>practice?exitPractice():startPractice();$('rules').onclick=showRules;
+$('refresh').onclick=()=>{state.notice='概念稿已重绘；真机清屏效果待验证。';render();};
+document.addEventListener('keydown',e=>{
+ if(!$('panel').hidden){if(e.key==='Escape'){e.preventDefault();if(!state.result)closePanel();}if(e.key==='Tab'){const bs=[...$('panel').querySelectorAll('button')];const i=bs.indexOf(document.activeElement);e.preventDefault();bs[(i+(e.shiftKey?-1:1)+bs.length)%bs.length].focus();}return;}
+ if(e.key==='Escape'){e.preventDefault();showMenu();return;}
+ if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;
+ e.preventDefault();const active=Number(document.activeElement?.dataset.cell);if(Number.isInteger(active))focusIndex=active;
+ const delta={ArrowLeft:-1,ArrowRight:1,ArrowUp:-3,ArrowDown:3}[e.key];let next=focusIndex+delta;
+ while(next>=0&&next<9&&(Math.abs(delta)===3||Math.floor(next/3)===Math.floor(focusIndex/3))){if(!state.processed.includes(next)){focusIndex=next;break;}next+=delta;}
+ const target=document.querySelector(`[data-cell="${focusIndex}"]`);if(!target.disabled)target.focus();else document.querySelector('.key:not(:disabled)')?.focus();
+});
+state=fresh();render();
+</script>
+</html>

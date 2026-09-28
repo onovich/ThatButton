@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ThatButton · 数学条件试玩</title>
+<link rel="stylesheet" href="math-study.css">
+<main>
+<header><div><small>THAT BUTTON / SHAPE + NUMBER</small><h1>读懂条件，再按按钮。</h1><p>保留形状，结合倍数、尾数、包含、奇偶、质数与合数。</p></div></header>
+<section class="lab"><div class="settings"><h2>数学条件试玩</h2><p>选择禁止条件，试着找出安全数字。</p>
+ <label for="mode">禁止条件组合</label><select id="mode"><option value="number">只看数字</option><option value="shape">只看形状</option><option value="and" selected>形状 并且是 数字条件</option><option value="or">形状 或 数字条件</option></select>
+ <label for="shape">形状条件</label><select id="shape"><option value="triangle">三角形</option><option value="circle">圆形</option><option value="square">方形</option><option value="star">星形</option></select>
+ <label for="rule">数字条件</label><select id="rule"><option value="multiple">是 n 的倍数</option><option value="ending">尾数是 n</option><option value="contains">数字中含 n</option><option value="odd">是奇数</option><option value="even">是偶数</option><option value="prime" selected>是质数</option><option value="composite">是合数</option></select>
+ <label for="parameter">n 的值</label><input id="parameter" type="number" value="3" min="2" max="9" step="1"><p id="parameter-note" class="note"></p>
+ <label class="toggle"><input id="answers" type="checkbox"> 标出危险答案</label>
+ <label class="toggle"><input id="negated" type="checkbox"> 除了上述条件之外（对整个条件取反）</label>
+ <p id="validation" class="note" role="status"></p>
+ <div class="explain"><h3 id="definition-title">条件说明</h3><p id="definition"></p></div>
+ <p><b>1 既不是质数，也不是合数。</b><br>2 是唯一的偶质数；9、21、27、49 是奇合数。</p>
+ <p class="note">这是本地规则原型，不扣护盾。使用 1–99 的正整数，不补前导零。画布为 480×800，窄屏可横向滚动；尚未接入设备。</p>
+</div><div class="device-scroll"><div class="device" aria-label="480×800 数学条件面板">
+ <div class="top">禁止按下</div>
+ <div class="instruction"><strong id="clue"></strong></div>
+ <div class="board" id="board"></div>
+
+</div></div></section>
+<section class="findings"><h2>从直观判断，到逻辑组合</h2><div><p><b>入门</b><br>形状、奇偶、尾数、包含某个数字。</p><p><b>进阶</b><br>倍数、质数与合数；练习识别数字性质。</p><p><b>组合</b><br>“并且是”要求同时成立；“或”只需一项成立。“除了……之外”对整个条件取反。</p></div><p>尾数为 7 与含数字 7 不相同：70、72 含 7，但尾数不是 7。“不是质数”也不等于“是合数”，因为还包括 1。</p></section>
+</main><script type="module" src="math-study.js"></script>
+</html>

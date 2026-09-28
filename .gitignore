@@ -1,6 +1,11 @@
 node_modules/
 dist/
 ports/wechat/build/
+ports/xteink/.venv/
+ports/xteink/build/
+ports/xteink/artifacts/
+ports/xteink/**/__pycache__/
+output/
 *.log
 .DS_Store
 Thumbs.db

@@ -1,5 +1,6 @@
 # Project Docs
 
+- [手指等等我：整体形象与 UI 重设计构想](WECHAT_ART_UI_CONCEPT.md) - 面向美术与前端的气质定位、角色、全流程界面、反馈动效、资源交付及实施建议。
 - [手指等等我：微信小游戏命名、简介与设计说明](WECHAT_BRAND_BRIEF.md) - 已确定的名称、简介、图标原图与设计原因，以及开发者接入建议。
 - [微信小游戏开发与准备计划](WECHAT_MINIGAME_PLAN.md) - 双端架构、实施阶段、验收条件及账号与发布准备清单。
 - [阅星曈版本准备](XTEINK_PREPARATION.md) - RoyalTapestry 经验、设备设计、交互概念稿与研发验收路线；尚未实现 Lua 版本。

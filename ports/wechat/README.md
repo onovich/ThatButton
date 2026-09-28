@@ -6,6 +6,8 @@
 
 开发者交接请先阅读[命名、简介与设计说明](../../docs/WECHAT_BRAND_BRIEF.md)，其中记录了已确定内容、设计原因和后续界面接入建议。
 
+整套美术与前端改版参考[整体形象与 UI 重设计构想](../../docs/WECHAT_ART_UI_CONCEPT.md)：气质定位、角色、全流程界面、动效与资源交付建议。
+
 - 名称与简称：**手指等等我**。
 - 已选定的账号头像：[shouzhi-dengdengwo-avatar-v1.png](assets/branding/shouzhi-dengdengwo-avatar-v1.png)。
 - 图标于 2026-09-28 生成并确认；PNG 原图为 1254×1254，1,250,998 字节。

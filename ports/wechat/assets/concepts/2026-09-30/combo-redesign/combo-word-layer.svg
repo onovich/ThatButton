@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 46" width="116" height="46" role="img" aria-label="COMBO! 漫画字标静态图层">
+  <g transform="translate(5 1) rotate(-4 52 22)">
+    <path d="M6 37 C33 27 78 27 105 30 C72 31 34 36 8 40 Z" fill="#ffe34e" stroke="#071944" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M8 36 C34 31 73 29 101 30" fill="none" stroke="#f89915" stroke-width="2.8" stroke-linecap="round"/>
+    <g font-family="Arial Black, Arial, sans-serif" font-size="26" font-style="italic" font-weight="900" letter-spacing="-1.4">
+      <text x="4" y="29" fill="#ffe644" stroke="#fffdf8" stroke-width="8" stroke-linejoin="round" paint-order="stroke">COMBO!</text>
+      <text x="4" y="29" fill="#ffe644" stroke="#071944" stroke-width="3.5" stroke-linejoin="round" paint-order="stroke">COMBO!</text>
+    </g>
+  </g>
+</svg>

@@ -680,7 +680,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       if (charIndex < ruleText.length) {
         refs.clueEl.innerHTML += ruleText.charAt(charIndex);
         charIndex++;
-        if (charIndex % 3 === 0) audio.playBeep(800 + random() * 200, 'square', 0.02);
+        if (charIndex % 3 === 0) audio.playTypingTick?.();
         typewriterTimeout = schedule(typeChar, 30);
       }
     }
@@ -942,11 +942,15 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
   function bindPlaytestReportExportControls() {
     if (typeof refs.playtestReportCopyButton?.addEventListener === 'function') {
       refs.playtestReportCopyButton.addEventListener('click', () => {
+        audio.playUiConfirm?.();
         void copyPlaytestReportText();
       });
     }
     if (typeof refs.playtestReportSelectButton?.addEventListener === 'function') {
-      refs.playtestReportSelectButton.addEventListener('click', selectPlaytestReportText);
+      refs.playtestReportSelectButton.addEventListener('click', () => {
+        audio.playUiConfirm?.();
+        selectPlaytestReportText();
+      });
     }
   }
 

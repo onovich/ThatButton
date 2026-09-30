@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>手指等等我 · v15 页面视觉提案</title>
+  <style>
+    :root { --w:320px;--h:568px;--navy:#071944;--yellow:#ffe135;--cyan:#03d7e3;--paper:#fffdf5; }
+    * { box-sizing:border-box; }
+    body { margin:0;background:#fff1ba;color:var(--navy);font-family:system-ui,"Microsoft YaHei",sans-serif; }
+    a { text-decoration:none;color:inherit; }
+    .screen { position:relative;width:var(--w);height:var(--h);overflow:hidden;background:radial-gradient(circle at -8% 36%,#fff8b6 0 17%,transparent 17.2%),radial-gradient(circle at 110% 65%,#fff5a6 0 17%,transparent 17.2%),linear-gradient(155deg,#fff14b 0%,#ffdf27 67%,#ffd51c);padding:17px 14px 15px; }
+    .screen.cream { background:linear-gradient(160deg,#fffef9,#fff8e8); }
+    .cloud { position:absolute;width:130px;height:53px;border-radius:50%;background:#fff5a0;opacity:.8; }
+    .cloud::before,.cloud::after { content:"";position:absolute;border-radius:50%;background:inherit; }
+    .cloud::before { width:69px;height:63px;left:14px;top:-22px; }
+    .cloud::after { width:73px;height:52px;right:8px;top:-13px; }
+    .cloud.a { top:183px;left:-56px; }
+    .cloud.b { top:295px;right:-83px; }
+    .nav { position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;min-height:31px; }
+    .back,.nav-chip { border:2px solid var(--navy);border-radius:12px;background:white;padding:4px 10px;font-weight:900;font-size:13px;box-shadow:0 2px 0 #c4b486; }
+    .back { display:grid;place-items:center;min-width:70px;min-height:44px; }
+    .nav-chip { background:#fff6b9; }
+    .logo { position:relative;z-index:2;margin:54px auto 0;text-align:center;font-size:41px;line-height:1.03;letter-spacing:-.07em;font-weight:1000;color:white;-webkit-text-stroke:5px var(--navy);paint-order:stroke fill;filter:drop-shadow(0 5px 0 #10204a);text-shadow:1px 1px 0 var(--navy); }
+    .logo span { color:var(--yellow); }
+    .tagline { position:relative;z-index:2;width:max-content;max-width:100%;margin:14px auto 0;padding:7px 14px;border:2px solid var(--navy);border-radius:30px;background:white;font-size:14px;font-weight:1000;transform:rotate(-2deg); }
+    .home .mascot { position:absolute;z-index:1;left:5px;top:203px;width:310px;height:205px;object-fit:contain;filter:drop-shadow(0 7px 0 #f1a91d); }
+    .home .start { position:absolute;z-index:3;left:27px;right:27px;bottom:91px;height:68px;display:grid;place-items:center;border:4px solid var(--navy);border-radius:22px;background:linear-gradient(#25f6f4,#00b9d7);box-shadow:0 7px 0 #007997,0 10px 0 var(--navy);color:white;font-size:28px;font-weight:1000;-webkit-text-stroke:1px var(--navy);text-shadow:2px 2px 0 var(--navy),-2px 2px 0 var(--navy); }
+    .home .record { position:absolute;z-index:3;left:28px;right:28px;bottom:20px;padding:10px 11px;background:#fffdf2;border:2px solid #e4c93e;border-radius:13px;text-align:center;font-size:13px;font-weight:900; }
+    .home .record b { font-size:15px; }
+    .home .toplinks { position:absolute;z-index:3;top:17px;right:13px;display:flex;gap:6px; }
+    .home .toplinks a { display:grid;place-items:center;min-width:58px;min-height:44px;border:2px solid var(--navy);border-radius:12px;padding:4px 8px;background:#fffdf3;font-size:12px;font-weight:900; }
+    .page-title { position:relative;z-index:2;margin:22px 0 5px;font-size:28px;line-height:1.14;letter-spacing:-.04em;font-weight:1000; }
+    .page-sub { position:relative;z-index:2;font-size:13px;line-height:1.45;font-weight:800;color:#405072; }
+    .primary { display:grid;place-items:center;min-height:51px;border:3px solid var(--navy);border-radius:16px;background:linear-gradient(#23e9ef,#04b9d1);box-shadow:0 5px 0 #00718c,0 7px 0 var(--navy);color:white;font-size:21px;font-weight:1000;text-shadow:1px 2px 0 var(--navy); }
+    .secondary { display:grid;place-items:center;min-height:44px;font-size:14px;font-weight:900;color:#294877;border:2px solid var(--navy);border-radius:12px;background:#fffdf4; }
+    .sheet { border:2px solid var(--navy);border-radius:16px;background:#fffefa;box-shadow:0 4px 0 #d4cfb5; }
+    .help-list { position:relative;z-index:2;margin-top:21px;display:grid;gap:10px; }
+    .help-step { display:flex;gap:10px;padding:11px 12px;background:#fffefa;border:2px solid var(--navy);border-radius:14px;font-size:14px;line-height:1.4;font-weight:850; }
+    .help-step b { flex:none;display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:var(--yellow);border:2px solid var(--navy); }
+    .help .primary,.settings .primary { position:absolute;left:17px;right:17px;bottom:26px; }
+    .toggle-list { position:relative;z-index:2;margin-top:27px;display:grid;gap:13px; }
+    .toggle-row { display:flex;justify-content:space-between;align-items:center;padding:17px 14px;background:white;border:2px solid var(--navy);border-radius:15px; }
+    .toggle-row strong { font-size:18px; }
+    .toggle-row small { display:block;margin-top:3px;color:#65718b;font-size:12px;font-weight:800; }
+    .switch { width:47px;height:27px;border:2px solid var(--navy);border-radius:20px;background:#2ecfbd;padding:2px;display:flex;justify-content:flex-end; }
+    .switch i { width:19px;height:19px;border-radius:50%;background:white;box-shadow:0 1px 2px #0005; }
+    .settings-note { margin-top:16px;font-size:12px;line-height:1.5;color:#596581; }
+    .upgrade .context { margin-top:15px;display:flex;justify-content:space-between;gap:6px;padding:8px 10px;background:#fffef9;border:2px solid var(--navy);border-radius:12px;font-size:13px;font-weight:900; }
+    .upgrade .context b { font-size:16px; }
+    .upgrade .cards { display:grid;gap:9px;margin-top:17px; }
+    .upgrade-card { position:relative;display:grid;grid-template-columns:49px 1fr;gap:9px;min-height:91px;padding:12px 11px;border:3px solid var(--navy);border-radius:16px;background:white;box-shadow:0 4px 0 #bbc4d0; }
+    .upgrade-card .icon { width:42px;height:42px;display:grid;place-items:center;border:2px solid var(--navy);border-radius:13px;background:#fff0a3;font-size:28px;font-weight:1000; }
+    .upgrade-card.hp .icon { background:#ffd1de;color:#d93162; }
+    .upgrade-card.time .icon { background:#d7f8fb;color:#087ca2; }
+    .upgrade-card.progress .icon { background:#e6dcff;color:#7845be; }
+    .upgrade-card h2 { margin:1px 0 4px;font-size:17px;line-height:1.2; }
+    .upgrade-card p { margin:0;font-size:13px;font-weight:850;line-height:1.4; }
+    .upgrade-card.selected { background:#f3fff5;border-color:#189558;box-shadow:0 4px 0 #137345; }
+    .upgrade-card.disabled { opacity:.42; }
+    .upgrade .card-note { margin-top:14px;text-align:center;font-size:12px;font-weight:800;color:#4e5a75; }
+    .upgrade .selected-note { margin-top:17px;padding:9px;border-radius:12px;background:#e8ffed;color:#166c44;text-align:center;font-size:14px;font-weight:900; }
+    .result .reason { position:relative;z-index:2;margin:12px auto 0;width:max-content;padding:7px 18px;background:#fff2f3;border:3px solid var(--navy);border-radius:30px;color:#bd233a;font-size:26px;font-weight:1000;transform:rotate(-2deg); }
+    .result .pair { position:relative;z-index:2;display:block;width:250px;height:196px;object-fit:contain;margin:-4px auto -4px; }
+    .result .score-sheet { position:relative;z-index:2;padding:10px 10px 8px;text-align:center; }
+    .result .score-sheet .big { font-size:30px;line-height:1.2;font-weight:1000; }
+    .result .score-sheet .meta { font-size:13px;font-weight:900; }
+    .result .recap { position:relative;z-index:2;margin-top:9px;padding:8px 10px;font-size:13px;line-height:1.45;font-weight:850; }
+    .result .recap b { color:#c9263e; }
+    .result .recap .row + .row { border-top:1px dashed #d6cba5;margin-top:5px;padding-top:5px; }
+    .result .actions { position:relative;z-index:2;margin-top:9px; }
+    .result .actions .primary { min-height:48px;font-size:20px; }
+    .result .actions .secondary { min-height:44px;margin-top:7px;font-size:14px; }
+    .overlay-base { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.5); }
+    .overlay { position:absolute;inset:0;display:grid;place-items:center;padding:20px;background:#06163b7a; }
+    .modal { width:100%;padding:20px 15px;border:3px solid var(--navy);border-radius:20px;background:#fffdf2;text-align:center;box-shadow:0 8px 0 #00103288; }
+    .modal h1 { margin:0 0 7px;font-size:24px; }
+    .modal p { margin:0 0 17px;font-size:14px;font-weight:850;line-height:1.5; }
+    .modal .primary { min-height:48px;font-size:18px; }
+    .loading .spinner { width:52px;height:52px;margin:125px auto 0;border:7px solid #fff8;border-top-color:var(--navy);border-radius:50%; }
+    .loading .load-text { margin-top:26px;text-align:center;font-size:21px;font-weight:1000; }
+    .loading .logo { font-size:33px;margin-top:20px; }
+    .loading .modal { margin-top:120px; }
+    .loading .modal .secondary { margin-top:8px; }
+    .state-board { width:1060px;min-height:790px;padding:28px 30px 35px;background:#fffaf0; }
+    .state-board h1 { margin:0;font-size:31px; }
+    .state-board .intro { margin:4px 0 20px;font-size:14px;font-weight:750; }
+    .state-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:14px; }
+    .state-card { min-height:178px;padding:14px;border:2px solid var(--navy);border-radius:16px;background:white; }
+    .state-card .id { display:inline-block;border-radius:7px;padding:2px 7px;background:#ffe668;font-size:12px;font-weight:1000; }
+    .state-card h2 { margin:8px 0 6px;font-size:17px; }
+    .state-card p { margin:4px 0;font-size:13px;line-height:1.5; }
+    .state-card .keyframe { display:inline-block;margin-top:7px;padding:6px 9px;border:2px solid var(--navy);border-radius:10px;background:#fff3c1;font-size:13px;font-weight:900; }
+    .state-card .keyframe.pink { background:#ffe5e9;color:#b7284b; }
+    .state-card .keyframe.purple { background:#e9dcff;color:#6241a9; }
+    .home[data-size="360"] .logo { margin-top:50px;font-size:45px; }
+    .home[data-size="360"] .mascot { left:12px;top:225px;width:335px;height:232px; }
+    .home[data-size="360"] .start { bottom:100px; }
+    .home[data-size="360"] .record { bottom:25px; }
+    .home[data-size="390"] .logo { margin-top:52px;font-size:54px; }
+    .home[data-size="390"] .tagline { margin-top:24px;font-size:17px; }
+    .home[data-size="390"] .mascot { left:8px;top:285px;width:374px;height:295px; }
+    .home[data-size="390"] .start { left:34px;right:34px;bottom:119px;height:75px;font-size:30px; }
+    .home[data-size="390"] .record { left:34px;right:34px;bottom:39px;padding:13px; }
+    .home[data-safe="46"] .toplinks { top:58px; }
+    .home[data-safe="46"] .logo { margin-top:95px;font-size:34px; }
+    .home[data-safe="46"] .tagline { margin-top:10px; }
+    .home[data-safe="46"] .mascot { top:230px;height:167px; }
+    .upgrade[data-size="360"] .cards { gap:13px;margin-top:30px; }
+    .upgrade[data-size="360"] .upgrade-card { min-height:101px; }
+    .upgrade[data-size="390"] .page-title { margin-top:50px;font-size:34px; }
+    .upgrade[data-size="390"] .context { margin-top:28px;padding:12px; }
+    .upgrade[data-size="390"] .cards { margin-top:65px;gap:21px; }
+    .upgrade[data-size="390"] .upgrade-card { min-height:116px;padding:18px;grid-template-columns:58px 1fr; }
+    .upgrade[data-size="390"] .upgrade-card .icon { width:51px;height:51px; }
+    .upgrade[data-size="390"] .card-note { margin-top:24px; }
+    .result[data-size="360"] .reason { margin-top:21px; }
+    .result[data-size="360"] .pair { width:282px;height:213px;margin:8px auto 3px; }
+    .result[data-size="360"] .score-sheet { padding:13px; }
+    .result[data-size="360"] .recap { margin-top:12px;padding:11px; }
+    .result[data-size="360"] .actions { position:absolute;left:18px;right:18px;bottom:30px; }
+    .result[data-size="390"] .reason { margin-top:36px;font-size:30px; }
+    .result[data-size="390"] .pair { width:333px;height:270px;margin:16px auto 9px; }
+    .result[data-size="390"] .score-sheet { padding:17px; }
+    .result[data-size="390"] .score-sheet .big { font-size:34px; }
+    .result[data-size="390"] .recap { margin-top:21px;padding:17px;font-size:15px; }
+    .result[data-size="390"] .actions { position:absolute;left:20px;right:20px;bottom:62px; }
+    .help[data-safe="46"],.settings[data-safe="46"],.upgrade[data-safe="46"] { padding-top:57px; }
+    .help[data-safe="46"] .page-title,.settings[data-safe="46"] .page-title { margin-top:11px; }
+    .help[data-safe="46"] .help-list { margin-top:12px;gap:6px; }
+    .help[data-safe="46"] .help-step { padding:7px 9px;font-size:13px;line-height:1.35; }
+    .settings[data-safe="46"] .toggle-list { margin-top:19px; }
+    .upgrade[data-safe="46"] .page-title { margin-top:9px;font-size:26px; }
+    .upgrade[data-safe="46"] .context { margin-top:7px;padding:6px 8px; }
+    .upgrade[data-safe="46"] .cards { margin-top:8px;gap:6px; }
+    .upgrade[data-safe="46"] .upgrade-card { min-height:77px;padding:7px 9px; }
+    .upgrade[data-safe="46"] .card-note { margin-top:8px; }
+    .result[data-safe="46"] .reason { margin-top:55px; }
+    .result[data-safe="46"] .pair { width:220px;height:150px;margin:-3px auto -4px; }
+    .result[data-safe="46"] .actions { margin-top:7px; }
+    .loading[data-safe="46"] .logo { margin-top:75px; }
+    .loading[data-safe="46"] .spinner { margin-top:90px; }
+    .loading[data-safe="46"] .modal { margin-top:77px; }
+    /* v15: restore the illustrated stage, titles and playful depth of the accepted v11 art. */
+    .screen:not(.cream) { background:#ffe62b url('sunny-stage-v15.png') center/cover no-repeat; }
+    .screen:not(.cream) .cloud { display:none; }
+    .home .title-art { position:absolute;z-index:3;left:7px;top:65px;width:306px;height:auto;filter:drop-shadow(0 5px 0 #06204a55); }
+    .home .tagline { position:absolute;z-index:3;top:182px;left:50%;transform:translateX(-50%) rotate(-2deg);margin:0;white-space:nowrap;background:#fffefa;border:3px solid var(--navy);box-shadow:0 3px 0 #d49b00;font-size:13px; }
+    .home .mascot { left:-20px;top:200px;height:225px;width:360px;filter:drop-shadow(0 8px 0 #d18e12); }
+    .home .start,.result .primary { background:linear-gradient(180deg,#b3ffff 0%,#35ebec 14%,#00d4df 48%,#00a9d2 100%);box-shadow:0 7px 0 #027799,0 10px 0 var(--navy),inset 0 3px 0 #ffffffb0; }
+    .home .start::after { content:"";position:absolute;inset:8px 15px auto;height:12px;border-radius:60%;background:linear-gradient(180deg,#fff9,transparent);pointer-events:none; }
+    .home .record { border:3px solid #f9df70;background:#fffdfa;box-shadow:0 3px 0 #be9d19; }
+    .home[data-size="360"] .title-art { left:10px;top:72px;width:340px; }
+    .home[data-size="360"] .tagline { top:210px;font-size:14px; }
+    .home[data-size="360"] .mascot { top:220px;height:250px;left:-8px;width:376px; }
+    .home[data-size="390"] .title-art { left:9px;top:83px;width:372px; }
+    .home[data-size="390"] .tagline { top:230px;font-size:16px;padding:8px 18px; }
+    .home[data-size="390"] .mascot { top:315px;height:280px;left:-15px;width:420px; }
+    .home[data-safe="46"] .title-art { left:14px;top:109px;width:292px; }
+    .home[data-safe="46"] .tagline { top:222px;font-size:12px; }
+    .home[data-safe="46"] .mascot { left:-12px;top:245px;width:344px;height:174px; }
+    .result .result-art { position:absolute;z-index:3;left:17px;top:9px;width:286px;height:auto;filter:drop-shadow(0 4px 0 #06184050); }
+    .result .reason { position:absolute;top:109px;left:50%;transform:translateX(-50%) rotate(-3deg);margin:0;padding:5px 15px;background:linear-gradient(#fff,#ffe4e9);box-shadow:0 4px 0 #c67823;font-size:22px;white-space:nowrap; }
+    .result .pair { position:absolute;top:153px;left:50%;transform:translateX(-50%);margin:0;width:225px;height:139px;filter:drop-shadow(0 5px 0 #d89a16); }
+    .result .score-sheet { position:absolute;left:14px;right:14px;top:294px;padding:7px 8px;border-width:3px;box-shadow:0 4px 0 #d1a919; }
+    .result .recap { position:absolute;left:14px;right:14px;top:369px;margin:0;padding:7px 9px;border-width:3px;box-shadow:0 4px 0 #d1a919; }
+    .result .actions { position:absolute;left:14px;right:14px;bottom:20px;margin:0; }
+    .result[data-size="360"] .result-art { left:13px;top:21px;width:334px; }
+    .result[data-size="360"] .reason { top:145px;margin:0;font-size:24px; }
+    .result[data-size="360"] .pair { top:192px;width:255px;height:160px; }
+    .result[data-size="360"] .score-sheet { top:357px; }
+    .result[data-size="360"] .recap { top:440px; }
+    .result[data-size="360"] .actions { bottom:15px; }
+    .result[data-size="390"] .result-art { left:12px;top:43px;width:366px; }
+    .result[data-size="390"] .reason { top:181px;margin:0;font-size:29px; }
+    .result[data-size="390"] .pair { top:243px;width:324px;height:237px; }
+    .result[data-size="390"] .score-sheet { left:18px;right:18px;top:486px;padding:14px; }
+    .result[data-size="390"] .recap { left:18px;right:18px;top:584px;padding:12px 14px; }
+    .result[data-size="390"] .actions { left:19px;right:19px;bottom:37px; }
+    .result[data-safe="46"] .result-art { left:23px;top:53px;width:274px; }
+    .result[data-safe="46"] .reason { top:153px;margin:0;font-size:21px; }
+    .result[data-safe="46"] .pair { top:197px;width:193px;height:98px; }
+    .result[data-safe="46"] .score-sheet { top:298px; }
+    .result[data-safe="46"] .recap { top:371px; }
+    .upgrade { background:radial-gradient(circle at 92% 4%,#fff4b0 0 14%,transparent 34%),linear-gradient(165deg,#fffef9 0%,#fff7dc 68%,#fff3c7); }
+    .upgrade .nav-chip { background:linear-gradient(#fff5a6,#ffe44b);box-shadow:0 3px 0 #b39920; }
+    .upgrade .page-title { color:#092454;text-shadow:2px 2px 0 white,-2px 2px 0 white,0 4px 0 #ffe25c; }
+    .upgrade .upgrade-card { background:linear-gradient(180deg,#fff 0%,#fffdf3 100%);box-shadow:0 5px 0 #102456,inset 0 3px 0 #ffffff; }
+    .upgrade .upgrade-card::after { content:"";position:absolute;inset:5px 7px auto;height:9px;border-radius:50%;background:linear-gradient(#ffffffa6,transparent);pointer-events:none; }
+    .upgrade .upgrade-card .icon { box-shadow:0 3px 0 #15234c; }
+  </style>
+</head>
+<body><main id="app"></main>
+<script>
+  const params=new URLSearchParams(location.search),page=params.get('page')||'home',size=params.get('size')||'320';
+  const dims={'320':[320,568],'360':[360,640],'390':[390,844]};
+  const [w,h]=dims[size]||dims['320'];
+  document.documentElement.style.setProperty('--w',w+'px');document.documentElement.style.setProperty('--h',h+'px');
+  const app=document.getElementById('app');
+  const nav=(title='')=>`<div class="nav"><a href="?page=home&size=${size}" class="back">‹ 返回</a>${title?`<span class="nav-chip">${title}</span>`:''}</div>`;
+  const cloud='<span class="cloud a"></span><span class="cloud b"></span>';
+  const cards={
+    chain:['chain','↗','连击更从容','连击接续时间 +0.5 秒'],
+    hp:['hp','♥','体力更充足','体力上限 +24，当前体力 +24'],
+    time:['time','◷','多一点时间','每轮时间上限 +1.2 秒'],
+    progress:['progress','➜','挑战再加速','每次清轮的挑战进度额外 +4']
+  };
+  const card=(key,klass='')=>{const c=cards[key];return `<article class="upgrade-card ${c[0]} ${klass}"><div class="icon">${c[1]}</div><div><h2>${c[2]}</h2><p>${c[3]}</p></div></article>`};
+  if(page==='home'||page==='home-first') app.innerHTML=`<section class="screen home">${cloud}<div class="toplinks"><a href="?page=help&size=${size}">怎么玩</a><a href="?page=settings&size=${size}">设置</a></div><img class="title-art" src="title-home-v15.png" alt="手指等等我"><div class="tagline">读懂提示，点亮安全按钮</div><img class="mascot" src="brain-glove-running-pair-v15.png" alt="大脑追着手指奔跑"><a class="start" href="gameplay-v15.html?size=${size}&grid=2x2">开始游戏</a><div class="record">${page==='home-first'?'第一次挑战，从这里出发！':'★ 最高纪录 <b>15 关 · 900 分</b>'}</div></section>`;
+  else if(page==='help') app.innerHTML=`<section class="screen cream help">${nav()}<h1 class="page-title">怎么玩？</h1><div class="page-sub">读规则、找安全按钮，脑子和手指一起冲！</div><div class="help-list"><div class="help-step"><b>1</b><span>先读完整的“本轮别按”，点完其余按钮。</span></div><div class="help-step"><b>2</b><span>点错会扣体力；体力耗尽或时间到，这一局结束。</span></div><div class="help-step"><b>3</b><span>点对加分；每轮清完进下一关，并推进挑战进度。</span></div><div class="help-step"><b>4</b><span>挑战进度满格时三选一升级；连击有接续时限。</span></div></div><a class="primary" href="?page=home&size=${size}">明白了</a></section>`;
+  else if(page==='settings') app.innerHTML=`<section class="screen cream settings">${nav()}<h1 class="page-title">设置</h1><div class="page-sub">小小调整，不打乱本局节奏。</div><div class="toggle-list"><div class="toggle-row"><div><strong>音效</strong><small>按钮和结果提示声</small></div><span class="switch"><i></i></span></div><div class="toggle-row"><div><strong>误按震动</strong><small>设备支持时生效</small></div><span class="switch"><i></i></span></div></div><p class="settings-note">设置保存在本机。</p><a class="primary" href="?page=home&size=${size}">完成</a></section>`;
+  else if(page==='upgrade'||page==='upgrade-alt'||page==='upgrade-selected') {const keys=page==='upgrade-alt'?['chain','hp','progress']:['chain','hp','time']; const selected=page==='upgrade-selected';app.innerHTML=`<section class="screen cream upgrade"><div class="nav"><span class="nav-chip">选一个升级</span></div><h1 class="page-title">挑战完成！</h1><div class="page-sub">挑战进度 500/500 · 选一个升级，继续下一关</div><div class="context"><span>本局 <b>1040 分</b></span><span>体力 <b>82/100</b></span></div><div class="cards">${keys.map((key,i)=>card(key,selected?(i===0?'selected':'disabled'):'' )).join('')}</div>${selected?'<div class="selected-note">已选择：连击接续时间 +0.5 秒<br>即将开始下一关</div>':'<div class="card-note">点整张卡，选择后立即生效</div>'}</section>`;}
+  else if(page==='result-health'||page==='result-time') {const time=page==='result-time';app.innerHTML=`<section class="screen result">${cloud}<img class="result-art" src="title-result-v15.png" alt="这次到这里"><div class="reason">${time?'时间到啦':'体力耗尽'}</div><img class="pair" src="../brain-glove-b-caring-pair-thin-rim.png" alt="大脑与手指互相照应"><div class="sheet score-sheet"><div class="big">第 ${time?'16':'12'} 关 · ${time?'920':'690'} 分</div><div class="meta">${time?'本局刷新最高分':'最高纪录 15 关 · 900 分'}</div></div><div class="sheet recap"><div class="row">当时别按：<b>${time?'颜色为蓝色或数字为奇数':'颜色为红色且数字为奇数'}</b></div>${time?'':'<div class="row">这次误按：<b>红色三角形 03</b></div>'}</div><div class="actions"><a class="primary" href="gameplay-v15.html?size=${size}&grid=2x2">再来一局</a><a class="secondary" href="?page=home&size=${size}">返回首页</a></div></section>`;}
+  else if(page==='resume') app.innerHTML=`<section class="screen"><img class="overlay-base" src="gameplay-v15-320x568.png" alt="原局内画面"><div class="overlay"><div class="modal"><h1>欢迎回来</h1><p>第 16 关还在等你。<br>规则、体力与剩余时间保持原样。</p><a class="primary" href="gameplay-v15.html?size=320&grid=3x3">继续这一局</a></div></div></section>`;
+  else if(page==='loading'||page==='resource-error') {const error=page==='resource-error';app.innerHTML=`<section class="screen loading">${cloud}<h1 class="logo">手指<br><span>等等我</span></h1>${error?'<div class="modal"><h1>部分画面没准备好</h1><p>可以重试；若只是角色图片失败，可用简化画面继续游戏。</p><a class="primary" href="?page=loading">重试加载</a><a class="secondary" href="?page=home">简化画面继续</a></div>':'<div class="spinner"></div><div class="load-text">正在准备画面…</div>'}</section>`;}
+  else if(page==='states') app.innerHTML=`<section class="state-board"><h1>v15 · 状态与过渡关键帧</h1><p class="intro">S1–S9 复用四种主模板；仅在真实事件发生后显示反馈，不增加每关必经的确认页。</p><div class="state-grid"><article class="state-card"><span class="id">S1 / S2</span><h2>准备资源与失败重试</h2><p>复用首页黄底。加载只写“正在准备画面”；可恢复失败才显示“重试加载”。非关键角色失败可用几何回退。</p><span class="keyframe">准备中 → 首页</span></article><article class="state-card"><span class="id">S3</span><h2>正确点击／非致命误按</h2><p>按钮落下后维持凹陷。误按局部短显“体力 −18”；不遮分数与规则，不把未按键染成答案。</p><span class="keyframe pink">体力 82 → 64</span></article><article class="state-card"><span class="id">S4</span><h2>普通清轮</h2><p>显示“本轮完成 · 挑战进度 +22”。进度更新后照常进入下一关；每次正确点击只加分。</p><span class="keyframe purple">180 → 202 / 500</span></article><article class="state-card"><span class="id">S5</span><h2>挑战进度满</h2><p>清轮后进度到目标，短显“挑战完成”；紧接 A3 三选一升级，不另设领取或胜利页。</p><span class="keyframe purple">500 / 500 → 升级</span></article><article class="state-card"><span class="id">S6</span><h2>升级生效后</h2><p>短显所选的真实效果，再开始下一关。新的挑战目标从 0 起，本局分数与成长保留。</p><span class="keyframe">连击接续 +0.5 秒</span></article><article class="state-card"><span class="id">S7</span><h2>移动／干扰</h2><p>只轻微移动棋盘按钮；绘制位置与命中位置相同。规则、颜色、图形和数字始终清楚。</p><span class="keyframe">同一按钮矩形</span></article><article class="state-card"><span class="id">S8 / B3</span><h2>从后台返回</h2><p>局内计时态采用“继续这一局”轻遮罩；升级、结算、首页返回原页。需新增持续暂停原因。</p><span class="keyframe">继续这一局</span></article><article class="state-card"><span class="id">S9</span><h2>最高纪录保存失败</h2><p>首页或结算非阻塞短提示：“本次纪录暂未保存”。不抹掉本局得分，不变成游戏失败。</p><span class="keyframe pink">纪录暂未保存</span></article><article class="state-card"><span class="id">C 类</span><h2>漫画／宣传候选</h2><p>沿用 v11 两格故事气质，可用于宣传或未来短过渡；当前每局不必看，不加分享领奖入口。</p><span class="keyframe">宣传候选</span></article></div></section>`;
+  const screen=app.querySelector('.screen');
+  if(screen) {screen.dataset.size=size;screen.dataset.safe=params.get('safe')||'0';}
+</script>
+</body></html>

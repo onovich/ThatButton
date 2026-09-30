@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>手指等等我 · 最终原画陈列</title>
+  <style>
+    :root { color-scheme:light; --navy:#071944; --yellow:#ffe343; --paper:#fffdf4; --cyan:#00cbdc; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; color:var(--navy); background:#fff8df; font-family:"Microsoft YaHei","PingFang SC",sans-serif; }
+    a { color:inherit; }
+    .hero { padding:34px max(18px,calc((100vw - 1320px)/2)); background:var(--yellow); border-bottom:5px solid var(--navy); }
+    h1 { margin:0; font-size:clamp(28px,4vw,46px); line-height:1.2; letter-spacing:.02em; }
+    .hero p { margin:12px 0 18px; max-width:850px; font-weight:700; line-height:1.7; }
+    nav { display:flex; flex-wrap:wrap; gap:9px; }
+    nav a { padding:8px 14px; text-decoration:none; background:var(--paper); border:2px solid var(--navy); border-radius:999px; font-weight:900; }
+    main { max-width:1360px; margin:auto; padding:26px 18px 70px; }
+    section { margin:0 0 26px; padding:22px; background:#fffef9; border:3px solid var(--navy); border-radius:22px; box-shadow:0 7px 0 #d9aa14; }
+    h2 { margin:0 0 6px; font-size:27px; }
+    section > p { margin:0 0 17px; line-height:1.6; }
+    h3 { margin:20px 0 10px; font-size:17px; }
+    .screens { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; }
+    figure { margin:0; }
+    .screen { width:min(390px,100%); }
+    .screen.small { width:min(320px,100%); }
+    figcaption { margin:0 0 8px; font-weight:900; }
+    .screen img { display:block; width:100%; height:auto; border:3px solid var(--navy); border-radius:12px; box-shadow:0 8px 18px #07194426; }
+    .assets { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+    .asset { min-width:0; }
+    .asset a { display:flex; align-items:center; justify-content:center; height:105px; padding:10px; border:2px solid #c6cedc; border-radius:12px; background-color:white; background-image:linear-gradient(45deg,#e8edf5 25%,transparent 25%),linear-gradient(-45deg,#e8edf5 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e8edf5 75%),linear-gradient(-45deg,transparent 75%,#e8edf5 75%); background-size:20px 20px; background-position:0 0,0 10px,10px -10px,-10px 0; }
+    .asset img { max-width:100%; max-height:100%; object-fit:contain; }
+    .asset figcaption { margin:6px 0 0; font-size:13px; line-height:1.35; }
+    details { margin-top:20px; padding:12px 15px; border:2px dashed #9ba7bb; border-radius:12px; }
+    summary { cursor:pointer; font-weight:900; }
+    footer { max-width:1360px; margin:auto; padding:0 18px 35px; line-height:1.7; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>手指等等我 · 最终原画陈列</h1>
+    <p>按界面展示当前接入的定稿截图与独立美术素材。局内 READY、1 HIT! 和普通连击数字使用黄橙贴纸字形；达到 12 连击上限后，持续展示 MAX! 字标。角色沿用已验收的 v11 造型。</p>
+    <nav><a href="#home">封面</a><a href="#game">局内</a><a href="#upgrade">升级</a><a href="#result">结算</a><a href="#other">辅助界面</a></nav>
+  </div>
+  <main>
+    <section id="home">
+      <h2>封面</h2><p>奔跑搭档、标题和晴天场景。</p>
+      <div class="screens"><figure class="screen"><figcaption>最终接入画面 · 390 × 844</figcaption><a href="final-home.png"><img src="final-home.png" alt="封面最终画面"></a></figure></div>
+      <h3>本界面使用的原画</h3>
+      <div class="assets">
+        <figure class="asset"><a href="../../../runtime/title-home.png"><img src="../../../runtime/title-home.png" alt="封面标题"></a><figcaption>封面标题</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/running-pair.png"><img src="../../../runtime/running-pair.png" alt="奔跑搭档"></a><figcaption>奔跑搭档 · v11 造型</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/sunny-stage.jpg"><img src="../../../runtime/sunny-stage.jpg" alt="晴天场景"></a><figcaption>晴天场景</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="game">
+      <h2>局内</h2><p>顶部展示 READY、1 HIT!、普通连击和满连击持续状态。九宫格按钮和状态条由 Canvas 绘制，角色及字标使用下方透明原画。</p>
+      <div class="screens">
+        <figure class="screen"><figcaption>0 · READY</figcaption><a href="final-game-ready.png"><img src="final-game-ready.png" alt="局内 READY 最终画面"></a></figure>
+        <figure class="screen"><figcaption>1 · HIT!</figcaption><a href="final-game-hit.png"><img src="final-game-hit.png" alt="局内 1 HIT 最终画面"></a></figure>
+        <figure class="screen"><figcaption>3 · 艺术数字连击</figcaption><a href="final-game-combo-3.png"><img src="final-game-combo-3.png" alt="局内 3 连击最终画面"></a></figure>
+        <figure class="screen"><figcaption>11 · 艺术数字连击</figcaption><a href="final-game-combo-11.png"><img src="final-game-combo-11.png" alt="局内 11 连击最终画面"></a></figure>
+        <figure class="screen"><figcaption>达到上限 · MAX! 持续状态</figcaption><a href="final-game-combo.png"><img src="final-game-combo.png" alt="局内满连击持续状态"></a></figure>
+      </div>
+      <details><summary>查看 320 × 568 窄屏定稿</summary><div class="screens" style="margin-top:14px">
+        <figure class="screen small"><figcaption>READY</figcaption><a href="final-game-ready-small.png"><img src="final-game-ready-small.png" alt="窄屏 READY"></a></figure>
+        <figure class="screen small"><figcaption>1 HIT!</figcaption><a href="final-game-hit-small.png"><img src="final-game-hit-small.png" alt="窄屏 1 HIT"></a></figure>
+        <figure class="screen small"><figcaption>3 连击</figcaption><a href="final-game-combo-3-small.png"><img src="final-game-combo-3-small.png" alt="窄屏 3 连击"></a></figure>
+        <figure class="screen small"><figcaption>11 连击</figcaption><a href="final-game-combo-11-small.png"><img src="final-game-combo-11-small.png" alt="窄屏 11 连击"></a></figure>
+        <figure class="screen small"><figcaption>满连击持续状态</figcaption><a href="final-game-combo-small.png"><img src="final-game-combo-small.png" alt="窄屏满连击持续状态"></a></figure>
+      </div></details>
+      <h3>本界面使用的原画</h3>
+      <div class="assets">
+        <figure class="asset"><a href="../../../runtime/separated-pair.png"><img src="../../../runtime/separated-pair.png" alt="局内双角色"></a><figcaption>局内陪伴双角色 · v11 造型</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/gameplay-landscape.jpg"><img src="../../../runtime/gameplay-landscape.jpg" alt="局内风景"></a><figcaption>局内风景</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/ready-wordmark-v25.png"><img src="../../../runtime/ready-wordmark-v25.png" alt="READY 字标"></a><figcaption>READY · 定稿贴纸字标</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/hit-wordmark-v30.png"><img src="../../../runtime/hit-wordmark-v30.png" alt="1 HIT 字标"></a><figcaption>1 HIT! · 定稿贴纸字标</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/combo-wordmark-v30.png"><img src="../../../runtime/combo-wordmark-v30.png" alt="COMBO 字标"></a><figcaption>COMBO! · 定稿贴纸字标</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/combo-digits-v29.png"><img src="../../../runtime/combo-digits-v29.png" alt="连击艺术数字 0 到 9"></a><figcaption>连击艺术数字 · 0–9</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/max-wordmark-v30.png"><img src="../../../runtime/max-wordmark-v30.png" alt="MAX 字标"></a><figcaption>MAX! · 满连击字标</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="upgrade">
+      <h2>升级选择</h2><p>包含实际会出现的升级卡类型；气泡、角色、图标与背景均为当前接入的定稿素材。</p>
+      <div class="screens">
+        <figure class="screen"><figcaption>默认三选一</figcaption><a href="final-upgrade.png"><img src="final-upgrade.png" alt="升级选择最终画面"></a></figure>
+        <figure class="screen"><figcaption>含挑战进度加成的组合</figcaption><a href="final-upgrade-alternate.png"><img src="final-upgrade-alternate.png" alt="升级选择替代卡组最终画面"></a></figure>
+      </div>
+      <h3>本界面使用的原画</h3>
+      <div class="assets">
+        <figure class="asset"><a href="../../../runtime/title-upgrade-v22.png"><img src="../../../runtime/title-upgrade-v22.png" alt="升级页标题"></a><figcaption>升级页标题</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/upgrade-pair-v24.png"><img src="../../../runtime/upgrade-pair-v24.png" alt="升级页双角色"></a><figcaption>升级页双角色</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/upgrade-bubble-v25.png"><img src="../../../runtime/upgrade-bubble-v25.png" alt="升级页气泡"></a><figcaption>升级提示气泡</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/upgrade-background-v24.jpg"><img src="../../../runtime/upgrade-background-v24.jpg" alt="升级页背景"></a><figcaption>升级页背景</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/upgrade-rays-v24.png"><img src="../../../runtime/upgrade-rays-v24.png" alt="升级页放射装饰"></a><figcaption>放射装饰</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/upgrade-status-v23.png"><img src="../../../runtime/upgrade-status-v23.png" alt="升级页状态条"></a><figcaption>状态条饰面</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/upgrade-heart-v23.png"><img src="../../../runtime/upgrade-heart-v23.png" alt="升级页体力图标"></a><figcaption>体力图标</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/upgrade-card-chain-v23.png"><img src="../../../runtime/upgrade-card-chain-v23.png" alt="连击升级卡图标"></a><figcaption>连击升级卡</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/upgrade-card-hp-v23.png"><img src="../../../runtime/upgrade-card-hp-v23.png" alt="体力升级卡图标"></a><figcaption>体力升级卡</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/upgrade-card-time-v23.png"><img src="../../../runtime/upgrade-card-time-v23.png" alt="时间升级卡图标"></a><figcaption>时间升级卡</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/upgrade-card-progress-v23.png"><img src="../../../runtime/upgrade-card-progress-v23.png" alt="挑战进度升级卡图标"></a><figcaption>挑战进度升级卡</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="result">
+      <h2>结算</h2><p>两种结果共用已验收的扶头双角色造型。关号退为小标签，艺术字分数可按位数伸缩；皇冠纪录条、战报框和两枚按钮使用当前定稿样式。</p>
+      <div class="screens">
+        <figure class="screen"><figcaption>体力耗尽</figcaption><a href="final-result.png"><img src="final-result.png" alt="体力耗尽结算最终画面"></a></figure>
+        <figure class="screen"><figcaption>时间结束</figcaption><a href="final-result-timeout.png"><img src="final-result-timeout.png" alt="时间结束结算最终画面"></a></figure>
+      </div>
+      <details><summary>查看七位数高分排版</summary><div class="screens" style="margin-top:14px">
+        <figure class="screen"><figcaption>390 宽高分</figcaption><a href="final-result-high-score.png"><img src="final-result-high-score.png" alt="390 宽七位数高分结算"></a></figure>
+        <figure class="screen small"><figcaption>320 宽高分</figcaption><a href="final-result-high-score-small.png"><img src="final-result-high-score-small.png" alt="320 宽七位数高分结算"></a></figure>
+      </div></details>
+      <details><summary>查看 320 × 568 窄屏结算</summary><div class="screens" style="margin-top:14px">
+        <figure class="screen small"><figcaption>体力耗尽</figcaption><a href="final-result-small.png"><img src="final-result-small.png" alt="窄屏体力耗尽结算"></a></figure>
+        <figure class="screen small"><figcaption>时间结束</figcaption><a href="final-result-timeout-small.png"><img src="final-result-timeout-small.png" alt="窄屏时间结束结算"></a></figure>
+      </div></details>
+      <details><summary>查看 492 × 1007 长屏结算</summary><div class="screens" style="margin-top:14px">
+        <figure class="screen"><figcaption>时间结束</figcaption><a href="final-result-timeout-tall.png"><img src="final-result-timeout-tall.png" alt="长屏时间结束结算"></a></figure>
+      </div></details>
+      <h3>本界面使用的原画</h3>
+      <div class="assets">
+        <figure class="asset"><a href="../../../runtime/title-result.png"><img src="../../../runtime/title-result.png" alt="结算标题"></a><figcaption>结算标题</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/caring-pair.png"><img src="../../../runtime/caring-pair.png" alt="结算扶头双角色"></a><figcaption>扶头双角色 · v11 造型</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/sunny-stage.jpg"><img src="../../../runtime/sunny-stage.jpg" alt="结算晴天场景"></a><figcaption>晴天场景</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/result-score-digits-v32.png"><img src="../../../runtime/result-score-digits-v32.png" alt="结算分数数字图集"></a><figcaption>分数艺术字 · 0–9</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/result-score-fen-v32.png"><img src="../../../runtime/result-score-fen-v32.png" alt="结算分字艺术字"></a><figcaption>分数艺术字 · 分</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/result-crown-v32.png"><img src="../../../runtime/result-crown-v32.png" alt="最高纪录皇冠"></a><figcaption>最高纪录皇冠</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/result-burst-v32.png"><img src="../../../runtime/result-burst-v32.png" alt="分数左侧黄色装饰"></a><figcaption>分数左侧装饰</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/result-burst-right-v32.png"><img src="../../../runtime/result-burst-right-v32.png" alt="分数右侧黄色装饰"></a><figcaption>分数右侧装饰</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/result-button-retry-v32.png"><img src="../../../runtime/result-button-retry-v32.png" alt="再来一局按钮"></a><figcaption>再来一局按钮 · 含文字</figcaption></figure>
+        <figure class="asset"><a href="../../../runtime/result-button-home-v32.png"><img src="../../../runtime/result-button-home-v32.png" alt="返回首页按钮"></a><figcaption>返回首页按钮 · 含文字</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="other">
+      <h2>辅助界面</h2><p>这些界面使用同一套 Canvas 组件与定稿色彩，没有单独的角色原画。</p>
+      <div class="screens">
+        <figure class="screen"><figcaption>玩法说明</figcaption><a href="final-help.png"><img src="final-help.png" alt="玩法说明最终画面"></a></figure>
+        <figure class="screen"><figcaption>设置</figcaption><a href="final-settings.png"><img src="final-settings.png" alt="设置最终画面"></a></figure>
+        <figure class="screen"><figcaption>继续游戏</figcaption><a href="final-resume.png"><img src="final-resume.png" alt="继续游戏最终画面"></a></figure>
+        <figure class="screen"><figcaption>素材加载异常提示</figcaption><a href="final-resource-error.png"><img src="final-resource-error.png" alt="素材加载异常提示最终画面"></a></figure>
+      </div>
+    </section>
+  </main>
+  <footer>截图由当前小游戏 Canvas 渲染器导出。角色造型依据 <a href="../../2026-09-29/CHARACTER_BASELINE.md">v11 基准</a>；页面只陈列当前使用的版本素材。</footer>
+</body>
+</html>

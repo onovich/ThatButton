@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>手指等等我 · 四方向原画对比</title>
+  <style>
+    :root {
+      --ink: #111b44;
+      --muted: #5e6783;
+      --sun: #ffe249;
+      --teal: #28d4cd;
+      --paper: #fffef7;
+      --line: #dce1e8;
+      --shadow: 0 16px 42px rgba(17, 27, 68, .11);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: #f5f4eb; font: 16px/1.55 system-ui, -apple-system, "Microsoft YaHei", sans-serif; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; }
+    a { color: inherit; }
+    .hero { background: var(--sun); border-bottom: 3px solid var(--ink); }
+    .hero-inner, main, footer { width: min(100% - 32px, 1560px); margin-inline: auto; }
+    .hero-inner { padding: 44px 0 34px; }
+    .eyebrow { margin: 0 0 10px; font-size: 13px; font-weight: 900; letter-spacing: .17em; }
+    h1 { max-width: 900px; margin: 0; font-size: clamp(30px, 4vw, 56px); line-height: 1.14; letter-spacing: -.04em; }
+    .intro { max-width: 830px; margin: 18px 0 0; font-size: 17px; }
+    .hero-note { margin: 16px 0 0; color: #354067; font-size: 14px; }
+    .hero-note a { text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    main { padding: 28px 0 46px; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 0 0 14px; }
+    h2 { margin: 0; font-size: 21px; }
+    .section-sub { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    .score-wrap { overflow-x: auto; background: white; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 5px 20px rgba(17, 27, 68, .04); }
+    table { width: 100%; min-width: 760px; border-collapse: collapse; text-align: center; font-size: 14px; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid #edf0f3; white-space: nowrap; }
+    tr:last-child td { border-bottom: 0; }
+    th { background: #f8f9f6; font-weight: 700; }
+    th:first-child, td:first-child { padding-left: 19px; text-align: left; }
+    td:first-child { font-weight: 800; }
+    td:nth-child(7) { font-size: 18px; font-weight: 900; }
+    .recommend { display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 6px; background: var(--sun); font-size: 11px; vertical-align: middle; }
+    .review-note { margin: 8px 3px 30px; color: var(--muted); font-size: 13px; }
+    .view-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 24px 0 16px; }
+    .view-bar h2 { margin-right: 12px; }
+    .view-buttons { display: flex; flex-wrap: wrap; gap: 7px; padding: 5px; background: white; border: 1px solid var(--line); border-radius: 13px; }
+    .view-buttons button { padding: 8px 13px; border: 0; border-radius: 9px; background: transparent; color: var(--ink); cursor: pointer; font-size: 14px; font-weight: 750; }
+    .view-buttons button[aria-pressed="true"] { background: var(--ink); color: white; }
+    .view-buttons button:focus-visible, .image-button:focus-visible, .open-original:focus-visible, .close:focus-visible { outline: 3px solid #008d9d; outline-offset: 3px; }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+    .card { min-width: 0; overflow: hidden; background: white; border: 2px solid var(--ink); border-radius: 20px; box-shadow: var(--shadow); }
+    .card[data-id="a"] { border-top: 8px solid #ffd13d; }
+    .card[data-id="b"] { border-top: 8px solid #b79b6f; }
+    .card[data-id="c"] { border-top: 8px solid #29beb8; }
+    .card[data-id="d"] { border-top: 8px solid #ef6278; }
+    .card-head { display: flex; align-items: start; justify-content: space-between; gap: 12px; padding: 17px 20px 12px; }
+    .card-title { display: flex; gap: 11px; align-items: center; }
+    .letter { display: grid; place-items: center; width: 38px; height: 38px; flex: none; border-radius: 11px; background: var(--ink); color: white; font-size: 20px; font-weight: 900; }
+    h3 { margin: 0; font-size: 19px; line-height: 1.25; }
+    .card-kicker { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+    .score { flex: none; padding: 4px 10px; border-radius: 10px; background: #f2f4f5; font-size: 21px; font-weight: 900; }
+    .score small { font-size: 11px; font-weight: 600; }
+    .image-button { display: block; width: calc(100% - 24px); margin: 0 12px; padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #fff9d0; cursor: zoom-in; }
+    .art { display: block; width: 100%; aspect-ratio: 1.5; overflow: hidden; }
+    .art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+    body[data-view="home"] .art,
+    body[data-view="game"] .art,
+    body[data-view="end"] .art { aspect-ratio: .5; }
+    body[data-view="home"] .art img { object-position: left center; }
+    body[data-view="game"] .art img { object-position: center center; }
+    body[data-view="end"] .art img { object-position: right center; }
+    body[data-view="home"] .cards,
+    body[data-view="game"] .cards,
+    body[data-view="end"] .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .image-hint { margin: 7px 15px 0; color: var(--muted); font-size: 12px; }
+    .card-body { padding: 11px 20px 19px; }
+    .card-body p { margin: 7px 0; font-size: 14px; }
+    .card-body strong { color: var(--ink); }
+    .card-links { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; }
+    .open-original { font-weight: 750; text-underline-offset: 3px; }
+    .cost { color: var(--muted); }
+    .conclusion { margin-top: 28px; padding: 20px 24px; border-left: 6px solid var(--teal); border-radius: 8px 16px 16px 8px; background: white; }
+    .conclusion h2 { margin-bottom: 5px; }
+    .conclusion p { max-width: 1050px; margin: 0; }
+    footer { padding: 0 0 28px; color: var(--muted); font-size: 13px; }
+    dialog { width: min(96vw, 1800px); max-height: 96vh; padding: 15px; border: 2px solid var(--ink); border-radius: 16px; box-shadow: 0 30px 90px rgba(0, 0, 0, .35); }
+    dialog::backdrop { background: rgba(8, 15, 39, .82); }
+    .dialog-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 0 3px 12px; }
+    .dialog-head h2 { font-size: 18px; }
+    .close { border: 0; border-radius: 8px; background: var(--ink); color: white; padding: 7px 13px; cursor: pointer; }
+    dialog img { display: block; max-width: 100%; max-height: calc(96vh - 82px); margin: auto; object-fit: contain; }
+    @media (max-width: 1180px) {
+      body[data-view="home"] .cards,
+      body[data-view="game"] .cards,
+      body[data-view="end"] .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 670px) {
+      .hero-inner, main, footer { width: min(100% - 22px, 1560px); }
+      .hero-inner { padding: 30px 0 28px; }
+      .intro { font-size: 15px; }
+      .cards, body[data-view="home"] .cards,
+      body[data-view="game"] .cards,
+      body[data-view="end"] .cards { grid-template-columns: 1fr; gap: 16px; }
+      .card-head { padding: 15px; }
+      .card-body { padding: 10px 15px 17px; }
+      .view-bar { align-items: start; }
+      .view-buttons { width: 100%; }
+      .view-buttons button { flex: 1 1 auto; padding-inline: 8px; }
+      body[data-view="home"] .art,
+      body[data-view="game"] .art,
+      body[data-view="end"] .art { aspect-ratio: .7; }
+    }
+  </style>
+</head>
+<body data-view="all">
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">手指等等我 / ART DIRECTION COMPARISON</p>
+      <h1>四个美术方向，放在一起看。</h1>
+      <p class="intro">每稿都用同一组首页、3×3 局内和结算场景。切换下方视角，可专看四稿的同一画面；点图可放大完整原画。</p>
+      <p class="hero-note"><strong>新增融合版：</strong><a href="../2026-09-29/hybrid.html">查看 A 界面 + B 角色 + C 按钮，以及统一双腿的小手设计 ↗</a></p>
+      <p class="hero-note">评分与建议摘自本项目的 <a href="../../../../../docs/WECHAT_CONCEPT_REVIEW.md">四方向原画评审</a>。静态图用于比较视觉方向，界面文字和数值仍需前端按真实状态绘制。</p>
+    </div>
+  </header>
+
+  <main>
+    <section aria-labelledby="score-heading">
+      <div class="section-head">
+        <div><h2 id="score-heading">评分速览</h2><p class="section-sub">单项 10 分制；综合分 100 分制。A 是评审推荐，尚待最终定稿。</p></div>
+      </div>
+      <div class="score-wrap">
+        <table>
+          <thead><tr><th scope="col">方向</th><th scope="col">可用性</th><th scope="col">美观性</th><th scope="col">辨识度</th><th scope="col">图标契合</th><th scope="col">传播优势</th><th scope="col">综合</th><th scope="col">实现代价</th></tr></thead>
+          <tbody>
+            <tr><td>A · 赛璐璐 <span class="recommend">推荐基线</span></td><td>7.5</td><td>8.5</td><td>8.5</td><td>9.5</td><td>8.5</td><td>85</td><td>中低</td></tr>
+            <tr><td>B · 纸片贴纸</td><td>8.0</td><td>9.0</td><td>9.0</td><td>8.5</td><td>8.0</td><td>85</td><td>中</td></tr>
+            <tr><td>C · 软胶玩具</td><td>7.5</td><td>8.5</td><td>7.5</td><td>8.5</td><td>8.5</td><td>81</td><td>中高</td></tr>
+            <tr><td>D · 动态漫画</td><td>7.0</td><td>8.0</td><td>9.5</td><td>8.0</td><td>9.0</td><td>80</td><td>中</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="review-note">实现代价为评审估计，独立于评分；实际触控、动画和性能仍需可玩版本验证。</p>
+    </section>
+
+    <section aria-labelledby="gallery-heading">
+      <div class="view-bar">
+        <h2 id="gallery-heading">原画对比</h2>
+        <div class="view-buttons" role="group" aria-label="切换比较画面">
+          <button type="button" data-view-button="all" aria-pressed="true">三屏总览</button>
+          <button type="button" data-view-button="home" aria-pressed="false">首页</button>
+          <button type="button" data-view-button="game" aria-pressed="false">局内</button>
+          <button type="button" data-view-button="end" aria-pressed="false">结算</button>
+        </div>
+      </div>
+      <div class="cards">
+        <article class="card" data-id="a">
+          <div class="card-head"><div class="card-title"><span class="letter">A</span><div><h3>明亮赛璐璐搭档剧场</h3><p class="card-kicker">最接近已批准头像</p></div></div><div class="score">85<small> /100</small></div></div>
+          <button class="image-button" type="button" data-image="A-cel-stage.png" data-title="A · 明亮赛璐璐搭档剧场" aria-label="放大查看 A 方向完整原画"><span class="art"><img src="A-cel-stage.png" alt="A 方向：首页、复杂局内页和结算页三联原画" loading="eager"></span></button>
+          <p class="image-hint">点击图像查看完整原画</p>
+          <div class="card-body"><p><strong>值得保留：</strong>角色关系、明黄首页、浅色局内、深蓝粗轮廓；开始入口明确。</p><p><strong>落地要修：</strong>底部数值偏小；静态值不应画成进度条；黄色按钮数字需提高对比。</p><div class="card-links"><a class="open-original" href="A-cel-stage.png" target="_blank" rel="noopener">打开原图 ↗</a><span class="cost">实现代价：中低</span></div></div>
+        </article>
+
+        <article class="card" data-id="b">
+          <div class="card-head"><div class="card-title"><span class="letter">B</span><div><h3>纸片贴纸桌面</h3><p class="card-kicker">信息排布最整齐的整套备选</p></div></div><div class="score">85<small> /100</small></div></div>
+          <button class="image-button" type="button" data-image="B-paper-stage.png" data-title="B · 纸片贴纸桌面" aria-label="放大查看 B 方向完整原画"><span class="art"><img src="B-paper-stage.png" alt="B 方向：首页、复杂局内页和结算页三联原画" loading="eager"></span></button>
+          <p class="image-hint">点击图像查看完整原画</p>
+          <div class="card-body"><p><strong>值得保留：</strong>温暖纸艺、整齐状态栏、黄底深字；形象完整又便于读题。</p><p><strong>落地要修：</strong>补连击窗口；统一各形状按钮的命中范围；短屏缩小顶部角色。</p><div class="card-links"><a class="open-original" href="B-paper-stage.png" target="_blank" rel="noopener">打开原图 ↗</a><span class="cost">实现代价：中</span></div></div>
+        </article>
+
+        <article class="card" data-id="c">
+          <div class="card-head"><div class="card-title"><span class="letter">C</span><div><h3>软胶玩具与积木按钮</h3><p class="card-kicker">按钮触感最突出</p></div></div><div class="score">81<small> /100</small></div></div>
+          <button class="image-button" type="button" data-image="C-soft-toy.png" data-title="C · 软胶玩具与积木按钮" aria-label="放大查看 C 方向完整原画"><span class="art"><img src="C-soft-toy.png" alt="C 方向：首页、复杂局内页和结算页三联原画" loading="lazy"></span></button>
+          <p class="image-hint">点击图像查看完整原画</p>
+          <div class="card-body"><p><strong>值得保留：</strong>主按钮与九宫格的厚度、底座和压下结构；棋盘仍为正视角。</p><p><strong>落地要修：</strong>黄色按钮白字偏弱，底栏较挤；对手与反击图标需符合实际含义。</p><div class="card-links"><a class="open-original" href="C-soft-toy.png" target="_blank" rel="noopener">打开原图 ↗</a><span class="cost">实现代价：中高</span></div></div>
+        </article>
+
+        <article class="card" data-id="d">
+          <div class="card-head"><div class="card-title"><span class="letter">D</span><div><h3>动态漫画与节奏游艺</h3><p class="card-kicker">适合宣传与短暂演出</p></div></div><div class="score">80<small> /100</small></div></div>
+          <button class="image-button" type="button" data-image="D-comic-rhythm.png" data-title="D · 动态漫画与节奏游艺" aria-label="放大查看 D 方向完整原画"><span class="art"><img src="D-comic-rhythm.png" alt="D 方向：首页、复杂局内页和结算页三联原画" loading="lazy"></span></button>
+          <p class="image-hint">点击图像查看完整原画</p>
+          <div class="card-body"><p><strong>值得保留：</strong>分镜、速度线和角色对白有记忆点；局内棋盘依然稳定。</p><p><strong>落地要修：</strong>已完成按钮不能全灰；规则层级需提高；结算中的脑手关系应更互相照应。</p><div class="card-links"><a class="open-original" href="D-comic-rhythm.png" target="_blank" rel="noopener">打开原图 ↗</a><span class="cost">实现代价：中</span></div></div>
+        </article>
+      </div>
+    </section>
+
+    <aside class="conclusion" aria-labelledby="conclusion-heading">
+      <h2 id="conclusion-heading">当前评审建议</h2>
+      <p>以 <strong>A</strong> 为整款游戏的深化基线，参考 <strong>B</strong> 的信息排布与黄底深字，借鉴 <strong>C</strong> 的按钮按压结构；<strong>D</strong> 的漫画表现用于宣传或短暂过轮演出。下一步应先把信息完整的 3×3 局内页做成可适配的真实界面。</p>
+    </aside>
+  </main>
+
+  <footer>原画批次：2026-09-28 · 评审：2026-09-29 · 本页只罗列现有四稿，不修改原画。</footer>
+
+  <dialog id="zoom" aria-labelledby="zoom-title">
+    <div class="dialog-head"><h2 id="zoom-title"></h2><button type="button" class="close" id="close-zoom">关闭 ×</button></div>
+    <img id="zoom-image" src="" alt="所选方向的完整三屏原画">
+  </dialog>
+  <script>
+    const viewButtons = [...document.querySelectorAll('[data-view-button]')];
+    for (const button of viewButtons) {
+      button.addEventListener('click', () => {
+        document.body.dataset.view = button.dataset.viewButton;
+        for (const item of viewButtons) item.setAttribute('aria-pressed', String(item === button));
+      });
+    }
+    const zoom = document.getElementById('zoom');
+    const zoomImage = document.getElementById('zoom-image');
+    const zoomTitle = document.getElementById('zoom-title');
+    for (const button of document.querySelectorAll('[data-image]')) {
+      button.addEventListener('click', () => {
+        zoomImage.src = button.dataset.image;
+        zoomTitle.textContent = button.dataset.title;
+        zoom.showModal();
+      });
+    }
+    document.getElementById('close-zoom').addEventListener('click', () => zoom.close());
+    zoom.addEventListener('click', event => { if (event.target === zoom) zoom.close(); });
+  </script>
+</body>
+</html>

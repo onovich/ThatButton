@@ -1,0 +1,7 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>干扰定稿 · 正式渲染预览</title><style>body{background:#f4f1e7;color:#142347;font:16px/1.7 system-ui;margin:24px auto;max-width:1000px;padding:0 16px}h1{font-size:26px}.grid{display:flex;gap:30px;flex-wrap:wrap}iframe{width:320px;height:568px;border:2px solid #142347;border-radius:16px}section{max-width:400px}p{max-width:850px}a{color:#205b92}</style>
+<h1>两种干扰 · 已接入小游戏</h1><p>下面调用正式渲染器与正式干扰调度，自动循环演示。示例时间固定，方便观察；实际游戏按关卡触发一次。调参实验页的未确认改动不会同步到游戏。</p>
+<div class="grid"><section><h2>第 28 关：漂移后交换</h2><iframe title="正式交换演示" src="visual-preview.html?mode=game&w=320&h=568&safe=46&lab=1&livehazard=swap"></iframe><p>保留 85% 尺寸，漂移 1400ms、交换 640ms。换位结束保持新位置。重叠按钮均受点击保护，交换期间补偿时间与连击窗口。</p></section>
+<section><h2>第 36 关：局部切片 + RGB</h2><iframe title="正式切片演示" src="visual-preview.html?mode=game&w=320&h=568&safe=46&lab=1&livehazard=glitch"></iframe><p>提前选定 2 个按钮，持续 2200ms，10Hz，切片高度 0.1、触发概率 0.5、位移比例 0.05、RGB 分离 2.8px。按下后恢复清晰。</p></section></div>
+<p>19–27 关沿用轻微漂移；28/29 关学习交换；30–35 关穿插练习与普通关；36/37 关学习 glitch；38 关休息、39 关复习交换；40 关起按“交换 → 普通 → glitch → 普通”循环。两种新干扰不在同一关叠加。</p>
+<a href="hazard-lab.html">返回调参实验页</a></html>

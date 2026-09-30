@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>手指等等我 · v14 原画交付</title>
+  <style>
+    :root{--ink:#071944;--cream:#fffaf0;--yellow:#ffe33c;--cyan:#0ad4df}
+    *{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:system-ui,"Microsoft YaHei",sans-serif;line-height:1.5}a{color:#075f85}header{padding:36px max(24px,calc((100vw - 1180px)/2));background:linear-gradient(135deg,#fff464,#ffdc20);border-bottom:4px solid var(--ink)}h1{font-size:clamp(28px,4vw,46px);line-height:1.13;margin:0 0 10px}header p{max-width:850px;margin:0 0 15px;font-weight:700}.toplinks{display:flex;flex-wrap:wrap;gap:10px}.toplinks a{display:inline-block;padding:7px 11px;border:2px solid var(--ink);border-radius:10px;background:white;font-weight:900;text-decoration:none}main{max-width:1228px;margin:auto;padding:22px 24px 60px}h2{font-size:24px;margin:33px 0 8px}section>p{margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(208px,1fr));gap:15px}.card{display:block;border:2px solid var(--ink);border-radius:15px;background:white;overflow:hidden;text-decoration:none;color:inherit;box-shadow:0 4px 0 #d9d3be}.card img{width:100%;height:260px;object-fit:contain;object-position:top;background:#fff4ca;display:block}.card .caption{padding:10px 11px 12px;font-size:13px}.card strong{display:block;font-size:15px}.card small{color:#52607c}.wide{grid-column:span 2}.wide img{height:260px;object-fit:contain;background:white}.note{padding:15px 18px;border-left:5px solid #ffbd1e;background:#fff2c9;border-radius:0 10px 10px 0}.sources{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}.sources a{padding:8px 11px;border:2px solid var(--ink);border-radius:9px;background:white;font-weight:900;text-decoration:none}@media(max-width:520px){.wide{grid-column:span 1}header{padding:25px 19px}main{padding:12px 18px 50px}}
+  </style>
+</head>
+<body>
+<header><h1>手指等等我 · v14 原画交付</h1><p>按最新玩法决策重排：首页、局内、升级、结算四种主模板；补完整短屏、按键实体状态、必要反馈和已决定采纳的辅助体验。v11 角色基准保持原样。</p><nav class="toplinks"><a href="README.md">逐页状态与分层清单</a><a href="gameplay-v14.html?size=320&grid=3x3">局内可复查源</a><a href="flow-v14.html?page=home&size=320">页面可复查源</a><a href="../hybrid-ui-v11-unified-thin-rim.png">v11 角色基准</a></nav></header>
+<main>
+  <p class="note">标准 320×568／360×640／390×844 稿按“已扣除原生顶部安全区后的有效画布”绘制；标有 safe46 的 320×568 图是整窗顶部占用 46px 的额外压力样例。前端仍须读取实际微信安全区和菜单矩形。</p>
+  <section><h2>局内 · A2</h2><p>先看 320 长规则与实体按钮；按钮状态仅依据是否按过，不提前揭示禁按答案。</p><div class="grid">
+    <a class="card" href="gameplay-v14-320x568.png"><img src="gameplay-v14-320x568.png"><div class="caption"><strong>3×3 · 320×568</strong><small>长规则、900分、体力、挑战进度</small></div></a>
+    <a class="card" href="gameplay-v14-360x640.png"><img src="gameplay-v14-360x640.png"><div class="caption"><strong>3×3 · 360×640</strong><small>标准中屏</small></div></a>
+    <a class="card" href="gameplay-v14-390x844.png"><img src="gameplay-v14-390x844.png"><div class="caption"><strong>3×3 · 390×844</strong><small>长屏组距重新分配</small></div></a>
+    <a class="card" href="gameplay-v14-320x568-safe46.png"><img src="gameplay-v14-320x568-safe46.png"><div class="caption"><strong>整窗 320 · 顶部占 46px</strong><small>规则、九格、状态仍完整</small></div></a>
+    <a class="card" href="gameplay-v14-2x2-360x640.png"><img src="gameplay-v14-2x2-360x640.png"><div class="caption"><strong>2×2 · 第1关</strong><small>开始／重试后的布局示例</small></div></a>
+    <a class="card" href="gameplay-v14-2x3-360x640.png"><img src="gameplay-v14-2x3-360x640.png"><div class="caption"><strong>2×3 · 第4关</strong><small>已按一格，120分</small></div></a>
+    <a class="card" href="gameplay-v14-wrong-click-320x568.png"><img src="gameplay-v14-wrong-click-320x568.png"><div class="caption"><strong>非致命误按</strong><small>红三角下沉，体力82→64</small></div></a>
+    <a class="card" href="gameplay-v14-critical-320x568.png"><img src="gameplay-v14-critical-320x568.png"><div class="caption"><strong>时间／体力临界</strong><small>局部变色，无全屏闪烁</small></div></a>
+    <a class="card" href="gameplay-v14-progress-near-320x568.png"><img src="gameplay-v14-progress-near-320x568.png"><div class="caption"><strong>挑战接近满格</strong><small>486/500，不提前弹升级</small></div></a>
+    <a class="card wide" href="buttons-v14-state-board.png"><img src="buttons-v14-state-board.png"><div class="caption"><strong>按钮状态组件板</strong><small>四种颜色、图形、数字；凸起／凹陷同一材质</small></div></a>
+  </div></section>
+  <section><h2>首页、升级与结算 · A1 / A3 / A4</h2><div class="grid">
+    <a class="card" href="home-v14-320x568.png"><img src="home-v14-320x568.png"><div class="caption"><strong>首页 · 320</strong><small>v11 角色关系的新透明奔跑组</small></div></a>
+    <a class="card" href="home-v14-390x844.png"><img src="home-v14-390x844.png"><div class="caption"><strong>首页 · 390</strong><small>长屏纵向重排</small></div></a>
+    <a class="card" href="home-v14-first-320x568.png"><img src="home-v14-first-320x568.png"><div class="caption"><strong>首次进入</strong><small>不虚构历史纪录</small></div></a>
+    <a class="card" href="upgrade-v14-choices-abc-320x568.png"><img src="upgrade-v14-choices-abc-320x568.png"><div class="caption"><strong>升级三选一 · 组合一</strong><small>连击、体力、每轮时间</small></div></a>
+    <a class="card" href="upgrade-v14-choices-abd-320x568.png"><img src="upgrade-v14-choices-abd-320x568.png"><div class="caption"><strong>升级三选一 · 组合二</strong><small>第四种：清轮进度+4</small></div></a>
+    <a class="card" href="upgrade-v14-choices-abc-390x844.png"><img src="upgrade-v14-choices-abc-390x844.png"><div class="caption"><strong>升级 · 390</strong><small>不可退出的必选节点</small></div></a>
+    <a class="card" href="upgrade-v14-selected-320x568.png"><img src="upgrade-v14-selected-320x568.png"><div class="caption"><strong>选中反馈</strong><small>一次应用，其他卡锁定</small></div></a>
+    <a class="card" href="result-v14-health-320x568.png"><img src="result-v14-health-320x568.png"><div class="caption"><strong>体力耗尽</strong><small>真实误按与完整规则</small></div></a>
+    <a class="card" href="result-v14-timeout-320x568.png"><img src="result-v14-timeout-320x568.png"><div class="caption"><strong>时间到啦</strong><small>不虚构最后误按</small></div></a>
+    <a class="card" href="result-v14-health-390x844.png"><img src="result-v14-health-390x844.png"><div class="caption"><strong>结算 · 390</strong><small>角色与操作区重排</small></div></a>
+  </div></section>
+  <section><h2>辅助体验与状态 · B1–B4 / S1–S9</h2><div class="grid">
+    <a class="card" href="help-v14-320x568.png"><img src="help-v14-320x568.png"><div class="caption"><strong>玩法帮助 · B1</strong><small>新增采纳；首页次级入口</small></div></a>
+    <a class="card" href="settings-v14-320x568.png"><img src="settings-v14-320x568.png"><div class="caption"><strong>音效／震动 · B2</strong><small>新增采纳；本机独立偏好</small></div></a>
+    <a class="card" href="resume-v14-320x568.png"><img src="resume-v14-320x568.png"><div class="caption"><strong>返回前台 · B3</strong><small>仅计时中的局内</small></div></a>
+    <a class="card" href="loading-v14-320x568.png"><img src="loading-v14-320x568.png"><div class="caption"><strong>资源准备 · S1</strong><small>不显示虚构百分比</small></div></a>
+    <a class="card" href="resource-error-v14-320x568.png"><img src="resource-error-v14-320x568.png"><div class="caption"><strong>资源失败 · S2</strong><small>重试／非关键图片几何回退</small></div></a>
+    <a class="card wide" href="states-v14-board.png"><img src="states-v14-board.png"><div class="caption"><strong>状态与过渡关键帧</strong><small>清轮、挑战满、升级生效、移动、后台、纪录保存失败</small></div></a>
+    <a class="card" href="help-v14-320x568-safe46.png"><img src="help-v14-320x568-safe46.png"><div class="caption"><strong>帮助 · 顶部安全区压力</strong><small>返回键和底部按钮完整</small></div></a>
+    <a class="card" href="settings-v14-320x568-safe46.png"><img src="settings-v14-320x568-safe46.png"><div class="caption"><strong>设置 · 顶部安全区压力</strong><small>两项开关完整</small></div></a>
+    <a class="card" href="upgrade-v14-choices-abc-320x568-safe46.png"><img src="upgrade-v14-choices-abc-320x568-safe46.png"><div class="caption"><strong>升级 · 顶部安全区压力</strong><small>三张卡完整</small></div></a>
+    <a class="card" href="result-v14-health-320x568-safe46.png"><img src="result-v14-health-320x568-safe46.png"><div class="caption"><strong>结算 · 顶部安全区压力</strong><small>双操作完整</small></div></a>
+  </div></section>
+  <div class="sources"><a href="README.md">交付说明</a><a href="gameplay-v14.html?size=320&grid=3x3">编辑局内</a><a href="flow-v14.html?page=home&size=320">编辑页面</a><a href="brain-glove-running-pair-v14.png">透明奔跑角色</a><a href="../brain-glove-b-caring-pair-thin-rim.png">v11 透明结算角色</a></div>
+</main>
+</body></html>

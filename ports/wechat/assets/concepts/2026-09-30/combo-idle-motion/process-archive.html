@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>局内连击 0／1／2／12 整屏对照</title>
+<style>
+  :root { color-scheme:light;--navy:#071944;--yellow:#ffe343; }
+  * { box-sizing:border-box; }
+  body { margin:0;background:#fff8e7;color:var(--navy);font-family:"Microsoft YaHei",sans-serif; }
+  header { padding:30px max(22px,calc((100vw - 1220px)/2));background:var(--yellow);border-bottom:4px solid var(--navy); }
+  h1 { margin:0;font-size:29px;line-height:1.35; }
+  p { max-width:880px;line-height:1.65; }
+  nav { display:flex;gap:16px;flex-wrap:wrap;font-weight:800; }
+  a { color:#114e89; }
+  main { max-width:1260px;margin:auto;padding:22px 18px 50px; }
+  section { margin:0 0 30px;padding:18px;border:2px solid var(--navy);border-radius:16px;background:#fffefa; }
+  h2 { margin:0 0 8px;font-size:23px; }
+  .pair { display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap; }
+  figure { margin:0; }
+  figcaption { margin:0 0 8px;font-weight:800; }
+  img { display:block;max-width:100%;height:auto;border:1px solid #ccd3df;box-shadow:0 9px 20px #07194422; }
+  .study { max-height:420px; }
+  .cutout { width:min(360px,100%);padding:18px;background-color:#fff;background-image:linear-gradient(45deg,#e9edf2 25%,transparent 25%),linear-gradient(-45deg,#e9edf2 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e9edf2 75%),linear-gradient(-45deg,transparent 75%,#e9edf2 75%);background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0; }
+</style>
+<header>
+  <h1>连击从待启动到爆发</h1>
+  <p>先在整屏里设计 READY，再切成透明字标回填原始 Canvas；0／1／2／12 连击以同一画风衔接。规则、按钮和 v11 角色均沿用运行时画面。</p>
+  <nav><a href="README.md">设计与接入说明</a><a href="character-motion-spec.json">角色逐帧规格</a><a href="gameplay-idle-preview.html?mode=game&w=320&h=568&safe=46&combo=0">可编辑 Canvas 预览</a></nav>
+</header>
+<main>
+  <section><h2>整屏设计 → 独立切图 → 原 Canvas 回填</h2><div class="pair"><figure><figcaption>整屏设计研究</figcaption><img class="study" src="ready-full-screen-study.png" alt="READY 放进整屏局内界面的设计研究"></figure><figure><figcaption>READY 透明 3x 切图</figcaption><img class="cutout" src="ready-wordmark-3x.png" alt="READY 透明字标"></figure><figure><figcaption>1 HIT! 同系列 3x 切图</figcaption><img class="cutout" src="one-hit-wordmark-3x.png" alt="1 HIT! 透明字标"></figure></div></section>
+  <section><h2>0 · READY</h2><div class="pair"><figure><figcaption>320×568 · 安全区 46px</figcaption><img src="combo-state-0-320x568-safe46.png" alt="0 连击窄屏"></figure><figure><figcaption>390×844 · 安全区 47px</figcaption><img src="combo-state-0-390x844-safe47.png" alt="0 连击宽屏"></figure></div></section>
+  <section><h2>1 · HIT!</h2><div class="pair"><figure><figcaption>320×568 · 安全区 46px</figcaption><img src="combo-state-1-320x568-safe46.png" alt="1 连击窄屏"></figure><figure><figcaption>390×844 · 安全区 47px</figcaption><img src="combo-state-1-390x844-safe47.png" alt="1 连击宽屏"></figure></div></section>
+  <section><h2>2 · COMBO!</h2><div class="pair"><figure><figcaption>320×568 · 安全区 46px</figcaption><img src="combo-state-2-320x568-safe46.png" alt="2 连击窄屏"></figure><figure><figcaption>390×844 · 安全区 47px</figcaption><img src="combo-state-2-390x844-safe47.png" alt="2 连击宽屏"></figure></div></section>
+  <section><h2>12 · COMBO!</h2><div class="pair"><figure><figcaption>320×568 · 安全区 46px</figcaption><img src="combo-state-12-320x568-safe46.png" alt="12 连击窄屏"></figure><figure><figcaption>390×844 · 安全区 47px</figcaption><img src="combo-state-12-390x844-safe47.png" alt="12 连击宽屏"></figure></div></section>
+</main>
+</html>

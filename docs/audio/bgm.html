@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>手指等等我 · 正式背景音乐试听</title>
+  <style>
+    :root { font: 16px/1.55 system-ui,sans-serif; color: #18335f; background: #fff6d9; }
+    body { margin: 0; } main { max-width: 900px; margin: auto; padding: 24px 16px 70px; }
+    h1 { font-size: clamp(28px,5vw,43px); line-height: 1.16; margin: 0 0 12px; }
+    h2 { margin: 0 0 8px; font-size: 24px; }
+    p { max-width: 70ch; } a { color: #0b6e83; }
+    .intro, section { border: 3px solid #18335f; border-radius: 20px; background: #fffdf4;
+      box-shadow: 6px 6px 0 #e6ae28; padding: 20px; margin: 0 6px 25px 0; }
+    .intro { background: #ffe486; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(285px,1fr)); gap: 18px; }
+    section { background: #eefdf8; border-color: #158578; }
+    audio { display: block; width: 100%; margin: 15px 0 12px; }
+    small { display: block; color: #526b8c; }
+    label { display: flex; align-items: center; gap: 7px; font-weight: 650; }
+    #status { min-height: 1.5em; color: #b31237; font-weight: 700; }
+  </style>
+</head>
+<body><main>
+  <div class="intro">
+    <h1>正式背景音乐试听</h1>
+    <p>已采用你选中的 Fupi CC0 曲目：短菜单版用于主页、帮助、设置和结算；完整循环版用于局内挑战和升级选择。这里播放的是微信小游戏实际打包的 AAC 文件。</p>
+    <p>“循环试听”按原曲终点重启。浏览器寻址可能出现短暂停顿；小游戏利用文件附带的 350 ms 开头尾巴交叠淡入淡出。</p>
+    <a href="index.html">返回音效试听</a> · <a href="bgm-manifest.json">查看来源、授权和循环点</a> ·
+    <a href="https://opengameart.org/content/empacotatron">查看作者原始发布页</a>
+  </div>
+  <div id="tracks" class="grid"></div>
+  <p id="status" role="status"></p>
+</main>
+<script>
+  const tracks = document.getElementById('tracks');
+  const players = [];
+  const names = { home: '主页 · 菜单版', game: '局内 · 挑战版' };
+  async function load() {
+    try {
+      const response = await fetch('bgm-manifest.json');
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const manifest = await response.json();
+      for (const mode of ['home', 'game']) {
+        const item = manifest.files.find((entry) => entry.cueId === `music_${mode}`);
+        if (!item) throw new Error(`缺少 ${mode} 音频记录`);
+        const section = document.createElement('section');
+        const heading = document.createElement('h2');
+        heading.textContent = names[mode];
+        const detail = document.createElement('small');
+        detail.textContent = `${(item.loopEndMs / 1000).toFixed(2)} 秒循环 · ${Math.round(item.bytes / 1024)} KiB · 均值 ${item.meanDbfs} dBFS`;
+        const audio = document.createElement('audio');
+        audio.controls = true;
+        audio.preload = 'metadata';
+        audio.src = `../../ports/wechat/assets/music/${item.filename}`;
+        audio.volume = Math.min(1, .5 * 10 ** ((-19 - item.meanDbfs) / 20));
+        players.push(audio);
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        label.append(checkbox, '循环试听');
+        let loopTimer = null;
+        audio.addEventListener('play', () => {
+          players.forEach((other) => { if (other !== audio) other.pause(); });
+          if (loopTimer === null) loopTimer = setInterval(() => {
+            if (checkbox.checked && audio.currentTime >= item.loopEndMs / 1000) audio.currentTime = 0;
+          }, 20);
+        });
+        audio.addEventListener('pause', () => { clearInterval(loopTimer); loopTimer = null; });
+        audio.addEventListener('ended', () => {
+          if (checkbox.checked) { audio.currentTime = 0; void audio.play(); }
+        });
+        const credit = document.createElement('small');
+        credit.textContent = `${item.creator} · Creative Commons CC0 1.0 · 无需署名；这里保留来源记录。`;
+        section.append(heading, detail, audio, label, credit);
+        tracks.append(section);
+      }
+    } catch (error) {
+      document.getElementById('status').textContent = `音频清单加载失败：${error.message}。请从项目根目录运行 npm run dev。`;
+    }
+  }
+  load();
+</script></body></html>

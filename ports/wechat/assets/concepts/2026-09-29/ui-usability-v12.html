@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>手指等等我 · v12 可用性修订</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f5f3e8; color: #0a1942; font: 16px/1.6 system-ui, "Microsoft YaHei", sans-serif; }
+    .stage { position: relative; width: 1536px; height: 1024px; margin: 0 auto; overflow: hidden; }
+    .stage > img, .stage > svg { position: absolute; inset: 0; width: 1536px; height: 1024px; display: block; }
+    .notes { max-width: 1100px; padding: 32px 24px 60px; margin: auto; }
+    h1 { margin: 0 0 8px; line-height: 1.2; }
+    p { margin: 8px 0; }
+    ul { padding-left: 1.3em; }
+    a { color: #075b80; }
+    @media (max-width: 1536px) { .stage { margin-left: 0; } }
+  </style>
+</head>
+<body>
+  <div class="stage" role="img" aria-label="v12 三屏概念稿，保留 v11 原画中的角色，调整局内状态栏、已按按钮和结算规则文字">
+    <img src="hybrid-ui-v11-unified-thin-rim.png" alt="">
+    <svg viewBox="0 0 1536 1024" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="pressedBlue" x2="0" y2="1"><stop stop-color="#006ec8"/><stop offset="1" stop-color="#1889d8"/></linearGradient>
+        <linearGradient id="pressedRed" x2="0" y2="1"><stop stop-color="#bb1828"/><stop offset="1" stop-color="#dc3444"/></linearGradient>
+        <linearGradient id="pressedPurple" x2="0" y2="1"><stop stop-color="#5d26b9"/><stop offset="1" stop-color="#8240d1"/></linearGradient>
+        <linearGradient id="hudPaper" x2="0" y2="1"><stop stop-color="#fffef6"/><stop offset="1" stop-color="#fff9e8"/></linearGradient>
+      </defs>
+
+      <!-- Only the middle phone's former decorative footer is replaced. -->
+      <path d="M552 620 H985 V806 Q985 832 956 832 H581 Q552 832 552 806 Z" fill="url(#hudPaper)"/>
+      <rect x="548" y="622" width="5" height="207" fill="#00143d"/>
+      <rect x="984" y="622" width="6" height="207" fill="#00143d"/>
+      <path d="M553 622 H984" stroke="#f2ddb0" stroke-width="2"/>
+      <rect x="578" y="628" width="382" height="34" rx="17" fill="#fff2ca"/>
+      <text x="769" y="652" text-anchor="middle" fill="#081841" font-family="Microsoft YaHei, sans-serif" font-size="19" font-weight="900">还剩 <tspan fill="#008ac5" font-size="24">4</tspan> 个安全按钮</text>
+
+      <!-- Player information is grouped apart from the opponent. -->
+      <rect x="575" y="669" width="388" height="76" rx="15" fill="#ffffff" stroke="#0b1b48" stroke-width="2"/>
+      <rect x="576" y="670" width="9" height="74" rx="4" fill="#ff5c83"/>
+      <text x="595" y="690" fill="#0b1b48" font-family="Microsoft YaHei, sans-serif" font-size="15" font-weight="900">我方</text>
+      <text x="595" y="715" fill="#0b1b48" font-family="Microsoft YaHei, sans-serif" font-size="18" font-weight="900">体力 82/100</text>
+      <rect x="595" y="726" width="150" height="8" rx="4" fill="#dbe1ea"/>
+      <rect x="595" y="726" width="123" height="8" rx="4" fill="#4dd272"/>
+      <path d="M766 681 V735" stroke="#e8eaf1" stroke-width="2"/>
+      <text x="781" y="690" fill="#0b1b48" font-family="Microsoft YaHei, sans-serif" font-size="17" font-weight="900">连击 4</text>
+      <text x="781" y="712" fill="#c14800" font-family="Microsoft YaHei, sans-serif" font-size="16" font-weight="800">剩余 2.1 秒</text>
+      <text x="781" y="733" fill="#0b1b48" font-family="Microsoft YaHei, sans-serif" font-size="15" font-weight="800">伤害加成 +3</text>
+
+      <rect x="575" y="752" width="388" height="66" rx="15" fill="#ffffff" stroke="#0b1b48" stroke-width="2"/>
+      <rect x="576" y="753" width="9" height="64" rx="4" fill="#8d5ae8"/>
+      <text x="595" y="774" fill="#0b1b48" font-family="Microsoft YaHei, sans-serif" font-size="15" font-weight="900">考官</text>
+      <text x="657" y="774" fill="#0b1b48" font-family="Microsoft YaHei, sans-serif" font-size="17" font-weight="900">耐力 180/500</text>
+      <rect x="595" y="791" width="227" height="9" rx="4.5" fill="#dbe1ea"/>
+      <rect x="595" y="791" width="82" height="9" rx="4.5" fill="#8b56e7"/>
+      <rect x="843" y="769" width="102" height="37" rx="12" fill="#f4eeff"/>
+      <text x="894" y="794" text-anchor="middle" fill="#5229a0" font-family="Microsoft YaHei, sans-serif" font-size="16" font-weight="900">反击 18</text>
+
+      <!-- Three selected buttons are redrawn as visibly recessed, retaining color and checks. -->
+      <g id="pressed-purple">
+        <rect x="842" y="284" width="120" height="111" rx="15" fill="#fffdf6"/>
+        <rect x="847" y="291" width="110" height="98" rx="14" fill="#371576" stroke="#0b1b48" stroke-width="4"/>
+        <rect x="852" y="297" width="100" height="86" rx="10" fill="url(#pressedPurple)" stroke="#9c64e9" stroke-width="2"/>
+        <rect x="884" y="310" width="34" height="31" rx="3" fill="#eee4ff" stroke="#4f2795" stroke-width="2"/>
+        <text x="902" y="371" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="24" font-weight="900">12</text>
+        <circle cx="941" cy="311" r="16" fill="#637080" stroke="#ffffff" stroke-width="2"/>
+        <path d="m934 311 5 5 9-11" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g id="pressed-red">
+        <rect x="705" y="397" width="128" height="111" rx="15" fill="#fffdf6"/>
+        <rect x="712" y="405" width="113" height="98" rx="14" fill="#89131d" stroke="#0b1b48" stroke-width="4"/>
+        <rect x="717" y="411" width="103" height="86" rx="10" fill="url(#pressedRed)" stroke="#ee6172" stroke-width="2"/>
+        <circle cx="768" cy="441" r="18" fill="#fff4ee" stroke="#a02130" stroke-width="2"/>
+        <text x="768" y="484" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="24" font-weight="900">10</text>
+        <circle cx="809" cy="425" r="16" fill="#637080" stroke="#ffffff" stroke-width="2"/>
+        <path d="m802 425 5 5 9-11" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g id="pressed-blue">
+        <rect x="571" y="508" width="128" height="114" rx="15" fill="#fffdf6"/>
+        <rect x="578" y="516" width="113" height="99" rx="14" fill="#004b9e" stroke="#0b1b48" stroke-width="4"/>
+        <rect x="583" y="522" width="103" height="87" rx="10" fill="url(#pressedBlue)" stroke="#53b5ef" stroke-width="2"/>
+        <path d="M635 535 654 569 H616 Z" fill="#ecf8ff" stroke="#005cae" stroke-width="2" stroke-linejoin="round"/>
+        <text x="635" y="597" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="24" font-weight="900">02</text>
+        <circle cx="674" cy="536" r="16" fill="#637080" stroke="#ffffff" stroke-width="2"/>
+        <path d="m667 536 5 5 9-11" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+
+      <!-- Yellow buttons use navy symbols; only the white 04 circle needs correcting. -->
+      <circle cx="903" cy="552" r="23" fill="#ffdc20"/>
+      <circle cx="903" cy="552" r="18" fill="#081841"/>
+
+      <!-- The result rule describes the forbidden condition explicitly. -->
+      <rect x="1046" y="620" width="117" height="33" fill="#fffdf8"/>
+      <text x="1052" y="644" fill="#0b1b48" font-family="Microsoft YaHei, sans-serif" font-size="19" font-weight="900">当时别按：</text>
+    </svg>
+  </div>
+
+  <section class="notes">
+    <h1>v12 可用性修订</h1>
+    <p>运营评审后，局内底栏改为我方与考官两组信息，显示连击剩余时间并把“威力 +3”写成“伤害加成 +3”；三枚已按按钮做下沉效果，保留原属性色与勾选。黄色 04 的图形改为深蓝，结算规则改成“当时别按”。首页与结算角色、背景、按钮布局及底部分镜均沿用 <a href="hybrid-ui-v11-unified-thin-rim.png">v11 造型基准</a>。</p>
+    <p>这是静态 UI 方案。连击剩余时间、伤害加成、结果原因和规则文字应由前端绑定真实游戏状态；长规则、小屏、连续点击与动效干扰仍需真机试玩。</p>
+    <p><a href="hybrid.html">返回融合版展示页</a> · <a href="CHARACTER_BASELINE.md">角色造型基准</a></p>
+  </section>
+</body>
+</html>

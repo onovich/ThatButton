@@ -15,7 +15,7 @@ export function createApp({
   hostBridge = null
 }) {
   const storage = getStorageAdapter(browserWindow);
-  const audio = createAudioFeedback(browserWindow.AudioContext || browserWindow.webkitAudioContext, { setTimeout });
+  const audio = createAudioFeedback(browserWindow.Audio);
   const renderer = createRenderer({
     document,
     timers: { setTimeout, clearTimeout },

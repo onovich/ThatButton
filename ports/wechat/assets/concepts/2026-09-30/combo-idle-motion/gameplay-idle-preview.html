@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>WeChat Canvas visual preview</title>
+<style>html,body{margin:0;background:#999}canvas{display:block}</style>
+<canvas id="canvas"></canvas>
+<script type="module">
+  import { createCanvasRenderer } from '../../../../src/renderer.js';
+  import { drawPreCombo } from './draw-pre-combo.mjs';
+  const query = new URLSearchParams(location.search);
+  const width = Number(query.get('w')) || 320;
+  const height = Number(query.get('h')) || 568;
+  const mode = query.get('mode') || 'game';
+  const safe = Number(query.get('safe')) || 46;
+  const grid = query.get('grid') || '3x3';
+  const comboCount = Number(query.get('combo') ?? 4);
+  const comboRemaining = Number(query.get('remaining') ?? 2100);
+  const [rows, cols] = grid.split('x').map(Number);
+  const canvas = document.getElementById('canvas');
+  const view = createCanvasRenderer({
+    canvas, info: { windowWidth: width, windowHeight: height, pixelRatio: 1,
+      safeArea: { top: safe, bottom: height - 10 } }
+  });
+  const buttons = [
+    ['red','triangle',3],['blue','circle',8],['purple','square',12],
+    ['yellow','star',5],['red','circle',10],['purple','triangle',7],
+    ['blue','triangle',2],['red','square',9],['yellow','circle',4]
+  ].map(([color,shape,number],index)=>({
+    id: `btn-${index}`,color:{id:color},shape:{id:shape,char:{triangle:'▲',circle:'●',square:'■',star:'★'}[shape]},
+    number,isClicked:[2,4,6].includes(index)
+  }));
+  view.renderer.updateCombatStatus({
+    player:{hp:82,maxHp:100},
+    combat:{hp:150,maxHp:500},
+    combo:{hasVisibleCombo:comboCount >= 2,streak:comboCount}
+  });
+  view.renderer.updateTimer(8400,14000,{remainingMs:comboRemaining,comboWindowMs:2400});
+  view.renderer.updateBestRecordUi({bestLevel:15,bestScore:900,updatedAt:'2026-09-29'});
+  view.renderer.renderBoard({buttons:buttons.slice(0,rows*cols),difficulty:{cols,rows},
+    ruleText:'颜色为【红色】且形状为【三角形】且数字为【3】',level:16,score:900});
+  if(mode==='home') view.showHome();
+  else if(mode==='help') view.showHelp();
+  else if(mode==='settings') view.showSettings();
+  else if(mode==='upgrade') view.renderer.showUpgradeScreen({choices:[
+    {id:'chain-span-plus'},{id:'max-hp-plus'},
+    {id:query.get('fourth')==='1'?'base-attack-plus':'round-time-plus'}]});
+  else if(mode==='result') {
+    const timeout = query.get('reason') === 'timeout';
+    const longRule = query.get('rule') === 'long';
+    view.renderer.showGameOverScreen({isTimeout:timeout,recap:{
+      level:timeout?16:12,score:timeout?920:690,
+      bestAfter:{bestLevel:timeout?16:15,bestScore:timeout?920:900},
+      bestComparison:timeout?'new_best':'below_best',
+      ruleText:longRule?'颜色为【红色】且形状为【三角形】且数字为【3】':
+        timeout?'颜色为【蓝色】或数字为【奇数】':'颜色为【红色】且数字为【奇数】',
+      pressedButton:timeout?null:{label:'红色 三角形 03'}
+    }});
+  }
+  else if(mode==='resume') view.showResume();
+  else if(mode==='resource-error') view.showResourceError(['running']);
+  const images = {};
+  await Promise.all(Object.entries({
+    running:'../../../../assets/runtime/running-pair.png',
+    caring:'../../../../assets/runtime/caring-pair.png',
+    separated:'../../../../assets/runtime/separated-pair.png',
+    homeTitle:'../../../../assets/runtime/title-home.png',
+    resultTitle:'../../../../assets/runtime/title-result.png',
+    stage:'../../../../assets/runtime/sunny-stage.jpg',
+    landscape:'../../../../assets/runtime/gameplay-landscape.jpg',
+    comboWordmark:'../../../../assets/runtime/combo-wordmark-v17.png',
+    readyWordmark:'./ready-wordmark-3x.png',
+    hitWordmark:'./one-hit-wordmark-3x.png'
+  })
+    .map(([name,path])=>new Promise(resolve=>{
+      const image=new Image();image.onload=()=>{images[name]=image;resolve()};image.onerror=resolve;image.src=path;
+    })));
+  // Freeze the concept capture after the runtime's entry animation settles.
+  const settledTime = Date.now() + 2000;
+  Date.now = () => settledTime;
+  view.setImages(images);
+  view.setMotionPaused?.(true);
+  if (mode === 'game' && comboCount < 2) {
+    const compact = height < 700;
+    const x = compact ? 10 : 14;
+    const headY = safe + (compact && safe > 45 ? 13 : compact ? 7 : 18);
+    const headH = compact ? 38 : 43;
+    const scoreW = compact ? 87 : 99;
+    const comboX = x + (compact ? 98 : 112);
+    const comboW = width - x - scoreW - 7 - comboX;
+    drawPreCombo(canvas.getContext('2d'), {
+      left: comboX, top: headY, width: comboW, height: headH,
+      stage: comboCount, remainingPercent: comboCount === 1 ? comboRemaining / 24 : 0,
+      readyImage: images.readyWordmark, hitImage: images.hitWordmark
+    });
+  }
+</script>

@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>手指等等我 · v15 三屏视觉修订</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#ffe736;font-family:system-ui,"Microsoft YaHei",sans-serif}.board{position:relative;width:1536px;height:1024px;overflow:hidden;background:radial-gradient(circle at 50% 15%,#fff56b,#ffe529 55%,#ffd900)}
+  .cloud{position:absolute;background:#fff4a7;border-radius:50%;opacity:.8}.cloud::before,.cloud::after{content:"";position:absolute;background:inherit;border-radius:50%}.cloud.a{width:260px;height:95px;left:-50px;top:90px}.cloud.a::before{width:150px;height:120px;left:36px;top:-40px}.cloud.a::after{width:120px;height:90px;left:150px;top:5px}.cloud.b{width:290px;height:100px;right:-60px;top:170px}.cloud.b::before{width:145px;height:145px;left:35px;top:-60px}.cloud.b::after{width:130px;height:110px;right:35px;top:-20px}
+  .phone{position:absolute;top:4px;width:414px;height:868px;padding:6px;border:9px solid #041944;border-radius:52px;background:#07132b;box-shadow:0 0 0 4px #fcf7dc,0 10px 0 #bc9c00,0 16px 20px #05204a65;overflow:hidden}.phone.one{left:89px}.phone.two{left:561px}.phone.three{left:1033px}.phone img{display:block;width:390px;height:844px;border-radius:36px;object-fit:cover}.phone::after{content:"";position:absolute;inset:1px;border:3px solid #87b7ee;border-radius:48px;pointer-events:none;opacity:.55}
+  .story{position:absolute;left:0;bottom:0;width:1536px;height:151px;overflow:hidden;background:#fff7cb}.story img{position:absolute;left:0;top:-855px;width:1536px;height:1024px;max-width:none}
+  .seam{position:absolute;left:0;right:0;top:864px;height:12px;background:linear-gradient(#ffde23,transparent);pointer-events:none}
+</style></head>
+<body><main class="board" aria-label="v15 首页、局内和结算三屏展示板"><span class="cloud a"></span><span class="cloud b"></span><div class="phone one"><img src="home-v15-390x844.png" alt="首页"></div><div class="phone two"><img src="gameplay-v15-390x844.png" alt="局内"></div><div class="phone three"><img src="result-v15-health-390x844.png" alt="结算"></div><div class="seam"></div><div class="story"><img src="../hybrid-ui-v11-unified-thin-rim.png" alt="沿用 v11 的两格故事分镜"></div></main></body></html>

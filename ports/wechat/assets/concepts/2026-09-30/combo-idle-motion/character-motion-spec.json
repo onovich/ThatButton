@@ -1,0 +1,83 @@
+{
+  "version": "v11-character-motion-1",
+  "type": "discrete-transform-frames",
+  "units": "logical-pixels-at-320-width",
+  "scaleForWidth": "min(1.2, viewportWidth / 320)",
+  "reducedMotion": "draw frame 0 only",
+  "sources": {
+    "home": {
+      "file": "ports/wechat/assets/runtime/running-pair.png",
+      "sourceSize": [840, 452],
+      "drawRect": "Use the current renderer home mascot rectangle.",
+      "pivot": [0.5, 0.94]
+    },
+    "gameBrain": {
+      "file": "ports/wechat/assets/runtime/separated-pair.png",
+      "sourceSize": [900, 316],
+      "sourceRect": [0, 0, 450, 316],
+      "drawRect": "Left half of the current full separated-pair rectangle, preserving the source x mapping.",
+      "pivotInFullSource": [0.205, 0.98]
+    },
+    "gameGlove": {
+      "file": "ports/wechat/assets/runtime/separated-pair.png",
+      "sourceSize": [900, 316],
+      "sourceRect": [450, 0, 450, 316],
+      "drawRect": "Right half of the current full separated-pair rectangle, preserving the source x mapping.",
+      "pivotInFullSource": [0.806, 0.99]
+    },
+    "result": {
+      "file": "ports/wechat/assets/runtime/caring-pair.png",
+      "sourceSize": [760, 577],
+      "drawRect": "Use the current renderer result mascot rectangle.",
+      "pivot": [0.52, 0.96]
+    }
+  },
+  "scenes": {
+    "home": {
+      "fps": 12,
+      "loopMs": 667,
+      "mode": "loop",
+      "source": "home",
+      "frames": [
+        {"dx": 0, "dy": 0, "rotationDeg": 0},
+        {"dx": 0.4, "dy": -1.0, "rotationDeg": -0.4},
+        {"dx": 0.8, "dy": -2.4, "rotationDeg": -0.8},
+        {"dx": 0.4, "dy": -3.2, "rotationDeg": -0.4},
+        {"dx": 0, "dy": -2.1, "rotationDeg": 0.2},
+        {"dx": -0.4, "dy": -0.7, "rotationDeg": 0.7},
+        {"dx": -0.4, "dy": 0.2, "rotationDeg": 0.3},
+        {"dx": 0, "dy": 0, "rotationDeg": 0}
+      ]
+    },
+    "game": {
+      "fps": 8,
+      "loopMs": 1000,
+      "mode": "loop-while-playing",
+      "sources": ["gameBrain", "gameGlove"],
+      "frames": [
+        {"brain": {"dy": 0, "rotationDeg": 0}, "glove": {"dy": 0, "rotationDeg": 0}},
+        {"brain": {"dy": -0.5, "rotationDeg": -0.2}, "glove": {"dy": 0, "rotationDeg": 0}},
+        {"brain": {"dy": -1.2, "rotationDeg": -0.5}, "glove": {"dy": -0.5, "rotationDeg": 0.2}},
+        {"brain": {"dy": -1.8, "rotationDeg": -0.3}, "glove": {"dy": -1.2, "rotationDeg": 0.5}},
+        {"brain": {"dy": -1.3, "rotationDeg": 0}, "glove": {"dy": -1.8, "rotationDeg": 0.3}},
+        {"brain": {"dy": -0.5, "rotationDeg": 0.2}, "glove": {"dy": -1.2, "rotationDeg": 0}},
+        {"brain": {"dy": 0, "rotationDeg": 0.1}, "glove": {"dy": -0.5, "rotationDeg": -0.2}},
+        {"brain": {"dy": 0, "rotationDeg": 0}, "glove": {"dy": 0, "rotationDeg": 0}}
+      ]
+    },
+    "result": {
+      "fps": 6,
+      "loopMs": 1000,
+      "mode": "loop-after-300ms-settle",
+      "source": "result",
+      "frames": [
+        {"dx": 0, "dy": 0, "rotationDeg": 0},
+        {"dx": 0, "dy": -0.5, "rotationDeg": -0.1},
+        {"dx": 0, "dy": -1.2, "rotationDeg": 0.1},
+        {"dx": 0, "dy": -1.8, "rotationDeg": 0.3},
+        {"dx": 0, "dy": -1.2, "rotationDeg": 0.1},
+        {"dx": 0, "dy": -0.5, "rotationDeg": 0}
+      ]
+    }
+  }
+}

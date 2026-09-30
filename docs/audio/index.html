@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>手指等等我 · 音效试听</title>
+  <style>
+    :root { color-scheme: light; font: 16px/1.55 system-ui, sans-serif; }
+    body { margin: 0; background: #fff6d9; color: #18335f; }
+    main { max-width: 960px; margin: auto; padding: 24px 16px 70px; }
+    h1 { margin: 0; font-size: clamp(28px, 5vw, 44px); letter-spacing: -.03em; }
+    p { max-width: 70ch; }
+    .intro, section { border: 3px solid #18335f; border-radius: 20px; background: #fffdf4; box-shadow: 6px 6px 0 #e6ae28; padding: 18px; margin: 0 6px 25px 0; }
+    .intro { background: #ffe486; }
+    h2 { margin: 0 0 12px; font-size: 22px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    button { border: 2px solid #18335f; border-radius: 10px; background: #fff; color: inherit; font: 700 14px system-ui; padding: 10px 14px; cursor: pointer; }
+    button:hover, button:focus-visible { background: #baf6ee; }
+    .rows { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+    article { border: 2px solid #8badd3; border-radius: 14px; padding: 12px; background: #fff; }
+    article h3 { margin: 0 0 2px; font-size: 17px; }
+    article p { margin: 0 0 10px; font-size: 13px; color: #526b8c; }
+    audio { display: block; width: 100%; height: 40px; margin-bottom: 8px; }
+    label { display: flex; gap: 7px; align-items: center; font-weight: 700; font-size: 13px; }
+    small, code { color: #526b8c; }
+    #status { min-height: 1.5em; font-weight: 700; }
+    #error { color: #b31237; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="intro">
+    <h1>手指等等我 · 音效试听</h1>
+    <p>这一组是已接入 Web 与微信小游戏的短音效。按用途逐项试听；播放器按游戏中的设计音量播放。勾选状态可导出，方便记录希望保留或替换的版本。</p>
+    <div class="toolbar">
+      <button id="play-all" type="button">依次试听全部</button>
+      <button id="copy" type="button">复制选择 JSON</button>
+      <button id="download" type="button">下载选择 JSON</button>
+    </div>
+    <div id="status" role="status"></div>
+    <div id="error" role="alert"></div>
+    <small>素材：Kenney Interface Sounds / Digital Audio，CC0。完整来源、文件哈希与响度在 <a href="manifest.json">manifest.json</a>。<a href="bgm.html">试听正式背景音乐</a>。</small>
+  </div>
+  <div id="groups"></div>
+</main>
+<script>
+  const groups = [
+    ['界面操作', ['ui_open', 'ui_back', 'ui_toggle', 'ui_confirm']],
+    ['开局与规则', ['run_start', 'round_enter', 'typing_tick', 'time_warning']],
+    ['按钮与连击', ['safe_press', 'chain_ready', 'combo_2', 'combo_high', 'combo_cap', 'wrong_press']],
+    ['进度与结算', ['round_clear', 'enemy_defeated', 'upgrade_offer', 'upgrade_select', 'run_failure']]
+  ];
+  const storageKey = 'thatbutton.sfx.selection.v1';
+  let files = [];
+  let playing = false;
+  const status = document.getElementById('status');
+  const error = document.getElementById('error');
+
+  function selection() {
+    const checked = new Set([...document.querySelectorAll('input[data-cue]:checked')].map((item) => item.dataset.cue));
+    return {
+      schema: 'thatbutton.sfxSelection.v1',
+      updatedAt: new Date().toISOString(),
+      sourcePreview: 'docs/audio/index.html',
+      selectedCount: checked.size,
+      cueCount: files.length,
+      selections: files.filter((item) => checked.has(item.cueId)).map((item) => ({
+        cueId: item.cueId, filename: item.filename, variation: 1,
+        durationMs: item.durationMs, designerVolumeFactor: item.designerVolumeFactor,
+        intendedUse: item.intendedUse
+      }))
+    };
+  }
+  window.__thatButtonSfxSelection = selection;
+  function save() {
+    localStorage.setItem(storageKey, JSON.stringify(selection()));
+    status.textContent = `已选择 ${selection().selectedCount} / ${files.length} 项。`;
+  }
+  function listen(item) {
+    return new Promise((resolve) => {
+      const player = document.querySelector(`audio[data-cue="${item.cueId}"]`);
+      player.currentTime = 0;
+      player.onended = resolve;
+      player.onerror = resolve;
+      const started = player.play();
+      started?.catch?.(resolve);
+    });
+  }
+  async function load() {
+    try {
+      files = (await (await fetch('manifest.json')).json()).files;
+      const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
+      const selected = new Set(saved?.selections?.map((item) => item.cueId) || files.map((item) => item.cueId));
+      const target = document.getElementById('groups');
+      for (const [title, ids] of groups) {
+        const section = document.createElement('section');
+        section.innerHTML = `<h2>${title}</h2><div class="rows"></div>`;
+        const rows = section.querySelector('.rows');
+        for (const id of ids) {
+          const item = files.find((entry) => entry.cueId === id);
+          if (!item) continue;
+          const row = document.createElement('article');
+          const heading = document.createElement('h3');
+          heading.textContent = item.intendedUse;
+          const detail = document.createElement('p');
+          detail.textContent = `${id} · ${item.durationMs} ms · 游戏音量 ${Math.round(item.designerVolumeFactor * 100)}%`;
+          const player = document.createElement('audio');
+          player.controls = true;
+          player.preload = 'none';
+          player.src = `../../src/audio/sfx/${item.filename}`;
+          player.dataset.cue = id;
+          player.volume = item.designerVolumeFactor;
+          const label = document.createElement('label');
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.dataset.cue = id;
+          checkbox.checked = selected.has(id);
+          checkbox.addEventListener('change', save);
+          label.append(checkbox, '选择这一版');
+          row.append(heading, detail, player, label);
+          rows.append(row);
+        }
+        target.append(section);
+      }
+      save();
+    } catch (cause) { error.textContent = `试听清单加载失败：${cause.message}。请从项目根目录运行 npm run dev 再打开此页。`; }
+  }
+  document.getElementById('play-all').addEventListener('click', async () => {
+    if (playing) return;
+    playing = true;
+    for (const item of files) {
+      status.textContent = `正在试听：${item.intendedUse}`;
+      await listen(item);
+    }
+    playing = false;
+    save();
+  });
+  document.getElementById('copy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(JSON.stringify(selection(), null, 2)); status.textContent = '选择 JSON 已复制。'; }
+    catch { status.textContent = '复制失败；请使用下载按钮。'; }
+  });
+  document.getElementById('download').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(selection(), null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'thatbutton-sfx-selection.json';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  });
+  load();
+</script>
+</body>
+</html>

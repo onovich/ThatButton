@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>WeChat Canvas visual preview</title>
+<style>html,body{margin:0;background:#999}canvas{display:block}</style>
+<canvas id="canvas"></canvas>
+<script type="module">
+  import { createCanvasRenderer } from '../src/renderer.js';
+  import { createWechatHazards } from '../src/hazards.js';
+  const query = new URLSearchParams(location.search);
+  const width = Number(query.get('w')) || 320;
+  const height = Number(query.get('h')) || 568;
+  const mode = query.get('mode') || 'game';
+  const safe = Number(query.get('safe')) || 46;
+  const grid = query.get('grid') || '3x3';
+  const comboCount = Number(query.get('combo') ?? 4);
+  const comboRemaining = Number(query.get('remaining') ?? 2100);
+  const previewScore = Number(query.get('score') ?? 900);
+  const [rows, cols] = grid.split('x').map(Number);
+  const canvas = document.getElementById('canvas');
+  const view = createCanvasRenderer({
+    canvas, motionEnabled: query.get('motion') === '1',
+    info: { windowWidth: width, windowHeight: height, pixelRatio: 1,
+      safeArea: { top: safe, bottom: height - 10 } }
+  });
+  const buttons = [
+    ['red','triangle',3],['blue','circle',8],['purple','square',12],
+    ['yellow','star',5],['red','circle',10],['purple','triangle',7],
+    ['blue','triangle',2],['red','square',9],['yellow','circle',4]
+  ].map(([color,shape,number],index)=>({
+    id: `btn-${index}`,color:{id:color},shape:{id:shape,char:{triangle:'▲',circle:'●',square:'■',star:'★'}[shape]},
+    number,isClicked:query.has('lab') ? false : [2,4,6].includes(index)
+  }));
+  view.renderer.updateCombatStatus({
+    player:{hp:Number(query.get('hp') ?? 82),maxHp:Number(query.get('maxHp') ?? 100)},
+    combat:{hp:150,maxHp:500},
+    combo:{hasVisibleCombo:comboCount > 1,streak:comboCount}
+  });
+  view.renderer.updateTimer(8400,14000,{remainingMs:comboRemaining,comboWindowMs:2400,
+    remainingPercent:Math.round(comboRemaining/2400*100)});
+  view.renderer.updateBestRecordUi({bestLevel:15,bestScore:900,updatedAt:'2026-09-29'});
+  view.renderer.renderBoard({buttons:buttons.slice(0,rows*cols),difficulty:{cols,rows},
+    ruleText:'颜色为【红色】且形状为【三角形】且数字为【3】',level:16,score:previewScore});
+  if(mode==='home') view.showHome();
+  else if(mode==='help') view.showHelp();
+  else if(mode==='settings') view.showSettings();
+  else if(mode==='upgrade') {
+    const ids = (query.get('choices') || '').split(',').filter((id) =>
+      ['chain-span-plus','max-hp-plus','round-time-plus','base-attack-plus'].includes(id));
+    const choices = ids.length === 3 ? ids : [
+      'chain-span-plus','max-hp-plus',
+      query.get('fourth')==='1'?'base-attack-plus':'round-time-plus'];
+    view.renderer.showUpgradeScreen({choices:choices.map((id)=>({id}))});
+  }
+  else if(mode==='result') {
+    const timeout = query.get('reason') === 'timeout';
+    const longRule = query.get('rule') === 'long';
+    const resultLevel = Number(query.get('resultLevel') ?? (timeout?16:12));
+    const resultScore = Number(query.get('resultScore') ?? (timeout?920:690));
+    view.renderer.showGameOverScreen({isTimeout:timeout,recap:{
+      level:resultLevel,score:resultScore,
+      bestAfter:{bestLevel:Number(query.get('resultBestLevel') ?? (timeout?resultLevel:15)),
+        bestScore:Number(query.get('resultBestScore') ?? (timeout?resultScore:900))},
+      bestComparison:timeout?'new_best':'below_best',
+      ruleText:longRule?'颜色为【红色】且形状为【三角形】且数字为【3】':
+        timeout?'颜色为【蓝色】或数字为【奇数】':'颜色为【红色】且数字为【奇数】',
+      pressedButton:timeout?null:{label:'红色 三角形 03'}
+    }});
+  }
+  else if(mode==='resume') view.showResume();
+  else if(mode==='resource-error') view.showResourceError(['running']);
+  const images = {};
+  await Promise.all(Object.entries({
+    running:'../assets/runtime/running-pair.png',
+    caring:'../assets/runtime/caring-pair.png',
+    separated:'../assets/runtime/separated-pair.png',
+    homeTitle:'../assets/runtime/title-home.png',
+    resultTitle:'../assets/runtime/title-result.png',
+    resultButtonRetry:'../assets/runtime/result-button-retry-v32.png',
+    resultButtonHome:'../assets/runtime/result-button-home-v32.png',
+    resultScoreDigits:'../assets/runtime/result-score-digits-v32.png',
+    resultScoreFen:'../assets/runtime/result-score-fen-v32.png',
+    resultCrown:'../assets/runtime/result-crown-v32.png',
+    resultBurst:'../assets/runtime/result-burst-v32.png',
+    resultBurstRight:'../assets/runtime/result-burst-right-v32.png',
+    upgradeTitle:'../assets/runtime/title-upgrade-v22.png',
+    upgradeBubble:'../assets/runtime/upgrade-bubble-v25.png',
+    upgradeStatus:'../assets/runtime/upgrade-status-v23.png',
+    upgradeHeart:'../assets/runtime/upgrade-heart-v23.png',
+    upgradeChain:'../assets/runtime/upgrade-card-chain-v23.png',
+    upgradeHp:'../assets/runtime/upgrade-card-hp-v23.png',
+    upgradeTime:'../assets/runtime/upgrade-card-time-v23.png',
+    upgradeProgress:'../assets/runtime/upgrade-card-progress-v23.png',
+    upgradePair:'../assets/runtime/upgrade-pair-v24.png',
+    upgradeBackground:'../assets/runtime/upgrade-background-v24.jpg',
+    upgradeRays:'../assets/runtime/upgrade-rays-v24.png',
+    stage:'../assets/runtime/sunny-stage.jpg',
+    landscape:'../assets/runtime/gameplay-landscape.jpg',
+    comboWordmark:'../assets/runtime/combo-wordmark-v30.png',
+    maxWordmark:'../assets/runtime/max-wordmark-v30.png',
+    readyWordmark:'../assets/runtime/ready-wordmark-v25.png',
+    hitWordmark:'../assets/runtime/hit-wordmark-v30.png',
+    comboDigits:'../assets/runtime/combo-digits-v29.png'
+  })
+    .map(([name,path])=>new Promise(resolve=>{
+      const image=new Image();image.onload=()=>{images[name]=image;resolve()};image.onerror=resolve;image.src=path;
+    })));
+  view.setImages(images);
+  if(query.has('livehazard')) {
+    const level=query.get('livehazard')==='swap'?28:36;
+    view.getView().board.level=level;
+    const showHazard=time=>{
+      view.renderer.updateHazardPresentation(createWechatHazards({level,enemyIndex:2,
+        seed:'accepted-hazards',buttonIds:buttons.map(b=>b.id),cols,nowMs:time}));view.draw();
+    };
+    if(query.has('at'))showHazard(Number(query.get('at')));
+    else {const start=performance.now();setInterval(()=>showHazard((performance.now()-start)%6500),40)}
+  }
+  if (query.has('lab')) window.previewLab = { view, canvas, buttons };
+  // Preview-only controls: exercise the production overlay without reaching level 24.
+  function previewInterference(active) {
+    view.renderer.updateHazardPresentation({ hazards: active
+      ? [{ type: 'interference', phase: 'active' }] : [] });
+    view.draw();
+  }
+  if (query.get('hazard') === 'interference') previewInterference(true);
+  if (query.has('hazard')) window.addEventListener('message', (event) => {
+    if (event.source === parent && event.data?.type === 'preview-interference') {
+      previewInterference(event.data.active === true);
+    }
+  });
+  if (query.get('trigger') === 'wrong') {
+    view.renderer.markButtonPressed('btn-0');
+    buttons[0].isClicked = true;
+    view.renderer.showWrongPressFeedback();
+  } else if (query.get('trigger') === 'safe') {
+    view.renderer.markButtonPressed('btn-1');
+    buttons[1].isClicked = true;
+    view.renderer.showSafePressFeedback();
+  } else if (query.get('trigger') === 'upgrade' && mode === 'upgrade') {
+    view.renderer.showUpgradeReward({upgrade:{id:'chain-span-plus'}});
+  } else if (query.get('trigger') === 'round-exit' && mode === 'game') {
+    view.renderer.beginRoundExit();
+  } else if (query.get('trigger') === 'round-enter' && mode === 'game') {
+    view.renderer.renderBoard({buttons:buttons.map(button=>({...button,isClicked:false})),
+      difficulty:{cols,rows},ruleText:'形状为【圆形】或数字为【偶数】',level:17,
+      score:previewScore});
+  }
+</script>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>手指等等我 · 已暂停的 v19 姿态序列帧</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;padding:24px;background:#fffdf4;color:#071944;font:16px/1.5 "Microsoft YaHei",sans-serif}
+  h1{margin:0 0 6px;font-size:28px}p{margin:0 0 20px}button{border:2px solid #071944;border-radius:10px;background:#ffe343;padding:8px 18px;font-weight:900;cursor:pointer}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-top:18px}
+  article{border:3px solid #071944;border-radius:16px;overflow:hidden;background:#ffe343;box-shadow:0 5px 0 #c79616}
+  h2{margin:12px 16px 0;font-size:18px}canvas{display:block;width:100%;height:auto}small{display:block;padding:0 16px 14px}
+</style>
+<h1>v19 姿态关键帧（已暂停）</h1>
+<p>用户反馈跨帧不一致，当前游戏已回退到 v11 静态原画轻微抖动。本页仅供回看，不代表运行时效果。</p>
+<p>原画第 0 帧与两张新增透明姿态帧按运行时节奏循环。点击按钮可暂停，逐帧检查手脚和白边。</p>
+<button id="toggle">暂停</button>
+<section class="grid">
+  <article><h2>首页 · 8 fps</h2><canvas id="home" width="840" height="500"></canvas><small id="home-label"></small></article>
+  <article><h2>局内 · 6 fps</h2><canvas id="game" width="900" height="400"></canvas><small id="game-label"></small></article>
+  <article><h2>结算 · 6 fps，扶头停留</h2><canvas id="result" width="760" height="640"></canvas><small id="result-label"></small></article>
+</section>
+<script type="module">
+  const specs={
+    home:{files:['../../../runtime/running-pair.png','../../../runtime/frames/running-1.png','../../../runtime/frames/running-2.png'],fps:8,order:[0,1,2,1]},
+    game:{files:['../../../runtime/separated-pair.png','../../../runtime/frames/separated-1.png','../../../runtime/frames/separated-2.png'],fps:6,order:[0,1,2,1]},
+    result:{files:['../../../runtime/caring-pair.png','../../../runtime/frames/caring-1.png','../../../runtime/frames/caring-2.png'],fps:6,order:[0,0,1,2,2,2,1,0]}
+  };
+  let playing=true,started=performance.now(),pausedAt=0;
+  document.querySelector('#toggle').onclick=()=>{
+    playing=!playing;
+    if(playing)started+=performance.now()-pausedAt;
+    else pausedAt=performance.now();
+    document.querySelector('#toggle').textContent=playing?'暂停':'播放';
+  };
+  await Promise.all(Object.values(specs).flatMap(spec=>spec.files.map(file=>new Promise(resolve=>{
+    const img=new Image();img.onload=img.onerror=resolve;img.src=file;(spec.images??=[]).push(img);
+  }))));
+  function paint(now){
+    const elapsed=(playing?now:pausedAt)-started;
+    for(const [name,spec] of Object.entries(specs)){
+      const canvas=document.getElementById(name),ctx=canvas.getContext('2d');
+      const slot=Math.floor(Math.max(0,elapsed)*spec.fps/1000)%spec.order.length;
+      const index=spec.order[slot];
+      ctx.fillStyle='#ffe343';ctx.fillRect(0,0,canvas.width,canvas.height);
+      const img=spec.images[index];
+      if(img?.complete&&img.naturalWidth){
+        const width=canvas.width*.96,height=width*img.naturalHeight/img.naturalWidth;
+        ctx.drawImage(img,(canvas.width-width)/2,canvas.height-height-10,width,height);
+      }
+      document.getElementById(`${name}-label`).textContent=`关键帧 ${index} / 2 · 槽位 ${slot+1} / ${spec.order.length}`;
+    }
+    requestAnimationFrame(paint);
+  }
+  requestAnimationFrame(paint);
+</script>

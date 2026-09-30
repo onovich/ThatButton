@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>Canvas COMBO 字形校样</title>
+<style>
+  body { margin:0;padding:24px;background:#e9e9e9;font-family:Arial,sans-serif; }
+  h1 { margin:0 0 20px;font-size:20px; }
+  canvas { display:block;margin:0 0 18px;background:#fffdf8;image-rendering:auto; }
+</style>
+<h1>Canvas 字形：320 区间与 390 区间</h1>
+<canvas id="small" width="320" height="120"></canvas>
+<canvas id="wide" width="390" height="120"></canvas>
+<script type="module">
+  import { drawComboMark } from './draw-combo-mark.mjs';
+  const small = document.getElementById('small').getContext('2d');
+  drawComboMark(small,{left:108,top:12,width:108,height:38,count:4,remainingMs:2100,windowMs:3000});
+  drawComboMark(small,{left:108,top:70,width:108,height:38,count:12,remainingMs:900,windowMs:3000});
+  const wide = document.getElementById('wide').getContext('2d');
+  drawComboMark(wide,{left:126,top:10,width:144,height:43,count:4,remainingMs:2100,windowMs:3000});
+  drawComboMark(wide,{left:126,top:66,width:144,height:43,count:12,remainingMs:900,windowMs:3000});
+</script>
+</html>

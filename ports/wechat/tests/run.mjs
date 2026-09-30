@@ -1,26 +1,60 @@
 import assert from 'node:assert/strict';
-import { readFileSync, statSync } from 'node:fs';
+import './hazards.mjs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createWechatGame } from '../src/game.js';
+import { drawPreCombo } from '../src/pre-combo.js';
+import { SFX_CUES } from '../../../src/audio/cues.js';
 import { getDifficultyForLevel } from '../../../src/config/difficulty.js';
 import { generateLevelData } from '../../../src/core/level.js';
 import { createSeededRng } from '../../../src/core/rng.js';
+import {createWechatHazards} from '../src/hazards.js';
 
-function createFakeWx({ width = 390, height = 844 } = {}) {
+const readySticker = { width: 384, height: 144 };
+const hitSticker = { width: 320, height: 168 };
+const preComboDraws = [];
+const preComboCtx = { drawImage(image) { preComboDraws.push(image); } };
+drawPreCombo(preComboCtx, { left: 0, top: 0, width: 140, height: 43,
+  stage: 0, readyImage: readySticker, hitImage: hitSticker });
+drawPreCombo(preComboCtx, { left: 0, top: 0, width: 140, height: 43,
+  stage: 1, readyImage: readySticker, hitImage: hitSticker });
+assert.deepEqual(preComboDraws, [readySticker, hitSticker],
+  'READY and 1 HIT must use their approved sticker images.');
+
+function createFakeWx({ width = 390, height = 844, failImages = false,
+  touchMode = 'both', canvasEvents = false, animateCanvas = false } = {}) {
   const frames = [];
+  const drawnText = [];
+  const transforms = [];
+  const alphaStack = [];
   const storage = new Map();
   let touchHandler = null;
+  let touchEndHandler = null;
+  const canvasHandlers = new Map();
   let hideHandler = null;
   let showHandler = null;
   const ctx = {
-    setTransform() {}, scale() {}, fillRect() {}, strokeRect() {}, fillText() {},
+    globalAlpha: 1,
+    setTransform() {}, scale() {}, fillRect() {}, strokeRect() {},
+    fillText(value) { drawnText.push(String(value)); }, strokeText() {},
+    beginPath() {}, moveTo() {}, lineTo() {}, quadraticCurveTo() {}, closePath() {},
+    arc() {}, fill() {}, stroke() {}, drawImage() {},
+    createLinearGradient() { return { addColorStop() {} }; },
     measureText(value) { return { width: [...String(value)].length * 17 }; }
   };
+  if (animateCanvas) {
+    ctx.save = () => { alphaStack.push(ctx.globalAlpha); };
+    ctx.restore = () => { ctx.globalAlpha = alphaStack.pop() ?? 1; };
+    ctx.translate = (x, y) => { transforms.push([x, y]); };
+    ctx.scale = (x, y) => { transforms.push([x, y]); };
+    ctx.rotate = (angle) => { transforms.push([angle]); };
+  }
   const canvas = {
     width: 0,
     height: 0,
     getContext() { return ctx; },
+    ...(canvasEvents ? { addEventListener(name, callback) { canvasHandlers.set(name, callback); } } : {}),
     requestAnimationFrame(callback) { frames.push(callback); }
   };
   const wxApi = {
@@ -34,17 +68,32 @@ function createFakeWx({ width = 390, height = 844 } = {}) {
     removeStorageSync(key) { storage.delete(key); },
     getLaunchOptionsSync() { return { query: { seed: 'wechat-integration' } }; },
     createInnerAudioContext() { return { stop() {}, play() {}, destroy() {} }; },
+    ...(failImages ? { createImage() {
+      const image = {};
+      Object.defineProperty(image, 'src', { set() { queueMicrotask(() => image.onerror?.()); } });
+      return image;
+    } } : {}),
     vibrateShort() {},
-    onTouchStart(callback) { touchHandler = callback; },
+    ...(touchMode !== 'end' ? { onTouchStart(callback) { touchHandler = callback; } } : {}),
+    onTouchEnd(callback) { touchEndHandler = callback; },
     onHide(callback) { hideHandler = callback; },
     onShow(callback) { showHandler = callback; }
   };
   return {
     wxApi,
     frames,
+    drawnText,
+    transforms,
     storage,
     canvas,
-    touch(x, y) { touchHandler({ touches: [{ clientX: x, clientY: y }] }); },
+    touch(x, y) {
+      const point = { clientX: x, clientY: y };
+      touchHandler?.({ touches: [point], changedTouches: [point] });
+      touchEndHandler?.({ touches: [], changedTouches: [point] });
+    },
+    canvasMouse(x, y) {
+      canvasHandlers.get('mousedown')?.({ clientX: x, clientY: y, offsetX: x, offsetY: y });
+    },
     hide() { hideHandler(); },
     show() { showHandler(); }
   };
@@ -62,9 +111,38 @@ function pointFor(view, predicate) {
 
 const fake = createFakeWx();
 const { app, view } = createWechatGame(fake.wxApi);
-assert.equal(view.getView().mode, 'start');
+assert.equal(view.getView().mode, 'home');
 assert.equal(fake.canvas.width, 780);
 assert.equal(fake.canvas.height, 1688);
+
+const helpPoint = pointFor(view, (action) => action.type === 'help');
+fake.touch(helpPoint.x, helpPoint.y);
+assert.equal(view.getView().mode, 'help');
+let homePoint = pointFor(view, (action) => action.type === 'home');
+fake.touch(homePoint.x, homePoint.y);
+assert.equal(view.getView().mode, 'home');
+const settingsPoint = pointFor(view, (action) => action.type === 'settings');
+fake.touch(settingsPoint.x, settingsPoint.y);
+assert.equal(view.getView().mode, 'settings');
+const soundPoint = pointFor(view, (action) => action.type === 'toggle' && action.key === 'sound');
+fake.touch(soundPoint.x, soundPoint.y);
+assert.equal(fake.storage.get('thatbutton.wechat.settings.v1').sound, false);
+const musicPoint = pointFor(view, (action) => action.type === 'toggle' && action.key === 'music');
+fake.touch(musicPoint.x, musicPoint.y);
+assert.equal(fake.storage.get('thatbutton.wechat.settings.v1').music, false);
+await new Promise((resolveWait) => setTimeout(resolveWait, 85));
+fake.touch(musicPoint.x, musicPoint.y);
+assert.equal(fake.storage.get('thatbutton.wechat.settings.v1').music, true);
+const musicLouder = pointFor(view, (action) => action.type === 'musicVolume' && action.delta === 1);
+fake.touch(musicLouder.x, musicLouder.y);
+assert.equal(fake.storage.get('thatbutton.wechat.settings.v1').musicVolume, 3);
+assert.equal(fake.drawnText.includes('75%'), true);
+const vibrationPoint = pointFor(view, (action) => action.type === 'toggle' && action.key === 'vibration');
+fake.touch(vibrationPoint.x, vibrationPoint.y);
+assert.equal(fake.storage.get('thatbutton.wechat.settings.v1').vibration, false);
+homePoint = pointFor(view, (action) => action.type === 'home');
+fake.touch(homePoint.x, homePoint.y);
+assert.equal(view.getView().mode, 'home');
 
 const startPoint = pointFor(view, (action) => action.type === 'start');
 fake.touch(startPoint.x, startPoint.y);
@@ -73,12 +151,30 @@ assert.equal(fake.frames.length, 1);
 const firstRound = app.getState();
 assert.equal(firstRound.seed, 'wechat-integration');
 assert.equal(firstRound.buttons.length, 4);
+assert.ok(fake.drawnText.includes('READY'), 'Zero streak should show the designed idle mark.');
+
+const endOnly = createFakeWx({ touchMode: 'end' });
+const endOnlyRun = createWechatGame(endOnly.wxApi);
+const endOnlyStart = pointFor(endOnlyRun.view, (action) => action.type === 'start');
+endOnly.touch(endOnlyStart.x, endOnlyStart.y);
+assert.equal(endOnlyRun.app.getSnapshot().status, 'playing');
+
+const canvasOnly = createFakeWx({ touchMode: 'end', canvasEvents: true });
+const canvasOnlyRun = createWechatGame(canvasOnly.wxApi);
+const canvasStart = pointFor(canvasOnlyRun.view, (action) => action.type === 'start');
+canvasOnly.canvasMouse(canvasStart.x, canvasStart.y);
+assert.equal(canvasOnlyRun.app.getSnapshot().status, 'playing');
 
 const safeId = firstRound.buttons.find((button) => !firstRound.forbiddenIds.includes(button.id)).id;
 const safePoint = pointFor(view, (action) => action.type === 'press' && action.buttonId === safeId);
 fake.touch(safePoint.x, safePoint.y);
 assert.equal(app.getState().score, 10);
 assert.equal(app.getState().buttons.find((button) => button.id === safeId).isClicked, true);
+assert.ok(fake.drawnText.includes('1 HIT!'), 'One safe press should show the primed mark.');
+const secondSafeId = firstRound.buttons.find((button) =>
+  button.id !== safeId && !firstRound.forbiddenIds.includes(button.id)).id;
+app.press(secondSafeId);
+assert.ok(fake.drawnText.includes('2 COMBO!'), 'Two safe presses should switch to the combo wordmark.');
 
 const forbiddenId = app.getState().forbiddenIds[0];
 const hpBefore = app.getState().player.hp;
@@ -87,11 +183,21 @@ fake.touch(forbiddenPoint.x, forbiddenPoint.y);
 assert.ok(app.getState().player.hp < hpBefore);
 
 fake.hide();
+fake.frames.shift()();
 const timeBeforePause = app.getState().timeLeft;
 await new Promise((resolveWait) => setTimeout(resolveWait, 25));
 fake.frames.shift()();
 assert.ok(Math.abs(app.getState().timeLeft - timeBeforePause) < 5);
 fake.show();
+assert.equal(view.getView().mode, 'resume');
+const timeWhileWaiting = app.getState().timeLeft;
+await new Promise((resolveWait) => setTimeout(resolveWait, 25));
+fake.frames.shift()();
+assert.ok(Math.abs(app.getState().timeLeft - timeWhileWaiting) < 5,
+  'Returning to the foreground must stay paused until the player continues.');
+const resumePoint = pointFor(view, (action) => action.type === 'resume');
+fake.touch(resumePoint.x, resumePoint.y);
+assert.equal(view.getView().mode, 'game');
 
 app.reset();
 assert.equal(fake.frames.length, 1, 'Reset must not create a second frame loop.');
@@ -110,6 +216,46 @@ fake.touch(resetPoint.x, resetPoint.y);
 assert.equal(app.getSnapshot().status, 'playing');
 assert.equal(app.getState().bestRecord.bestScore, 10);
 
+const homeFromResult = createFakeWx();
+const homeRun = createWechatGame(homeFromResult.wxApi);
+homeRun.app.start();
+const homeRunState = homeRun.app.getState();
+homeRun.app.gameLoop(homeRunState.lastTime + homeRunState.timeLeft + 5);
+await new Promise((resolveWait) => setTimeout(resolveWait, 820));
+const resultHomePoint = pointFor(homeRun.view, (action) => action.type === 'home');
+homeFromResult.touch(resultHomePoint.x, resultHomePoint.y);
+assert.equal(homeRun.view.getView().mode, 'home');
+assert.equal(homeRun.app.getState().isPlaying, false);
+const freshStartPoint = pointFor(homeRun.view, (action) => action.type === 'start');
+homeFromResult.touch(freshStartPoint.x, freshStartPoint.y);
+assert.equal(homeRun.app.getState().level, 1);
+assert.equal(homeRun.app.getSnapshot().status, 'playing');
+
+const brokenArt = createFakeWx({ failImages: true });
+const artRun = createWechatGame(brokenArt.wxApi);
+await new Promise((resolveWait) => setTimeout(resolveWait, 0));
+assert.equal(artRun.view.getView().mode, 'resource-error');
+const fallbackPoint = pointFor(artRun.view, (action) => action.type === 'continueFallback');
+brokenArt.touch(fallbackPoint.x, fallbackPoint.y);
+assert.equal(artRun.view.getView().mode, 'home');
+
+const capsuleFake = createFakeWx({ width: 320, height: 568 });
+capsuleFake.wxApi.getMenuButtonBoundingClientRect = () => ({ bottom: 48 });
+const capsuleRun = createWechatGame(capsuleFake.wxApi);
+assert.ok(capsuleRun.view.safeTop >= 53);
+const capsuleHelp = pointFor(capsuleRun.view, (action) => action.type === 'help');
+assert.ok(capsuleHelp.y >= capsuleRun.view.safeTop);
+const capsuleBoard = generateLevelData({ level: 6, difficulty: getDifficultyForLevel(6),
+  rng: createSeededRng('wechat-capsule-layout') });
+capsuleRun.view.renderer.renderBoard({ ...capsuleBoard, level: 6, score: 90 });
+for (const button of capsuleBoard.buttons) {
+  const point = pointFor(capsuleRun.view, (action) =>
+    action.type === 'press' && action.buttonId === button.id);
+  assert.ok(point.y < 520, 'Safe-area layout must keep every tile above the status panel.');
+}
+assert.equal(capsuleFake.drawnText.some((value) => value.includes('【') || value.includes('】')), false,
+  'Visible rule text must omit source emphasis brackets.');
+
 view.renderer.showUpgradeScreen({ choices: [{ id: 'test-upgrade', label: 'TEST', shortLabel: '+TEST', value: 1 }] });
 assert.equal(pointFor(view, (action) => action.type === 'upgrade').x > 0, true);
 
@@ -126,6 +272,34 @@ for (const button of layoutBoard.buttons) {
 }
 
 const upgradeFake = createFakeWx();
+// New mechanic rounds start normally; only the swap window compensates time.
+const hazardFake=createFakeWx(),hazardGame=createWechatGame(hazardFake.wxApi);
+const realDateNow=Date.now;let hazardNow=100000;Date.now=()=>hazardNow;
+hazardGame.app.start();
+const hs=hazardGame.app.getState();
+Object.assign(hs,{level:28,roundStartedAtMs:100000,lastTime:100000,timeLeft:10000});
+Object.assign(hs.combo,{streak:2,expiresAtMs:102400,lastEventAtMs:100000});
+hazardNow=101000;hazardFake.frames.shift()();
+assert.equal(hs.timeLeft,9000);assert.equal(hs.combo.expiresAtMs,102400);
+assert.equal(hazardGame.view.renderer.canPressButton(hs.buttons[0].id),true);
+hazardNow=101600;hazardFake.frames.shift()();
+assert.equal(hs.timeLeft,8400);assert.equal(hs.combo.expiresAtMs,102400);
+Object.assign(hs,{lastTime:103190,timeLeft:9000});
+Object.assign(hs.combo,{streak:2,expiresAtMs:105000,lastEventAtMs:103000});
+hazardNow=103850;hazardFake.frames.shift()();
+assert.equal(hs.timeLeft,8980);assert.equal(hs.combo.expiresAtMs,105640);
+// Renderer retains swapped identities at their destination and guards BOTH tiles.
+const hb=generateLevelData({level:28,difficulty:getDifficultyForLevel(28),rng:createSeededRng('swap-layout')});
+const hazardOptions={seed:'swap-renderer',level:28,enemyIndex:2,cols:3,buttonIds:hb.buttons.map(b=>b.id)};
+hazardGame.view.renderer.renderBoard({...hb,level:28,score:0});
+hazardGame.view.renderer.updateHazardPresentation(createWechatHazards({...hazardOptions,nowMs:1600}));hazardGame.view.draw();
+const targetPair=createWechatHazards({...hazardOptions,nowMs:1600}).hazards[0].targetButtonIds;
+const beforePoint=pointFor(hazardGame.view,a=>a.buttonId===targetPair[0]);
+hazardGame.view.renderer.updateHazardPresentation(createWechatHazards({...hazardOptions,nowMs:3510}));hazardGame.view.draw();
+for(const id of targetPair)assert.equal(hazardGame.view.renderer.canPressButton(id),false);
+hazardGame.view.renderer.updateHazardPresentation(createWechatHazards({...hazardOptions,nowMs:5000}));hazardGame.view.draw();
+assert.equal(hazardGame.view.hitTest(beforePoint.x,beforePoint.y)?.buttonId,targetPair[1]);
+Date.now=realDateNow;
 const upgradeGame = createWechatGame(upgradeFake.wxApi);
 upgradeGame.app.start();
 upgradeGame.app.getState().combat.hp = 1;
@@ -135,11 +309,64 @@ for (const button of upgradeGame.app.getState().buttons) {
 await new Promise((resolveWait) => setTimeout(resolveWait, 630));
 assert.equal(upgradeGame.view.getView().mode, 'upgrade');
 assert.equal(upgradeGame.app.getState().upgrades.pending, true);
+assert.equal(upgradeGame.app.getState().upgrades.choices.length, 3);
+assert.equal(upgradeGame.app.getState().upgrades.choices.some((choice) => choice.id === 'combo-reward-plus'), false);
 const upgradePoint = pointFor(upgradeGame.view, (action) => action.type === 'upgrade');
 upgradeFake.touch(upgradePoint.x, upgradePoint.y);
 await new Promise((resolveWait) => setTimeout(resolveWait, 470));
 assert.equal(upgradeGame.app.getSnapshot().status, 'playing');
 assert.equal(upgradeGame.app.getState().level, 2);
+
+const animatedFake = createFakeWx({ animateCanvas: true });
+const animatedRun = createWechatGame(animatedFake.wxApi);
+animatedRun.app.start();
+const animatedSafe = animatedRun.app.getState().buttons.find((button) =>
+  !animatedRun.app.getState().forbiddenIds.includes(button.id));
+animatedRun.app.press(animatedSafe.id);
+const animatedForbidden = animatedRun.app.getState().forbiddenIds[0];
+animatedRun.app.press(animatedForbidden);
+assert.ok(animatedFake.transforms.length > 0,
+  'Full Canvas mode must exercise animated transforms.');
+assert.ok(animatedFake.transforms.every((entry) => entry.every(Number.isFinite)),
+  'Motion transforms must stay finite after safe and wrong presses.');
+
+animatedRun.view.renderer.updateScore(87654);
+await new Promise((resolveWait) => setTimeout(resolveWait, 410));
+animatedRun.view.renderer.showGameOverScreen({ level: 1, score: 87654, isTimeout: true });
+animatedFake.drawnText.length = 0;
+animatedRun.app.reset();
+assert.equal(animatedRun.view.getView().score, 0);
+assert.equal(animatedRun.view.getView().mode, 'game');
+animatedFake.drawnText.length = 0;
+animatedRun.view.draw();
+assert.equal(animatedFake.drawnText.includes('87654'), false,
+  'Restart must not keep drawing the previous run through its completed score tween.');
+assert.ok(animatedFake.drawnText.includes('0'), 'A new run must visibly start at zero points.');
+
+const transitionFake = createFakeWx({ animateCanvas: true });
+const transitionRun = createWechatGame(transitionFake.wxApi);
+transitionRun.app.start();
+for (const button of transitionRun.app.getState().buttons) {
+  if (!transitionRun.app.getState().forbiddenIds.includes(button.id)) {
+    transitionRun.app.press(button.id);
+  }
+}
+assert.equal(transitionRun.app.getState().isPlaying, false,
+  'Clearing a round must pause its timer while old tiles leave.');
+await new Promise((resolveWait) => setTimeout(resolveWait, 640));
+assert.equal(transitionRun.app.getState().level, 2);
+assert.equal(transitionRun.app.getState().isPlaying, false,
+  'The new timer must wait until staggered tile entry finishes.');
+const entryTimeLeft = transitionRun.app.getState().timeLeft;
+assert.throws(() => pointFor(transitionRun.view, (action) => action.type === 'press'),
+  'New tiles must ignore input while entering.');
+await new Promise((resolveWait) => setTimeout(resolveWait, 260));
+assert.equal(transitionRun.app.getState().timeLeft, entryTimeLeft,
+  'The countdown must remain fixed during tile entry.');
+await new Promise((resolveWait) => setTimeout(resolveWait, 400));
+assert.equal(transitionRun.app.getState().isPlaying, true);
+assert.ok(transitionRun.app.getState().timeLeft <= entryTimeLeft);
+assert.ok(pointFor(transitionRun.view, (action) => action.type === 'press').x > 0);
 
 const buildRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'build');
 const bundle = readFileSync(resolve(buildRoot, 'game.js'), 'utf8');
@@ -147,5 +374,53 @@ assert.ok(statSync(resolve(buildRoot, 'game.js')).size > 10000);
 assert.equal(bundle.includes('document.getElementById'), false);
 assert.equal(bundle.includes('new AudioContext('), false);
 assert.equal(JSON.parse(readFileSync(resolve(buildRoot, 'project.config.json'))).compileType, 'game');
-assert.equal(readFileSync(resolve(buildRoot, 'audio/click.wav')).toString('ascii', 0, 4), 'RIFF');
+assert.equal(readFileSync(resolve(buildRoot, 'audio/safe_press.wav')).toString('ascii', 0, 4), 'RIFF');
+assert.equal(existsSync(resolve(buildRoot, 'audio/click.wav')), false, 'Placeholder audio must be removed.');
+for (const cue of Object.values(SFX_CUES)) {
+  assert.ok(readFileSync(resolve(buildRoot, 'audio', cue.file)).equals(
+    readFileSync(resolve(buildRoot, '../../../src/audio/sfx', cue.file))
+  ), `Built audio differs from source: ${cue.file}`);
+}
+for (const name of ['home.m4a', 'game.m4a']) {
+  assert.ok(readFileSync(resolve(buildRoot, 'audio/music', name)).equals(
+    readFileSync(resolve(buildRoot, '../assets/music', name))
+  ), `Built music differs from source: ${name}`);
+}
+function directoryBytes(path) {
+  return readdirSync(path, { withFileTypes: true }).reduce((total, item) => {
+    const child = resolve(path, item.name);
+    return total + (item.isDirectory() ? directoryBytes(child) : statSync(child).size);
+  }, 0);
+}
+assert.ok(directoryBytes(buildRoot) < 4 * 1024 * 1024,
+  'WeChat main package must stay below 4 MiB.');
+for (const name of [
+  'running-pair.png', 'caring-pair.png', 'separated-pair.png',
+  'title-home.png', 'title-result.png', 'sunny-stage.jpg', 'gameplay-landscape.jpg',
+  'result-button-retry-v32.png', 'result-button-home-v32.png',
+  'result-score-digits-v32.png', 'result-score-fen-v32.png',
+  'result-crown-v32.png', 'result-burst-v32.png', 'result-burst-right-v32.png',
+  'upgrade-pair-v24.png', 'upgrade-background-v24.jpg', 'upgrade-rays-v24.png',
+  'upgrade-bubble-v25.png',
+  'combo-wordmark-v30.png', 'max-wordmark-v30.png', 'ready-wordmark-v25.png',
+  'hit-wordmark-v30.png', 'combo-digits-v29.png'
+]) {
+  if (name.endsWith('.jpg')) {
+    assert.equal(readFileSync(resolve(buildRoot, 'art', name)).toString('hex', 0, 2), 'ffd8');
+    continue;
+  }
+  assert.equal(readFileSync(resolve(buildRoot, 'art', name)).toString('hex', 0, 4), '89504e47');
+}
+assert.equal(existsSync(resolve(buildRoot, 'art/combo-wordmark-v17.png')), false);
+assert.equal(existsSync(resolve(buildRoot, 'art/ready-wordmark-v21.png')), false);
+assert.equal(existsSync(resolve(buildRoot, 'art/upgrade-bubble-v23.png')), false);
+for (const name of ['ready-wordmark-v25.png', 'hit-wordmark-v30.png',
+  'combo-wordmark-v30.png', 'combo-digits-v29.png', 'max-wordmark-v30.png',
+  'result-button-retry-v32.png', 'result-button-home-v32.png',
+  'result-score-digits-v32.png', 'result-score-fen-v32.png',
+  'result-crown-v32.png', 'result-burst-v32.png', 'result-burst-right-v32.png']) {
+  assert.ok(readFileSync(resolve(buildRoot, 'art', name)).equals(
+    readFileSync(resolve(buildRoot, '../assets/runtime', name))
+  ), `Built sticker art differs from source: ${name}`);
+}
 console.log('WeChat port integration checks passed.');

@@ -58,6 +58,8 @@ export function createGameSession({
   seedProvider,
   debugProvider,
   hazardsDisabledProvider,
+  upgradeDefinitions = null,
+  hazardDirector = createHazardDirectorState,
   exposeHostApi = null
 }) {
   const loadedBestRecord = loadBestRecordFromStorage(storage);
@@ -72,6 +74,8 @@ export function createGameSession({
     performance
   });
   let loopStarted = false;
+  let roundActivationToken = 0;
+  let timeWarningPlayed = false;
 
   function getViewportClass() {
     const viewport = viewportSize();
@@ -259,7 +263,7 @@ export function createGameSession({
       syncPlaytestRound(gameState.hazards);
       return gameState.hazards;
     }
-    gameState.hazards = createHazardDirectorState({
+    gameState.hazards = hazardDirector({
       seed: gameState.seed || 'unseeded',
       level: gameState.level,
       enemyIndex: gameState.combat?.enemyIndex || 1,
@@ -331,6 +335,7 @@ export function createGameSession({
   }
 
   function playSafePressCue(comboChange) {
+    audio.playSafeClick();
     if (comboChange.combo.hasVisibleCombo) {
       audio.playComboCue({
         streak: comboChange.combo.streak,
@@ -342,13 +347,12 @@ export function createGameSession({
       audio.playChainReady();
       return;
     }
-    audio.playSafeClick();
   }
 
   function triggerGameOver(id, element) {
     gameState.isPlaying = false;
-    audio.playExplosion();
     const isTimeout = id === 'timeout';
+    if (isTimeout) audio.playFailure();
     const failedButton = gameState.buttons.find((button) => button.id === id);
     const failureReason = isTimeout ? 'timeout' : 'wrong_click';
     const failureRecap = finalizeBestRecordForRun(buildFailureRecapFromState(gameState, {
@@ -413,7 +417,8 @@ export function createGameSession({
       player: encounterFacts.player,
       combo: encounterFacts.combo
     });
-    audio.playError();
+    if (playerDamageResult.defeated) audio.playFailure();
+    else audio.playError();
     renderer.showWrongPressFeedback({
       sourceElement,
       damage: playerDamageResult.damage,
@@ -430,7 +435,8 @@ export function createGameSession({
     renderer.updateHazardPresentation(gameState.hazards);
     const offer = offerEncounterUpgradeChoices(gameState.upgrades, {
       rng: gameState.rng,
-      enemyIndex: gameState.combat.enemyIndex
+      enemyIndex: gameState.combat.enemyIndex,
+      ...(upgradeDefinitions ? { definitions: upgradeDefinitions } : {})
     });
     gameState.upgrades = offer.upgrades;
     if (gameState.playtestRun) {
@@ -442,6 +448,7 @@ export function createGameSession({
       choices: offer.choices,
       onSelect: selectUpgrade
     });
+    audio.playUpgradeOffer();
     recordDebugEvent('upgrades_offered', {
       choices: offer.choices,
       upgrades: encounterFacts.upgrades,
@@ -501,7 +508,7 @@ export function createGameSession({
       upgrade: applied.upgrade
     });
     renderer.hideUpgradeScreen();
-    audio.playLevelUp();
+    audio.playUpgradeSelect();
     const encounterFacts = getEncounterFacts(gameState);
     recordDebugEvent('upgrade_selected', {
       upgrade: applied.upgrade,
@@ -541,6 +548,7 @@ export function createGameSession({
       defeated: combatResult.defeated,
       sourceElement
     });
+    const transitionDelay = renderer.beginRoundExit?.() ?? 600;
     recordDebugEvent('level_complete', {
       combatDamage: combatResult.damage,
       combat: encounterFacts.combat,
@@ -576,13 +584,13 @@ export function createGameSession({
         combo: encounterFacts.combo,
         upgrades: encounterFacts.upgrades
       });
-      audio.playLevelUp();
+      audio.playEnemyDefeated();
       setTimeout(() => {
         showUpgradeChoices();
-      }, 600);
+      }, transitionDelay);
       return;
     }
-    audio.playLevelUp();
+    audio.playRoundClear();
     gameState.level++;
 
     const nextDifficulty = getDifficultyForLevel(gameState.level);
@@ -596,7 +604,7 @@ export function createGameSession({
     renderer.setWarningVisible(nextDifficulty.feedbackIntensity === 'critical');
     setTimeout(() => {
       startRound();
-    }, 600);
+    }, transitionDelay);
   }
 
   function pressButton(id, { element = renderer.getButtonElement(id), event = null, source = 'host' } = {}) {
@@ -608,6 +616,9 @@ export function createGameSession({
     }
     if (!gameState.isPlaying) {
       return { accepted: false, reason: 'not_playing', buttonId: id, source };
+    }
+    if (renderer.canPressButton?.(id) === false) {
+      return { accepted: false, reason: 'hazard_input_protected', buttonId: id, source };
     }
 
     const button = gameState.buttons.find((entry) => entry.id === id);
@@ -716,6 +727,9 @@ export function createGameSession({
   }
 
   function startRound() {
+    const activationToken = ++roundActivationToken;
+    timeWarningPlayed = false;
+    if (gameState.level > 1) audio.playRoundEnter();
     const difficulty = getDifficultyForLevel(gameState.level);
     gameState.currentDifficulty = difficulty;
     if (!gameState.timeLimit) {
@@ -723,10 +737,8 @@ export function createGameSession({
       gameState.timeLeft = gameState.timeLimit;
     }
     generateCurrentLevelData(difficulty);
-    gameState.roundStartedAtMs = performance.now();
     updateHazardState(0);
-    recordDebugEvent('round_start');
-    renderer.renderBoard({
+    const entryDelayMs = renderer.renderBoard({
       buttons: gameState.buttons,
       forbiddenIds: gameState.forbiddenIds,
       difficulty: gameState.currentDifficulty,
@@ -736,18 +748,30 @@ export function createGameSession({
       onButtonInput: handleButtonInput
     });
     renderer.updateHazardPresentation(gameState.hazards);
-    gameState.lastTime = performance.now();
-    gameState.isPlaying = true;
-    hostController.emitRoundStarted();
+    renderer.updateTimer(gameState.timeLeft, gameState.timeLimit, getCurrentComboWindow());
+    const activateRound = () => {
+      if (activationToken !== roundActivationToken) return;
+      gameState.roundStartedAtMs = performance.now();
+      gameState.lastTime = gameState.roundStartedAtMs;
+      gameState.isPlaying = true;
+      recordDebugEvent('round_start');
+      hostController.emitRoundStarted();
+    };
+    if (Number.isFinite(entryDelayMs) && entryDelayMs > 0) {
+      gameState.isPlaying = false;
+      setTimeout(activateRound, entryDelayMs);
+    } else activateRound();
   }
 
   function startGame() {
     audio.resume();
+    audio.playRunStart();
     renderer.hideStartScreen();
     renderer.hideGameOverScreen();
     renderer.hideUpgradeScreen();
     renderer.resetFailureShake();
     renderer.renderFailureRecap(null);
+    renderer.resetRoundMotion?.();
     syncBestRecordFromStorage();
     resetRandomSource();
     gameState.debug = getDebugFromUrl();
@@ -803,9 +827,26 @@ export function createGameSession({
     }
 
     const deltaTime = timestamp - gameState.lastTime;
+    const fromElapsed = gameState.lastTime - gameState.roundStartedAtMs;
     gameState.lastTime = timestamp;
-    gameState.timeLeft -= deltaTime;
     updateHazardState(timestamp - gameState.roundStartedAtMs);
+    const toElapsed = timestamp - gameState.roundStartedAtMs;
+    const protectedMs = (from) => (gameState.hazards.protectionWindows || []).reduce((total, [a, b]) =>
+      total + Math.max(0, Math.min(toElapsed, b) - Math.max(from, a)), 0);
+    gameState.timeLeft -= Math.max(0, deltaTime - protectedMs(fromElapsed));
+    if (gameState.combo.expiresAtMs !== null) {
+      const comboFrom = Math.max(fromElapsed,
+        (gameState.combo.lastEventAtMs ?? gameState.lastTime) - gameState.roundStartedAtMs);
+      for (const [a,b] of gameState.hazards.protectionWindows || []) {
+        const begin = Math.max(comboFrom,a), end = Math.min(toElapsed,b);
+        if(end > begin && gameState.combo.expiresAtMs >= gameState.roundStartedAtMs + begin)
+          gameState.combo.expiresAtMs += end-begin;
+      }
+    }
+    if (!timeWarningPlayed && gameState.timeLeft > 0 && gameState.timeLeft <= 5000) {
+      timeWarningPlayed = true;
+      audio.playTimeWarning();
+    }
     renderer.updateHazardPresentation(gameState.hazards);
     const comboExpiry = expireEncounterComboIfNeeded(gameState.combo, timestamp);
     if (comboExpiry.changed) {

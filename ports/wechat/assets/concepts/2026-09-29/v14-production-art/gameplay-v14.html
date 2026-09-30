@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>手指等等我 · v14 局内原画</title>
+  <style>
+    :root { --w:320px;--h:568px;--navy:#071944;--paper:#fffdf4;--gold:#ffe343;--cyan:#05c8d9;--pink:#ef668e; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#f7e9bb; color:var(--navy); font-family:system-ui,"Microsoft YaHei",sans-serif; }
+    button { font:inherit; }
+    .screen { width:var(--w);height:var(--h);overflow:hidden;padding:11px 12px 10px;background:radial-gradient(circle at 90% -5%,#fff2b2 0 12%,transparent 35%),linear-gradient(180deg,#fffef9,#fff8e7);display:flex;flex-direction:column;gap:5px; }
+    .head { flex:none;height:41px;display:flex;align-items:center;justify-content:space-between;gap:9px; }
+    .level { padding:5px 12px;border:2px solid var(--navy);border-radius:13px;background:var(--gold);box-shadow:0 3px 0 #ba9f14;font-weight:1000;font-size:17px;white-space:nowrap; }
+    .score { display:flex;align-items:baseline;gap:3px;font-size:13px;font-weight:900;white-space:nowrap; }
+    .score b { font-size:31px;letter-spacing:-.07em;line-height:1; }
+    .rule { flex:none;min-height:73px;padding:5px 9px 6px;border:2px solid var(--navy);border-radius:13px;background:linear-gradient(135deg,#fff1f1,#fffdf8);box-shadow:0 3px 0 #e9d7d4; }
+    .rule-label { font-size:13px;line-height:17px;color:#b71f34;font-weight:1000; }
+    .rule-text { font-size:14px;line-height:20px;font-weight:950;letter-spacing:-.035em;overflow-wrap:anywhere; }
+    .rule-text em { font-style:normal;color:#df1234; }
+    .vitals { flex:none;height:64px;display:flex;flex-direction:column;justify-content:space-evenly;gap:3px; }
+    .time-row,.hp-row { display:flex;align-items:center;gap:8px;font-size:14px;font-weight:900;line-height:1; }
+    .time-row strong,.hp-row strong { font-size:17px;white-space:nowrap; }
+    .track { height:12px;flex:1;border:2px solid var(--navy);border-radius:9px;background:#dfeeff;overflow:hidden; }
+    .track i { display:block;height:100%;border-radius:9px; }
+    .time-row .track i { width:61%;background:#56ce72; }
+    .time-row.danger strong { color:#ca294a; }
+    .time-row.danger .track i { background:#ed4b68; }
+    .hp-row .track { height:14px;background:#e6e7e8; }
+    .hp-row .track i { width:82%;background:linear-gradient(90deg,#ff8f9c,#f05075); }
+    .hp-row.danger strong { color:#c92b4b; }
+    .hp-row.danger .track i { background:#e53c5d; }
+    .board { flex:1 1 auto;min-height:0;max-height:390px;display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-template-rows:repeat(var(--rows),minmax(0,1fr));gap:8px;padding:2px 3px 7px;align-self:stretch; }
+    .tile { position:relative;min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px 2px 2px;border:3px solid var(--navy);border-radius:12px;color:#fff;background:linear-gradient(180deg,#fff8 0%,#fff3 15%,transparent 28%),linear-gradient(180deg,var(--top),var(--base));box-shadow:0 6px 0 var(--wall),0 8px 0 var(--navy),inset 0 2px 0 #ffffff75;text-shadow:0 1px 1px #0005;cursor:default; }
+    .tile.red { --top:#ff5b6b;--base:#ed1c39;--wall:#aa1934; }
+    .tile.blue { --top:#41b4fc;--base:#087ddd;--wall:#075eaa; }
+    .tile.yellow { --top:#ffe96d;--base:#ffcc08;--wall:#a57c0b;color:var(--navy);text-shadow:none; }
+    .tile.purple { --top:#c083ff;--base:#7e3dd7;--wall:#572998; }
+    .shape { display:block;width:26px;height:26px;flex:none;filter:drop-shadow(0 2px 1px #0003); }
+    .number { font-size:18px;font-weight:1000;line-height:19px; }
+    .tile.pressed { transform:translateY(6px);box-shadow:inset 0 5px 8px #091a4770,inset 0 1px 2px #fff4,0 1px 0 var(--navy);background:linear-gradient(180deg,#0c144322,#0c144322),linear-gradient(180deg,var(--top),var(--base));filter:saturate(.82) brightness(.89); }
+    .tile.pressed .shape { filter:drop-shadow(0 1px 1px #0005); }
+    .tile.wrong { transform:translateY(6px);box-shadow:inset 0 5px 8px #091a4770,0 1px 0 var(--navy),0 0 0 3px #f24961;filter:saturate(.82) brightness(.89); }
+    .wrong-note { position:absolute;z-index:4;top:7px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:6px 11px;border:2px solid var(--navy);border-radius:10px;background:#fff4f3;color:#bd1639;font-size:13px;font-weight:1000;box-shadow:0 3px 0 #c83254; }
+    .combo { flex:none;height:22px;display:flex;align-items:center;justify-content:space-between;padding:0 3px;font-size:12px;font-weight:900; }
+    .combo .fade { color:#66718a; }
+    .challenge { flex:none;height:56px;padding:5px 9px 6px;border:2px solid var(--navy);border-radius:13px;background:#fff;box-shadow:0 3px 0 #d1d6de; }
+    .challenge-top { display:flex;align-items:baseline;justify-content:space-between;gap:5px;font-size:12px;font-weight:900;line-height:20px; }
+    .challenge-top b { font-size:17px; }
+    .challenge-top small { font-size:11px;color:#5d6690; }
+    .challenge .track { display:block;height:11px;background:#eee6fc; }
+    .challenge .track i { width:36%;background:linear-gradient(90deg,#8c52e2,#bd79fb); }
+    .screen[data-grid="2x2"] .board { max-height:305px; }
+    .screen[data-grid="2x3"] .board { max-height:345px; }
+    .screen[data-grid="2x2"] .shape,.screen[data-grid="2x3"] .shape { width:31px;height:31px; }
+    .screen[data-grid="2x2"] .number,.screen[data-grid="2x3"] .number { font-size:20px;line-height:22px; }
+    .screen[data-size="390"] { padding:29px 16px 24px;gap:11px; }
+    .screen[data-size="390"] .board { flex:0 0 390px;margin-top:15px; }
+    .screen[data-size="390"] .combo { margin-top:12px; }
+    .screen[data-size="390"] .challenge { margin-top:7px; }
+    .screen[data-safe="46"] { padding-top:57px; }
+    .component-board { width:1000px;min-height:770px;padding:32px;background:#fffaf0; }
+    .component-board h1 { margin:0;font-size:34px; }
+    .component-board p { font-size:16px;margin:5px 0 23px; }
+    .component-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:15px; }
+    .component-pair { border:2px solid var(--navy);border-radius:18px;background:white;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+    .component-pair h2 { grid-column:1/-1;margin:0;font-size:17px; }
+    .component-pair .tile { height:96px;min-height:96px; }
+    .component-pair .label { text-align:center;font-size:13px;font-weight:800; }
+    .component-foot { display:flex;gap:18px;margin-top:26px; }
+    .component-foot article { border:2px solid var(--navy);border-radius:16px;background:white;padding:17px 18px;flex:1;font-size:16px;line-height:1.5; }
+    .component-foot h2 { margin:0 0 5px;font-size:20px; }
+    .component-foot .sample { display:inline-block;background:#fff0c7;border-radius:8px;padding:5px 9px;margin:7px 0;font-weight:900; }
+  </style>
+</head>
+<body>
+  <main id="app"></main>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const size = params.get('size') || '320';
+    const dims = {'320':[320,568], '360':[360,640], '390':[390,844]};
+    const [w,h] = dims[size] || dims['320'];
+    document.documentElement.style.setProperty('--w',w+'px');
+    document.documentElement.style.setProperty('--h',h+'px');
+    const grid = params.get('grid') || '3x3';
+    const variant = params.get('variant') || 'normal';
+    const shapes = {
+      triangle:'<path d="M16 3 29 28H3Z" fill="currentColor"/>',
+      circle:'<circle cx="16" cy="16" r="12" fill="currentColor"/>',
+      square:'<rect x="4" y="4" width="24" height="24" rx="2" fill="currentColor"/>',
+      star:'<path d="m16 2 4.1 9.1L30 12l-7.5 6.6 2.2 10L16 23.3l-8.7 5.3 2.2-10L2 12l9.9-.9Z" fill="currentColor"/>'
+    };
+    const tile = (color,shape,number,pressed=false,wrong=false) => `<button class="tile ${color}${pressed?' pressed':''}${wrong?' wrong':''}" aria-label="${pressed?'已按下 ':''}${color} ${shape} ${number}"><svg class="shape" viewBox="0 0 32 32" aria-hidden="true">${shapes[shape]}</svg><span class="number">${number}</span></button>`;
+    const examples = {
+      '3x3': {level:16,score:900,rule:'颜色为【<em>红色</em>】且形状为【三角形】且数字为【<em>3</em>】',timer:'8.4',hp:82,max:100,progress:350,target:500,combo:'连击 4 · 接续剩 2.1 秒',cols:3,rows:3,buttons:[['red','triangle','03'],['blue','circle','08'],['purple','square','12',true],['yellow','star','05'],['red','circle','10',true],['purple','triangle','07'],['blue','triangle','02',true],['red','square','09'],['yellow','circle','04']]},
+      '2x3': {level:4,score:120,rule:'数字为【<em>奇数</em>】',timer:'11.2',hp:100,max:100,progress:58,target:500,combo:'连击 1 · 接续剩 2.2 秒',cols:3,rows:2,buttons:[['red','triangle','03'],['blue','circle','08',true],['purple','square','12'],['yellow','star','04'],['red','circle','10'],['blue','triangle','02']]},
+      '2x2': {level:1,score:0,rule:'颜色为【<em>红色</em>】',timer:'17.8',hp:100,max:100,progress:0,target:500,combo:'连击尚未开始',cols:2,rows:2,buttons:[['red','triangle','03'],['blue','circle','08'],['purple','square','12'],['yellow','star','04']]}
+    };
+    const e = examples[grid] || examples['3x3'];
+    if (variant === 'wrong' && grid === '3x3') { e.hp=64;e.buttons[0][3]=true;e.buttons[0][4]=true; }
+    if (variant === 'critical' && grid === '3x3') { e.timer='1.2';e.timePct=10;e.hp=18;e.max=124;e.combo='连击已中断'; }
+    if (variant === 'progress-near' && grid === '3x3') { e.progress=486;e.combo='连击已中断'; }
+    if (params.get('page') === 'buttons') {
+      const samples=[['red','triangle','03'],['blue','circle','08'],['yellow','star','05'],['purple','square','12'],['red','circle','10'],['blue','triangle','02'],['yellow','circle','04'],['purple','triangle','07']];
+      document.getElementById('app').innerHTML=`<section class="component-board"><h1>v14 · 同一实体按钮的两种状态</h1><p>四种属性色、四种图形；按下后只改变高度、侧壁、明度和高光，仍保留原颜色、形状、数字。未按状态不提示答案。</p><div class="component-grid">${samples.map((s,i)=>`<div class="component-pair"><h2>${['红三角 03','蓝圆 08','黄星 05','紫方 12','红圆 10','蓝三角 02','黄圆 04','紫三角 07'][i]}</h2>${tile(...s)}${tile(...s,true)}<div class="label">凸起 · 未按</div><div class="label">凹陷 · 已按</div></div>`).join('')}</div><div class="component-foot"><article><h2>误按后的短反馈</h2><span class="sample">误按 · 体力 −18</span><br>只在真实误按后出现；若玩家仍存活，按钮留在已按的凹陷状态。没有勾号，也不让未按按钮变色。</article><article><h2>动态绑定</h2>按钮颜色、图形、数字取自 buttons[]；按下取 isClicked。误按扣血取 lastPlayerDamage.appliedDamage。绘制和触摸命中共用同一个按钮矩形。</article></div></section>`;
+    } else {
+      const hp=e.hp; const hpPercent=Math.min(100,100*hp/e.max); const progressPercent=100*e.progress/e.target;
+      document.getElementById('app').innerHTML=`<section class="screen" data-size="${size}" data-safe="${params.get('safe')||'0'}" data-grid="${grid}" style="--cols:${e.cols};--rows:${e.rows}" aria-label="${grid} 局内原画"><header class="head"><div class="level">第 ${e.level} 关</div><div class="score"><b>${e.score}</b><span>分</span></div></header><section class="rule"><div class="rule-label">本轮别按：</div><div class="rule-text">${e.rule}</div></section><section class="vitals"><div class="time-row${Number(e.timer)<3?' danger':''}"><strong>◷ ${e.timer} 秒</strong><span class="track"><i style="width:${e.timePct||61}%"></i></span></div><div class="hp-row${hp/e.max<.3||variant==='wrong'?' danger':''}"><strong>体力 ${hp}/${e.max}</strong><span class="track"><i style="width:${hpPercent}%"></i></span></div></section><section class="board" aria-label="${grid} 按钮">${e.buttons.map(b=>tile(...b)).join('')}</section><div class="combo"${variant==='wrong'?' style="color:#c92747"':''}><span>${variant==='wrong'?'误按 · 体力 −18':e.combo}</span><span class="fade">${variant==='wrong'?'短暂反馈':'满格后选升级'}</span></div><section class="challenge"><div class="challenge-top"><span>挑战进度 <b>${e.progress}/${e.target}</b></span><small>清完一轮推进</small></div><span class="track"><i style="width:${progressPercent}%"></i></span></section></section>`;
+    }
+  </script>
+</body>
+</html>

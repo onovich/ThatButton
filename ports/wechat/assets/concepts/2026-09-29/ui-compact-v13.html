@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>手指等等我 · 小屏局内适配</title>
+  <style>
+    :root { --screen-w:320px; --screen-h:568px; --ink:#081741; --paper:#fffef7; --yellow:#ffe441; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--yellow); color:var(--ink); font-family:system-ui,"Microsoft YaHei",sans-serif; }
+    button { font:inherit; }
+    .screen {
+      width:var(--screen-w); height:var(--screen-h); overflow:hidden; margin:0;
+      padding:5px 10px 10px; border:5px solid #081741; border-radius:26px;
+      background:linear-gradient(180deg,#fffef9,#fff9e9);
+      display:flex; flex-direction:column; justify-content:space-between; gap:4px;
+    }
+    .system { flex:0 0 17px; display:flex; align-items:center; justify-content:space-between; padding:0 10px; font-size:11px; font-weight:900; }
+    .head { flex:0 0 33px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .level,.score { height:32px; display:flex; align-items:center; justify-content:center; border:2px solid var(--ink); border-radius:12px; font-size:18px; font-weight:1000; line-height:1; box-shadow:0 2px 0 #d4d5dd; }
+    .level { min-width:95px; padding:0 8px; background:#ffe942; }
+    .score { min-width:91px; padding:0 8px; background:#fff; }
+    .rule { flex:0 0 71px; border:2px solid var(--ink); border-radius:13px; background:linear-gradient(160deg,#fff5f5,#fffdf7); padding:5px 9px 4px; }
+    .rule-label { color:#ad2338; font-size:13px; line-height:16px; font-weight:900; }
+    .rule-text { font-size:15px; line-height:20px; font-weight:900; letter-spacing:-.04em; overflow-wrap:anywhere; }
+    .rule-text em { color:#e81529; font-style:normal; }
+    .timer { flex:0 0 27px; display:flex; align-items:center; gap:8px; padding:0 4px; }
+    .timer strong { white-space:nowrap; font-size:18px; line-height:1; }
+    .timer-track { flex:1; height:11px; border:2px solid var(--ink); border-radius:8px; background:#dbeafa; overflow:hidden; }
+    .timer-track i { display:block; width:64%; height:100%; background:#46d672; border-radius:5px; }
+    .board { flex:1 1 auto; min-height:204px; max-height:350px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-rows:repeat(3,minmax(0,1fr)); gap:7px; padding:3px 3px 8px; }
+    .tile { position:relative; min-width:0; min-height:0; padding:4px 2px 2px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:3px solid var(--ink); border-radius:12px; color:#fff; box-shadow:0 5px 0 var(--wall),0 7px 0 var(--ink); background:linear-gradient(#fff7 0%,transparent 17%),linear-gradient(var(--top),var(--base)); font-weight:900; }
+    .tile.red { --top:#ff6167; --base:#eb1c35; --wall:#ad1129; }
+    .tile.blue { --top:#30a9ff; --base:#0078df; --wall:#00569e; }
+    .tile.purple { --top:#b576ff; --base:#7835d8; --wall:#5327a1; }
+    .tile.yellow { --top:#ffe769; --base:#ffcf00; --wall:#b68900; color:var(--ink); }
+    .tile .shape { display:block; width:26px; height:26px; flex:none; filter:drop-shadow(0 2px 1px #0004); }
+    .tile .number { font-size:18px; line-height:21px; }
+    .tile.pressed { transform:translateY(5px); box-shadow:inset 0 4px 7px #001b4b60,0 1px 0 var(--ink); filter:saturate(.86); }
+    .tile.pressed .check { position:absolute; right:-4px; top:-5px; width:23px; height:23px; display:grid; place-items:center; border:2px solid white; border-radius:50%; background:#657386; color:white; font-size:15px; line-height:1; }
+    .remaining { flex:0 0 24px; display:flex; align-items:center; justify-content:center; gap:3px; white-space:nowrap; border-radius:14px; background:#fff0c9; font-size:14px; line-height:1; font-weight:900; }
+    .remaining b { color:#007fb3; font-size:18px; }
+    .player,.enemy { border:2px solid var(--ink); background:white; border-radius:11px; position:relative; overflow:hidden; }
+    .player::before,.enemy::before { content:""; position:absolute; inset:0 auto 0 0; width:6px; background:#ff5b83; }
+    .enemy::before { background:#8951e2; }
+    .player { flex:0 0 71px; padding:6px 9px 5px 13px; display:flex; flex-direction:column; justify-content:space-between; }
+    .player-row,.enemy-row { display:flex; justify-content:space-between; align-items:center; gap:6px; white-space:nowrap; font-size:14px; line-height:1.15; font-weight:800; }
+    .player-row strong,.enemy-row strong { font-size:16px; }
+    .player-row .urgent { color:#b93c00; }
+    .player-bar { height:6px; flex:1; max-width:90px; border-radius:3px; background:#dce2e8; overflow:hidden; }
+    .player-bar i { display:block; height:100%; width:82%; border-radius:3px; background:#4ccc72; }
+    .enemy { flex:0 0 38px; padding:5px 8px 4px 13px; }
+    .enemy-row { height:25px; }
+    .enemy-row strong { font-size:15px; }
+    .enemy .counter { color:#6335b0; }
+    .info { max-width:850px; padding:26px 20px 40px; background:#fffef7; line-height:1.6; }
+    .info h1 { font-size:23px; margin:0 0 8px; }
+    .info p { margin:7px 0; }
+    .info a { color:#075b80; }
+    .screen[data-size="390"] { justify-content:flex-start; gap:9px; padding-top:28px; }
+    .screen[data-size="390"] .board { flex:0 0 350px; margin-top:29px; }
+    .screen[data-size="390"] .player { margin-top:36px; }
+  </style>
+</head>
+<body>
+  <main class="screen" aria-label="小屏局内布局压力测试">
+    <div class="system"><span>9:41</span><span>●●● ▰</span></div>
+    <div class="head"><div class="level">第 16 关</div><div class="score">320 分</div></div>
+    <div class="rule" aria-label="本轮禁止按颜色为红色且形状为三角形且数字为3的按钮">
+      <div class="rule-label">本轮别按：</div>
+      <div class="rule-text">颜色为【<em>红色</em>】且形状为【三角形】且数字为【<em>3</em>】</div>
+    </div>
+    <div class="timer"><strong>◷ 8.4 秒</strong><span class="timer-track"><i></i></span></div>
+    <div class="board" aria-label="九宫格按钮；紫方12、红圆10、蓝三角02已按下">
+      <button class="tile red" aria-label="红色三角形03"><svg class="shape" viewBox="0 0 32 32"><path d="M16 3 29 28H3Z" fill="currentColor"/></svg><span class="number">03</span></button>
+      <button class="tile blue" aria-label="蓝色圆形08"><svg class="shape" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="currentColor"/></svg><span class="number">08</span></button>
+      <button class="tile purple pressed" aria-label="已按下紫色正方形12"><span class="check">✓</span><svg class="shape" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="2" fill="currentColor"/></svg><span class="number">12</span></button>
+      <button class="tile yellow" aria-label="黄色五角星05"><svg class="shape" viewBox="0 0 32 32"><path d="m16 2 4.1 9.1L30 12l-7.5 6.6 2.2 10L16 23.3l-8.7 5.3 2.2-10L2 12l9.9-.9Z" fill="currentColor"/></svg><span class="number">05</span></button>
+      <button class="tile red pressed" aria-label="已按下红色圆形10"><span class="check">✓</span><svg class="shape" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="currentColor"/></svg><span class="number">10</span></button>
+      <button class="tile purple" aria-label="紫色三角形07"><svg class="shape" viewBox="0 0 32 32"><path d="M16 3 29 28H3Z" fill="currentColor"/></svg><span class="number">07</span></button>
+      <button class="tile blue pressed" aria-label="已按下蓝色三角形02"><span class="check">✓</span><svg class="shape" viewBox="0 0 32 32"><path d="M16 3 29 28H3Z" fill="currentColor"/></svg><span class="number">02</span></button>
+      <button class="tile red" aria-label="红色正方形09"><svg class="shape" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="2" fill="currentColor"/></svg><span class="number">09</span></button>
+      <button class="tile yellow" aria-label="黄色圆形04"><svg class="shape" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="currentColor"/></svg><span class="number">04</span></button>
+    </div>
+    <div class="remaining">还剩 <b>5</b> 个安全按钮</div>
+    <div class="player" aria-label="我方体力82/100；连击4；连击剩余2.1秒；伤害加成3">
+      <div class="player-row"><span>我方 体力 <strong>82/100</strong></span><span class="player-bar" aria-hidden="true"><i></i></span></div>
+      <div class="player-row"><span>连击 <strong>4</strong> · <span class="urgent">剩 <strong>2.1</strong> 秒</span></span><span>伤害加成 <strong>+3</strong></span></div>
+    </div>
+    <div class="enemy"><div class="enemy-row"><span>考官 耐力 <strong>180/500</strong></span><span class="counter">反击 <strong>18</strong></span></div></div>
+  </main>
+  <section class="info">
+    <h1>小屏局内适配检查</h1>
+    <p>此页使用真实 CSS 尺寸排布，不对三屏原画等比缩小。通过 <a href="?size=320">320×568</a>、<a href="?size=360">360×640</a>、<a href="?size=390">390×844</a> 切换尺寸。规则采用当前规则生成器可能返回的较长精确条件作为压力测试；九宫格中只有红色三角形 03 被禁按，已完成三枚安全按钮，因此剩余五枚。</p>
+    <p>状态说明目标字号约 14px，关键数字约 16px；装饰角色从局内移到首页、结算和故事画面，角色造型仍以 <a href="hybrid-ui-v11-unified-thin-rim.png">v11 基准</a>为准。实际连击、倒计时和结束原因仍需前端绑定真实数据并真机验证。</p>
+    <p><a href="hybrid.html">返回融合版展示页</a></p>
+  </section>
+  <script>
+    const sizes = { '320':[320,568], '360':[360,640], '390':[390,844] };
+    const sizeKey = new URLSearchParams(location.search).get('size') || '320';
+    const selected = sizes[sizeKey] || sizes['320'];
+    document.documentElement.style.setProperty('--screen-w', selected[0] + 'px');
+    document.documentElement.style.setProperty('--screen-h', selected[1] + 'px');
+    document.querySelector('.screen').dataset.size = sizeKey;
+  </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>手指等等我 · 融合版视觉方向</title>
+  <style>
+    :root { --ink:#111b44; --yellow:#ffe249; --teal:#28d4cd; --paper:#fffef7; --line:#d8dce6; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:#f6f5ec; font:16px/1.6 system-ui,-apple-system,"Microsoft YaHei",sans-serif; }
+    a { color:inherit; text-underline-offset:3px; }
+    header { background:var(--yellow); border-bottom:3px solid var(--ink); }
+    .wrap { width:min(100% - 32px,1280px); margin:auto; }
+    header .wrap { padding:40px 0 34px; }
+    .eyebrow { margin:0 0 7px; font-size:13px; font-weight:900; letter-spacing:.14em; }
+    h1 { margin:0; font-size:clamp(32px,4.2vw,54px); line-height:1.15; }
+    .lead { max-width:820px; margin:16px 0 0; font-size:18px; }
+    .nav { margin:18px 0 0; font-size:14px; }
+    main { padding:30px 0 50px; }
+    h2 { margin:0 0 10px; font-size:24px; }
+    p { margin:8px 0; }
+    .panel { margin-bottom:26px; padding:20px; background:white; border:1px solid var(--line); border-radius:18px; box-shadow:0 12px 32px rgba(17,27,68,.07); }
+    .panel img { display:block; width:100%; height:auto; border-radius:10px; }
+    .caption { color:#4d5974; font-size:14px; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 0; padding:0; list-style:none; }
+    .chips li { padding:7px 11px; background:#f3f5f6; border:1px solid var(--line); border-radius:9px; font-weight:700; font-size:14px; }
+    .two { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+    .compare { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .compare figure { min-width:0; margin:0; }
+    .compare figcaption { margin:0 0 8px; font-weight:800; }
+    .compare img { aspect-ratio:1; object-fit:cover; }
+    .compact-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; align-items:start; }
+    .compact-grid figure { margin:0; text-align:center; }
+    .compact-grid figcaption { margin-bottom:8px; font-weight:900; }
+    .compact-grid img { width:auto; max-width:100%; margin:auto; border-radius:18px; }
+    .callout { border-left:6px solid var(--teal); padding:16px 20px; background:var(--paper); border-radius:8px 15px 15px 8px; }
+    footer { padding:0 0 30px; color:#58637c; font-size:13px; }
+    @media(max-width:720px) { .wrap{width:min(100% - 20px,1280px)} .two,.compare,.compact-grid{grid-template-columns:1fr} .panel{padding:12px} .lead{font-size:16px} }
+  </style>
+</head>
+<body>
+  <header><div class="wrap">
+    <p class="eyebrow">手指等等我 / 融合版视觉提案</p>
+    <h1>A 的界面，B 的搭档，C 的按钮。</h1>
+    <p class="lead">D 的漫画节奏留给背景故事演出。小手统一为两条短深蓝腿、两只鞋；伸出的白色食指只负责点击。</p>
+    <p class="nav"><a href="v14-production-art/index.html"><strong>查看已验收的 v14 完整原画</strong></a> · <a href="../2026-09-28/compare.html">返回四方向对比</a> · <a href="README.md">阅读设计说明</a> · <a href="CHARACTER_BASELINE.md">查看已确认的造型基准</a></p>
+  </div></header>
+  <main class="wrap">
+    <aside class="callout panel"><strong>新版本：</strong><a href="v14-production-art/index.html">v14 完整原画交付</a>已覆盖首页、2×2／2×3／3×3 局内、按钮状态、升级、两类结算和必要辅助状态，并通过小游戏负责人静态验收。此页继续保留 v11–v13 历史对照。</aside>
+    <section class="panel">
+      <h2>融合版三屏 · v12 可用性修订</h2>
+      <p class="caption">首页 → 复杂 3×3 局内 → 结算。依据运营评审，将局内底栏拆成我方与考官两组，补出连击剩余时间和伤害加成，让已按按钮明显下沉，并统一黄色按钮图形、明确结算规则措辞。首页角色、结算双人组和下方分镜逐像素保留自 <a href="hybrid-ui-v11-unified-thin-rim.png">v11 造型基准</a>。<a href="ui-usability-v12.html">查看可编辑的 UI 修订图层与说明</a>。</p>
+      <a href="hybrid-ui-v12-usability.png" target="_blank" rel="noopener"><img src="hybrid-ui-v12-usability.png" alt="v12 融合版三屏：首页和结算角色保留 v11 造型；局内已按按钮下沉，底栏按我方与考官分组，显示连击时限和伤害加成；结算规则改为当时别按"></a>
+      <ul class="chips"><li>A：明黄与浅色局内</li><li>B：纸片感搭档</li><li>C：积木按钮结构</li><li>D：限于故事分镜</li></ul>
+    </section>
+    <aside class="callout panel"><strong>造型基准 v11：</strong>当前大脑与小手的轮廓、脸部比例、深蓝主线和薄白边作为后续变体起点。UI 可在新版本中调整，<a href="hybrid-ui-v11-unified-thin-rim.png">原始三屏</a>与下方透明双人组保留原样。<a href="CHARACTER_BASELINE.md">查看基准与验收步骤</a>。</aside>
+    <section class="panel">
+      <h2>局内短屏适配 · v13</h2>
+      <p class="caption">按运营复验意见，单独排布 320×568 的长规则与完整状态，并检查 360×640、390×844。这里是实际 CSS 尺寸渲染，保持深蓝轮廓、明黄与积木按钮语言；局内省去装饰角色，优先保证规则、数字和可点面积。<a href="ui-compact-v13.html?size=320">打开可切换尺寸的页面</a> · <a href="UI_USABILITY_REVIEW.md">评审记录</a>。</p>
+      <div class="compact-grid">
+        <figure><figcaption>320 × 568</figcaption><a href="ui-compact-v13-320x568.png" target="_blank" rel="noopener"><img src="ui-compact-v13-320x568.png" alt="320乘568短屏局内，长规则、九宫格和完整状态均可见"></a></figure>
+        <figure><figcaption>360 × 640</figcaption><a href="ui-compact-v13-360x640.png" target="_blank" rel="noopener"><img src="ui-compact-v13-360x640.png" alt="360乘640局内排布"></a></figure>
+        <figure><figcaption>390 × 844</figcaption><a href="ui-compact-v13-390x844.png" target="_blank" rel="noopener"><img src="ui-compact-v13-390x844.png" alt="390乘844局内排布"></a></figure>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>结算角色：保留双人表演</h2>
+      <p class="caption">统一规则：角色以深蓝主轮廓定形，外侧加一圈明显比深蓝轮廓细的白边；小尺寸角色随比例收细。白边只围角色整体，不描脸部内线，也不在两位角色接触处插入白线。<a href="CHARACTER_ANATOMY.md">肢体验收规则</a> · <a href="POSE_WORKFLOW.md">生图与合成工作流</a> · <a href="hybrid-clean-base-no-result-characters.png">查看清洁底板</a>。</p>
+      <a href="brain-glove-b-caring-pair-thin-rim.png" target="_blank" rel="noopener"><img src="brain-glove-b-caring-pair-thin-rim.png" alt="透明底结算双人组：薄白边配深蓝主轮廓；大脑委屈地收拢坐着，小手闭眼微笑轻扶大脑，两只深蓝鞋分开可辨"></a>
+    </section>
+    <section class="two">
+      <div class="panel">
+        <h2>小手结构定稿</h2>
+        <p class="caption">站立、奔跑、刹车和安慰搭档使用同一套双腿结构；侧面也让第二只鞋露出边缘。</p>
+        <a href="hand-two-legs-model-v2.png" target="_blank" rel="noopener"><img src="hand-two-legs-model-v2.png" alt="小手双腿角色规范稿，包括多角度结构和四个动作"></a>
+      </div>
+      <div class="panel">
+        <h2>头像双腿候选</h2>
+        <p class="caption">在已批准原图上只补足第二条腿与鞋。原图未覆盖，下面可直接对照。</p>
+        <div class="compare">
+          <figure><figcaption>原头像</figcaption><img src="../../branding/shouzhi-dengdengwo-avatar-v1.png" alt="已批准的原头像，小手只显出一只鞋"></figure>
+          <figure><figcaption>双腿候选</figcaption><a href="avatar-two-legs-candidate.png" target="_blank" rel="noopener"><img src="avatar-two-legs-candidate.png" alt="保留原图构图并补足小手第二条腿和鞋的头像候选"></a></figure>
+        </div>
+      </div>
+    </section>
+    <aside class="callout"><strong>落地核对：</strong>大脑不添加来源不明的粉色肢体；收拢坐姿中的遮挡应由动作设计明确，不靠额外手脚补轮廓。全身小手保持两腿两鞋；已按下按钮仍保留红蓝黄紫属性色；规则、时间和九宫格优先可读。动态文字与数值需由前端按真实状态重绘。</aside>
+  </main>
+  <footer class="wrap">2026-09-29 概念交付 · 已批准头像和游戏代码保持原状。</footer>
+</body>
+</html>

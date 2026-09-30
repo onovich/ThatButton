@@ -62,8 +62,8 @@ export function swapRect(rect,destination,index,elapsed,options=WECHAT_HAZARDS.s
 }
 export const rectsOverlap=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
 // Work at logical tile resolution, never read neighbouring tile pixels.
-export function slicePixels(input,width,height,time,config=WECHAT_HAZARDS.glitch){
-  const output=new Uint8ClampedArray(input.length),tick=Math.floor(time*config.rate);
+export function slicePixels(input,width,height,time,config=WECHAT_HAZARDS.glitch,output=new Uint8ClampedArray(input.length)){
+  const tick=Math.floor(time*config.rate);
   const hash=n=>{const v=Math.sin(n*127.1+17*13.13)*43758.5453123;return v-Math.floor(v)};
   for(let y=0;y<height;y++){
     const row=Math.floor(y/height/config.slice);

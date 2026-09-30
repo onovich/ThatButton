@@ -26,6 +26,7 @@ function createFakeWx({ width = 390, height = 844, failImages = false,
   touchMode = 'both', canvasEvents = false, animateCanvas = false } = {}) {
   const frames = [];
   const drawnText = [];
+  const stats = { paints: 0, measures: 0 };
   const transforms = [];
   const alphaStack = [];
   const storage = new Map();
@@ -36,12 +37,12 @@ function createFakeWx({ width = 390, height = 844, failImages = false,
   let showHandler = null;
   const ctx = {
     globalAlpha: 1,
-    setTransform() {}, scale() {}, fillRect() {}, strokeRect() {},
+    setTransform() {}, scale() {}, fillRect(x,y,w,h) { if (x === 0 && y === 0 && w === width && h === height) stats.paints++; }, strokeRect() {},
     fillText(value) { drawnText.push(String(value)); }, strokeText() {},
     beginPath() {}, moveTo() {}, lineTo() {}, quadraticCurveTo() {}, closePath() {},
     arc() {}, fill() {}, stroke() {}, drawImage() {},
     createLinearGradient() { return { addColorStop() {} }; },
-    measureText(value) { return { width: [...String(value)].length * 17 }; }
+    measureText(value) { stats.measures++; return { width: [...String(value)].length * 17 }; }
   };
   if (animateCanvas) {
     ctx.save = () => { alphaStack.push(ctx.globalAlpha); };
@@ -81,6 +82,7 @@ function createFakeWx({ width = 390, height = 844, failImages = false,
   };
   return {
     wxApi,
+    stats,
     frames,
     drawnText,
     transforms,
@@ -182,17 +184,26 @@ const forbiddenPoint = pointFor(view, (action) => action.type === 'press' && act
 fake.touch(forbiddenPoint.x, forbiddenPoint.y);
 assert.ok(app.getState().player.hp < hpBefore);
 
-fake.hide();
+const paintsBeforeFrame = fake.stats.paints;
 fake.frames.shift()();
+assert.equal(fake.stats.paints - paintsBeforeFrame, 1, 'One logic frame must paint exactly once.');
+view.draw();
+const measuresBefore = fake.stats.measures;
+view.draw();
+assert.equal(fake.stats.measures, measuresBefore, 'Unchanged text/layout should reuse measurements.');
+fake.hide();
+const hiddenPaints = fake.stats.paints;
+fake.frames.shift()();
+assert.equal(fake.stats.paints, hiddenPaints, 'Hidden queued RAF must not paint.');
 const timeBeforePause = app.getState().timeLeft;
 await new Promise((resolveWait) => setTimeout(resolveWait, 25));
-fake.frames.shift()();
+assert.equal(fake.frames.length, 0, "Paused game must not keep scheduling RAF callbacks.");
 assert.ok(Math.abs(app.getState().timeLeft - timeBeforePause) < 5);
 fake.show();
 assert.equal(view.getView().mode, 'resume');
 const timeWhileWaiting = app.getState().timeLeft;
 await new Promise((resolveWait) => setTimeout(resolveWait, 25));
-fake.frames.shift()();
+assert.equal(fake.frames.length, 0, "Paused game must not keep scheduling RAF callbacks.");
 assert.ok(Math.abs(app.getState().timeLeft - timeWhileWaiting) < 5,
   'Returning to the foreground must stay paused until the player continues.');
 const resumePoint = pointFor(view, (action) => action.type === 'resume');

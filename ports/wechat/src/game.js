@@ -79,9 +79,23 @@ export function createWechatGame(wxApi) {
   const clock = {
     now: () => Date.now() - pausedDurationMs - (pausedAt === null ? 0 : Date.now() - pausedAt)
   };
-  const requestFrame = typeof canvas.requestAnimationFrame === 'function'
-    ? (callback) => canvas.requestAnimationFrame(() => callback(clock.now()))
-    : (callback) => setTimeout(() => callback(clock.now()), 16);
+  let hidden = false;
+  let pendingFrame = null;
+  let frameScheduled = false;
+  function scheduleFrame() {
+    if (hidden || pausedAt !== null || frameScheduled || !pendingFrame) return;
+    frameScheduled = true;
+    const run = () => {
+      frameScheduled = false;
+      if (hidden || pausedAt !== null) return;
+      const callback = pendingFrame;
+      pendingFrame = null;
+      if (callback) view.batch(() => callback(clock.now()));
+    };
+    if (typeof canvas.requestAnimationFrame === 'function') canvas.requestAnimationFrame(run);
+    else setTimeout(run, 16);
+  }
+  function requestFrame(callback) { pendingFrame = callback; scheduleFrame(); }
   const storage = {
     getItem: (key) => wxApi.getStorageSync(key) || null,
     setItem: (key, value) => wxApi.setStorageSync(key, value),
@@ -122,6 +136,7 @@ export function createWechatGame(wxApi) {
       pausedDurationMs += Date.now() - pausedAt;
       pausedAt = null;
     }
+    scheduleFrame();
   }
   function loadOne(name, source) {
     return new Promise((resolve) => {
@@ -162,6 +177,9 @@ export function createWechatGame(wxApi) {
 
   let lastDispatch = null;
   function handleTouch(event, source) {
+    return view.batch(() => dispatchTouch(event, source));
+  }
+  function dispatchTouch(event, source) {
     const touch = event.changedTouches?.[0] || event.touches?.[0] || event;
     if (!touch) return;
     let x = touch.clientX ?? touch.pageX ?? touch.x ?? touch.screenX;
@@ -238,6 +256,7 @@ export function createWechatGame(wxApi) {
     console.error('WeChat touch APIs are unavailable; check the imported project type and runtime.');
   }
   wxApi.onHide?.(() => {
+    hidden = true;
     audio.suspend();
     music.pause();
     view.setMotionPaused(true);
@@ -246,6 +265,7 @@ export function createWechatGame(wxApi) {
     }
   });
   wxApi.onShow?.(() => {
+    hidden = false;
     if (pausedAt !== null && app.getState().isPlaying) {
       view.showResume();
     } else {

@@ -28,3 +28,10 @@ const result=slicePixels(pixels,32,24,.5);assert.notDeepEqual(result,pixels);
 assert.deepEqual(slicePixels(pixels,32,24,.5,{...WECHAT_HAZARDS.glitch,strength:0}),pixels);
 assert.deepEqual(result,slicePixels(pixels,32,24,.5),'same frame must not flicker on incidental redraws');
 console.log('WeChat hazard schedule, stable targets, swap endpoint, protection and slice RGB checks passed.');
+
+const reusable = new Uint8ClampedArray(pixels.length);
+for (const time of [0, .1, .5, 1.2, 2.1]) {
+  const expected = slicePixels(pixels,32,24,time);
+  assert.equal(slicePixels(pixels,32,24,time,undefined,reusable), reusable);
+  assert.deepEqual(reusable,expected,'Reused output must preserve every RGBA byte.');
+}

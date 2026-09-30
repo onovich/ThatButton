@@ -1,0 +1,62 @@
+{
+  "static": [
+    {
+      "case": "mode=home",
+      "different": 0
+    },
+    {
+      "case": "mode=game",
+      "different": 0
+    },
+    {
+      "case": "mode=upgrade&hp=100&maxHp=100&score=9999999",
+      "different": 0
+    },
+    {
+      "case": "mode=result",
+      "different": 0
+    },
+    {
+      "case": "mode=game&lab=1&livehazard=glitch&at=1800",
+      "different": 0
+    },
+    {
+      "case": "mode=game&lab=1&livehazard=swap&at=3500",
+      "different": 0
+    }
+  ],
+  "motion": [
+    {
+      "case": "mode=home&motion=1",
+      "different": 0
+    },
+    {
+      "case": "mode=game&motion=1&trigger=safe",
+      "different": 0
+    },
+    {
+      "case": "mode=game&motion=1&trigger=round-exit",
+      "different": 0
+    },
+    {
+      "case": "mode=game",
+      "different": 0
+    },
+    {
+      "case": "mode=upgrade&hp=100&maxHp=100&score=9999999",
+      "different": 0
+    },
+    {
+      "case": "mode=result",
+      "different": 0
+    },
+    {
+      "case": "mode=game&lab=1&livehazard=glitch&at=1800",
+      "different": 0
+    },
+    {
+      "case": "mode=game&lab=1&livehazard=swap&at=3500",
+      "different": 0
+    }
+  ]
+}

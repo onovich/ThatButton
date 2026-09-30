@@ -71,6 +71,25 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
   canvas.height = Math.round(height * ratio);
   let ctx = canvas.getContext('2d');
   const glitchCache = new Map();
+  const textWidths = new Map();
+  let batchDepth = 0, drawPending = false, drawRevision = 0;
+  function measuredWidth(value) {
+    const text = String(value);
+    const key = `${ctx.font}:${ctx.textAlign}:${ctx.direction}:${text}`;
+    if (textWidths.has(key)) return textWidths.get(key);
+    const width = ctx.measureText(text).width;
+    if (textWidths.size >= 1024) textWidths.clear();
+    textWidths.set(key, width);
+    return width;
+  }
+  function batch(callback) {
+    batchDepth++;
+    try { return callback(); }
+    finally {
+      batchDepth--;
+      if (!batchDepth && drawPending) { drawPending = false; draw(); }
+    }
+  }
   let blockedTileRects = [];
   function drawGlitchTile(button, rect, hazard) {
     if (!createSurface || !ctx.drawImage) return false;
@@ -81,17 +100,24 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
       let surface;
       try { surface = cached?.surface || createSurface(); } catch { return false; }
       if (!surface || surface === canvas) return false;
-      surface.width = Math.ceil(rect.w)+4; surface.height = Math.ceil(rect.h)+12;
+      const sw = Math.ceil(rect.w)+4, sh = Math.ceil(rect.h)+12;
+      if (surface.width !== sw) surface.width = sw;
+      if (surface.height !== sh) surface.height = sh;
       const local = surface.getContext('2d');
       if (!local?.getImageData || !local?.putImageData) return false;
       const screen = ctx;
       try {
+        local.clearRect(0,0,surface.width,surface.height);
         ctx = local; drawTile(button, {x:2,y:2,w:rect.w,h:rect.h});
         const pixels = local.getImageData(0,0,surface.width,surface.height);
-        pixels.data.set(slicePixels(pixels.data,surface.width,surface.height,hazard.elapsedMs/1000));
+        const output = cached?.output?.length === pixels.data.length
+          ? cached.output : new Uint8ClampedArray(pixels.data.length);
+        slicePixels(pixels.data,surface.width,surface.height,hazard.elapsedMs/1000,undefined,output);
+        pixels.data.set(output);
+        cached = { output };
         local.putImageData(pixels,0,0);
       } catch { return false; } finally { ctx = screen; }
-      cached = {key,surface};glitchCache.set(button.id,cached);
+      cached = {...cached,key,surface};glitchCache.set(button.id,cached);
     }
     ctx.drawImage(cached.surface,rect.x-2,rect.y-2,rect.w+4,rect.h+12);
     return true;
@@ -135,9 +161,13 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
     const ambient = ['home', 'gameover', 'upgrade', 'resume'].includes(view.mode);
     const active = now < motion.activeUntil;
     if (!ambient && !active) return;
+    const scheduledRevision = drawRevision;
     motion.timer = setTimeout(() => {
       motion.timer = null;
-      if (!motion.paused) draw();
+      if (!motion.paused) {
+        if (view.mode !== 'game' || scheduledRevision === drawRevision) draw();
+        else scheduleMotion();
+      }
     }, active ? 32 : 85);
     motion.timer.unref?.();
   }
@@ -230,7 +260,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
   }
   function textWidth(value, size, weight = 900, family = '"Microsoft YaHei",sans-serif') {
     ctx.font = `${weight} ${size}px ${family}`;
-    return ctx.measureText(String(value)).width;
+    return measuredWidth(String(value));
   }
   function fittedTextSize(value, maxSize, minSize, maxWidth, weight = 900,
     family = '"Microsoft YaHei",sans-serif') {
@@ -245,15 +275,15 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
       digits.length > 4 ? (compact ? 18 : 23) : digits.length > 3 ? (compact ? 22 : 28) : 99);
     const unitSize = compact ? 11 : 12;
     ctx.font = `800 ${unitSize}px "Microsoft YaHei",sans-serif`;
-    const unitWidth = ctx.measureText('分').width;
+    const unitWidth = measuredWidth('分');
     const gap = compact ? 2 : 3;
     ctx.font = `900 ${fontSize}px "Microsoft YaHei",sans-serif`;
-    while (fontSize > 13 && Math.max(ctx.measureText(digits).width,
-      ctx.measureText(displayValue).width) + gap + unitWidth > rect.w - 10) {
+    while (fontSize > 13 && Math.max(measuredWidth(digits),
+      measuredWidth(displayValue)) + gap + unitWidth > rect.w - 10) {
       fontSize--;
       ctx.font = `900 ${fontSize}px "Microsoft YaHei",sans-serif`;
     }
-    const numberWidth = ctx.measureText(displayValue).width;
+    const numberWidth = measuredWidth(displayValue);
     const startX = rect.x + (rect.w - numberWidth - gap - unitWidth) / 2;
     // Canvas middle baseline sits optically high for these heavy digits.
     const numberY = rect.y + rect.h / 2 + 3;
@@ -454,7 +484,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
     let line = '';
     const tokens = String(textValue || '').match(/【[^】]*】|./gu) || [];
     for (const token of tokens) {
-      if (line && ctx.measureText(line + token).width > maxWidth) {
+      if (line && measuredWidth(line + token) > maxWidth) {
         lines.push(line);
         line = '';
       }
@@ -806,6 +836,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
     ctx.closePath();
     ctx.fill();
   }
+  let ruleLayout = null;
   function drawRuleText(value, centerY, maxWidth, preferredSize) {
     const makeLines = (size) => {
       ctx.font = `900 ${size}px "Microsoft YaHei",sans-serif`;
@@ -818,7 +849,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
         if ((glyph === '且' || glyph === '或') && !highlighted && clauses[clauses.length - 1].length) {
           clauses.push([]);
         }
-        clauses[clauses.length - 1].push({ glyph, width: ctx.measureText(glyph).width, highlighted });
+        clauses[clauses.length - 1].push({ glyph, width: measuredWidth(glyph), highlighted });
       }
       for (const glyphs of clauses) {
         const clauseWidth = glyphs.reduce((sum, item) => sum + item.width, 0);
@@ -838,9 +869,15 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
       }
       return lines;
     };
-    let size = preferredSize;
-    let lines = makeLines(size);
-    if (lines.length > 2) { size -= 2; lines = makeLines(size); }
+    const key = JSON.stringify([value, maxWidth, preferredSize, ctx.direction]);
+    if (ruleLayout?.key !== key) {
+      let size = preferredSize;
+      let lines = makeLines(size);
+      if (lines.length > 2) { size -= 2; lines = makeLines(size); }
+      ruleLayout = { key, size, lines };
+    }
+    const { size, lines } = ruleLayout;
+    ctx.font = `900 ${size}px "Microsoft YaHei",sans-serif`;
     const lineHeight = size + 4;
     lines.slice(0, 3).forEach((line, index) => {
       let x = (width - line.width) / 2;
@@ -1367,6 +1404,9 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
     action('继续这一局', { x: 40, y: y + 121, w: width - 80, h: 51 }, 'resume');
   }
   function draw() {
+    if (batchDepth) { drawPending = true; return; }
+    if (motion.paused) return;
+    drawRevision++;
     hits = [];
     if (view.mode === 'home') drawHome();
     else if (view.mode === 'help') drawHelp();
@@ -1516,7 +1556,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
   };
   draw();
   return {
-    renderer, width, height, safeTop, safeBottom, draw,
+    renderer, width, height, safeTop, safeBottom, draw, batch,
     getView: () => view,
     hitTest(x, y) {
       const camera = view.mode === 'game' ? cameraOffset() : { x: 0, y: 0 };
@@ -1535,7 +1575,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
       view.failedAssets = failedAssets; enterScene('resource-error', 470);
     },
     showLoading() { view.mode = 'loading'; draw(); },
-    setImages(images) { view.images = images; draw(); },
+    setImages(images) { ruleLayout = null; textWidths.clear(); view.images = images; draw(); },
     setSettings(settings) { view.settings = { ...view.settings, ...settings }; draw(); },
     playActionFeedback(action) {
       if (!canAnimate || !action) return;

@@ -61,6 +61,7 @@ const easeOutBack = (value) => {
 const lerp = (from, to, progress) => from + (to - from) * progress;
 
 export function createCanvasRenderer({ canvas, info, menuButtonRect = null, motionEnabled = true,
+  diagnostics = null,
   createSurface = () => typeof document !== 'undefined' ? document.createElement('canvas') : null }) {
   const width = Math.max(280, info.windowWidth || info.screenWidth || 390);
   const height = Math.max(480, info.windowHeight || info.screenHeight || 844);
@@ -110,6 +111,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
         local.clearRect(0,0,surface.width,surface.height);
         ctx = local; drawTile(button, {x:2,y:2,w:rect.w,h:rect.h});
         const pixels = local.getImageData(0,0,surface.width,surface.height);
+        diagnostics?.count('glitchReadback');
         const output = cached?.output?.length === pixels.data.length
           ? cached.output : new Uint8ClampedArray(pixels.data.length);
         slicePixels(pixels.data,surface.width,surface.height,hazard.elapsedMs/1000,undefined,output);
@@ -118,6 +120,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
         local.putImageData(pixels,0,0);
       } catch { return false; } finally { ctx = screen; }
       cached = {...cached,key,surface};glitchCache.set(button.id,cached);
+      diagnostics?.count('glitchRebuild');
     }
     ctx.drawImage(cached.surface,rect.x-2,rect.y-2,rect.w+4,rect.h+12);
     return true;
@@ -257,6 +260,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
     }
     ctx.fillStyle = color;
     ctx.fillText(String(value), x, y);
+    diagnostics?.count('fillText');
   }
   function textWidth(value, size, weight = 900, family = '"Microsoft YaHei",sans-serif') {
     ctx.font = `${weight} ${size}px ${family}`;
@@ -713,7 +717,12 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
     });
     label('设置保存在本机。', 14, top + rows.length * (rowH + gap) + 5,
       11, '#596581', 'left', 600);
-    action('完成', { x: 18, y: height - safeBottom - 63, w: width - 36, h: 51 }, 'home');
+    if (diagnostics) {
+      action('复制内测报告', { x: 18, y: height - safeBottom - 63,
+        w: (width - 46) / 2, h: 51 }, 'exportPerformance', 'secondary');
+      action('完成', { x: (width + 10) / 2, y: height - safeBottom - 63,
+        w: (width - 46) / 2, h: 51 }, 'home');
+    } else action('完成', { x: 18, y: height - safeBottom - 63, w: width - 36, h: 51 }, 'home');
   }
   function drawLoading(error = false) {
     background('yellow');
@@ -1403,9 +1412,22 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
     });
     action('继续这一局', { x: 40, y: y + 121, w: width - 80, h: 51 }, 'resume');
   }
+  function getDiagnosticScene() {
+    if (view.mode !== 'game') return view.mode;
+    if (motion.roundExit) return 'game-exit';
+    if (motion.roundEnter) return 'game-entry';
+    for (const hazard of view.hazards?.hazards || []) {
+      if (hazard.phase !== 'active') continue;
+      if (hazard.type === 'button_glitch') return 'game-glitch';
+      if (hazard.type === 'button_swap') return 'game-swap';
+      if (hazard.type === 'moving_button') return 'game-drift';
+    }
+    return 'game';
+  }
   function draw() {
     if (batchDepth) { drawPending = true; return; }
     if (motion.paused) return;
+    const drawStarted = diagnostics?.beginDraw(getDiagnosticScene());
     drawRevision++;
     hits = [];
     if (view.mode === 'home') drawHome();
@@ -1417,6 +1439,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
     else if (view.mode === 'gameover') drawResult();
     else if (view.mode === 'resume') drawResume();
     else drawGame();
+    if (diagnostics) diagnostics.endDraw(drawStarted);
     scheduleMotion();
   }
   const renderer = {
@@ -1556,7 +1579,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
   };
   draw();
   return {
-    renderer, width, height, safeTop, safeBottom, draw, batch,
+    renderer, width, height, safeTop, safeBottom, draw, batch, getDiagnosticScene,
     getView: () => view,
     hitTest(x, y) {
       const camera = view.mode === 'game' ? cameraOffset() : { x: 0, y: 0 };

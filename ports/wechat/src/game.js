@@ -4,6 +4,7 @@ import { createWechatAudio } from './audio.js';
 import { createWechatMusic, normalizeMusicVolume } from './music.js';
 import { createCanvasRenderer } from './renderer.js';
 import { createWechatHazards } from './hazards.js';
+import { createPerformanceDiagnostics } from './performance-diagnostics.js';
 
 const SETTINGS_KEY = 'thatbutton.wechat.settings.v1';
 const ART = {
@@ -45,9 +46,14 @@ export function createWechatGame(wxApi) {
   }
   const canvas = wxApi.createCanvas();
   const info = wxApi.getWindowInfo?.() || wxApi.getSystemInfoSync();
+  const query = wxApi.getLaunchOptionsSync?.().query || {};
+  const diagnostics = createPerformanceDiagnostics(wxApi, {
+    enabled: query.perf === '1',
+    metadata: { width: info.windowWidth, height: info.windowHeight, pixelRatio: info.pixelRatio }
+  });
   let menuButtonRect = null;
   try { menuButtonRect = wxApi.getMenuButtonBoundingClientRect?.() || null; } catch {}
-  const view = createCanvasRenderer({ canvas, info, menuButtonRect,
+  const view = createCanvasRenderer({ canvas, info, menuButtonRect, diagnostics,
     createSurface: () => wxApi.createOffscreenCanvas?.({type:'2d',width:128,height:128}) || wxApi.createCanvas() });
   const music = createWechatMusic(wxApi);
   const audio = createWechatAudio(wxApi, Date.now, (cue) => {
@@ -88,6 +94,7 @@ export function createWechatGame(wxApi) {
     const run = () => {
       frameScheduled = false;
       if (hidden || pausedAt !== null) return;
+      diagnostics?.frame(view.getDiagnosticScene(), typeof canvas.requestAnimationFrame === 'function');
       const callback = pendingFrame;
       pendingFrame = null;
       if (callback) view.batch(() => callback(clock.now()));
@@ -101,7 +108,6 @@ export function createWechatGame(wxApi) {
     setItem: (key, value) => wxApi.setStorageSync(key, value),
     removeItem: (key) => wxApi.removeStorageSync(key)
   };
-  const query = wxApi.getLaunchOptionsSync?.().query || {};
   const renderer = {
     ...view.renderer,
     renderBoard(options) {
@@ -136,6 +142,7 @@ export function createWechatGame(wxApi) {
       pausedDurationMs += Date.now() - pausedAt;
       pausedAt = null;
     }
+    diagnostics?.setActive(true);
     scheduleFrame();
   }
   function loadOne(name, source) {
@@ -216,6 +223,7 @@ export function createWechatGame(wxApi) {
     else if (action.type === 'resume') { unpause(); view.resumeGame(); music.resume(); }
     else if (action.type === 'retryAssets') void loadArt();
     else if (action.type === 'continueFallback') { view.showHome(); music.play('home'); }
+    else if (action.type === 'exportPerformance') diagnostics?.exportReport();
     else if (action.type === 'toggle') {
       preferences = { ...preferences, [action.key]: !preferences[action.key] };
       try { wxApi.setStorageSync(SETTINGS_KEY, preferences); } catch {}
@@ -257,6 +265,8 @@ export function createWechatGame(wxApi) {
   }
   wxApi.onHide?.(() => {
     hidden = true;
+    diagnostics?.setActive(false);
+    diagnostics?.save();
     audio.suspend();
     music.pause();
     view.setMotionPaused(true);
@@ -276,7 +286,7 @@ export function createWechatGame(wxApi) {
     view.setMotionPaused(false);
   });
 
-  return { app, view, audio, music };
+  return { app, view, audio, music, diagnostics };
 }
 
 if (typeof wx !== 'undefined') {

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import './hazards.mjs';
+import './performance-diagnostics.mjs';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';

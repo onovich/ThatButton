@@ -1,5 +1,16 @@
 import assert from 'node:assert/strict';
-import { createPerformanceDiagnostics } from '../src/performance-diagnostics.js';
+import { createPerformanceDiagnostics, createDiagnosticClock } from '../src/performance-diagnostics.js';
+
+for (const unit of [1, 1000, 7]) {
+  let wall = 100, calibrate;
+  const clock = createDiagnosticClock({ getPerformance: () => ({ now: () => wall * unit }) }, {
+    wallNow: () => wall, schedule: (fn) => { calibrate = fn; }
+  });
+  wall += 200; calibrate();
+  const before = clock.now(); wall += 16;
+  assert.equal(clock.now() - before, 16);
+  assert.match(clock.source(), unit === 7 ? /Date.now/ : new RegExp(`/ ${unit} `));
+}
 
 assert.equal(createPerformanceDiagnostics({ getPerformance() { throw new Error('off'); } }), null);
 let time = 0, saved, copied;

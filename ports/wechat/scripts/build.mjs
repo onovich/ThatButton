@@ -1,5 +1,6 @@
 import { build } from 'esbuild';
-import { copyFile, mkdir, rm, writeFile, readdir, stat } from 'node:fs/promises';
+import { copyFile, mkdir, rm, writeFile, readdir, stat, readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SFX_CUES } from '../../../src/audio/cues.js';
@@ -62,6 +63,19 @@ try {
   console.warn(`Obsolete combo art is still open in WeChat DevTools (${error.code}).`);
 }
 
+// Stamp the tested source/assets, independent of dirty Git state or build time.
+const sourceHash = createHash('sha256');
+async function hashDirectory(path) {
+  const entries = (await readdir(path, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name, 'en'));
+  for (const entry of entries) {
+    const file = resolve(path, entry.name);
+    if (entry.isDirectory()) await hashDirectory(file);
+    else { sourceHash.update(relative(portRoot, file).replaceAll('\\', '/')); sourceHash.update('\0'); sourceHash.update(await readFile(file)); }
+  }
+}
+for (const path of ['src', 'assets/runtime', 'assets/music', '../../src']) await hashDirectory(resolve(portRoot, path));
+sourceHash.update(await readFile(fileURLToPath(import.meta.url)));
+const buildId = sourceHash.digest('hex').slice(0, 20);
 await build({
   entryPoints: [resolve(portRoot, 'src/game.js')],
   outfile: resolve(output, 'game.js'),
@@ -71,6 +85,7 @@ await build({
   target: 'es2018',
   // Preserve names and syntax for profiling; remove whitespace to fit the 4 MiB package.
   minifyWhitespace: true,
+  define: { __WECHAT_BUILD_ID__: JSON.stringify(buildId) },
   logLevel: 'info'
 });
 await copyFile(resolve(portRoot, 'assets/text-atlas/OFL.txt'), resolve(output, 'art/OFL-text-atlas.txt'));
@@ -106,4 +121,4 @@ async function directoryBytes(path) {
 }
 const packageBytes = await directoryBytes(output);
 if (packageBytes >= 4 * 1024 * 1024) throw new Error(`WeChat main package exceeds 4 MiB: ${packageBytes} bytes`);
-console.log(`WeChat Mini Game build: ${output} (${packageBytes} bytes; ${4 * 1024 * 1024 - packageBytes} bytes remaining)`);
+console.log(`WeChat Mini Game build: ${output} (${packageBytes} bytes; ${4 * 1024 * 1024 - packageBytes} bytes remaining; id ${buildId})`);

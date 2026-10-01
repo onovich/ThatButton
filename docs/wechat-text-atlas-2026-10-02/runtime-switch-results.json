@@ -1,0 +1,138 @@
+{
+  "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "baseline": "89eab01",
+  "runtimeSwitchCases": [
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "enabled": {
+        "differentPixels": 6213,
+        "differentChannels": 17781,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 35,
+          "top": 111,
+          "right": 284,
+          "bottom": 416
+        }
+      },
+      "restored": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "enabled": {
+        "differentPixels": 18544,
+        "differentChannels": 52529,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 70,
+          "top": 223,
+          "right": 567,
+          "bottom": 832
+        }
+      },
+      "restored": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "enabled": {
+        "differentPixels": 36775,
+        "differentChannels": 103578,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 105,
+          "top": 335,
+          "right": 851,
+          "bottom": 1249
+        }
+      },
+      "restored": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "enabled": {
+        "differentPixels": 8708,
+        "differentChannels": 24612,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 31,
+          "top": 176,
+          "right": 357,
+          "bottom": 614
+        }
+      },
+      "restored": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "enabled": {
+        "differentPixels": 29283,
+        "differentChannels": 82472,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 62,
+          "top": 352,
+          "right": 715,
+          "bottom": 1228
+        }
+      },
+      "restored": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "enabled": {
+        "differentPixels": 59668,
+        "differentChannels": 167550,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 93,
+          "top": 528,
+          "right": 1073,
+          "bottom": 1842
+        }
+      },
+      "restored": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      }
+    }
+  ]
+}

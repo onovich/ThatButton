@@ -103,7 +103,19 @@ try {
         atlasVsBaseline:differences(a.canvas,c.canvas),missingVsBaseline:differences(a.canvas,missing.canvas),
         baselineCounts:a.counters,atlasCounts:c.counters});
     }
-  document.querySelector('#output').textContent=JSON.stringify({browser:navigator.userAgent,results,example});
+  const runtimeSwitchCases=[];
+  for(const [w,h] of [[320,568],[390,844]]) for(const dpr of [1,2,3]) {
+    const a=make(before,w,h,dpr,rules[8],'off',1900,'glitch');
+    const live=make(after,w,h,dpr,rules[8],'off',1900,'glitch');
+    live.view.setMotionPaused(false);
+    live.view.setTextAtlasOptions({rules:true,numbers:true});
+    const enabled=differences(a.canvas,live.canvas);
+    live.view.setTextAtlasOptions({rules:false,numbers:false});
+    const restored=differences(a.canvas,live.canvas);
+    live.view.setMotionPaused(true);
+    runtimeSwitchCases.push({w,h,dpr,enabled,restored});
+  }
+  document.querySelector('#output').textContent=JSON.stringify({browser:navigator.userAgent,results,runtimeSwitchCases,example});
 }catch(error){document.querySelector('#output').textContent=JSON.stringify({error:String(error),stack:error.stack});}
 </script>`;
 const server = createServer(async (request, response) => {
@@ -135,7 +147,10 @@ try {
   await writeFile(resolve(output,'results.json'),JSON.stringify(report,null,2)+'\n');
   assert.ok(report.results.every(r=>r.defaultVsBaseline.differentPixels===0),'Default visual regression');
   assert.ok(report.results.every(r=>r.missingVsBaseline.differentPixels===0),'Atlas failure visual regression');
+  assert.ok(report.runtimeSwitchCases.every(r=>r.enabled.differentPixels>0 && r.restored.differentPixels===0),
+    'Runtime switch must invalidate rule/glitch caches and restore the original pixels.');
   console.log(JSON.stringify({cases:report.results.length,defaultDifferent:0,missingDifferent:0,
+    runtimeSwitchCases:report.runtimeSwitchCases.length,runtimeRestoredDifferent:0,
     candidateDiffRange:[Math.min(...report.results.map(r=>r.atlasVsBaseline.differentPixels)),
       Math.max(...report.results.map(r=>r.atlasVsBaseline.differentPixels))],output}));
 } finally {server.close();}

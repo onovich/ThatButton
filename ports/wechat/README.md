@@ -31,7 +31,7 @@ npm run check
 
 `npm run check` 会生成 `build/game.js`、`game.json`、`project.config.json` 和从项目正式资源复制的音效及 CC0 背景音乐，并验证触摸输入、计时暂停、重开、存档、音乐设置和产物结构。构建包须低于 4 MiB。根项目的 `npm run validate` 还会检查 Web 版本、音效与背景音乐契约。[音频试听与来源](../../docs/audio/README.md)提供逐项复核入口。
 
-设置页可按 [内测诊断说明](../../docs/WECHAT_PLAYTEST_DIAGNOSTICS.md) 开启本次诊断并主动复制报告，正常启动默认关。规则/按钮数字的有限预制 PNG 图集也默认关，开发者可用 `ruleAtlas=1` / `numberAtlas=1` 单独 A/B；当前字形对照有差异，不能称为视觉验收通过。重建素材用 `npm run atlas:prepare`，无头画面对照用 `npm run atlas:check`，详见 [图集候选、许可、体积及验收证据](../../docs/WECHAT_TEXT_ATLAS_CANDIDATE.md)。
+设置页可按 [内测诊断说明](../../docs/WECHAT_PLAYTEST_DIAGNOSTICS.md) 开启本次诊断并主动复制报告，正常启动默认关。手机可从「同包文字A/B对照」选择 A 原文字或 B 图集，同一 build 依次测试并复制四轮报告，见 [真机四轮步骤](../../docs/WECHAT_SAME_BUILD_AB_TEST.md)。规则/按钮数字的有限预制 PNG 图集也默认关，开发者可用 `ruleAtlas=1` / `numberAtlas=1` 单独 A/B；当前字形对照有差异，不能称为视觉验收通过。重建素材用 `npm run atlas:prepare`，无头画面对照用 `npm run atlas:check`，详见 [图集候选、许可、体积及验收证据](../../docs/WECHAT_TEXT_ATLAS_CANDIDATE.md)。
 
 若需在浏览器预览 Canvas 画面，从仓库根目录运行 `npm run dev`，然后打开 `/ports/wechat/preview.html`。预览使用模拟 `wx` 接口，只用于布局与输入检查。加上 `?autostart&layout=3x3&w=360&h=640` 可查看窄屏 3×3 排版；该参数注入的是示意棋盘，点击不会推进真实第 6 关状态。
 

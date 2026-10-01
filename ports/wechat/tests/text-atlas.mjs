@@ -102,5 +102,14 @@ try {
   assert.equal(ruleOnly.counters.numberAtlasHit || 0, 0);
   assert.ok(numberOnly.counters.numberAtlasHit > 0);
   assert.equal(numberOnly.counters.ruleAtlasHit || 0, 0);
+  // Runtime switching must invalidate the already cached layout of the same rule.
+  const runtime = setup({});
+  runtime.view.renderer.renderBoard(separateBoard);
+  runtime.view.setTextAtlasOptions({ rules: true, numbers: true });
+  runtime.clear(); runtime.view.draw();
+  assert.ok(runtime.counters.ruleAtlasHit > 0 && runtime.counters.numberAtlasHit > 0);
+  runtime.view.setTextAtlasOptions({ rules: false, numbers: false });
+  runtime.clear(); runtime.view.draw();
+  assert.equal((runtime.counters.ruleAtlasHit || 0) + (runtime.counters.numberAtlasHit || 0), 0);
   console.log('Atlas range, layout/hit parity, missing/decode/unknown-word fallback checks passed:', aggregate);
 } finally { Date.now = originalNow; }

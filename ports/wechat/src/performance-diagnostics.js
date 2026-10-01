@@ -1,6 +1,7 @@
 // Opt-in application-side counters. No per-frame logs, uploads or unbounded history.
 export const PERFORMANCE_STORAGE_KEY = 'thatbutton.wechat.performance.v1';
 const SAMPLE_LIMIT = 256;
+let sessionSerial = 0;
 const SCENES = new Set(['loading', 'resource-error', 'home', 'help', 'settings',
   'upgrade', 'gameover', 'resume', 'game', 'game-entry', 'game-exit',
   'game-drift', 'game-swap', 'game-glitch']);
@@ -67,6 +68,7 @@ export function createPerformanceDiagnostics(wxApi, { enabled = false, now, cloc
   metadata = {} } = {}) {
   if (!enabled) return null;
   const startedAt = Date.now();
+  const sessionId = `${startedAt}:${++sessionSerial}`;
   const scenes = new Map();
   let active = true, previousRaf = null, previousScene = null;
   let currentScene = 'loading';
@@ -84,13 +86,13 @@ export function createPerformanceDiagnostics(wxApi, { enabled = false, now, cloc
     return scenes.get(key);
   }
   function snapshot() {
-    return { schemaVersion: 1, startedAt, exportedAt: Date.now(),
+    return { schemaVersion: 1, sessionId, startedAt, exportedAt: Date.now(),
       clockSource: diagnosticClock?.source() || clockSource,
       metadata: { ...metadata },
       semantics: 'Foreground RAF callback intervals and synchronous application draw/submit time; not GPU presentation FPS or CPU utilization. Percentiles use the latest 256 samples per scene.',
       unavailable: { gpuPresentationFps: null, cpuPercent: null, temperatureCelsius: null,
         gpuTimeMs: null, memoryBytes: null },
-      limits: { scenes: SCENES.size, samplesPerSeries: SAMPLE_LIMIT, savedReports: 3 },
+      limits: { scenes: SCENES.size, samplesPerSeries: SAMPLE_LIMIT, savedReports: 4 },
       persistenceError,
       scenes: Object.fromEntries([...scenes].map(([name, data]) => [name, {
         ...data.counters, rafInterval: summarize(data.rafInterval),
@@ -100,10 +102,10 @@ export function createPerformanceDiagnostics(wxApi, { enabled = false, now, cloc
   function save() {
     try {
       const stored = wxApi.getStorageSync?.(PERFORMANCE_STORAGE_KEY);
-      // Replace this session's previous snapshot; retain at most two earlier sessions.
-      const history = Array.isArray(stored) ? stored.slice(-3).filter((r) =>
-        r?.schemaVersion === 1 && r.startedAt !== startedAt &&
-        JSON.stringify(r).length <= 24000).slice(-2) : [];
+      // Replace this session's snapshot; retain four runs for an A/B/B/A comparison.
+      const history = Array.isArray(stored) ? stored.slice(-4).filter((r) =>
+        r?.schemaVersion === 1 && (r.sessionId ? r.sessionId !== sessionId : r.startedAt !== startedAt) &&
+        JSON.stringify(r).length <= 24000).slice(-3) : [];
       persistenceError = null;
       wxApi.setStorageSync?.(PERFORMANCE_STORAGE_KEY, [...history, snapshot()]);
     } catch { persistenceError = 'local storage failed'; }

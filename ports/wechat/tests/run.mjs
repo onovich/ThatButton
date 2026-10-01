@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import './hazards.mjs';
 import './performance-diagnostics.mjs';
 import './text-atlas.mjs';
+import './ab-comparison.mjs';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -159,6 +160,96 @@ for (const [width, height] of [[320,568], [390,844]]) {
   assert.ok(pointFor(smallRun.view, (action) => action.type === 'diagnosticsMenu'));
   assert.ok(pointFor(smallRun.view, (action) => action.type === 'home'));
 }
+
+// Same-build A/B can be selected from the native settings menu, without launch parameters.
+const comparisonFake = createFakeWx({ query: { seed: '' } });
+let comparisonMenu, comparisonModal, comparisonCopy, atlasLoads = 0;
+comparisonFake.wxApi.showActionSheet = (options) => { comparisonMenu = options; };
+comparisonFake.wxApi.showModal = (options) => { comparisonModal = options; };
+comparisonFake.wxApi.setClipboardData = ({ data }) => { comparisonCopy = data; };
+const comparisonRun = createWechatGame(comparisonFake.wxApi);
+assert.equal(comparisonRun.performanceControls.getComparison(), null);
+assert.equal(comparisonRun.diagnostics, null);
+comparisonFake.wxApi.createImage = () => {
+  const image = { width: 864, height: 588 };
+  Object.defineProperty(image, 'src', { set() { atlasLoads++; queueMicrotask(() => image.onload?.()); } });
+  return image;
+};
+comparisonRun.view.showSettings();
+const comparisonPoint = pointFor(comparisonRun.view, (action) => action.type === 'diagnosticsMenu');
+comparisonFake.touch(comparisonPoint.x, comparisonPoint.y);
+comparisonMenu.success({ tapIndex: 3 });
+assert.match(comparisonMenu.itemList[0], /A组/);
+comparisonMenu.success({ tapIndex: 1 });
+comparisonModal.success({ confirm: false });
+assert.equal(comparisonRun.diagnostics, null, 'Cancelled comparison must keep normal play untouched.');
+let firstSeed, firstButtons, firstRule, firstSampler;
+for (const [index, group] of ['A', 'B', 'B', 'A'].entries()) {
+  assert.equal(await comparisonRun.performanceControls.beginComparison(group), true,
+    `Preparing ${group}/${index}: ${comparisonRun.view.getView().mode}, playing=${comparisonRun.app.getState().isPlaying}, status=${JSON.stringify(comparisonRun.view.getTextAtlasStatus())}`);
+  const status = comparisonRun.view.getTextAtlasStatus();
+  assert.equal(status.loaded, true, 'Both groups must retain the same preloaded asset.');
+  assert.equal(status.rules, group === 'B');
+  assert.equal(status.numbers, group === 'B');
+  assert.equal(comparisonRun.diagnostics.metadata.comparison.group, group);
+  assert.equal(comparisonRun.diagnostics.metadata.comparison.order, index + 1);
+  if (firstSampler) {
+    const stopped = firstSampler.snapshot().scenes.game?.draws || 0;
+    comparisonRun.view.draw();
+    assert.equal(firstSampler.snapshot().scenes.game?.draws || 0, stopped);
+  }
+  comparisonRun.app.start();
+  const state = comparisonRun.app.getState();
+  if (!index) { firstSeed = state.seed; firstButtons = JSON.stringify(state.buttons); firstRule = state.currentRuleText; }
+  assert.equal(state.seed, firstSeed);
+  assert.equal(JSON.stringify(state.buttons), firstButtons);
+  assert.equal(state.currentRuleText, firstRule);
+  assert.equal(await comparisonRun.performanceControls.beginComparison(group === 'A' ? 'B' : 'A'), false,
+    'Group changes must be blocked while a game is running.');
+  firstSampler = comparisonRun.diagnostics;
+  comparisonRun.view.draw();
+  const sampled = firstSampler.snapshot().scenes.game;
+  if (group === 'B') assert.ok(sampled.ruleAtlasHit > 0 && sampled.numberAtlasHit > 0);
+  else assert.equal(sampled.ruleAtlasHit + sampled.numberAtlasHit, 0);
+  comparisonRun.app.gameLoop(state.lastTime + state.timeLeft + 5);
+  assert.equal(await comparisonRun.performanceControls.beginComparison('B'), false,
+    'Post-failure animation must finish before switching groups.');
+  await new Promise((done) => setTimeout(done, 820));
+}
+assert.equal(atlasLoads, 1, 'Four group selections must reuse one decoded atlas.');
+assert.equal(comparisonRun.performanceControls.finishComparison(), true);
+assert.equal(comparisonRun.diagnostics, null);
+assert.equal(comparisonRun.view.getTextAtlasStatus().decodedBytes, 0);
+assert.equal(comparisonRun.view.getTextAtlasStatus().rules, false);
+const comparisonBundle = JSON.parse(comparisonRun.performanceControls.exportComparison());
+assert.equal(comparisonBundle.reports.length, 4);
+assert.deepEqual(comparisonBundle.reports.map((r) => r.metadata.comparison.group), ['A', 'B', 'B', 'A']);
+assert.equal(comparisonBundle.hasBothGroups, true);
+assert.equal(JSON.parse(comparisonCopy).type, 'thatbutton.prebuilt-text-ab');
+assert.equal(comparisonFake.storage.has('thatbutton.wechat.settings.v1'), false);
+const freshComparisonRun = createWechatGame(createFakeWx().wxApi);
+assert.equal(freshComparisonRun.diagnostics, null);
+assert.equal(freshComparisonRun.performanceControls.getComparison(), null);
+
+const failedComparison = createWechatGame(createFakeWx({ failImages: true }).wxApi);
+await new Promise((done) => setTimeout(done, 1));
+failedComparison.view.showHome();
+assert.equal(await failedComparison.performanceControls.beginComparison('B'), false);
+assert.equal(failedComparison.diagnostics, null, 'A missing image must not be labelled a started B test.');
+const pendingFake = createFakeWx();
+const pendingRun = createWechatGame(pendingFake.wxApi);
+let completeAtlas;
+pendingFake.wxApi.createImage = () => {
+  const image = { width: 864, height: 588 };
+  Object.defineProperty(image, 'src', { set() { completeAtlas = () => image.onload?.(); } });
+  return image;
+};
+const pendingSelection = pendingRun.performanceControls.beginComparison('B');
+pendingRun.app.start(); // A user starts playing before the optional load has finished.
+completeAtlas();
+assert.equal(await pendingSelection, false);
+assert.equal(pendingRun.view.getTextAtlasStatus().rules, false, 'A late asset must never switch a live game.');
+assert.equal(pendingRun.performanceControls.getComparison(), null);
 
 // An optional atlas failure must not block the already usable game artwork.
 const optionalAssetFake = createFakeWx({ query: { ruleAtlas: '1', numberAtlas: '1' } });

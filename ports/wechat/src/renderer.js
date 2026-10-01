@@ -1632,6 +1632,9 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
       view.images = images; textAtlas.setImage(images.textAtlas); draw();
     },
     getTextAtlasStatus: () => textAtlas.status(),
+    setTextAtlasOptions(options) {
+      textAtlas.setOptions(options); ruleLayout = null; glitchCache.clear(); draw();
+    },
     setSettings(settings) { view.settings = { ...view.settings, ...settings }; draw(); },
     playActionFeedback(action) {
       if (!canAnimate || !action) return;

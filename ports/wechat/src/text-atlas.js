@@ -5,7 +5,9 @@ export function createTextAtlas({ rules = false, numbers = false } = {}) {
   let image = null;
   let failed = false;
   return {
-    rules, numbers,
+    get rules() { return rules; },
+    get numbers() { return numbers; },
+    setOptions(options) { rules = Boolean(options.rules); numbers = Boolean(options.numbers); },
     setImage(value) {
       failed = false;
       image = value?.width === TEXT_ATLAS.width && value?.height === TEXT_ATLAS.height ? value : null;

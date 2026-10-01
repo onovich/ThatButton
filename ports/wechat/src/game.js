@@ -5,8 +5,10 @@ import { createWechatMusic, normalizeMusicVolume } from './music.js';
 import { createCanvasRenderer } from './renderer.js';
 import { createWechatHazards } from './hazards.js';
 import { createPerformanceDiagnostics, PERFORMANCE_STORAGE_KEY } from './performance-diagnostics.js';
+import { createComparisonExport } from './ab-comparison.js';
 
 const SETTINGS_KEY = 'thatbutton.wechat.settings.v1';
+const BUILD_ID = typeof __WECHAT_BUILD_ID__ === 'undefined' ? 'source-preview' : __WECHAT_BUILD_ID__;
 const ART = {
   running: 'art/running-pair.png',
   caring: 'art/caring-pair.png',
@@ -49,9 +51,11 @@ export function createWechatGame(wxApi) {
   const query = wxApi.getLaunchOptionsSync?.().query || {};
   // Candidate remains opt-in until system-font visual parity is accepted.
   const textAtlasOptions = { rules: query.ruleAtlas === '1', numbers: query.numberAtlas === '1' };
+  let comparison = null, comparisonSeed = null, comparisonSeriesId = null;
+  let comparisonOrder = 0, comparisonRequest = 0, atlasImagePromise = null;
   let diagnostics = createPerformanceDiagnostics(wxApi, {
     enabled: query.perf === '1',
-    metadata: { width: info.windowWidth, height: info.windowHeight, pixelRatio: info.pixelRatio,
+    metadata: { buildId: BUILD_ID, width: info.windowWidth, height: info.windowHeight, pixelRatio: info.pixelRatio,
       ruleAtlas: textAtlasOptions.rules, numberAtlas: textAtlasOptions.numbers }
   });
   let menuButtonRect = null;
@@ -133,7 +137,7 @@ export function createWechatGame(wxApi) {
     renderer,
     hazardDirector: createWechatHazards,
     viewportSize: () => ({ width: view.width, height: view.height }),
-    seedProvider: () => query.seed || null,
+    seedProvider: () => comparisonSeed || query.seed || null,
     debugProvider: () => false,
     hazardsDisabledProvider: () => false,
     upgradeDefinitions: UPGRADE_DEFINITIONS.filter((item) => item.id !== 'combo-reward-plus')
@@ -188,6 +192,13 @@ export function createWechatGame(wxApi) {
   }
   void loadArt();
 
+  function updateDiagnosticMetadata() {
+    if (!diagnostics) return;
+    const state = app.getState();
+    diagnostics.metadata.run = { seed: state.seed, level: state.level, score: state.score };
+    diagnostics.metadata.atlasStatus = view.getTextAtlasStatus();
+  }
+
   function setDiagnosticsEnabled(enabled) {
     if (Boolean(diagnostics) === Boolean(enabled)) return;
     if (enabled) {
@@ -199,11 +210,13 @@ export function createWechatGame(wxApi) {
         }
       } catch {}
       diagnostics = createPerformanceDiagnostics(wxApi, { enabled: true,
-        metadata: { ...device, width: info.windowWidth, height: info.windowHeight,
+        metadata: { ...device, buildId: BUILD_ID, comparison,
+          width: info.windowWidth, height: info.windowHeight,
           pixelRatio: info.pixelRatio, ruleAtlas: textAtlasOptions.rules,
           numberAtlas: textAtlasOptions.numbers, atlasStatus: view.getTextAtlasStatus() } });
       diagnostics.setActive(!hidden && pausedAt === null);
     } else {
+      updateDiagnosticMetadata();
       diagnostics.setActive(false);
       diagnostics.save();
       diagnostics.dispose();
@@ -212,7 +225,7 @@ export function createWechatGame(wxApi) {
     view.setDiagnostics(diagnostics);
   }
   function exportDiagnostics() {
-    if (diagnostics) return diagnostics.exportReport();
+    if (diagnostics) { updateDiagnosticMetadata(); return diagnostics.exportReport(); }
     try {
       const stored = wxApi.getStorageSync?.(PERFORMANCE_STORAGE_KEY);
       const report = Array.isArray(stored) ? stored[stored.length - 1] : null;
@@ -240,6 +253,83 @@ export function createWechatGame(wxApi) {
     catch { wxApi.showToast?.({ title: '清除失败，请重试', icon: 'none' }); return false; }
     return true;
   }
+  function canSelectComparison() {
+    if (hidden || app.getState().isPlaying || !['home', 'settings', 'gameover'].includes(view.getView().mode)) {
+      wxApi.showToast?.({ title: '请先结束本局，再选择对照组', icon: 'none' });
+      return false;
+    }
+    return true;
+  }
+  async function beginComparison(group) {
+    if (!['A', 'B'].includes(group) || !canSelectComparison()) return false;
+    const request = ++comparisonRequest;
+    setDiagnosticsEnabled(false); // Save the previous group before changing its metadata or rendering.
+    // Both groups retain the same decoded asset; exclude loading from their samples.
+    if (view.getTextAtlasStatus().failed) atlasImagePromise = null;
+    let image = view.getTextAtlasStatus().loaded && !view.getTextAtlasStatus().failed
+      ? view.getView().images.textAtlas : null;
+    if (!image) {
+      wxApi.showToast?.({ title: '正在准备对照素材', icon: 'loading' });
+      atlasImagePromise ||= loadOne('textAtlas', 'art/text-atlas-v1.png');
+      image = (await atlasImagePromise).image;
+    }
+    if (request !== comparisonRequest || !canSelectComparison()) return false;
+    view.setImages({ ...view.getView().images, textAtlas: image });
+    if (!view.getTextAtlasStatus().loaded) {
+      atlasImagePromise = null;
+      wxApi.showToast?.({ title: '图集加载失败，对照未开始', icon: 'none' });
+      return false;
+    }
+    comparisonSeriesId ||= `text-ab-${Date.now()}`;
+    comparisonSeed = query.seed ? String(query.seed).slice(0, 128) : 'text-atlas-ab-v1';
+    Object.assign(textAtlasOptions, { rules: group === 'B', numbers: group === 'B' });
+    comparison = { seriesId: comparisonSeriesId, order: ++comparisonOrder, group,
+      seed: comparisonSeed, scope: 'prebuilt-text-only', warmedAtlasInBothGroups: true };
+    view.setTextAtlasOptions(textAtlasOptions);
+    setDiagnosticsEnabled(true);
+    wxApi.showToast?.({ title: `${group}组已就绪，请开始游戏`, icon: 'none' });
+    return true;
+  }
+  function finishComparison() {
+    if (!canSelectComparison()) return false;
+    comparisonRequest++;
+    setDiagnosticsEnabled(false);
+    comparison = null; comparisonSeed = null;
+    Object.assign(textAtlasOptions, { rules: false, numbers: false });
+    view.setTextAtlasOptions(textAtlasOptions);
+    const { textAtlas, ...images } = view.getView().images;
+    view.setImages(images); atlasImagePromise = null;
+    return true;
+  }
+  function exportComparison() {
+    if (diagnostics) { updateDiagnosticMetadata(); diagnostics.save(); }
+    try {
+      const bundle = createComparisonExport(wxApi.getStorageSync?.(PERFORMANCE_STORAGE_KEY), comparisonSeriesId);
+      if (!bundle.reports.length) {
+        wxApi.showToast?.({ title: '暂无本次A/B报告，请先选组试玩', icon: 'none' });
+        return null;
+      }
+      if (typeof wxApi.setClipboardData !== 'function') throw new Error('clipboard unavailable');
+      const data = JSON.stringify(bundle, null, 2);
+      wxApi.setClipboardData({ data,
+        fail: () => wxApi.showToast?.({ title: '复制失败，请重试', icon: 'none' }) });
+      return data;
+    } catch { wxApi.showToast?.({ title: '对照报告读取或复制失败', icon: 'none' }); return null; }
+  }
+  function openComparisonMenu() {
+    if (!canSelectComparison()) return;
+    wxApi.showActionSheet({ itemList: ['A组：原文字绘制', 'B组：规则和数字图集', '退出A/B，恢复默认绘制'],
+      success({ tapIndex }) {
+        if (tapIndex === 2) { finishComparison(); return; }
+        const group = ['A', 'B'][tapIndex];
+        if (!group) return;
+        if (typeof wxApi.showModal === 'function') wxApi.showModal({ title: `开始${group}组对照`,
+          content: '保存上一份报告，使用固定种子并开始新采样。仅本次运行；B组字体外观可能不同。素材准备后从首页开始游戏。',
+          confirmText: '开始对照', success: ({ confirm }) => { if (confirm) void beginComparison(group); } });
+        else void beginComparison(group);
+      }
+    });
+  }
   function openDiagnosticsMenu() {
     if (typeof wxApi.showActionSheet !== 'function') {
       wxApi.showToast?.({ title: '请在微信中使用内测诊断', icon: 'none' });
@@ -247,7 +337,8 @@ export function createWechatGame(wxApi) {
     }
     wxApi.showActionSheet({
       itemList: [diagnostics ? '关闭内测诊断并保存报告' : '开启内测诊断（仅本次运行）',
-        '复制最近内测报告', '关闭诊断并清除内测记录'],
+        '复制最近内测报告', '关闭诊断并清除内测记录',
+        `同包文字A/B对照${comparison ? `：${comparison.group}组` : ''}`, '复制本次A/B对照报告'],
       success({ tapIndex }) {
         if (tapIndex === 0) {
           if (diagnostics) setDiagnosticsEnabled(false);
@@ -261,7 +352,8 @@ export function createWechatGame(wxApi) {
         } else if (tapIndex === 1) exportDiagnostics();
         else if (tapIndex === 2) {
           if (clearDiagnostics()) wxApi.showToast?.({ title: '内测记录已清除', icon: 'none' });
-        }
+        } else if (tapIndex === 3) openComparisonMenu();
+        else if (tapIndex === 4) exportComparison();
       }
     });
   }
@@ -350,6 +442,7 @@ export function createWechatGame(wxApi) {
   }
   wxApi.onHide?.(() => {
     hidden = true;
+    updateDiagnosticMetadata();
     diagnostics?.setActive(false);
     diagnostics?.save();
     audio.suspend();
@@ -373,7 +466,8 @@ export function createWechatGame(wxApi) {
 
   return { app, view, audio, music, get diagnostics() { return diagnostics; },
     performanceControls: { setEnabled: setDiagnosticsEnabled, exportReport: exportDiagnostics,
-      clear: clearDiagnostics, isEnabled: () => Boolean(diagnostics) } };
+      clear: clearDiagnostics, isEnabled: () => Boolean(diagnostics),
+      beginComparison, finishComparison, exportComparison, getComparison: () => comparison } };
 }
 
 if (typeof wx !== 'undefined') {

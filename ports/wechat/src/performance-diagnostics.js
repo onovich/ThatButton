@@ -1,5 +1,5 @@
 // Opt-in application-side counters. No per-frame logs, uploads or unbounded history.
-const STORAGE_KEY = 'thatbutton.wechat.performance.v1';
+export const PERFORMANCE_STORAGE_KEY = 'thatbutton.wechat.performance.v1';
 const SAMPLE_LIMIT = 256;
 const SCENES = new Set(['loading', 'resource-error', 'home', 'help', 'settings',
   'upgrade', 'gameover', 'resume', 'game', 'game-entry', 'game-exit',
@@ -25,7 +25,8 @@ function summarize(target) {
 }
 
 export function createDiagnosticClock(wxApi, { wallNow = Date.now, schedule = setTimeout,
-  onChange = () => {} } = {}) {
+  onChange = () => {}, cancel = clearTimeout } = {}) {
+  let timer = null, disposed = false;
   let read = wallNow;
   let source = 'Date.now (millisecond resolution)';
   try {
@@ -34,7 +35,9 @@ export function createDiagnosticClock(wxApi, { wallNow = Date.now, schedule = se
       const rawStart = platform.now(), wallStart = wallNow();
       // WeChat hosts can expose microseconds or milliseconds. Measure the unit
       // without blocking, guessing from platform names, or changing the game clock.
-      const timer = schedule(() => {
+      timer = schedule(() => {
+        timer = null;
+        if (disposed) return;
         try {
           const rawEnd = platform.now(), wallEnd = wallNow();
           const elapsed = wallEnd - wallStart;
@@ -56,7 +59,8 @@ export function createDiagnosticClock(wxApi, { wallNow = Date.now, schedule = se
       timer?.unref?.();
     }
   } catch {}
-  return { now: () => read(), source: () => source };
+  return { now: () => read(), source: () => source,
+    dispose() { disposed = true; if (timer !== null) cancel(timer); timer = null; } };
 }
 
 export function createPerformanceDiagnostics(wxApi, { enabled = false, now, clockSource,
@@ -95,13 +99,13 @@ export function createPerformanceDiagnostics(wxApi, { enabled = false, now, cloc
   }
   function save() {
     try {
-      const stored = wxApi.getStorageSync?.(STORAGE_KEY);
+      const stored = wxApi.getStorageSync?.(PERFORMANCE_STORAGE_KEY);
       // Replace this session's previous snapshot; retain at most two earlier sessions.
       const history = Array.isArray(stored) ? stored.slice(-3).filter((r) =>
         r?.schemaVersion === 1 && r.startedAt !== startedAt &&
         JSON.stringify(r).length <= 24000).slice(-2) : [];
       persistenceError = null;
-      wxApi.setStorageSync?.(STORAGE_KEY, [...history, snapshot()]);
+      wxApi.setStorageSync?.(PERFORMANCE_STORAGE_KEY, [...history, snapshot()]);
     } catch { persistenceError = 'local storage failed'; }
   }
   return {
@@ -111,9 +115,9 @@ export function createPerformanceDiagnostics(wxApi, { enabled = false, now, cloc
     count(name, amount = 1) {
       if (active && COUNTERS.includes(name)) bucket().counters[name] += amount;
     },
-    beginDraw(scene) { currentScene = scene; return now(); },
+    beginDraw(scene) { if (!active) return null; currentScene = scene; return now(); },
     endDraw(start) {
-      if (!active) return;
+      if (!active || start === null) return;
       const data = bucket();
       data.counters.draws++;
       record(data.drawSubmit, now() - start);
@@ -135,6 +139,7 @@ export function createPerformanceDiagnostics(wxApi, { enabled = false, now, cloc
     },
     resetFrame() { previousRaf = null; previousScene = null; },
     setActive(value) { active = Boolean(value); previousRaf = null; previousScene = null; },
+    dispose() { active = false; previousRaf = null; diagnosticClock?.dispose(); },
     snapshot, save,
     exportReport() {
       save();

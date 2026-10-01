@@ -56,3 +56,13 @@ const failing = createPerformanceDiagnostics({ setStorageSync() { throw new Erro
 failing.save();
 assert.equal(failing.snapshot().persistenceError, 'local storage failed');
 console.log('Opt-in performance diagnostics, foreground gaps, scene bounds and explicit export checks passed.');
+
+let pendingCalibration, cancelledCalibration = false, platformReads = 0;
+const disposableClock = createDiagnosticClock({ getPerformance: () => ({ now() { platformReads++; return 0; } }) }, {
+  schedule(fn) { pendingCalibration = fn; return 17; },
+  cancel(id) { assert.equal(id,17); cancelledCalibration = true; }
+});
+disposableClock.dispose();
+pendingCalibration();
+assert.equal(cancelledCalibration,true);
+assert.equal(platformReads,1,'Disposed calibration must not read the platform clock again.');

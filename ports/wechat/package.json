@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "npm run build && node tests/run.mjs"
+    "check": "npm run build && node tests/run.mjs",
+    "atlas:prepare": "node scripts/prepare-text-atlas.mjs",
+    "atlas:check": "node scripts/check-text-atlas-browser.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

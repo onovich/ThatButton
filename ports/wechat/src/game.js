@@ -4,7 +4,7 @@ import { createWechatAudio } from './audio.js';
 import { createWechatMusic, normalizeMusicVolume } from './music.js';
 import { createCanvasRenderer } from './renderer.js';
 import { createWechatHazards } from './hazards.js';
-import { createPerformanceDiagnostics } from './performance-diagnostics.js';
+import { createPerformanceDiagnostics, PERFORMANCE_STORAGE_KEY } from './performance-diagnostics.js';
 
 const SETTINGS_KEY = 'thatbutton.wechat.settings.v1';
 const ART = {
@@ -47,13 +47,16 @@ export function createWechatGame(wxApi) {
   const canvas = wxApi.createCanvas();
   const info = wxApi.getWindowInfo?.() || wxApi.getSystemInfoSync();
   const query = wxApi.getLaunchOptionsSync?.().query || {};
-  const diagnostics = createPerformanceDiagnostics(wxApi, {
+  // Candidate remains opt-in until system-font visual parity is accepted.
+  const textAtlasOptions = { rules: query.ruleAtlas === '1', numbers: query.numberAtlas === '1' };
+  let diagnostics = createPerformanceDiagnostics(wxApi, {
     enabled: query.perf === '1',
-    metadata: { width: info.windowWidth, height: info.windowHeight, pixelRatio: info.pixelRatio }
+    metadata: { width: info.windowWidth, height: info.windowHeight, pixelRatio: info.pixelRatio,
+      ruleAtlas: textAtlasOptions.rules, numberAtlas: textAtlasOptions.numbers }
   });
   let menuButtonRect = null;
   try { menuButtonRect = wxApi.getMenuButtonBoundingClientRect?.() || null; } catch {}
-  const view = createCanvasRenderer({ canvas, info, menuButtonRect, diagnostics,
+  const view = createCanvasRenderer({ canvas, info, menuButtonRect, diagnostics, textAtlasOptions,
     createSurface: () => wxApi.createOffscreenCanvas?.({type:'2d',width:128,height:128}) || wxApi.createCanvas() });
   const music = createWechatMusic(wxApi);
   const audio = createWechatAudio(wxApi, Date.now, (cue) => {
@@ -169,18 +172,99 @@ export function createWechatGame(wxApi) {
       return;
     }
     view.showLoading();
-    const settled = await Promise.all(Object.entries(ART).map(([name, source]) => loadOne(name, source)));
+    const assets = { ...ART };
+    if (textAtlasOptions.rules || textAtlasOptions.numbers) assets.textAtlas = 'art/text-atlas-v1.png';
+    const settled = await Promise.all(Object.entries(assets).map(([name, source]) => loadOne(name, source)));
     const images = {};
     const failed = [];
     for (const item of settled) {
       if (item.image) images[item.name] = item.image;
-      else failed.push(item.name);
+      else if (item.name !== 'textAtlas') failed.push(item.name);
     }
     view.setImages(images);
+    if (diagnostics) diagnostics.metadata.atlasStatus = view.getTextAtlasStatus();
     if (failed.length) view.showResourceError(failed);
     else { view.showHome(); music.play('home'); }
   }
   void loadArt();
+
+  function setDiagnosticsEnabled(enabled) {
+    if (Boolean(diagnostics) === Boolean(enabled)) return;
+    if (enabled) {
+      let device = {};
+      try {
+        const details = wxApi.getDeviceInfo?.() || {};
+        for (const key of ['model', 'system', 'platform']) {
+          if (typeof details[key] === 'string') device[key] = details[key].slice(0, 100);
+        }
+      } catch {}
+      diagnostics = createPerformanceDiagnostics(wxApi, { enabled: true,
+        metadata: { ...device, width: info.windowWidth, height: info.windowHeight,
+          pixelRatio: info.pixelRatio, ruleAtlas: textAtlasOptions.rules,
+          numberAtlas: textAtlasOptions.numbers, atlasStatus: view.getTextAtlasStatus() } });
+      diagnostics.setActive(!hidden && pausedAt === null);
+    } else {
+      diagnostics.setActive(false);
+      diagnostics.save();
+      diagnostics.dispose();
+      diagnostics = null;
+    }
+    view.setDiagnostics(diagnostics);
+  }
+  function exportDiagnostics() {
+    if (diagnostics) return diagnostics.exportReport();
+    try {
+      const stored = wxApi.getStorageSync?.(PERFORMANCE_STORAGE_KEY);
+      const report = Array.isArray(stored) ? stored[stored.length - 1] : null;
+      if (!report || report.schemaVersion !== 1 || JSON.stringify(report).length > 24000) {
+        wxApi.showToast?.({ title: '暂无报告，请先开启诊断试玩', icon: 'none' });
+        return null;
+      }
+      const data = JSON.stringify(report, null, 2);
+      if (typeof wxApi.setClipboardData !== 'function') throw new Error('clipboard unavailable');
+      wxApi.setClipboardData({ data,
+        fail: () => wxApi.showToast?.({ title: '复制失败，请重试', icon: 'none' }) });
+      return data;
+    } catch {
+      wxApi.showToast?.({ title: '报告读取或复制失败', icon: 'none' });
+      return null;
+    }
+  }
+  function clearDiagnostics() {
+    if (diagnostics) {
+      diagnostics.dispose();
+      diagnostics = null;
+      view.setDiagnostics(null);
+    }
+    try { wxApi.removeStorageSync(PERFORMANCE_STORAGE_KEY); }
+    catch { wxApi.showToast?.({ title: '清除失败，请重试', icon: 'none' }); return false; }
+    return true;
+  }
+  function openDiagnosticsMenu() {
+    if (typeof wxApi.showActionSheet !== 'function') {
+      wxApi.showToast?.({ title: '请在微信中使用内测诊断', icon: 'none' });
+      return;
+    }
+    wxApi.showActionSheet({
+      itemList: [diagnostics ? '关闭内测诊断并保存报告' : '开启内测诊断（仅本次运行）',
+        '复制最近内测报告', '关闭诊断并清除内测记录'],
+      success({ tapIndex }) {
+        if (tapIndex === 0) {
+          if (diagnostics) setDiagnosticsEnabled(false);
+          else if (typeof wxApi.showModal === 'function') wxApi.showModal({
+            title: '开启内测诊断',
+            content: '记录机型和游戏性能统计，仅保存在本机。会有少量采样开销，不自动上传；重启后默认关闭。',
+            confirmText: '开启',
+            success: ({ confirm }) => { if (confirm) setDiagnosticsEnabled(true); }
+          });
+          else setDiagnosticsEnabled(true);
+        } else if (tapIndex === 1) exportDiagnostics();
+        else if (tapIndex === 2) {
+          if (clearDiagnostics()) wxApi.showToast?.({ title: '内测记录已清除', icon: 'none' });
+        }
+      }
+    });
+  }
 
   let lastDispatch = null;
   function handleTouch(event, source) {
@@ -223,7 +307,8 @@ export function createWechatGame(wxApi) {
     else if (action.type === 'resume') { unpause(); view.resumeGame(); music.resume(); }
     else if (action.type === 'retryAssets') void loadArt();
     else if (action.type === 'continueFallback') { view.showHome(); music.play('home'); }
-    else if (action.type === 'exportPerformance') diagnostics?.exportReport();
+    else if (action.type === 'diagnosticsMenu') openDiagnosticsMenu();
+    else if (action.type === 'exportPerformance') exportDiagnostics();
     else if (action.type === 'toggle') {
       preferences = { ...preferences, [action.key]: !preferences[action.key] };
       try { wxApi.setStorageSync(SETTINGS_KEY, preferences); } catch {}
@@ -286,7 +371,9 @@ export function createWechatGame(wxApi) {
     view.setMotionPaused(false);
   });
 
-  return { app, view, audio, music, diagnostics };
+  return { app, view, audio, music, get diagnostics() { return diagnostics; },
+    performanceControls: { setEnabled: setDiagnosticsEnabled, exportReport: exportDiagnostics,
+      clear: clearDiagnostics, isEnabled: () => Boolean(diagnostics) } };
 }
 
 if (typeof wx !== 'undefined') {

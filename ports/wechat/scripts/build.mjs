@@ -1,5 +1,5 @@
 import { build } from 'esbuild';
-import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, rm, writeFile, readdir, stat } from 'node:fs/promises';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SFX_CUES } from '../../../src/audio/cues.js';
@@ -43,7 +43,7 @@ for (const name of [
   'upgrade-rays-v24.png',
   'sunny-stage.jpg', 'gameplay-landscape.jpg',
   'combo-wordmark-v30.png', 'max-wordmark-v30.png', 'ready-wordmark-v25.png',
-  'hit-wordmark-v30.png', 'combo-digits-v29.png'
+  'hit-wordmark-v30.png', 'combo-digits-v29.png', 'text-atlas-v1.png'
 ]) {
   await copyFile(resolve(portRoot, 'assets/runtime', name), resolve(output, 'art', name));
 }
@@ -69,8 +69,11 @@ await build({
   format: 'iife',
   platform: 'browser',
   target: 'es2018',
+  // Preserve names and syntax for profiling; remove whitespace to fit the 4 MiB package.
+  minifyWhitespace: true,
   logLevel: 'info'
 });
+await copyFile(resolve(portRoot, 'assets/text-atlas/OFL.txt'), resolve(output, 'art/OFL-text-atlas.txt'));
 
 for (const name of ['beep', 'chain', 'click', 'combo', 'error', 'explosion', 'levelup']) {
   await rm(resolve(output, 'audio', `${name}.wav`), { force: true });
@@ -93,4 +96,14 @@ await writeFile(resolve(output, 'project.config.json'), JSON.stringify({
   projectname: 'ThatButton',
   setting: { es6: false, minified: false, urlCheck: true }
 }, null, 2) + '\n');
-console.log(`WeChat Mini Game build: ${output}`);
+async function directoryBytes(path) {
+  let total = 0;
+  for (const item of await readdir(path, { withFileTypes: true })) {
+    const child = resolve(path, item.name);
+    total += item.isDirectory() ? await directoryBytes(child) : (await stat(child)).size;
+  }
+  return total;
+}
+const packageBytes = await directoryBytes(output);
+if (packageBytes >= 4 * 1024 * 1024) throw new Error(`WeChat main package exceeds 4 MiB: ${packageBytes} bytes`);
+console.log(`WeChat Mini Game build: ${output} (${packageBytes} bytes; ${4 * 1024 * 1024 - packageBytes} bytes remaining)`);

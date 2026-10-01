@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import './hazards.mjs';
 import './performance-diagnostics.mjs';
+import './text-atlas.mjs';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,7 +25,7 @@ assert.deepEqual(preComboDraws, [readySticker, hitSticker],
   'READY and 1 HIT must use their approved sticker images.');
 
 function createFakeWx({ width = 390, height = 844, failImages = false,
-  touchMode = 'both', canvasEvents = false, animateCanvas = false } = {}) {
+  touchMode = 'both', canvasEvents = false, animateCanvas = false, query = {} } = {}) {
   const frames = [];
   const drawnText = [];
   const stats = { paints: 0, measures: 0 };
@@ -68,7 +69,7 @@ function createFakeWx({ width = 390, height = 844, failImages = false,
     getStorageSync(key) { return storage.get(key); },
     setStorageSync(key, value) { storage.set(key, value); },
     removeStorageSync(key) { storage.delete(key); },
-    getLaunchOptionsSync() { return { query: { seed: 'wechat-integration' } }; },
+    getLaunchOptionsSync() { return { query: { seed: 'wechat-integration', ...query } }; },
     createInnerAudioContext() { return { stop() {}, play() {}, destroy() {} }; },
     ...(failImages ? { createImage() {
       const image = {};
@@ -111,6 +112,136 @@ function pointFor(view, predicate) {
   }
   throw new Error('Expected touch action was not found.');
 }
+
+// The player-facing diagnostic switch is session-only and separate from game settings.
+const diagnosticFake = createFakeWx();
+let perfReads = 0, menu, modal, copiedReport;
+diagnosticFake.wxApi.getPerformance = () => { perfReads++; return { now: () => Date.now() }; };
+diagnosticFake.wxApi.showActionSheet = (options) => { menu = options; };
+diagnosticFake.wxApi.showModal = (options) => { modal = options; };
+diagnosticFake.wxApi.setClipboardData = ({ data }) => { copiedReport = data; };
+const diagnosticRun = createWechatGame(diagnosticFake.wxApi);
+assert.equal(diagnosticRun.diagnostics, null);
+assert.equal(perfReads, 0, 'Default-off startup must not initialize the diagnostic clock.');
+assert.equal(diagnosticFake.storage.has('thatbutton.wechat.performance.v1'), false);
+diagnosticRun.view.showSettings();
+let diagPoint = pointFor(diagnosticRun.view, (action) => action.type === 'diagnosticsMenu');
+diagnosticFake.touch(diagPoint.x, diagPoint.y);
+assert.match(menu.itemList[0], /开启/);
+menu.success({ tapIndex: 0 });
+modal.success({ confirm: false });
+assert.equal(diagnosticRun.diagnostics, null, 'Cancelled opt-in must not enable sampling.');
+menu.success({ tapIndex: 0 });
+modal.success({ confirm: true });
+assert.equal(diagnosticRun.performanceControls.isEnabled(), true);
+assert.equal(perfReads, 1);
+diagnosticRun.view.draw();
+assert.ok(diagnosticRun.diagnostics.snapshot().scenes.settings.draws > 0);
+const collected = diagnosticRun.diagnostics;
+diagnosticRun.performanceControls.setEnabled(false);
+const stopped = collected.snapshot().scenes.settings.draws;
+assert.equal(diagnosticRun.diagnostics, null);
+diagnosticRun.view.draw();
+assert.equal(collected.snapshot().scenes.settings.draws, stopped, 'Off detaches renderer sampling.');
+assert.equal(diagnosticRun.performanceControls.exportReport(), copiedReport);
+assert.equal(JSON.parse(copiedReport).schemaVersion, 1);
+const recreated = createWechatGame(diagnosticFake.wxApi);
+assert.equal(recreated.diagnostics, null, 'Saved report must never persist the enabled flag.');
+assert.equal(perfReads, 1);
+diagnosticFake.storage.set('thatbutton.bestRun.v1', 'keep-best');
+diagnosticRun.performanceControls.clear();
+assert.equal(diagnosticFake.storage.has('thatbutton.wechat.performance.v1'), false);
+assert.equal(diagnosticFake.storage.get('thatbutton.bestRun.v1'), 'keep-best');
+for (const [width, height] of [[320,568], [390,844]]) {
+  const smallFake = createFakeWx({ width, height });
+  const smallRun = createWechatGame(smallFake.wxApi);
+  smallRun.view.showSettings();
+  assert.ok(pointFor(smallRun.view, (action) => action.type === 'diagnosticsMenu'));
+  assert.ok(pointFor(smallRun.view, (action) => action.type === 'home'));
+}
+
+// An optional atlas failure must not block the already usable game artwork.
+const optionalAssetFake = createFakeWx({ query: { ruleAtlas: '1', numberAtlas: '1' } });
+const loadedPaths = [];
+optionalAssetFake.wxApi.createImage = () => {
+  const image = { width: 100, height: 100 };
+  Object.defineProperty(image, 'src', { set(path) {
+    loadedPaths.push(path);
+    queueMicrotask(() => path === 'art/text-atlas-v1.png' ? image.onerror?.() : image.onload?.());
+  } });
+  return image;
+};
+const optionalAssetRun = createWechatGame(optionalAssetFake.wxApi);
+await new Promise((done) => setTimeout(done, 1));
+assert.ok(loadedPaths.includes('art/text-atlas-v1.png'));
+assert.equal(optionalAssetRun.view.getView().mode, 'home');
+assert.equal(optionalAssetRun.view.getTextAtlasStatus().loaded, false);
+assert.deepEqual(optionalAssetRun.view.getView().failedAssets, []);
+
+// Same seed and touch/RAF/pause timeline must produce identical business state.
+const savedDate = Date;
+let replayTime = 100000;
+globalThis.Date = class extends savedDate {
+  constructor(...args) { super(...(args.length ? args : [replayTime])); }
+  static now() { return replayTime; }
+};
+try {
+  const replays = [{}, { ruleAtlas: '1', numberAtlas: '1' }].map((query) => {
+    const host = createFakeWx({ query });
+    const run = createWechatGame(host.wxApi);
+    run.view.setImages({ textAtlas: { width: 864, height: 588 } });
+    return { host, ...run };
+  });
+  const compareState = (step) => {
+    const differences = [];
+    function compare(left, right, path) {
+      if (left && right && typeof left === 'object' && typeof right === 'object') {
+        for (const key of new Set([...Object.keys(left), ...Object.keys(right)])) compare(left[key], right[key], `${path}.${key}`);
+      } else if (typeof left !== 'function' && left !== right) differences.push({ path, left, right });
+    }
+    compare(replays[0].app.getState(), replays[1].app.getState(), 'state');
+    assert.deepEqual(differences, [], `Atlas A/B state mismatch: ${step}`);
+  };
+  for (const run of replays) {
+    const point = pointFor(run.view, (action) => action.type === 'start');
+    run.host.touch(point.x, point.y);
+  }
+  compareState('start');
+  for (const interval of [16, 100, 16]) {
+    replayTime += interval;
+    for (const run of replays) run.host.frames.shift()();
+    compareState(`RAF ${interval}`);
+  }
+  for (const kind of ['safe', 'safe', 'fatal']) {
+    replayTime += 200;
+    for (const run of replays) {
+      const state = run.app.getState();
+      const button = state.buttons.find((b) => !b.isClicked &&
+        state.forbiddenIds.includes(b.id) === (kind === 'fatal'));
+      const point = pointFor(run.view, (action) => action.type === 'press' && action.buttonId === button.id);
+      run.host.touch(point.x, point.y);
+    }
+    compareState(`${kind} touch`);
+  }
+  for (const run of replays) { run.host.hide(); run.host.frames.shift()(); }
+  replayTime += 12000;
+  for (const run of replays) run.host.show();
+  compareState('waiting for resume');
+  replayTime += 200;
+  for (const run of replays) {
+    const point = pointFor(run.view, (action) => action.type === 'resume');
+    run.host.touch(point.x, point.y); run.host.frames.shift()();
+  }
+  compareState('resume');
+  for (const run of replays) run.app.reset();
+  compareState('reset');
+  for (const run of replays) {
+    const state = run.app.getState();
+    run.app.gameLoop(state.lastTime + state.timeLeft + 5);
+  }
+  compareState('timeout and save');
+  assert.equal(replays[0].host.storage.get('thatbutton.bestRun.v1'), replays[1].host.storage.get('thatbutton.bestRun.v1'));
+} finally { globalThis.Date = savedDate; }
 
 const fake = createFakeWx();
 const { app, view } = createWechatGame(fake.wxApi);

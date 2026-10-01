@@ -1,6 +1,7 @@
 import { drawPreCombo } from './pre-combo.js';
 import { CHARACTER_FRAMES } from './character-frames.js';
 import { swapRect, rectsOverlap, slicePixels, WECHAT_HAZARDS } from './hazards.js';
+import { createTextAtlas } from './text-atlas.js';
 
 const C = {
   navy: '#071944', yellow: '#ffe343', paper: '#fffdf4', cyan: '#04c8d9',
@@ -62,6 +63,7 @@ const lerp = (from, to, progress) => from + (to - from) * progress;
 
 export function createCanvasRenderer({ canvas, info, menuButtonRect = null, motionEnabled = true,
   diagnostics = null,
+  textAtlasOptions = {},
   createSurface = () => typeof document !== 'undefined' ? document.createElement('canvas') : null }) {
   const width = Math.max(280, info.windowWidth || info.screenWidth || 390);
   const height = Math.max(480, info.windowHeight || info.screenHeight || 844);
@@ -73,6 +75,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
   let ctx = canvas.getContext('2d');
   const glitchCache = new Map();
   const textWidths = new Map();
+  const textAtlas = createTextAtlas(textAtlasOptions);
   let batchDepth = 0, drawPending = false, drawRevision = 0;
   function measuredWidth(value) {
     const text = String(value);
@@ -717,12 +720,11 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
     });
     label('设置保存在本机。', 14, top + rows.length * (rowH + gap) + 5,
       11, '#596581', 'left', 600);
-    if (diagnostics) {
-      action('复制内测报告', { x: 18, y: height - safeBottom - 63,
-        w: (width - 46) / 2, h: 51 }, 'exportPerformance', 'secondary');
-      action('完成', { x: (width + 10) / 2, y: height - safeBottom - 63,
-        w: (width - 46) / 2, h: 51 }, 'home');
-    } else action('完成', { x: 18, y: height - safeBottom - 63, w: width - 36, h: 51 }, 'home');
+    action(diagnostics ? '内测诊断：开' : '内测诊断：关', {
+      x: 18, y: height - safeBottom - 63, w: (width - 46) / 2, h: 51
+    }, 'diagnosticsMenu', 'secondary');
+    action('完成', { x: (width + 10) / 2, y: height - safeBottom - 63,
+      w: (width - 46) / 2, h: 51 }, 'home');
   }
   function drawLoading(error = false) {
     background('yellow');
@@ -793,9 +795,26 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
     const contentTop = y + (h - symbolSize - contentGap - numberSize) / 2;
     const centerX = rect.x + rect.w / 2;
     drawShape(button.shape?.id, centerX, contentTop + symbolSize / 2, symbolSize, ink);
-    label(String(button.number).padStart(2, '0'), centerX,
-      contentTop + symbolSize + contentGap + numberSize / 2,
-      numberSize, ink, 'center', 900);
+    const numberText = String(button.number).padStart(2, '0');
+    const numberY = contentTop + symbolSize + contentGap + numberSize / 2;
+    if (textAtlas.numbers && button.number >= 1 && button.number <= 9 &&
+        textAtlas.canDraw(numberText, ink)) {
+      // Use the original font's advance/kerning and centered two-digit layout.
+      const startX = centerX - textWidth(numberText, numberSize) / 2;
+      for (let i = 0; i < numberText.length; i++) {
+        const glyphX = startX + (i ? textWidth(numberText.slice(0, i + 1), numberSize) -
+          textWidth(numberText[i], numberSize) : 0);
+        if (textAtlas.drawGlyph(ctx, numberText[i], glyphX, numberY, numberSize, ink))
+          diagnostics?.count('numberAtlasHit');
+        else {
+          diagnostics?.count('numberAtlasFallback');
+          label(numberText[i], glyphX, numberY, numberSize, ink, 'left', 900);
+        }
+      }
+    } else {
+      if (textAtlas.numbers) diagnostics?.count('numberAtlasFallback', numberText.length);
+      label(numberText, centerX, numberY, numberSize, ink, 'center', 900);
+    }
     if (wrong) {
       const exitT = canAnimate ? clamp01(1 - (view.wrongUntil - now) / 700) : 0;
       if (canAnimate) {
@@ -883,16 +902,25 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
       let size = preferredSize;
       let lines = makeLines(size);
       if (lines.length > 2) { size -= 2; lines = makeLines(size); }
-      ruleLayout = { key, size, lines };
+      const plainText = String(value || '').replace(/[【】]/g, '');
+      const atlasReady = textAtlas.rules && textAtlas.canDraw(plainText, C.navy) &&
+        textAtlas.canDraw(plainText, '#ec1938');
+      ruleLayout = { key, size, lines, atlasReady };
     }
-    const { size, lines } = ruleLayout;
+    const { size, lines, atlasReady } = ruleLayout;
     ctx.font = `900 ${size}px "Microsoft YaHei",sans-serif`;
     const lineHeight = size + 4;
     lines.slice(0, 3).forEach((line, index) => {
       let x = (width - line.width) / 2;
       const y = centerY + (index - (lines.length - 1) / 2) * lineHeight;
       for (const item of line.glyphs) {
-        label(item.glyph, x, y, size, item.highlighted ? '#ec1938' : C.navy, 'left', 900);
+        const color = item.highlighted ? '#ec1938' : C.navy;
+        if (atlasReady && textAtlas.drawGlyph(ctx, item.glyph, x, y, size, color))
+          diagnostics?.count('ruleAtlasHit');
+        else {
+          if (textAtlas.rules) diagnostics?.count('ruleAtlasFallback');
+          label(item.glyph, x, y, size, color, 'left', 900);
+        }
         x += item.width;
       }
     });
@@ -1580,6 +1608,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
   draw();
   return {
     renderer, width, height, safeTop, safeBottom, draw, batch, getDiagnosticScene,
+    setDiagnostics(value) { diagnostics = value; draw(); },
     getView: () => view,
     hitTest(x, y) {
       const camera = view.mode === 'game' ? cameraOffset() : { x: 0, y: 0 };
@@ -1598,7 +1627,11 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
       view.failedAssets = failedAssets; enterScene('resource-error', 470);
     },
     showLoading() { view.mode = 'loading'; draw(); },
-    setImages(images) { ruleLayout = null; textWidths.clear(); view.images = images; draw(); },
+    setImages(images) {
+      ruleLayout = null; textWidths.clear(); glitchCache.clear();
+      view.images = images; textAtlas.setImage(images.textAtlas); draw();
+    },
+    getTextAtlasStatus: () => textAtlas.status(),
     setSettings(settings) { view.settings = { ...view.settings, ...settings }; draw(); },
     playActionFeedback(action) {
       if (!canAnimate || !action) return;

@@ -1,0 +1,4253 @@
+{
+  "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "results": [
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【红色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 3446,
+        "differentChannels": 9966,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 48,
+          "top": 111,
+          "right": 271,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 25,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 27,
+        "ruleAtlasHit": 5,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "形状为【三角形】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 3645,
+        "differentChannels": 10568,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 48,
+          "top": 111,
+          "right": 271,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 26,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 28,
+        "ruleAtlasHit": 6,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "数字为【偶数】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 3471,
+        "differentChannels": 10037,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 48,
+          "top": 111,
+          "right": 271,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 25,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 27,
+        "ruleAtlasHit": 5,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【五角星】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 5102,
+        "differentChannels": 14914,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 48,
+          "top": 111,
+          "right": 271,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 32,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 34,
+        "ruleAtlasHit": 12,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "数字为【9】且颜色为【黄色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 4509,
+        "differentChannels": 13158,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 48,
+          "top": 111,
+          "right": 271,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 30,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 32,
+        "ruleAtlasHit": 10,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色不是【蓝色】且形状为【正方形】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 5362,
+        "differentChannels": 15682,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 48,
+          "top": 111,
+          "right": 271,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 33,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 35,
+        "ruleAtlasHit": 13,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【红色】或【蓝色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 4206,
+        "differentChannels": 12223,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 48,
+          "top": 111,
+          "right": 271,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 28,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 30,
+        "ruleAtlasHit": 8,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【黄色】或数字为【奇数】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 4900,
+        "differentChannels": 14303,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 48,
+          "top": 111,
+          "right": 271,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 31,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 33,
+        "ruleAtlasHit": 11,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 5983,
+        "differentChannels": 17564,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 35,
+          "top": 111,
+          "right": 284,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【红色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 9890,
+        "differentChannels": 28896,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 97,
+          "top": 223,
+          "right": 542,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 25,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 27,
+        "ruleAtlasHit": 5,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "形状为【三角形】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 10399,
+        "differentChannels": 30397,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 97,
+          "top": 223,
+          "right": 542,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 26,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 28,
+        "ruleAtlasHit": 6,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "数字为【偶数】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 9857,
+        "differentChannels": 28774,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 97,
+          "top": 223,
+          "right": 542,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 25,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 27,
+        "ruleAtlasHit": 5,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【五角星】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 14614,
+        "differentChannels": 42959,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 97,
+          "top": 223,
+          "right": 542,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 32,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 34,
+        "ruleAtlasHit": 12,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "数字为【9】且颜色为【黄色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 12912,
+        "differentChannels": 37947,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 97,
+          "top": 223,
+          "right": 542,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 30,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 32,
+        "ruleAtlasHit": 10,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色不是【蓝色】且形状为【正方形】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 15248,
+        "differentChannels": 44906,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 97,
+          "top": 223,
+          "right": 542,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 33,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 35,
+        "ruleAtlasHit": 13,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【红色】或【蓝色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 12090,
+        "differentChannels": 35448,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 97,
+          "top": 223,
+          "right": 542,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 28,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 30,
+        "ruleAtlasHit": 8,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【黄色】或数字为【奇数】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 13983,
+        "differentChannels": 41101,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 97,
+          "top": 223,
+          "right": 542,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 31,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 33,
+        "ruleAtlasHit": 11,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 16893,
+        "differentChannels": 49791,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 70,
+          "top": 223,
+          "right": 567,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【红色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 19213,
+        "differentChannels": 56024,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 146,
+          "top": 335,
+          "right": 813,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 25,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 27,
+        "ruleAtlasHit": 5,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "形状为【三角形】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 20122,
+        "differentChannels": 58780,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 146,
+          "top": 336,
+          "right": 813,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 26,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 28,
+        "ruleAtlasHit": 6,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "数字为【偶数】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 19151,
+        "differentChannels": 55812,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 146,
+          "top": 335,
+          "right": 813,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 25,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 27,
+        "ruleAtlasHit": 5,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【五角星】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 28773,
+        "differentChannels": 84573,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 146,
+          "top": 336,
+          "right": 813,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 32,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 34,
+        "ruleAtlasHit": 12,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "数字为【9】且颜色为【黄色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 25197,
+        "differentChannels": 73997,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 146,
+          "top": 335,
+          "right": 813,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 30,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 32,
+        "ruleAtlasHit": 10,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色不是【蓝色】且形状为【正方形】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 29514,
+        "differentChannels": 86813,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 146,
+          "top": 336,
+          "right": 813,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 33,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 35,
+        "ruleAtlasHit": 13,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【红色】或【蓝色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 23506,
+        "differentChannels": 68794,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 146,
+          "top": 335,
+          "right": 813,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 28,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 30,
+        "ruleAtlasHit": 8,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【黄色】或数字为【奇数】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 27410,
+        "differentChannels": 80505,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 146,
+          "top": 335,
+          "right": 813,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 31,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 33,
+        "ruleAtlasHit": 11,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 32802,
+        "differentChannels": 96580,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 105,
+          "top": 335,
+          "right": 851,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【红色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 4948,
+        "differentChannels": 14346,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 60,
+          "top": 176,
+          "right": 329,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 25,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 27,
+        "ruleAtlasHit": 5,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "形状为【三角形】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 5193,
+        "differentChannels": 15073,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 60,
+          "top": 176,
+          "right": 329,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 26,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 28,
+        "ruleAtlasHit": 6,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "数字为【偶数】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 5007,
+        "differentChannels": 14476,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 60,
+          "top": 176,
+          "right": 329,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 25,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 27,
+        "ruleAtlasHit": 5,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【五角星】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 7208,
+        "differentChannels": 21083,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 60,
+          "top": 176,
+          "right": 329,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 32,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 34,
+        "ruleAtlasHit": 12,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "数字为【9】且颜色为【黄色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 6402,
+        "differentChannels": 18704,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 60,
+          "top": 176,
+          "right": 329,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 30,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 32,
+        "ruleAtlasHit": 10,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色不是【蓝色】且形状为【正方形】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 7435,
+        "differentChannels": 21744,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 58,
+          "top": 176,
+          "right": 331,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 33,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 35,
+        "ruleAtlasHit": 13,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【红色】或【蓝色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 5983,
+        "differentChannels": 17417,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 60,
+          "top": 176,
+          "right": 329,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 28,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 30,
+        "ruleAtlasHit": 8,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【黄色】或数字为【奇数】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 6936,
+        "differentChannels": 20242,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 60,
+          "top": 176,
+          "right": 329,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 31,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 33,
+        "ruleAtlasHit": 11,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 8281,
+        "differentChannels": 24257,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 31,
+          "top": 176,
+          "right": 357,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【红色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 15383,
+        "differentChannels": 44948,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 121,
+          "top": 351,
+          "right": 658,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 25,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 27,
+        "ruleAtlasHit": 5,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "形状为【三角形】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 15996,
+        "differentChannels": 46743,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 121,
+          "top": 352,
+          "right": 658,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 26,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 28,
+        "ruleAtlasHit": 6,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "数字为【偶数】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 15352,
+        "differentChannels": 44813,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 121,
+          "top": 352,
+          "right": 658,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 25,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 27,
+        "ruleAtlasHit": 5,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【五角星】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 22857,
+        "differentChannels": 67256,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 121,
+          "top": 352,
+          "right": 658,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 32,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 34,
+        "ruleAtlasHit": 12,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "数字为【9】且颜色为【黄色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 20221,
+        "differentChannels": 59439,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 121,
+          "top": 352,
+          "right": 658,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 30,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 32,
+        "ruleAtlasHit": 10,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色不是【蓝色】且形状为【正方形】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 23760,
+        "differentChannels": 69896,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 117,
+          "top": 352,
+          "right": 662,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 33,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 35,
+        "ruleAtlasHit": 13,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【红色】或【蓝色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 18838,
+        "differentChannels": 55230,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 121,
+          "top": 351,
+          "right": 658,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 28,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 30,
+        "ruleAtlasHit": 8,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【黄色】或数字为【奇数】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 21944,
+        "differentChannels": 64502,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 121,
+          "top": 352,
+          "right": 658,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 31,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 33,
+        "ruleAtlasHit": 11,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 26521,
+        "differentChannels": 78170,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 62,
+          "top": 352,
+          "right": 715,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【红色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 31438,
+        "differentChannels": 92322,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 182,
+          "top": 528,
+          "right": 987,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 25,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 27,
+        "ruleAtlasHit": 5,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "形状为【三角形】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 32138,
+        "differentChannels": 94382,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 182,
+          "top": 528,
+          "right": 987,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 26,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 28,
+        "ruleAtlasHit": 6,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "数字为【偶数】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 31507,
+        "differentChannels": 92436,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 182,
+          "top": 528,
+          "right": 987,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 25,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 27,
+        "ruleAtlasHit": 5,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【五角星】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 45242,
+        "differentChannels": 133572,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 182,
+          "top": 528,
+          "right": 987,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 32,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 34,
+        "ruleAtlasHit": 12,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "数字为【9】且颜色为【黄色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 40902,
+        "differentChannels": 120607,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 182,
+          "top": 528,
+          "right": 987,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 30,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 32,
+        "ruleAtlasHit": 10,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色不是【蓝色】且形状为【正方形】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 47583,
+        "differentChannels": 140532,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 175,
+          "top": 528,
+          "right": 993,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 33,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 35,
+        "ruleAtlasHit": 13,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【红色】或【蓝色】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 37432,
+        "differentChannels": 110223,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 182,
+          "top": 528,
+          "right": 987,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 28,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 30,
+        "ruleAtlasHit": 8,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【黄色】或数字为【奇数】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 44451,
+        "differentChannels": 131169,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 182,
+          "top": 528,
+          "right": 987,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 31,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 33,
+        "ruleAtlasHit": 11,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 53321,
+        "differentChannels": 157663,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 93,
+          "top": 528,
+          "right": 1073,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "press",
+      "at": 80,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 5770,
+        "differentChannels": 16879,
+        "maxChannelDelta": 250,
+        "bounds": {
+          "left": 35,
+          "top": 111,
+          "right": 284,
+          "bottom": 415
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "press",
+      "at": 180,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 6019,
+        "differentChannels": 17656,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 35,
+          "top": 111,
+          "right": 284,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "exit",
+      "at": 90,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 5600,
+        "differentChannels": 16409,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 34,
+          "top": 111,
+          "right": 284,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "exit",
+      "at": 300,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 4396,
+        "differentChannels": 13030,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 35,
+          "top": 111,
+          "right": 284,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "swap",
+      "at": 3300,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 5981,
+        "differentChannels": 17548,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 35,
+          "top": 111,
+          "right": 284,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "swap",
+      "at": 3500,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 5777,
+        "differentChannels": 16954,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 35,
+          "top": 111,
+          "right": 284,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "glitch",
+      "at": 1900,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 6213,
+        "differentChannels": 17781,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 35,
+          "top": 111,
+          "right": 284,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 34,
+        "canvasdrawImage": 6
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 36,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18,
+        "glitchReadback": 2,
+        "glitchRebuild": 2
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "glitch",
+      "at": 2800,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 6227,
+        "differentChannels": 17781,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 35,
+          "top": 111,
+          "right": 284,
+          "bottom": 416
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 34,
+        "canvasdrawImage": 6
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 36,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18,
+        "glitchReadback": 2,
+        "glitchRebuild": 2
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "press",
+      "at": 80,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 17115,
+        "differentChannels": 50258,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 70,
+          "top": 223,
+          "right": 567,
+          "bottom": 831
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "press",
+      "at": 180,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 16409,
+        "differentChannels": 48294,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 70,
+          "top": 223,
+          "right": 567,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "exit",
+      "at": 90,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 15961,
+        "differentChannels": 47015,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 70,
+          "top": 223,
+          "right": 567,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "exit",
+      "at": 300,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 12354,
+        "differentChannels": 36634,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 70,
+          "top": 223,
+          "right": 567,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "swap",
+      "at": 3300,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 16760,
+        "differentChannels": 49399,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 70,
+          "top": 223,
+          "right": 567,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "swap",
+      "at": 3500,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 16212,
+        "differentChannels": 47774,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 70,
+          "top": 223,
+          "right": 567,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "glitch",
+      "at": 1900,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 18544,
+        "differentChannels": 52529,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 70,
+          "top": 223,
+          "right": 567,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 34,
+        "canvasdrawImage": 6
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 36,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18,
+        "glitchReadback": 2,
+        "glitchRebuild": 2
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "glitch",
+      "at": 2800,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 18619,
+        "differentChannels": 52583,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 70,
+          "top": 223,
+          "right": 567,
+          "bottom": 832
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 34,
+        "canvasdrawImage": 6
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 36,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18,
+        "glitchReadback": 2,
+        "glitchRebuild": 2
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "press",
+      "at": 80,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 32346,
+        "differentChannels": 95419,
+        "maxChannelDelta": 253,
+        "bounds": {
+          "left": 105,
+          "top": 335,
+          "right": 851,
+          "bottom": 1246
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "press",
+      "at": 180,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 32924,
+        "differentChannels": 97066,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 105,
+          "top": 335,
+          "right": 851,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "exit",
+      "at": 90,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 31128,
+        "differentChannels": 91572,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 104,
+          "top": 335,
+          "right": 852,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "exit",
+      "at": 300,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 24000,
+        "differentChannels": 71133,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 105,
+          "top": 335,
+          "right": 851,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "swap",
+      "at": 3300,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 32891,
+        "differentChannels": 96859,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 105,
+          "top": 335,
+          "right": 851,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "swap",
+      "at": 3500,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 31626,
+        "differentChannels": 93103,
+        "maxChannelDelta": 254,
+        "bounds": {
+          "left": 105,
+          "top": 335,
+          "right": 851,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "glitch",
+      "at": 1900,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 36775,
+        "differentChannels": 103578,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 105,
+          "top": 335,
+          "right": 851,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 34,
+        "canvasdrawImage": 6
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 36,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18,
+        "glitchReadback": 2,
+        "glitchRebuild": 2
+      }
+    },
+    {
+      "w": 320,
+      "h": 568,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "glitch",
+      "at": 2800,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 36923,
+        "differentChannels": 103652,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 105,
+          "top": 335,
+          "right": 851,
+          "bottom": 1249
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 34,
+        "canvasdrawImage": 6
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 36,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18,
+        "glitchReadback": 2,
+        "glitchRebuild": 2
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "press",
+      "at": 80,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 8035,
+        "differentChannels": 23536,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 31,
+          "top": 176,
+          "right": 357,
+          "bottom": 613
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "press",
+      "at": 180,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 8040,
+        "differentChannels": 23523,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 31,
+          "top": 176,
+          "right": 357,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "exit",
+      "at": 90,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 7746,
+        "differentChannels": 22688,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 30,
+          "top": 176,
+          "right": 358,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "exit",
+      "at": 300,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 5897,
+        "differentChannels": 17427,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 31,
+          "top": 176,
+          "right": 357,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "swap",
+      "at": 3300,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 8122,
+        "differentChannels": 23793,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 31,
+          "top": 176,
+          "right": 357,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "swap",
+      "at": 3500,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 7882,
+        "differentChannels": 23084,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 31,
+          "top": 176,
+          "right": 357,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "glitch",
+      "at": 1900,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 8708,
+        "differentChannels": 24612,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 31,
+          "top": 176,
+          "right": 357,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 34,
+        "canvasdrawImage": 6
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 36,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18,
+        "glitchReadback": 2,
+        "glitchRebuild": 2
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 1,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "glitch",
+      "at": 2800,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 8708,
+        "differentChannels": 24612,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 31,
+          "top": 176,
+          "right": 357,
+          "bottom": 614
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 34,
+        "canvasdrawImage": 6
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 36,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18,
+        "glitchReadback": 2,
+        "glitchRebuild": 2
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "press",
+      "at": 80,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 25983,
+        "differentChannels": 76612,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 62,
+          "top": 352,
+          "right": 715,
+          "bottom": 1226
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "press",
+      "at": 180,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 26435,
+        "differentChannels": 77933,
+        "maxChannelDelta": 250,
+        "bounds": {
+          "left": 62,
+          "top": 352,
+          "right": 715,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "exit",
+      "at": 90,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 24924,
+        "differentChannels": 73425,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 61,
+          "top": 352,
+          "right": 715,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "exit",
+      "at": 300,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 19532,
+        "differentChannels": 57936,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 62,
+          "top": 352,
+          "right": 715,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "swap",
+      "at": 3300,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 26117,
+        "differentChannels": 76976,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 62,
+          "top": 352,
+          "right": 715,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "swap",
+      "at": 3500,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 25450,
+        "differentChannels": 75000,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 62,
+          "top": 352,
+          "right": 715,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "glitch",
+      "at": 1900,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 29283,
+        "differentChannels": 82472,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 62,
+          "top": 352,
+          "right": 715,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 34,
+        "canvasdrawImage": 6
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 36,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18,
+        "glitchReadback": 2,
+        "glitchRebuild": 2
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 2,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "glitch",
+      "at": 2800,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 29280,
+        "differentChannels": 82485,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 62,
+          "top": 352,
+          "right": 715,
+          "bottom": 1228
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 34,
+        "canvasdrawImage": 6
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 36,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18,
+        "glitchReadback": 2,
+        "glitchRebuild": 2
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "press",
+      "at": 80,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 55117,
+        "differentChannels": 162545,
+        "maxChannelDelta": 250,
+        "bounds": {
+          "left": 92,
+          "top": 528,
+          "right": 1073,
+          "bottom": 1839
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "press",
+      "at": 180,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 55728,
+        "differentChannels": 163891,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 93,
+          "top": 528,
+          "right": 1073,
+          "bottom": 1843
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "exit",
+      "at": 90,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 52954,
+        "differentChannels": 156472,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 92,
+          "top": 528,
+          "right": 1073,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "trigger": "exit",
+      "at": 300,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 38669,
+        "differentChannels": 114924,
+        "maxChannelDelta": 248,
+        "bounds": {
+          "left": 93,
+          "top": 528,
+          "right": 1073,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "swap",
+      "at": 3300,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 52834,
+        "differentChannels": 156215,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 93,
+          "top": 528,
+          "right": 1073,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "swap",
+      "at": 3500,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 51139,
+        "differentChannels": 151163,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 93,
+          "top": 528,
+          "right": 1073,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 36,
+        "canvasdrawImage": 4
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 38,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "glitch",
+      "at": 1900,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 59668,
+        "differentChannels": 167550,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 93,
+          "top": 528,
+          "right": 1073,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 34,
+        "canvasdrawImage": 6
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 36,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18,
+        "glitchReadback": 2,
+        "glitchRebuild": 2
+      }
+    },
+    {
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "rule": "颜色为【紫色】且形状为【圆形】且数字为【1】",
+      "hazard": "glitch",
+      "at": 2800,
+      "motion": true,
+      "defaultVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "atlasVsBaseline": {
+        "differentPixels": 59668,
+        "differentChannels": 167567,
+        "maxChannelDelta": 249,
+        "bounds": {
+          "left": 93,
+          "top": 528,
+          "right": 1073,
+          "bottom": 1842
+        }
+      },
+      "missingVsBaseline": {
+        "differentPixels": 0,
+        "differentChannels": 0,
+        "maxChannelDelta": 0,
+        "bounds": null
+      },
+      "baselineCounts": {
+        "canvasfillText": 34,
+        "canvasdrawImage": 6
+      },
+      "atlasCounts": {
+        "canvasfillText": 11,
+        "fillText": 11,
+        "canvasdrawImage": 36,
+        "ruleAtlasHit": 16,
+        "numberAtlasHit": 18,
+        "glitchReadback": 2,
+        "glitchRebuild": 2
+      }
+    }
+  ]
+}

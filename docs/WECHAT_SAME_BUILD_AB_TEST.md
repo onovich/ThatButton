@@ -9,6 +9,36 @@
 
 两组都保留此前的绘制合并、测量缓存、暂停调度与 glitch 缓冲复用。因此本次隔离测量的是文字图集收益，不能称为全部优化相对于最早版本的收益。若要测那一整批变化，需要给旧实现补同样的诊断后另做基线包。
 
+## Mac 端接续（2026-10-03）
+
+代码、图集素材、诊断和本说明均随 `main` 推送。Mac 不需要连接家里的 Windows，也不需要复制 Windows 的 build。生成目录 `ports/wechat/build/` 不纳入 Git，拉取后在 Mac 重新构建一次。
+
+已有仓库的位置是 `/Users/onovich/WebProjects/ThatButton`。先用 `git status --short --branch` 检查是否有 Mac 本地修改；保留本地修改，不用强制重置覆盖。工作区可更新时执行：
+
+```bash
+cd /Users/onovich/WebProjects/ThatButton
+git pull --ff-only origin main
+node --version
+cd ports/wechat
+npm ci
+npm run check
+```
+
+Node 要求 >=20；上次 Mac 使用 Node 24.19 构建。`npm run check` 已包含构建和集成检查，无需再重复 build。若 `git pull --ff-only` 提示分叉，先处理 Mac 本地提交；不要使用 `reset --hard` 覆盖它们。
+
+在微信开发者工具打开已有项目，确认导入目录为 `/Users/onovich/WebProjects/ThatButton/ports/wechat/build/`，AppID 为 `wxecad834e040489b5`。清空之前的 `perf`、`ruleAtlas`、`numberAtlas` 编译启动参数，重新编译并生成本轮普通预览码。手机进入后应能在「设置 → 内测诊断」看到「同包文字A/B对照」。如果没有该项，先检查是否仍打开旧预览或导入了错误目录。
+
+只在这一步重新生成一次预览；后面的 A/B/B/A 全部通过手机菜单切组。同包对照每组自动开启诊断，不需要在工具里反复改启动参数。高性能模式和此前 Mac / iPhone 调试记录见 [测试交接](wechat-mac-test-2026-10-02/README.md)；普通预览测试无需一直连接 USB 调试器。
+
+四轮结束且导出后，在 Mac 保存剪贴板 JSON，例如：
+
+```bash
+mkdir -p output/phone-ab
+pbpaste > output/phone-ab/iphone-text-ab-2026-10-03.json
+```
+
+先确认 Mac 剪贴板内容是手机复制的 A/B JSON：若通用剪贴板没有同步，先通过你方便的方式传到 Mac 并复制。`output/` 是本机临时材料，不会自动推送。要继续让 Codex 分析，把 JSON 文件或完整内容交给 Mac 上的会话，并让它先读本说明。建议同时记录机型、普通预览/调试模式、四轮关卡、时长、发热体感和电量起止；导出报告自身包含构建指纹、种子及组别。
+
 ## 手机操作：四轮 A → B → B → A
 
 1. 用无 `perf`、`ruleAtlas`、`numberAtlas` 参数的普通预览进入游戏。首次进入默认关闭诊断与图集。

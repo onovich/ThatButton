@@ -1,0 +1,11 @@
+Selected backend event lines; device identifiers, account identifiers, tokens and full application logs omitted.
+[2026-10-01 23:51:01.586] logic.connectToWkInstance
+[2026-10-01 23:51:10.449] Device disconnected, reason:  FindInstanceTimeout , extra:  undefined
+[2026-10-02 00:07:32.059] logic.connectToWkInstance
+[2026-10-02 00:07:40.916] Device disconnected, reason:  FindInstanceTimeout , extra:  undefined
+[2026-10-02 00:11:25.221] find webview instance {
+[2026-10-02 00:11:25.221] logic.connectToWkInstance
+[2026-10-02 00:11:26.315] logic.connectToWkInstance
+[2026-10-02 00:12:05.987] find webview instance {
+[2026-10-02 00:12:05.988] logic.connectToWkInstance
+[2026-10-02 00:12:07.164] logic.connectToWkInstance

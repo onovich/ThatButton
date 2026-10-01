@@ -1,0 +1,139 @@
+{
+  "testedSourceCommit": "89eab0160cb47aee84bc3f2ac25573688baf6795",
+  "userResult": {
+    "level": 48,
+    "score": 2910,
+    "stutter": "none reported",
+    "heat": "mild; user reports cooler than before"
+  },
+  "traceEvents": 9,
+  "cpuNodes": 21764,
+  "samples": 24670,
+  "timeDeltas": 24670,
+  "rawBytes": 4073450,
+  "rawSHA256": "5df65bc1698e091851e5c7475b4de495b43d85ad1bcbaa6cada8df3c8b76f35e",
+  "recordingDurationMs": 310458,
+  "caveat": "iOS adapter exports a synthesized trace around CPU sampling. Sample interval totals and synthetic RunTask duration are not CPU utilization, actual blocking time, FPS, memory, or temperature. Recording includes waiting before gameplay. Native send cost may include instrumentation.",
+  "topLeafSampleIntervalTotals": [
+    {
+      "function": "fillText",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 53024.632
+    },
+    {
+      "function": "send",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 36385.261
+    },
+    {
+      "function": "label",
+      "url": "weapp://wechat-game-runtime/wxfs/game.js",
+      "lineNumberZeroBased": 5522,
+      "sampleIntervalTotalMs": 19104.463
+    },
+    {
+      "function": "setTimeout",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 10728.181
+    },
+    {
+      "function": "fill",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 9734.598
+    },
+    {
+      "function": "drawImage",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 6917.35
+    },
+    {
+      "function": "",
+      "url": "weapp://wechat-game-runtime/wxcommlib/WAGame.js",
+      "lineNumberZeroBased": -1,
+      "sampleIntervalTotalMs": 5244.609
+    },
+    {
+      "function": "quadraticCurveTo",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 5106.262
+    },
+    {
+      "function": "stroke",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 4854.722
+    },
+    {
+      "function": "",
+      "url": "weapp://wechat-game-runtime",
+      "lineNumberZeroBased": 97,
+      "sampleIntervalTotalMs": 4175.564
+    },
+    {
+      "function": "",
+      "url": "weapp://wechat-game-runtime/wxcommlib/WAGameSubContext.js",
+      "lineNumberZeroBased": -1,
+      "sampleIntervalTotalMs": 3861.139
+    },
+    {
+      "function": "lineTo",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 3773.1
+    },
+    {
+      "function": "requestAnimationFrame",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 3747.946
+    },
+    {
+      "function": "measuredWidth",
+      "url": "weapp://wechat-game-runtime/wxfs/game.js",
+      "lineNumberZeroBased": 5300,
+      "sampleIntervalTotalMs": 3672.484
+    },
+    {
+      "function": "getImageData",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 3420.944
+    },
+    {
+      "function": "map",
+      "url": "",
+      "lineNumberZeroBased": -1,
+      "sampleIntervalTotalMs": 3358.059
+    },
+    {
+      "function": "fillRect",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 3345.482
+    },
+    {
+      "function": "restore",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 3068.788
+    },
+    {
+      "function": "translate",
+      "url": "",
+      "lineNumberZeroBased": -2,
+      "sampleIntervalTotalMs": 2842.402
+    },
+    {
+      "function": "get",
+      "url": "",
+      "lineNumberZeroBased": -1,
+      "sampleIntervalTotalMs": 1962.012
+    }
+  ]
+}

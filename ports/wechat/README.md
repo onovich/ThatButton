@@ -44,6 +44,8 @@ npm run check
 
 ## iOS USB 真机调试
 
+Mac / iPhone 实测、原始采样和未解决问题请先阅读 [2026-10-02 测试交接](../../docs/wechat-mac-test-2026-10-02/README.md)。本次已在微信公众平台开通高性能模式，并在真机验证 `GameGlobal.isIOSHighPerformanceMode === true`；仅设置下面的构建配置并不能替代后台开通。若扫码仍进入旧普通模式，按[微信官方说明](https://developers.weixin.qq.com/minigame/dev/guide/performance/perf-high-performance.html)检查本地运行模式缓存，清除记录前注意本地存档影响。
+
 构建脚本已开启 `game.json` 的 `iOSHighPerformance: true`。当前安装的开发者工具要求高性能模式、USB 可识别设备和 iOS 16.4 及以上，连接后还会检查微信 8.0.61 及以上、基础库 3.8.10 及以上。重新构建后在开发者工具点击「编译」，重新打开「真机调试」并选择 iOS；若仍灰显，继续检查设备信任与 USB 调试连接。
 
 2026-10-01 开启此配置；本地检查不等同于高性能模式的真机验收，仍需验证启动、触摸、音频和返回前台继续。

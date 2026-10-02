@@ -6,6 +6,7 @@ import { createCanvasRenderer } from './renderer.js';
 import { createWechatHazards } from './hazards.js';
 import { createPerformanceDiagnostics, PERFORMANCE_STORAGE_KEY } from './performance-diagnostics.js';
 import { createComparisonExport } from './ab-comparison.js';
+import { copyDiagnosticReport } from './report-export.js';
 
 const SETTINGS_KEY = 'thatbutton.wechat.settings.v1';
 const BUILD_ID = typeof __WECHAT_BUILD_ID__ === 'undefined' ? 'source-preview' : __WECHAT_BUILD_ID__;
@@ -95,19 +96,25 @@ export function createWechatGame(wxApi) {
   let hidden = false;
   let pendingFrame = null;
   let frameScheduled = false;
+  // Some Mini Game hosts expose RAF globally instead of on the canvas.
+  const frameSource = typeof canvas.requestAnimationFrame === 'function' ? 'canvas.requestAnimationFrame' :
+    typeof requestAnimationFrame === 'function' ? 'global.requestAnimationFrame' : 'setTimeout';
+  const scheduleHostFrame = frameSource === 'canvas.requestAnimationFrame' ? canvas.requestAnimationFrame.bind(canvas) :
+    frameSource === 'global.requestAnimationFrame' ? (callback) => requestAnimationFrame(callback) :
+    (callback) => setTimeout(callback, 16);
+  if (diagnostics) diagnostics.metadata.frameSource = frameSource;
   function scheduleFrame() {
     if (hidden || pausedAt !== null || frameScheduled || !pendingFrame) return;
     frameScheduled = true;
     const run = () => {
       frameScheduled = false;
       if (hidden || pausedAt !== null) return;
-      diagnostics?.frame(view.getDiagnosticScene(), typeof canvas.requestAnimationFrame === 'function');
+      diagnostics?.frame(view.getDiagnosticScene(), frameSource !== 'setTimeout');
       const callback = pendingFrame;
       pendingFrame = null;
       if (callback) view.batch(() => callback(clock.now()));
     };
-    if (typeof canvas.requestAnimationFrame === 'function') canvas.requestAnimationFrame(run);
-    else setTimeout(run, 16);
+    scheduleHostFrame(run);
   }
   function requestFrame(callback) { pendingFrame = callback; scheduleFrame(); }
   const storage = {
@@ -210,7 +217,7 @@ export function createWechatGame(wxApi) {
         }
       } catch {}
       diagnostics = createPerformanceDiagnostics(wxApi, { enabled: true,
-        metadata: { ...device, buildId: BUILD_ID, comparison,
+        metadata: { ...device, buildId: BUILD_ID, comparison, frameSource,
           width: info.windowWidth, height: info.windowHeight,
           pixelRatio: info.pixelRatio, ruleAtlas: textAtlasOptions.rules,
           numberAtlas: textAtlasOptions.numbers, atlasStatus: view.getTextAtlasStatus() } });
@@ -233,11 +240,7 @@ export function createWechatGame(wxApi) {
         wxApi.showToast?.({ title: '暂无报告，请先开启诊断试玩', icon: 'none' });
         return null;
       }
-      const data = JSON.stringify(report, null, 2);
-      if (typeof wxApi.setClipboardData !== 'function') throw new Error('clipboard unavailable');
-      wxApi.setClipboardData({ data,
-        fail: () => wxApi.showToast?.({ title: '复制失败，请重试', icon: 'none' }) });
-      return data;
+      return copyDiagnosticReport(wxApi, report);
     } catch {
       wxApi.showToast?.({ title: '报告读取或复制失败', icon: 'none' });
       return null;
@@ -304,16 +307,15 @@ export function createWechatGame(wxApi) {
   function exportComparison() {
     if (diagnostics) { updateDiagnosticMetadata(); diagnostics.save(); }
     try {
-      const bundle = createComparisonExport(wxApi.getStorageSync?.(PERFORMANCE_STORAGE_KEY), comparisonSeriesId);
+      const stored = wxApi.getStorageSync?.(PERFORMANCE_STORAGE_KEY);
+      const savedSeries = Array.isArray(stored)
+        ? [...stored].reverse().find((r) => r?.metadata?.comparison?.seriesId)?.metadata.comparison.seriesId : null;
+      const bundle = createComparisonExport(stored, comparisonSeriesId || savedSeries);
       if (!bundle.reports.length) {
         wxApi.showToast?.({ title: '暂无本次A/B报告，请先选组试玩', icon: 'none' });
         return null;
       }
-      if (typeof wxApi.setClipboardData !== 'function') throw new Error('clipboard unavailable');
-      const data = JSON.stringify(bundle, null, 2);
-      wxApi.setClipboardData({ data,
-        fail: () => wxApi.showToast?.({ title: '复制失败，请重试', icon: 'none' }) });
-      return data;
+      return copyDiagnosticReport(wxApi, bundle);
     } catch { wxApi.showToast?.({ title: '对照报告读取或复制失败', icon: 'none' }); return null; }
   }
   function openComparisonMenu() {

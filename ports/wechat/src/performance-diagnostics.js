@@ -1,3 +1,4 @@
+import { copyDiagnosticReport } from './report-export.js';
 // Opt-in application-side counters. No per-frame logs, uploads or unbounded history.
 export const PERFORMANCE_STORAGE_KEY = 'thatbutton.wechat.performance.v1';
 const SAMPLE_LIMIT = 256;
@@ -145,12 +146,7 @@ export function createPerformanceDiagnostics(wxApi, { enabled = false, now, cloc
     snapshot, save,
     exportReport() {
       save();
-      const report = JSON.stringify(snapshot(), null, 2);
-      if (typeof wxApi.setClipboardData === 'function') {
-        wxApi.setClipboardData({ data: report,
-          fail: () => wxApi.showToast?.({ title: '复制失败，请重试', icon: 'none' }) });
-      } else wxApi.showToast?.({ title: '此环境不支持复制报告', icon: 'none' });
-      return report;
+      return copyDiagnosticReport(wxApi, snapshot());
     }
   };
 }

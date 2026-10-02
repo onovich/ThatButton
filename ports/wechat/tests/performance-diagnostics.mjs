@@ -49,7 +49,11 @@ assert.equal(diagnostics.snapshot().scenes.home.timerCallbacks, 1);
 assert.equal(diagnostics.snapshot().scenes.home.rafInterval.count, 0);
 diagnostics.save(); diagnostics.save(); diagnostics.exportReport();
 assert.equal(saved.length, 1);
-assert.deepEqual(JSON.parse(copied), diagnostics.snapshot());
+// Export and a later snapshot may cross a wall-clock millisecond boundary.
+const { exportedAt: copiedAt, ...copiedSnapshot } = JSON.parse(copied);
+const { exportedAt: currentAt, ...currentSnapshot } = diagnostics.snapshot();
+assert.ok(Number.isFinite(copiedAt) && Number.isFinite(currentAt));
+assert.deepEqual(copiedSnapshot, currentSnapshot);
 assert.ok(copied.length < 24000);
 const failing = createPerformanceDiagnostics({ setStorageSync() { throw new Error('quota'); } },
   { enabled: true, now: () => time });

@@ -1443,7 +1443,8 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
   function getDiagnosticScene() {
     if (view.mode !== 'game') return view.mode;
     if (motion.roundExit) return 'game-exit';
-    if (motion.roundEnter) return 'game-entry';
+    // Keep the animation state intact; classify only its active time window.
+    if (motion.roundEnter && Date.now() < motion.roundEnter.startedAt + motion.roundEnter.duration) return 'game-entry';
     for (const hazard of view.hazards?.hazards || []) {
       if (hazard.phase !== 'active') continue;
       if (hazard.type === 'button_glitch') return 'game-glitch';

@@ -49,7 +49,7 @@ export function createWechatGame(wxApi) {
   }
   const canvas = wxApi.createCanvas();
   const info = wxApi.getWindowInfo?.() || wxApi.getSystemInfoSync();
-  const query = wxApi.getLaunchOptionsSync?.().query || {};
+  const query = { ...(wxApi.getLaunchOptionsSync?.().query || {}) };
   // Candidate remains opt-in until system-font visual parity is accepted.
   const textAtlasOptions = { rules: query.ruleAtlas === '1', numbers: query.numberAtlas === '1' };
   let comparison = null, comparisonSeed = null, comparisonSeriesId = null;
@@ -247,13 +247,17 @@ export function createWechatGame(wxApi) {
     }
   }
   function clearDiagnostics() {
+    if (!canSelectComparison()) return false;
+    try { wxApi.removeStorageSync(PERFORMANCE_STORAGE_KEY); }
+    catch { wxApi.showToast?.({ title: '清除失败，请重试', icon: 'none' }); return false; }
     if (diagnostics) {
       diagnostics.dispose();
       diagnostics = null;
       view.setDiagnostics(null);
     }
-    try { wxApi.removeStorageSync(PERFORMANCE_STORAGE_KEY); }
-    catch { wxApi.showToast?.({ title: '清除失败，请重试', icon: 'none' }); return false; }
+    finishComparison(); // Cancel pending setup and restore default drawing without saving discarded samples.
+    comparisonSeriesId = null; comparisonOrder = 0;
+    for (const key of ['perf', 'ruleAtlas', 'numberAtlas', 'seed']) delete query[key];
     return true;
   }
   function canSelectComparison() {
@@ -339,7 +343,7 @@ export function createWechatGame(wxApi) {
     }
     wxApi.showActionSheet({
       itemList: [diagnostics ? '关闭内测诊断并保存报告' : '开启内测诊断（仅本次运行）',
-        '复制最近内测报告', '关闭诊断并清除内测记录',
+        '复制最近内测报告', '重置诊断并清空记录',
         `同包文字A/B对照${comparison ? `：${comparison.group}组` : ''}`, '复制本次A/B对照报告'],
       success({ tapIndex }) {
         if (tapIndex === 0) {
@@ -353,7 +357,12 @@ export function createWechatGame(wxApi) {
           else setDiagnosticsEnabled(true);
         } else if (tapIndex === 1) exportDiagnostics();
         else if (tapIndex === 2) {
-          if (clearDiagnostics()) wxApi.showToast?.({ title: '内测记录已清除', icon: 'none' });
+          wxApi.showModal?.({ title: '重置内测诊断',
+            content: '清空本机诊断报告，重置A/B轮次和本次测试参数，恢复默认绘制。游戏存档保留。需要的报告请先导出。',
+            confirmText: '重置', cancelText: '取消',
+            success: ({ confirm }) => {
+              if (confirm && clearDiagnostics()) wxApi.showToast?.({ title: '已重置，请选择测试组', icon: 'none' });
+            } });
         } else if (tapIndex === 3) openComparisonMenu();
         else if (tapIndex === 4) exportComparison();
       }

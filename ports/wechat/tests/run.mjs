@@ -152,7 +152,10 @@ const recreated = createWechatGame(diagnosticFake.wxApi);
 assert.equal(recreated.diagnostics, null, 'Saved report must never persist the enabled flag.');
 assert.equal(perfReads, 1);
 diagnosticFake.storage.set('thatbutton.bestRun.v1', 'keep-best');
-diagnosticRun.performanceControls.clear();
+menu.success({ tapIndex: 2 });
+modal.success({ confirm: false });
+assert.equal(diagnosticFake.storage.has('thatbutton.wechat.performance.v1'), true);
+modal.success({ confirm: true });
 assert.equal(diagnosticFake.storage.has('thatbutton.wechat.performance.v1'), false);
 assert.equal(diagnosticFake.storage.get('thatbutton.bestRun.v1'), 'keep-best');
 for (const [width, height] of [[320,568], [390,844]]) {
@@ -164,7 +167,7 @@ for (const [width, height] of [[320,568], [390,844]]) {
 }
 
 // Same-build A/B can be selected from the native settings menu, without launch parameters.
-const comparisonFake = createFakeWx({ query: { seed: '' } });
+const comparisonFake = createFakeWx({ query: { seed: 'legacy-launch-seed' } });
 let comparisonMenu, comparisonModal, comparisonCopy, atlasLoads = 0;
 comparisonFake.wxApi.showActionSheet = (options) => { comparisonMenu = options; };
 comparisonFake.wxApi.showModal = (options) => { comparisonModal = options; };
@@ -233,6 +236,21 @@ const recoveredBundle = JSON.parse(recoveredComparisonRun.performanceControls.ex
 assert.equal(recoveredBundle.reports.length, 4, 'Restart can export the latest stored comparison without starting a new run.');
 assert.deepEqual(recoveredBundle.reports.map((r) => r.sessionId), comparisonBundle.reports.map((r) => r.sessionId));
 assert.equal(comparisonFake.storage.has('thatbutton.wechat.settings.v1'), false);
+assert.equal(await comparisonRun.performanceControls.beginComparison('B'), true);
+comparisonRun.view.showSettings();
+assert.equal(comparisonRun.performanceControls.getComparison().group, 'B');
+assert.equal(comparisonFake.storage.get('thatbutton.wechat.performance.v1').length, 4);
+assert.equal(comparisonRun.performanceControls.clear(), true);
+assert.equal(comparisonRun.diagnostics, null);
+assert.equal(comparisonRun.performanceControls.getComparison(), null);
+assert.equal(comparisonRun.view.getTextAtlasStatus().rules, false);
+assert.equal(comparisonRun.view.getTextAtlasStatus().decodedBytes, 0);
+assert.equal(comparisonFake.storage.has('thatbutton.wechat.performance.v1'), false);
+await comparisonRun.performanceControls.beginComparison('A');
+assert.equal(comparisonRun.performanceControls.getComparison().order, 1);
+assert.equal(comparisonRun.performanceControls.getComparison().seed, 'text-atlas-ab-v1');
+assert.notEqual(comparisonRun.performanceControls.getComparison().seriesId, comparisonBundle.seriesId);
+comparisonRun.performanceControls.finishComparison();
 const freshComparisonRun = createWechatGame(createFakeWx().wxApi);
 assert.equal(freshComparisonRun.diagnostics, null);
 assert.equal(freshComparisonRun.performanceControls.getComparison(), null);

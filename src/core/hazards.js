@@ -1,3 +1,4 @@
+import { getLatePlan } from '../config/late-plan.js';
 import { BASE_HAZARD_CONFIG, HAZARD_PHASES, HAZARD_TYPES } from '../config/hazards.js';
 import { createSeededRng } from './rng.js';
 
@@ -275,7 +276,8 @@ export function createHazardDirectorState({
   const normalizedLevel = normalizeLevel(level);
   const normalizedEnemyIndex = normalizeEnemyIndex(enemyIndex);
   const boardZones = createBoardZoneFacts({ rows, cols });
-  if (disabled || !config.enabled) {
+  const latePlan = getLatePlan(normalizedLevel);
+  if (disabled || !config.enabled || (latePlan && !latePlan.hazardTier)) {
     return {
       ...createDisabledHazardState({
         level: normalizedLevel,
@@ -304,7 +306,7 @@ export function createHazardDirectorState({
       nowMs,
       config
     })
-  ].filter(Boolean);
+  ].filter(Boolean).filter((hazard, index) => !latePlan || index === 0);
   const hasActiveHazard = hazards.some((hazard) => hazard.phase === HAZARD_PHASES.ACTIVE);
   const hasTelegraphHazard = hazards.some((hazard) => hazard.phase === HAZARD_PHASES.TELEGRAPH);
   const unlocked = isUnlocked({

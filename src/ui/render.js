@@ -650,7 +650,7 @@ export function createRenderer({ document, timers = {}, random = Math.random, au
       buttonEl.setAttribute('tabindex', '0');
       buttonEl.setAttribute('aria-label', `${button.color.name}${button.shape.name}，数字 ${button.number}`);
       buttonEl.innerHTML = `
-                    <span class="btn-number crt-font">${String(button.number).padStart(2, '0')}</span>
+                    <span class="btn-number crt-font">${(button.displayNumber ?? String(button.number).padStart(2, '0'))}</span>
                     <span class="btn-shape">${button.shape.char}</span>
       `;
       buttonEl.style.opacity = '0';

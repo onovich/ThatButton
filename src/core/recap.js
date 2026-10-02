@@ -13,7 +13,7 @@ export function getButtonRecap(button) {
     shape: button.shape.name,
     shapeId: button.shape.id,
     number: button.number,
-    label: `${button.color.name} ${button.shape.name} ${String(button.number).padStart(2, '0')}`
+    label: `${button.color.name} ${button.shape.name} ${(button.displayNumber ?? String(button.number).padStart(2, '0'))}`
   };
 }
 

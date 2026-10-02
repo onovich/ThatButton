@@ -1,3 +1,4 @@
+import { extendProtectedCombo } from '../core/protected-clock.js';
 import { getDifficultyForLevel } from '../config/difficulty.js';
 import { createInitialState } from '../core/app-state.js';
 import { resolveWrongPressDamage } from '../core/battle.js';
@@ -60,6 +61,7 @@ export function createGameSession({
   hazardsDisabledProvider,
   upgradeDefinitions = null,
   hazardDirector = createHazardDirectorState,
+  roundDiagnostics = null,
   exposeHostApi = null
 }) {
   const loadedBestRecord = loadBestRecordFromStorage(storage);
@@ -76,6 +78,13 @@ export function createGameSession({
   let loopStarted = false;
   let roundActivationToken = 0;
   let timeWarningPlayed = false;
+  let pendingLateTime = null;
+  let preparedLevel = null;
+
+  function recordRoundDiagnostic(method, ...args) {
+    try { roundDiagnostics?.[method]?.(...args); }
+    catch (error) { gameState.diagnosticError = String(error?.message || error); }
+  }
 
   function getViewportClass() {
     const viewport = viewportSize();
@@ -241,19 +250,23 @@ export function createGameSession({
     gameState.forbiddenIds = levelData.forbiddenIds;
     gameState.currentRuleTier = levelData.ruleTier;
     gameState.currentRuleId = levelData.ruleId;
+    gameState.ruleDescriptor = levelData.ruleDescriptor || null;
+    gameState.fallbackReason = levelData.fallbackReason || null;
     gameState.safeKeysRemaining = levelData.safeKeysRemaining;
   }
 
   function generateCurrentLevelData(difficulty = getDifficultyForLevel(gameState.level)) {
+    const generationStarted = performance.now();
     applyLevelData(generateLevelData({
       level: gameState.level,
       difficulty,
       rng: gameState.rng
     }));
+    gameState.generationMs = Math.max(0, performance.now() - generationStarted);
   }
 
   function updateHazardState(roundElapsedMs = 0, { disabled = false, reason = null } = {}) {
-    const hazardDisabled = disabled || getHazardsDisabledFromUrl();
+    const hazardDisabled = disabled || getHazardsDisabledFromUrl() || (gameState.level > 30 && gameState.currentDifficulty.hazardTier === 0);
     if (hazardDisabled) {
       gameState.hazards = createDisabledHazardState({
         level: gameState.level,
@@ -270,6 +283,9 @@ export function createGameSession({
       rows: gameState.currentDifficulty?.rows || 3,
       cols: gameState.currentDifficulty?.cols || 3,
       buttonIds: gameState.buttons.map((button) => button.id),
+      clickedIds: gameState.buttons.filter(button => button.isClicked).map(button => button.id),
+      previousState: gameState.hazards,
+      plan: gameState.currentDifficulty,
       forbiddenIds: gameState.forbiddenIds,
       nowMs: roundElapsedMs
     });
@@ -352,6 +368,7 @@ export function createGameSession({
   function triggerGameOver(id, element) {
     gameState.isPlaying = false;
     const isTimeout = id === 'timeout';
+    recordRoundDiagnostic('finish', gameState, isTimeout ? 'timeout' : 'health-depleted');
     if (isTimeout) audio.playFailure();
     const failedButton = gameState.buttons.find((button) => button.id === id);
     const failureReason = isTimeout ? 'timeout' : 'wrong_click';
@@ -471,6 +488,7 @@ export function createGameSession({
     gameState.currentDifficulty = nextDifficulty;
     gameState.timeLimit = getEffectiveRoundTimeLimit(nextDifficulty);
     gameState.timeLeft = gameState.timeLimit;
+    if (gameState.level > 30) pendingLateTime = { full: true };
     applyComboChange(resetEncounterCombo(gameState.combo, 'upgrade_selected'));
     const encounterFacts = getEncounterFacts(gameState);
     renderer.updateCombatStatus(encounterFacts);
@@ -531,6 +549,7 @@ export function createGameSession({
   }
 
   function levelComplete({ sourceElement = null } = {}) {
+    recordRoundDiagnostic('finish', gameState, 'clear');
     gameState.isPlaying = false;
     const combatResult = resolveRoundClearCombat({
       combat: gameState.combat,
@@ -596,7 +615,8 @@ export function createGameSession({
     const nextDifficulty = getDifficultyForLevel(gameState.level);
     gameState.currentDifficulty = nextDifficulty;
     gameState.timeLimit = getEffectiveRoundTimeLimit(nextDifficulty);
-    gameState.timeLeft = Math.min(
+    if (gameState.level > 30) pendingLateTime = { previous: gameState.timeLeft };
+    else gameState.timeLeft = Math.min(
       gameState.timeLimit,
       gameState.timeLeft + (gameState.timeLimit * nextDifficulty.carryoverRatio)
     );
@@ -617,6 +637,10 @@ export function createGameSession({
     if (!gameState.isPlaying) {
       return { accepted: false, reason: 'not_playing', buttonId: id, source };
     }
+    if (gameState.level > 30) {
+      gameLoop(performance.now(), false);
+      if (!gameState.isPlaying) return { accepted: false, reason: 'not_playing', buttonId: id, source };
+    }
     if (renderer.canPressButton?.(id) === false) {
       return { accepted: false, reason: 'hazard_input_protected', buttonId: id, source };
     }
@@ -633,6 +657,7 @@ export function createGameSession({
     if (element) {
       renderer.markButtonPressed(element);
     }
+    recordRoundDiagnostic('press', gameState, gameState.forbiddenIds.includes(id));
     button.isClicked = true;
 
     if (gameState.forbiddenIds.includes(id)) {
@@ -731,12 +756,23 @@ export function createGameSession({
     timeWarningPlayed = false;
     if (gameState.level > 1) audio.playRoundEnter();
     const difficulty = getDifficultyForLevel(gameState.level);
-    gameState.currentDifficulty = difficulty;
+    if (gameState.level <= 30 || preparedLevel !== gameState.level) gameState.currentDifficulty = difficulty;
     if (!gameState.timeLimit) {
       gameState.timeLimit = getEffectiveRoundTimeLimit(difficulty);
       gameState.timeLeft = gameState.timeLimit;
     }
-    generateCurrentLevelData(difficulty);
+    if (gameState.level <= 30 || preparedLevel !== gameState.level) {
+      generateCurrentLevelData(difficulty);
+      if (gameState.level > 30) {
+        const base = getEffectiveRoundTimeLimit(gameState.currentDifficulty);
+        const compensation = gameState.currentDifficulty.compensationMs || 0;
+        gameState.timeLimit = base + compensation;
+        gameState.timeLeft = pendingLateTime?.full ? gameState.timeLimit : Math.min(gameState.timeLimit,
+          Math.max(0, pendingLateTime?.previous ?? gameState.timeLeft) + base * difficulty.carryoverRatio + compensation);
+        pendingLateTime = null;
+      }
+      preparedLevel = gameState.level;
+    }
     updateHazardState(0);
     const entryDelayMs = renderer.renderBoard({
       buttons: gameState.buttons,
@@ -754,6 +790,7 @@ export function createGameSession({
       gameState.roundStartedAtMs = performance.now();
       gameState.lastTime = gameState.roundStartedAtMs;
       gameState.isPlaying = true;
+      recordRoundDiagnostic('begin', gameState);
       recordDebugEvent('round_start');
       hostController.emitRoundStarted();
     };
@@ -764,6 +801,7 @@ export function createGameSession({
   }
 
   function startGame() {
+    recordRoundDiagnostic('reset', gameState);
     audio.resume();
     audio.playRunStart();
     renderer.hideStartScreen();
@@ -777,6 +815,7 @@ export function createGameSession({
     gameState.debug = getDebugFromUrl();
     gameState.debugLog = [];
     gameState.level = 1;
+    preparedLevel = null; pendingLateTime = null;
     gameState.score = 0;
     resetEncounterState();
     gameState.playtestRun = createPlaytestRunState({
@@ -819,10 +858,10 @@ export function createGameSession({
     startGame();
   }
 
-  function gameLoop(timestamp) {
+  function gameLoop(timestamp, scheduleNext = true) {
     if (!gameState.isPlaying) {
       gameState.lastTime = timestamp;
-      requestAnimationFrame(gameLoop);
+      if (scheduleNext) requestAnimationFrame(gameLoop);
       return;
     }
 
@@ -834,15 +873,8 @@ export function createGameSession({
     const protectedMs = (from) => (gameState.hazards.protectionWindows || []).reduce((total, [a, b]) =>
       total + Math.max(0, Math.min(toElapsed, b) - Math.max(from, a)), 0);
     gameState.timeLeft -= Math.max(0, deltaTime - protectedMs(fromElapsed));
-    if (gameState.combo.expiresAtMs !== null) {
-      const comboFrom = Math.max(fromElapsed,
-        (gameState.combo.lastEventAtMs ?? gameState.lastTime) - gameState.roundStartedAtMs);
-      for (const [a,b] of gameState.hazards.protectionWindows || []) {
-        const begin = Math.max(comboFrom,a), end = Math.min(toElapsed,b);
-        if(end > begin && gameState.combo.expiresAtMs >= gameState.roundStartedAtMs + begin)
-          gameState.combo.expiresAtMs += end-begin;
-      }
-    }
+    recordRoundDiagnostic('tick', gameState, protectedMs(fromElapsed));
+    extendProtectedCombo(gameState.combo, gameState.hazards.protectionWindows, fromElapsed, toElapsed, gameState.roundStartedAtMs);
     if (!timeWarningPlayed && gameState.timeLeft > 0 && gameState.timeLeft <= 5000) {
       timeWarningPlayed = true;
       audio.playTimeWarning();
@@ -859,7 +891,7 @@ export function createGameSession({
     }
 
     renderer.updateScore(gameState.score);
-    requestAnimationFrame(gameLoop);
+    if (scheduleNext) requestAnimationFrame(gameLoop);
   }
 
   const debugApi = createDebugApi({

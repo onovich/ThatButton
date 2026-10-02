@@ -106,6 +106,16 @@
       const image=new Image();image.onload=()=>{images[name]=image;resolve()};image.onerror=resolve;image.src=path;
     })));
   view.setImages(images);
+  if (query.has('late')) {
+    const { generateLevelData } = await import('../../../src/core/level.js');
+    const { createSeededRng } = await import('../../../src/core/rng.js');
+    const level = Number(query.get('late'));
+    const round = generateLevelData({level, rng:createSeededRng(query.get('seed') || 'late-visual')});
+    view.renderer.renderBoard({...round,level,score:previewScore});
+    view.renderer.updateHazardPresentation(createWechatHazards({level,enemyIndex:2,
+      seed:'late-visual',buttonIds:round.buttons.map(b=>b.id),cols:3,nowMs:Number(query.get('at') || 0)}));
+    view.draw();
+  }
   if(query.has('livehazard')) {
     const level=query.get('livehazard')==='swap'?28:36;
     view.getView().board.level=level;

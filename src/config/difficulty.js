@@ -97,6 +97,7 @@ export const DIFFICULTY_BANDS = Object.freeze([
     id: 'extended',
     label: 'EXTENDED',
     minLevel: 16,
+    maxLevel: 30,
     rows: 3,
     cols: 3,
     buttonCount: 9,
@@ -111,7 +112,15 @@ export const DIFFICULTY_BANDS = Object.freeze([
     timeRewardMs: 700,
     carryoverRatio: 0.22,
     feedbackIntensity: 'critical'
-  }
+  },
+  ...[31, 38, 48, 58, 68, 78, 88].map((minLevel, index, starts) => ({
+    id: `late-${index}`, label: 'LATE', minLevel, maxLevel: starts[index + 1] ? starts[index + 1] - 1 : undefined,
+    rows: 3, cols: 3, buttonCount: 9, fatalMin: 2, fatalMax: 4,
+    ruleTiers: ['compoundAnd', 'not', 'orColor', 'orMixed'],
+    readability: 'mixed-axis pressure', maxClueChars: 56, feedbackIntensity: 'critical',
+    baseTimeLimitMs: 9500 - index * 250, minTimeLimitMs: 9500 - index * 250,
+    timeDropPerLevelMs: 0, timeRewardMs: 700 - index * 25, carryoverRatio: 0.22
+  }))
 ]);
 
 export function getDifficultyBand(level) {

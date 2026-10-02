@@ -1,6 +1,6 @@
 import { drawPreCombo } from './pre-combo.js';
 import { CHARACTER_FRAMES } from './character-frames.js';
-import { swapRect, rectsOverlap, slicePixels, WECHAT_HAZARDS } from './hazards.js';
+import { swapHazardRect, rectsOverlap, slicePixels, WECHAT_HAZARDS } from './hazards.js';
 import { createTextAtlas } from './text-atlas.js';
 
 const C = {
@@ -795,7 +795,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
     const contentTop = y + (h - symbolSize - contentGap - numberSize) / 2;
     const centerX = rect.x + rect.w / 2;
     drawShape(button.shape?.id, centerX, contentTop + symbolSize / 2, symbolSize, ink);
-    const numberText = String(button.number).padStart(2, '0');
+    const numberText = (button.displayNumber ?? String(button.number).padStart(2, '0'));
     const numberY = contentTop + symbolSize + contentGap + numberSize / 2;
     if (textAtlas.numbers && button.number >= 1 && button.number <= 9 &&
         textAtlas.canDraw(numberText, ink)) {
@@ -1037,10 +1037,10 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
       x:gridX+index%cols*(cellW+gap),y:gridY+Math.floor(index/cols)*(cellH+gap),w:cellW,h:cellH+1}));
     const tileRects = baseRects.map(r=>{
       const targetIndex=swap?.targetButtonIds.indexOf(r.id)??-1;
-      if(targetIndex<0 || !['active','settled'].includes(swap.phase))return r;
+      if(targetIndex<0)return r;
       const destination=baseRects.find(b=>b.id===swap.targetButtonIds[1-targetIndex]);
       if(!destination)return r;
-      const moved=swapRect(r,destination,targetIndex,swap.elapsedMs);
+      const moved=swapHazardRect(r,destination,targetIndex,swap);
       return {...moved,id:r.id,y:clamp(moved.y,gridY,gridY+boardH+1-moved.h)};
     });
     blockedTileRects = tileRects.filter(a=>tileRects.some(b=>a.id!==b.id&&rectsOverlap(a,b)));
@@ -1073,7 +1073,7 @@ export function createCanvasRenderer({ canvas, info, menuButtonRect = null, moti
         if(!affected || !drawGlitchTile(button,rect,glitch))
           drawTile(button, rect, view.wrongButtonId === button.id && Date.now() < view.wrongUntil);
       });
-      const marked=[swap,glitch].some(h=>h?.phase==='telegraph'&&h.targetButtonIds.includes(button.id));
+      const marked=[swap,glitch,...(view.hazards?.hazards || []).filter(h => h.type === 'moving_button')].some(h=>h?.phase==='telegraph'&&h.targetButtonIds.includes(button.id));
       if(marked){path(rect.x-2,rect.y-2,rect.w+4,rect.h+12,14);ctx.strokeStyle=C.cyan;ctx.lineWidth=3;ctx.stroke();}
       const entering = motion.roundEnter && now < motion.roundEnter.startedAt + motion.roundEnter.duration;
       if (!button.isClicked && !entering && !motion.roundExit && !blockedTileRects.some(r=>r.id===button.id)) hits.push({ rect: { ...rect, h: rect.h + 8 },

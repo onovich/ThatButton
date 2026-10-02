@@ -67,9 +67,12 @@ export function generateRule(buttons, level, difficulty = getDifficultyForLevel(
   ];
 
   const availableTemplates = templates.filter((template) => difficulty.ruleTiers.includes(template.tier));
+  // Integer weights retain the same seeded random picker and leave early levels unchanged.
+  const weightedTemplates = availableTemplates.flatMap((template) =>
+    Array.from({ length: difficulty.ruleTierWeights?.[template.tier] ?? 1 }, () => template));
 
   while (attempts < maxAttempts) {
-    const template = randomItem(availableTemplates);
+    const template = randomItem(weightedTemplates);
     const rule = template.fn();
     targets = buttons.filter((button) => rule.check(button));
 

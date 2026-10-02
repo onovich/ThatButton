@@ -1,5 +1,16 @@
 // Only invoked by an explicit export action; no background work or uploads.
 export function reportSummaryPages(report) {
+  if (report.type === 'thatbutton.difficulty-summary') {
+    return report.reports.flatMap(item => {
+      const pages = [`难度测试\n构建 ${item.buildId}\n方案 ${item.planVersion}\n种子 ${item.seed}\n早期明细已淘汰 ${item.droppedRounds || 0} 条`];
+      item.buckets.slice(0,7).forEach((b,i) => {
+        if (b[0]) pages.push(`${i === 6 ? '91+' : `${31+i*10}～${40+i*10}`}关\n开始 ${b[0]} / 通关 ${b[1]}\n超时 ${b[2]} / 血量耗尽 ${b[3]}\n中断 ${b[4]} / 禁用误触 ${b[5]}`);
+      });
+      return pages;
+    });
+  }
+  if (report.type === 'thatbutton.difficulty-detail') return report.rows.map(row =>
+    `关卡 ${row[0]} / ${report.rules[row[2]]}\n开始/最低/结束时间 ${row[13]}/${row[14]}/${row[15]}ms\n首击 ${row[16]}ms / 安全点击 ${row[17]}\n禁用误触 ${row[18]} / ${report.outcomes[row[19]]}\n执行/跳过干扰 ${row[24]}/${row[25]}`);
   const reports = report.reports || [report];
   const fmt = (v) => Number.isFinite(v) ? Number(v.toFixed(3)) : '未测';
   const pages = [];

@@ -108,7 +108,13 @@ export function createPerformanceDiagnostics(wxApi, { enabled = false, now, cloc
         r?.schemaVersion === 1 && (r.sessionId ? r.sessionId !== sessionId : r.startedAt !== startedAt) &&
         JSON.stringify(r).length <= 24000).slice(-3) : [];
       persistenceError = null;
-      wxApi.setStorageSync?.(PERFORMANCE_STORAGE_KEY, [...history, snapshot()]);
+      const current = snapshot();
+      if (JSON.stringify(current).length > 24000) {
+        persistenceError = 'report exceeds 24000 code units';
+        wxApi.showToast?.({title:'报告超限，历史记录已保留',icon:'none'});
+        return;
+      }
+      wxApi.setStorageSync?.(PERFORMANCE_STORAGE_KEY, [...history, current]);
     } catch { persistenceError = 'local storage failed'; }
   }
   return {

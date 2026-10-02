@@ -1,3 +1,4 @@
+import { createDifficultyDiagnostics } from './difficulty-diagnostics.js';
 import { createGameSession } from '../../../src/app/game-session.js';
 import { UPGRADE_DEFINITIONS } from '../../../src/config/upgrades.js';
 import { createWechatAudio } from './audio.js';
@@ -54,6 +55,7 @@ export function createWechatGame(wxApi) {
   const textAtlasOptions = { rules: query.ruleAtlas === '1', numbers: query.numberAtlas === '1' };
   let comparison = null, comparisonSeed = null, comparisonSeriesId = null;
   let comparisonOrder = 0, comparisonRequest = 0, atlasImagePromise = null;
+  const difficultyDiagnostics = createDifficultyDiagnostics(wxApi, { buildId: BUILD_ID });
   let diagnostics = createPerformanceDiagnostics(wxApi, {
     enabled: query.perf === '1',
     metadata: { buildId: BUILD_ID, width: info.windowWidth, height: info.windowHeight, pixelRatio: info.pixelRatio,
@@ -143,6 +145,7 @@ export function createWechatGame(wxApi) {
     audio,
     renderer,
     hazardDirector: createWechatHazards,
+    roundDiagnostics: difficultyDiagnostics,
     viewportSize: () => ({ width: view.width, height: view.height }),
     seedProvider: () => comparisonSeed || query.seed || null,
     debugProvider: () => false,
@@ -150,6 +153,7 @@ export function createWechatGame(wxApi) {
     upgradeDefinitions: UPGRADE_DEFINITIONS.filter((item) => item.id !== 'combo-reward-plus')
   });
   app.init();
+  difficultyDiagnostics.setEnabled(Boolean(diagnostics), app.getState());
 
   function unpause() {
     if (pausedAt !== null) {
@@ -230,6 +234,7 @@ export function createWechatGame(wxApi) {
       diagnostics = null;
     }
     view.setDiagnostics(diagnostics);
+    difficultyDiagnostics.setEnabled(Boolean(diagnostics), app.getState());
   }
   function exportDiagnostics() {
     if (diagnostics) { updateDiagnosticMetadata(); return diagnostics.exportReport(); }
@@ -248,7 +253,7 @@ export function createWechatGame(wxApi) {
   }
   function clearDiagnostics() {
     if (!canSelectComparison()) return false;
-    try { wxApi.removeStorageSync(PERFORMANCE_STORAGE_KEY); }
+    try { wxApi.removeStorageSync(PERFORMANCE_STORAGE_KEY); difficultyDiagnostics.clear(); }
     catch { wxApi.showToast?.({ title: '清除失败，请重试', icon: 'none' }); return false; }
     if (diagnostics) {
       diagnostics.dispose();
@@ -344,7 +349,7 @@ export function createWechatGame(wxApi) {
     wxApi.showActionSheet({
       itemList: [diagnostics ? '关闭内测诊断并保存报告' : '开启内测诊断（仅本次运行）',
         '复制最近内测报告', '重置诊断并清空记录',
-        `同包文字A/B对照${comparison ? `：${comparison.group}组` : ''}`, '复制本次A/B对照报告'],
+        `同包文字A/B对照${comparison ? `：${comparison.group}组` : ''}`, '复制本次A/B对照报告', '难度测试报告'],
       success({ tapIndex }) {
         if (tapIndex === 0) {
           if (diagnostics) setDiagnosticsEnabled(false);
@@ -365,6 +370,17 @@ export function createWechatGame(wxApi) {
             } });
         } else if (tapIndex === 3) openComparisonMenu();
         else if (tapIndex === 4) exportComparison();
+        else if (tapIndex === 5) wxApi.showActionSheet({ itemList: ['复制难度摘要', '复制最近一局明细'], success({tapIndex: choice}) {
+          try {
+            if (choice === 0) copyDiagnosticReport(wxApi, difficultyDiagnostics.summary());
+            else {
+              const parts = difficultyDiagnostics.details();
+              if (!parts.length) { wxApi.showToast?.({title:'暂无难度明细',icon:'none'}); return; }
+              wxApi.showActionSheet({itemList:parts.map(p=>`第${p.part}/${p.total}份：${p.fromLevel}～${p.toLevel}关`),
+                success({tapIndex:index}) { if(parts[index])copyDiagnosticReport(wxApi,parts[index]); }});
+            }
+          } catch { wxApi.showToast?.({title:'难度报告保存或导出失败',icon:'none'}); }
+        }});
       }
     });
   }

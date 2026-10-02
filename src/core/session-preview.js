@@ -1,3 +1,4 @@
+import { extendProtectedCombo } from './protected-clock.js';
 import { getDifficultyForLevel } from '../config/difficulty.js';
 import { applyRoundClearDamage, createCombatState, createNextCombatState, getCombatSummary } from './combat.js';
 import { createComboState, expireComboIfNeeded, getComboSummary, incrementCombo, resetCombo } from './combo.js';
@@ -216,10 +217,13 @@ export function previewSessionProgression({
   maxLevels = 42,
   maxEnemies = 4,
   safePressCadenceMs = 850,
+  readTimeMs = 0,
+  newReadTimeMs = readTimeMs,
   interRoundDelayMs = 600,
   hazardSampleMs = 6000,
   upgradeStrategy = 'balanced',
   upgradePriority = DEFAULT_UPGRADE_PRIORITY,
+  hazardDirector = createHazardDirectorState,
   includeSafePressRewards = true
 } = {}) {
   const config = {
@@ -244,6 +248,8 @@ export function previewSessionProgression({
   let currentDifficulty = getDifficultyForLevel(level);
   let timeLimit = getEffectiveRoundTimeLimitMs(currentDifficulty.timeLimitMs, upgrades);
   let timeLeft = timeLimit;
+  let pendingFull = true;
+  let pendingCarry = false;
   const rounds = [];
   const defeatedEnemies = [];
   const upgradeLog = [];
@@ -257,14 +263,23 @@ export function previewSessionProgression({
   while (level <= config.maxLevels && combat.enemyIndex <= config.maxEnemies) {
     currentDifficulty = getDifficultyForLevel(level);
     timeLimit = getEffectiveRoundTimeLimitMs(currentDifficulty.timeLimitMs, upgrades);
-    timeLeft = Math.min(timeLimit, timeLeft || timeLimit);
-    const timeLeftBefore = timeLeft;
+    if (level <= 30) timeLeft = Math.min(timeLimit, timeLeft || timeLimit);
+    let timeLeftBefore = timeLeft;
     const levelData = generateLevelData({
       level,
       difficulty: currentDifficulty,
       rng
     });
-    const hazards = createHazardDirectorState({
+    currentDifficulty = levelData.difficulty;
+    const compensation = currentDifficulty.compensationMs || 0;
+    timeLimit = getEffectiveRoundTimeLimitMs(currentDifficulty.timeLimitMs, upgrades) + compensation;
+    if (level > 30) {
+      timeLeft = pendingFull ? timeLimit : Math.min(timeLimit, Math.max(0,timeLeft) +
+        (pendingCarry ? (timeLimit-compensation)*currentDifficulty.carryoverRatio : 0) + compensation);
+    }
+    pendingFull = false; pendingCarry = false;
+    timeLeftBefore = timeLeft;
+    const hazards = hazardDirector({
       seed: config.seed,
       level,
       enemyIndex: combat.enemyIndex,
@@ -272,13 +287,34 @@ export function previewSessionProgression({
       cols: currentDifficulty.cols,
       buttonIds: levelData.buttons.map((button) => button.id),
       forbiddenIds: levelData.forbiddenIds,
-      nowMs: config.hazardSampleMs
+      nowMs: config.hazardSampleMs,
+      disabled: level > 30 && currentDifficulty.hazardTier === 0
     });
     let lowestTimeLeft = timeLeft;
+    let roundElapsed = 0, hazardState = null;
+    const clickedIds = [];
+    const safeIds = levelData.buttons.filter(b => !levelData.forbiddenIds.includes(b.id)).map(b => b.id);
 
     for (let pressIndex = 0; pressIndex < levelData.safeKeysRemaining; pressIndex++) {
-      elapsedMs += config.safePressCadenceMs;
-      timeLeft = Math.max(0, timeLeft - config.safePressCadenceMs);
+      const reading = pressIndex === 0 ? (['teach','practice'].includes(currentDifficulty.scheduleRole) ? newReadTimeMs : readTimeMs) : 0;
+      const wait = config.safePressCadenceMs + reading;
+      if (level <= 30) {
+        elapsedMs += Math.min(timeLeft, wait);
+        timeLeft = Math.max(0, timeLeft - wait);
+      } else {
+        const end = roundElapsed + wait;
+        while (roundElapsed < end && timeLeft > 0) {
+          const to = Math.min(end, roundElapsed + 1);
+          hazardState = currentDifficulty.hazardTier === 0 ? {protectionWindows:[]} : hazardDirector({
+            seed:config.seed,level,enemyIndex:combat.enemyIndex,rows:currentDifficulty.rows,cols:currentDifficulty.cols,
+            buttonIds:levelData.buttons.map(b=>b.id),forbiddenIds:levelData.forbiddenIds,clickedIds,
+            previousState:hazardState,nowMs:to});
+          const protection=(hazardState.protectionWindows||[]).reduce((n,[a,b])=>n+Math.max(0,Math.min(to,b)-Math.max(roundElapsed,a)),0);
+          extendProtectedCombo(combo,hazardState.protectionWindows,roundElapsed,to,elapsedMs-roundElapsed);
+          timeLeft=Math.max(0,timeLeft-(to-roundElapsed-protection));
+          elapsedMs+=to-roundElapsed;roundElapsed=to;
+        }
+      }
       lowestTimeLeft = Math.min(lowestTimeLeft, timeLeft);
       if (timeLeft <= 0) {
         result = {
@@ -308,6 +344,7 @@ export function previewSessionProgression({
         atMs: elapsedMs,
         windowMs: getEffectiveComboWindowMs(upgrades)
       }).combo;
+      clickedIds.push(safeIds[pressIndex]);
       totalSafePresses++;
       score += 10;
       if (config.includeSafePressRewards) {
@@ -404,6 +441,7 @@ export function previewSessionProgression({
       currentDifficulty = getDifficultyForLevel(level);
       timeLimit = getEffectiveRoundTimeLimitMs(currentDifficulty.timeLimitMs, upgrades);
       timeLeft = timeLimit;
+      pendingFull = true;
       elapsedMs += config.interRoundDelayMs;
       combo = expireComboIfNeeded(combo, elapsedMs).combo;
       continue;
@@ -412,7 +450,8 @@ export function previewSessionProgression({
     level++;
     currentDifficulty = getDifficultyForLevel(level);
     timeLimit = getEffectiveRoundTimeLimitMs(currentDifficulty.timeLimitMs, upgrades);
-    timeLeft = Math.min(
+    if (level > 30) pendingCarry = true;
+    else timeLeft = Math.min(
       timeLimit,
       timeLeft + (timeLimit * currentDifficulty.carryoverRatio)
     );

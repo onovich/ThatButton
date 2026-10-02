@@ -1,8 +1,10 @@
 import { COLORS, SHAPES, getDifficultyForLevel } from '../config/difficulty.js';
 import { createRandomTools } from './rng.js';
 import { generateRule } from './rules.js';
+import { generateLateLevel } from './late-rules.js';
 
 export function generateLevelData({ level, difficulty = getDifficultyForLevel(level), rng }) {
+  if (level > 30) return generateLateLevel({ level, difficulty, rng });
   const randomTools = createRandomTools(rng);
   const buttons = [];
   const numbers = randomTools.shuffledNumbers(difficulty.buttonCount);

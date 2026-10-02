@@ -1,28 +1,39 @@
 import assert from 'node:assert/strict';
-import {createWechatHazards,hazardForLevel,protectedDuration,swapRect,WECHAT_HAZARDS,slicePixels} from '../src/hazards.js';
+import {createWechatHazards,hazardForLevel,hazardIntensityForLevel,protectedDuration,swapRect,swapHazardRect,WECHAT_HAZARDS,slicePixels} from '../src/hazards.js';
 import {createHazardDirectorState} from '../../../src/core/hazards.js';
 const options={seed:'hazard-tests',enemyIndex:2,cols:3,buttonIds:Array.from({length:9},(_,i)=>`btn-${i}`)};
-assert.equal(hazardForLevel(24),'drift');assert.equal(hazardForLevel(28),'swap');
-assert.equal(hazardForLevel(30),null);assert.equal(hazardForLevel(36),'glitch');
-for(let level=40;level<120;level++)assert.equal(hazardForLevel(level),['swap',null,'glitch',null][(level-40)%4]);
-assert.ok(createHazardDirectorState({...options,level:24,nowMs:6000}).hazards.some(h=>h.type==='interference'), 'Web director retains its previous behaviour');
-assert.ok(!createWechatHazards({...options,level:24,nowMs:6000}).hazards.some(h=>h.type==='interference'));
-const first=createWechatHazards({...options,level:28,nowMs:0});assert.equal(first.notice,undefined);
-assert.deepEqual(createWechatHazards({...options,level:36,nowMs:0}).protectionWindows,[]);
-const pair=first.hazards[0].targetButtonIds;
-assert.equal(pair.length,2);assert.notEqual(pair[0],pair[1]);
-assert.equal(Math.floor(Number(pair[0].slice(4))/3),Math.floor(Number(pair[1].slice(4))/3));
-for(let t=0;t<8000;t+=31)assert.deepEqual(createWechatHazards({...options,level:28,nowMs:t}).hazards[0].targetButtonIds,pair);
-assert.equal(protectedDuration(first.protectionWindows,0,10000),640);
-assert.equal(protectedDuration(first.protectionWindows,3190,3850),640);
-assert.equal(protectedDuration(first.protectionWindows,3840,9000),0);
+assert.equal(hazardForLevel(24),'drift'); assert.equal(hazardForLevel(28),'swap');
+assert.equal(hazardForLevel(30),null);
+const {getLatePlan}=await import('../../../src/config/late-plan.js');
 const a={x:10,y:200,w:95,h:75},b={...a,x:116};
+for(let level=31;level<=150;level++) {
+ const plan=getLatePlan(level),type=hazardForLevel(level);
+ assert.equal(Boolean(type),Boolean(plan.hazardTier));
+ let previousState=null;
+ for(let nowMs=0;nowMs<20000;nowMs+=100) {
+  const state=createWechatHazards({...options,level,nowMs,previousState});
+  assert.ok((state.waveRecords?.length||0)<=plan.hazardTier);
+  if(type==='swap') {
+   const executed=state.waveRecords.filter(w=>w.execute).length;
+   assert.equal(protectedDuration(state.protectionWindows,0,100000),executed*640);
+   const h=state.hazards[0];
+   if(h.phase==='settled') assert.deepEqual(swapHazardRect(a,b,0,h),executed%2?b:a);
+  }
+  previousState=state;
+ }
+ const canceled=createWechatHazards({...options,level,nowMs:20000,clickedIds:options.buttonIds});
+ assert.equal(protectedDuration(canceled.protectionWindows,0,100000),0);
+ assert.ok((canceled.waveRecords||[]).every(w=>!w.execute));
+}
+const lateSwap=Array.from({length:30},(_,i)=>67+i).find(l=>getLatePlan(l).hazardTier===4&&hazardForLevel(l)==='swap');
+let active=createWechatHazards({...options,level:lateSwap,nowMs:1500});
+const latched=createWechatHazards({...options,level:lateSwap,nowMs:18000,previousState:active,clickedIds:options.buttonIds});
+assert.equal(latched.waveRecords.filter(w=>w.execute).length,1);
+assert.equal(protectedDuration(latched.protectionWindows,0,20000),640);
+const old=createWechatHazards({...options,level:28,nowMs:0});
+assert.equal(protectedDuration(old.protectionWindows,0,10000),640);
 assert.deepEqual(swapRect(a,b,0,2040),b);
 assert.equal(swapRect(a,b,0,1710).w,95*.85);
-const gl=createWechatHazards({...options,level:36,nowMs:1800}).hazards[0];
-assert.equal(gl.phase,'active');assert.equal(gl.targetButtonIds.length,2);
-assert.equal(createWechatHazards({...options,level:36,nowMs:4000}).hazards[0].phase,'expired');
-assert.equal(WECHAT_HAZARDS.glitch.rgb,2.8);assert.equal(WECHAT_HAZARDS.glitch.duration,2200);
 const pixels=Uint8ClampedArray.from({length:32*24*4},(_,i)=>i%4===3?255:(i*17)%256);
 const result=slicePixels(pixels,32,24,.5);assert.notDeepEqual(result,pixels);
 assert.deepEqual(slicePixels(pixels,32,24,.5,{...WECHAT_HAZARDS.glitch,strength:0}),pixels);

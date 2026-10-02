@@ -61,7 +61,7 @@ try {
   let aggregate = { baselineFillText: 0, atlasFillText: 0, ruleGlyphHits: 0, numberGlyphHits: 0 };
   for (const level of [1, 6, 19, 28, 36, 48]) for (let seed = 0; seed < 8; seed++) {
     const board = generateLevelData({ level, rng: createSeededRng(`atlas-${seed}`) });
-    assert.ok(board.buttons.every((button) => button.number >= 1 && button.number <= 9));
+    assert.ok(board.buttons.every((button) => button.number >= 1 && button.number <= (level <= 30 ? 9 : 99)));
     const rendered = { ...board, level, score: 80 };
     for (const run of [baseline, candidate, absent]) {
       run.view.renderer.renderBoard(rendered);
@@ -74,8 +74,8 @@ try {
     }
     assert.deepEqual(touchMap(candidate.view), touchMap(baseline.view));
     assert.deepEqual(absent.commands, baseline.commands, 'Missing atlas must preserve original drawing commands');
-    assert.equal(candidate.counters.ruleAtlasFallback || 0, 0);
-    assert.equal(candidate.counters.numberAtlasFallback || 0, 0);
+    if(level <= 30) assert.equal(candidate.counters.ruleAtlasFallback || 0, 0);
+    if(level <= 30) assert.equal(candidate.counters.numberAtlasFallback || 0, 0);
     aggregate.baselineFillText += baseline.counters.fillText || 0;
     aggregate.atlasFillText += candidate.counters.fillText || 0;
     aggregate.ruleGlyphHits += candidate.counters.ruleAtlasHit || 0;

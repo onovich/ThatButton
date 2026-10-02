@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import './hazards.mjs';
+import './difficulty-diagnostics.mjs';
 import './performance-diagnostics.mjs';
 import './diagnostic-quality.mjs';
 import './report-export.mjs';
@@ -557,6 +558,21 @@ hazardGame.view.renderer.updateHazardPresentation(createWechatHazards({...hazard
 for(const id of targetPair)assert.equal(hazardGame.view.renderer.canPressButton(id),false);
 hazardGame.view.renderer.updateHazardPresentation(createWechatHazards({...hazardOptions,nowMs:5000}));hazardGame.view.draw();
 assert.equal(hazardGame.view.hitTest(beforePoint.x,beforePoint.y)?.buttonId,targetPair[1]);
+const lateHazardOptions={...hazardOptions,level:57};
+const lateSchedule=createWechatHazards({...lateHazardOptions,nowMs:20000});
+const latePair=lateSchedule.hazards[0].targetButtonIds;
+const showLate=t=>{
+  hazardGame.view.renderer.updateHazardPresentation(createWechatHazards({...lateHazardOptions,nowMs:t}));
+  hazardGame.view.draw();
+};
+showLate(0);
+const lateOrigin=pointFor(hazardGame.view,a=>a.buttonId===latePair[0]);
+lateSchedule.protectionWindows.forEach(([from,to],wave)=>{
+  showLate((from+to)/2);
+  for(const id of latePair)assert.equal(hazardGame.view.renderer.canPressButton(id),false);
+  showLate(to+1);
+  assert.equal(hazardGame.view.hitTest(lateOrigin.x,lateOrigin.y)?.buttonId,latePair[wave%2?0:1]);
+});
 Date.now=realDateNow;
 const upgradeGame = createWechatGame(upgradeFake.wxApi);
 upgradeGame.app.start();

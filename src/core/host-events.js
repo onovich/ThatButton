@@ -114,7 +114,7 @@ export function createButtonPayload(button) {
       char: button.shape.char
     },
     number: button.number,
-    label: `${button.color.name} ${button.shape.name} ${String(button.number).padStart(2, '0')}`
+    label: `${button.color.name} ${button.shape.name} ${(button.displayNumber ?? String(button.number).padStart(2, '0'))}`
   };
 }
 

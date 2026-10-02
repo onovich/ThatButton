@@ -1,5 +1,9 @@
 # Project Docs
 
+- **[当前交接与待办（2026-10-03，Mac接手首读）](CURRENT_HANDOFF.md)** — 已实现/待验收边界、历史决定、真机难度测试、Mac构建与同步说明。
+- [后期难度计划与实施记录](LATE_GAME_DIFFICULTY_TUNING.md) — 用户已确认执行；本地实现/验证完成，真机手感与性能待验收。
+- [文字图集真机A/B结论](WECHAT_DEVICE_AB_RESULTS.md) — 默认继续A，现阶段不必重复四轮。
+
 - [Mac / iPhone 微信小游戏测试交接（2026-10-02）](wechat-mac-test-2026-10-02/README.md) - 连接故障调查、后台高性能模式开通、VPN 判断修正、原版 48 关 / 2910 分反馈、CPU 原始采样与 PC 待办。
 
 - [手指等等我：四方向原画评审](WECHAT_CONCEPT_REVIEW.md) - 四套首页、局内与结算原画，五维评分、推荐方向及美术/前端精修意见。

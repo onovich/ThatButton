@@ -1,5 +1,7 @@
 # ThatButton
 
+**Continuing on another computer?** Read [current status, decisions, TODOs and Mac setup](docs/CURRENT_HANDOFF.md) first.
+
 [简体中文](README.zh-CN.md)
 
 [Play online](https://game.onovich.com/ThatButton/)

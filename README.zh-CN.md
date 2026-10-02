@@ -1,5 +1,7 @@
 # ThatButton
 
+**换电脑或新会话接手：**先读[当前交接、历史结论、待办与 Mac 步骤](docs/CURRENT_HANDOFF.md)。
+
 [English](README.md)
 
 [在线试玩](https://game.onovich.com/ThatButton/)
